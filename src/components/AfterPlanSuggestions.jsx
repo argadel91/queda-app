@@ -22,10 +22,10 @@ export default function AfterPlanSuggestions({plan, c, lang}){
       <div style={{fontSize:'13px',fontWeight:'600',color:c.T,marginBottom:'10px'}}>💡 {t.ifNightRunsOn}</div>
       <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
         {[
-          {icon:'🚕',text:isEs?'Si bebes, pide un taxi de antemano — los precios suben de noche.':"If you're drinking, book a taxi in advance — prices surge at night.",link:'https://m.uber.com/',linkText:'Uber'},
+          {icon:'🚕',text:t.taxiTip,link:'https://m.uber.com/',linkText:'Uber'},
           {icon:'🍔',text:t.burgerTip,link:null,linkText:null},
-          {icon:'🎵',text:isEs?'¿Continuar la fiesta? Busca salas o bares de copas cercanos.':'Continue the party? Find nearby clubs or bars.',link:`https://www.google.com/maps/search/nightclub+near+${cityEnc}`,linkText:'Google Maps'},
-          {icon:'🌅',text:isEs?'Si amaneces fuera, el desayuno es sagrado.':"If you're out till sunrise, breakfast is sacred.",link:`https://www.google.com/maps/search/breakfast+near+${cityEnc}`,linkText:'Google Maps'},
+          {icon:'🎵',text:t.continueParty,link:`https://www.google.com/maps/search/nightclub+near+${cityEnc}`,linkText:'Google Maps'},
+          {icon:'🌅',text:t.breakfastTip,link:`https://www.google.com/maps/search/breakfast+near+${cityEnc}`,linkText:'Google Maps'},
           plan.mode==='intimate'?{icon:'🌹',text:t.specialNightTip,link:('https://www.airbnb.com/s/'+cityEnc+'/homes?room_types%5B%5D=Entire+home%2Fapt&checkin='+date),linkText:'Airbnb'}:null,
         ].filter(Boolean).map((tip,i)=><div key={i} style={{display:'flex',gap:'10px',alignItems:'flex-start',padding:'8px 0',borderBottom:i<4?`1px solid ${c.BD}`:'none'}}><span style={{fontSize:'18px',flexShrink:0}}>{tip.icon}</span><div><div style={{fontSize:'13px',color:c.T,lineHeight:1.5}}>{tip.text}</div>{tip.link&&<a href={tip.link} target="_blank" rel="noreferrer" style={{fontSize:'12px',color:mc,textDecoration:'none',fontWeight:'600'}}>{tip.linkText} →</a>}</div></div>)}
       </div>
