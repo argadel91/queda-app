@@ -1,0 +1,218 @@
+import React, { useState, useEffect, useMemo } from 'react'
+import T from '../constants/translations.js'
+import { getMC } from '../constants/theme.js'
+import { savePlan, savePlanWithUser, showErr } from '../lib/supabase.js'
+import { ls, addMyPlan } from '../lib/storage.js'
+import { genId, fmtShort } from '../lib/utils.js'
+import { Btn, Card, Lbl, Inp, Txa, HR, Back, ModeBadge, Stepper, Badge } from '../components/ui.jsx'
+import CalendarPicker from '../components/CalendarPicker.jsx'
+import TimePicker from '../components/TimePicker.jsx'
+import CityInput from '../components/CityInput.jsx'
+import MapModal from '../components/MapModal.jsx'
+import { getCityTz, getTzLabel, getGMTOffset, getUserTz } from '../constants/weather.js'
+import WeatherWidget from '../components/WeatherWidget.jsx'
+
+export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
+  const t=T[lang];const mc=getMC(mode,c);const isEs=lang==='es';
+  const[step,setStep]=useState(0);
+  const[name,setName]=useState('');const[desc,setDesc]=useState('');
+  const[org,setOrg]=useState(profile?.name||ls.get('q_myname',''));const[orgEmail,setOrgEmail]=useState('');
+  const[orgRole,setOrgRole]=useState(t.roles[0]);const[isPublic,setIsPublic]=useState(false);
+  const[city,setCity]=useState('');const[cityData,setCityData]=useState(null);
+  const[selDates,setSelDates]=useState([]);const[selTimes,setSelTimes]=useState({});
+  const[stops,setStops]=useState([{id:1,name:'',cat:t.cat[0],address:'',cost:'',link:'',lat:null,lng:null}]);
+  const[mapStop,setMapStop]=useState(null);
+  const[dressCode,setDressCode]=useState(null);const[dressNote,setDressNote]=useState('');
+  const[autoConfirm,setAutoConfirm]=useState(false);const[autoConfirmN,setAutoConfirmN]=useState(3);
+  const[surpriseMode,setSurprise]=useState(false);
+  const[maxGuests,setMaxGuests]=useState('');
+  const[orgAttends,setOrgAttends]=useState(true);
+  const[poll,setPoll]=useState({q:'',opts:['','']});
+  const[giftOn,setGiftOn]=useState(false);const[gift,setGift]=useState({name:'',link:'',price:'',stripeLink:''});
+  const[bring,setBring]=useState([{id:1,text:''}]);
+  const[payment,setPayment]=useState({bizumPhone:'',paypalUser:'',revolutUser:''});
+  const[saving,setSaving]=useState(false);
+  const planTz=cityData?.tz||getCityTz(city);
+  useEffect(()=>{if(org.trim())ls.set('q_myname',org.trim());},[org]);
+  const addStop=()=>setStops(p=>[...p,{id:Date.now(),name:'',cat:t.cat[0],address:'',cost:'',link:'',lat:null,lng:null}]);
+  const upd=(id,k,v)=>setStops(p=>p.map(s=>s.id===id?{...s,[k]:v}:s));
+  const remStop=id=>setStops(p=>p.filter(s=>s.id!==id));
+  const budget=stops.reduce((s,x)=>s+(parseFloat(x.cost)||0),0);
+  const stepLabels=mode==='intimate'?[t.basics,t.datesStep,t.routeStep]:[t.basics,t.datesStep,t.routeStep,t.extrasStep];
+  const create=async()=>{
+    setSaving(true);
+    try{
+      const plan={id:genId(),name:name.trim(),desc:desc.trim(),organizer:org.trim(),organizerEmail:orgEmail.trim(),organizerRole:orgRole,mode,dates:[...selDates].sort(),times:selTimes,timezone:planTz,city:city.split(',')[0].trim(),cityFull:city,cityLat:cityData?.lat,cityLon:cityData?.lon,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,maxGuests:maxGuests?parseInt(maxGuests):null,orgAttends,poll:poll.q.trim()?poll:null,gift:giftOn?gift:null,bring:bring.filter(b=>b.text.trim()),payment,confirmedDate:null,isPublic:mode!=='intimate'?isPublic:false,lang,createdAt:new Date().toISOString()};
+      if(authUser)await savePlanWithUser(plan,authUser.id);else await savePlan(plan);
+      addMyPlan(plan.id,plan.name,'organizer',mode);
+      ls.set('q_state',{screen:'share',planId:plan.id,isOrg:true});onCreated(plan);
+    }catch(e){console.error(e);showErr('Error al crear el plan. Comprueba tu conexión.');}
+    setSaving(false);
+  };
+  const is=(v,ph,k,sid)=><input value={v} onChange={e=>upd(sid,k,e.target.value)} placeholder={ph} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'9px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>;
+  return(<>
+    {mapStop!==null&&<MapModal onSelect={sel=>{upd(mapStop,'name',sel.name);upd(mapStop,'address',sel.address);upd(mapStop,'lat',sel.lat);upd(mapStop,'lng',sel.lng);if(!city&&sel.address)setCity(sel.address.split(',').slice(-3,-1).join(',').trim()||'');setMapStop(null);}} onClose={()=>setMapStop(null)} c={c} lang={lang} init={stops.find(s=>s.id===mapStop)?.name||city||''}/>}
+    <div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
+      <Back onClick={step===0?onBack:()=>setStep(s=>s-1)} label={t.back} c={c}/>
+      <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'20px'}}><ModeBadge mode={mode} lang={lang} c={c}/><div style={{flex:1,height:'1px',background:c.BD}}/></div>
+      <Stepper cur={step} labels={stepLabels} c={c} accent={mc}/>
+
+      {step===0&&<>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'20px'}}>{t.basics}</h2>
+        {mode==='intimate'&&<div style={{background:'#F472B620',border:'1px solid #F472B650',borderRadius:'12px',padding:'12px 14px',marginBottom:'16px',fontSize:'13px',color:'#F472B6',lineHeight:1.6}}>{t.privateNote}</div>}
+        <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.planName}</Lbl><Inp value={name} onChange={setName} placeholder={t.modes[mode].ex[0]} c={c}/></div>
+        <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.desc}</Lbl><Txa value={desc} onChange={setDesc} placeholder={t.descPh} c={c}/></div>
+        <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.yourName}</Lbl><Inp value={org} onChange={setOrg} placeholder={t.yourNamePh} c={c}/></div>
+        <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.emailLbl}</Lbl><Inp value={orgEmail} onChange={setOrgEmail} placeholder={t.emailPh} type="email" c={c}/></div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'14px'}}>
+          <div><Lbl c={c}>{t.maxGuests}</Lbl><input type="number" min="1" max="999" value={maxGuests} onChange={e=>setMaxGuests(e.target.value)} placeholder={t.noLimit} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/></div>
+          <div><Lbl c={c}>{t.willAttend}</Lbl>
+            <div style={{display:'flex',gap:'6px'}}>
+              {[{v:true,l:isEs?'Sí':'Yes'},{v:false,l:'No'}].map(o=><button key={String(o.v)} onClick={()=>setOrgAttends(o.v)} style={{flex:1,padding:'12px 6px',borderRadius:'10px',border:`1px solid ${orgAttends===o.v?mc+'50':c.BD}`,background:orgAttends===o.v?`${mc}15`:c.CARD,color:orgAttends===o.v?mc:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:orgAttends===o.v?'700':'400'}}>{o.l}</button>)}
+            </div>
+          </div>
+        </div>
+        {mode==='professional'&&<div style={{marginBottom:'14px'}}><Lbl c={c}>{t.yourRole}</Lbl><select value={orgRole} onChange={e=>setOrgRole(e.target.value)} style={{background:c.CARD,border:`1px solid ${c.BD}`,color:c.T,fontSize:'14px',padding:'12px 14px',borderRadius:'10px',width:'100%',fontFamily:'inherit'}}>{t.roles.map(r=><option key={r} value={r}>{r}</option>)}</select></div>}
+        {mode!=='intimate'&&<div onClick={()=>setIsPublic(p=>!p)} style={{display:'flex',alignItems:'center',gap:'12px',padding:'14px 16px',background:c.CARD,border:`1px solid ${isPublic?mc+'50':c.BD}`,borderRadius:'12px',cursor:'pointer',marginBottom:'24px'}}>
+          <div style={{width:'22px',height:'22px',borderRadius:'50%',border:`2px solid ${isPublic?mc:c.BD}`,background:isPublic?mc:'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',color:'#0A0A0A',fontWeight:'800',flexShrink:0}}>{isPublic?'✓':''}</div>
+          <div><div style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>🌍 {isPublic?t.isPublicLbl:(t.privatePlan)}</div><div style={{fontSize:'12px',color:c.M2}}>{isPublic?(t.appearsInDiscover):(t.codeOnly)}</div></div>
+        </div>}
+        {mode==='intimate'&&<div style={{height:'24px'}}/>}
+        <Btn onClick={()=>setStep(1)} disabled={!name.trim()||!org.trim()} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn>
+      </>}
+
+      {step===1&&<>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{t.datesTitle}</h2>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{t.datesSub}</p>
+        <div style={{marginBottom:'16px'}}>
+          <Lbl c={c}>{t.cityLbl}</Lbl>
+          <CityInput value={city} onChange={setCity} onSelect={d=>{setCityData(d);setCity(d.label);}} placeholder={t.cityPh} c={c}/>
+          {city&&<div style={{fontSize:'12px',color:c.M2,marginTop:'6px',display:'flex',flexWrap:'wrap',gap:'8px',alignItems:'center'}}>
+  <span>🌍 <span style={{color:c.T,fontWeight:'500'}}>{getTzLabel(planTz)}</span> <span style={{color:c.M}}>({getGMTOffset(planTz)})</span></span>
+  {(()=>{const uTz=getUserTz();if(!uTz||uTz===planTz)return null;return<span style={{color:c.M}}>· {t.yourZone} <span style={{fontWeight:'500'}}>{getGMTOffset(uTz)}</span></span>;})()}
+</div>}
+        </div>
+        {city&&selDates.length>0&&<div style={{marginBottom:'16px'}}>
+          <Lbl c={c}>{t.weatherForecast}</Lbl>
+          {selDates.slice(0,2).map(d=><div key={d} style={{marginBottom:'8px'}}><div style={{fontSize:'12px',color:c.M2,marginBottom:'4px',textTransform:'capitalize'}}>{fmtShort(d,lang)}</div><WeatherWidget city={city.split(',')[0]} date={d} c={c} lang={lang}/></div>)}
+          {selDates.length>2&&<div style={{fontSize:'12px',color:c.M2,textAlign:'center',padding:'4px'}}>+{selDates.length-2} {t.moreDates}</div>}
+        </div>}
+        <Lbl c={c}>{t.selectDates}</Lbl>
+        <CalendarPicker selected={selDates} onChange={setSelDates} c={c} lang={lang}/>
+        {selDates.length>0&&<><HR c={c}/><Lbl c={c}>{t.times}</Lbl>
+          {selDates.sort().map(d=><div key={d} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'14px',marginBottom:'10px'}}>
+            <div style={{fontSize:'13px',color:mc,fontWeight:'600',marginBottom:'10px',textTransform:'capitalize'}}>{fmtShort(d,lang)}</div>
+            <TimePicker times={selTimes[d]||[]} onChange={times=>setSelTimes(p=>({...p,[d]:times}))} c={c} lang={lang} tz={planTz}/>
+          </div>)}
+        </>}
+        <div style={{marginTop:'20px'}}><Btn onClick={()=>setStep(2)} disabled={selDates.length<1} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
+      </>}
+
+      {step===2&&<>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{t.routeTitle}</h2>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'14px'}}>{t.routeSub}</p>
+        {city&&<div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',marginBottom:'14px',display:'flex',alignItems:'center',gap:'8px',fontSize:'13px'}}>
+          <span>📍</span><span style={{color:c.T,fontWeight:'500'}}>{city}</span>
+          <span style={{color:c.M2,fontSize:'11px',marginLeft:'auto',cursor:'pointer'}} onClick={()=>setStep(1)}>✏️</span>
+        </div>}
+        <HR c={c}/>
+        {stops.map((s,i)=><div key={s.id} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'14px',padding:'16px',marginBottom:'10px'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'12px'}}>
+            <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
+              <div style={{width:'24px',height:'24px',borderRadius:'50%',background:`${mc}25`,border:`1px solid ${mc}50`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',fontWeight:'800',color:mc}}>{i+1}</div>
+              <span style={{fontSize:'12px',color:c.M2,fontWeight:'600',textTransform:'uppercase',letterSpacing:'.05em'}}>{t.stop} {i+1}</span>
+            </div>
+            <div style={{display:'flex',gap:'6px'}}>
+              <button onClick={()=>setMapStop(s.id)} title={t.searchOnMap} style={{background:'none',border:`1px solid ${c.BD}`,color:mc,cursor:'pointer',fontSize:'12px',padding:'4px 10px',borderRadius:'8px',fontFamily:'inherit',fontWeight:'600'}}>{t.searchMap}</button>
+              {stops.length>1&&<button onClick={()=>remStop(s.id)} title={t.removeStop} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'18px'}}>×</button>}
+            </div>
+          </div>
+          {s.lat&&<div style={{fontSize:'11px',color:mc,marginBottom:'8px'}}>📍 {t.locationSet}</div>}
+          <select value={s.cat} onChange={e=>upd(s.id,'cat',e.target.value)} style={{background:c.CARD,border:`1px solid ${c.BD}`,color:c.T,fontSize:'13px',padding:'9px 12px',borderRadius:'8px',width:'100%',fontFamily:'inherit',marginBottom:'8px'}}>{t.cat.map(cat=><option key={cat} value={cat}>{cat}</option>)}</select>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',marginBottom:'8px'}}>{is(s.name,t.place,'name',s.id)}{is(s.address,t.addr,'address',s.id)}</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',marginBottom:'8px'}}>{is(s.cost,t.cost,'cost',s.id)}{is(s.link,t.booking,'link',s.id)}</div>
+        </div>)}
+        <Btn onClick={addStop} v="secondary" full sm style={{marginBottom:'14px'}} c={c}>{t.addStop}</Btn>
+        {budget>0&&<div style={{background:`${mc}0D`,border:`1px solid ${mc}30`,borderRadius:'12px',padding:'14px 16px',marginBottom:'14px',display:'flex',justifyContent:'space-between'}}><span style={{color:c.M2}}>{t.estPer}</span><span style={{color:mc,fontSize:'22px',fontWeight:'800'}}>{budget.toFixed(0)}€</span></div>}
+        <Btn onClick={()=>stepLabels.length>3?setStep(3):create()} disabled={saving} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{stepLabels.length>3?t.cont:(saving?t.saving:t.createBtn)}</Btn>
+      </>}
+
+      {step===3&&stepLabels.length>3&&<>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'20px'}}>{t.extrasTitle}</h2>
+        {/* DRESS CODE */}
+        <div style={{marginBottom:'20px'}}>
+          <Lbl c={c}>{t.dcLbl}</Lbl>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'6px',marginBottom:'8px'}}>
+            {t.dressCodes.map(opt=><div key={opt.k} onClick={()=>setDressCode(dressCode===opt.k?null:opt.k)} style={{padding:'10px 12px',borderRadius:'10px',border:`1px solid ${dressCode===opt.k?mc+'50':c.BD}`,background:dressCode===opt.k?`${mc}12`:c.CARD,cursor:'pointer',fontSize:'13px',color:dressCode===opt.k?mc:c.T,fontWeight:dressCode===opt.k?'600':'400'}}>{opt.l}</div>)}
+          </div>
+          {dressCode&&<input value={dressNote} onChange={e=>setDressNote(e.target.value)} placeholder={dressCode==='custom'?t.dcCustomPh:t.dcNote} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'11px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
+        </div>
+        {/* AUTO-CONFIRM MODE */}
+        <div style={{marginBottom:'20px'}}>
+          <div onClick={()=>setAutoConfirm(a=>!a)} style={{display:'flex',alignItems:'center',gap:'12px',padding:'14px 16px',background:c.CARD,border:`1px solid ${autoConfirm?mc+'50':c.BD}`,borderRadius:'12px',cursor:'pointer'}}>
+            <div style={{width:'22px',height:'22px',borderRadius:'50%',border:`2px solid ${autoConfirm?mc:c.BD}`,background:autoConfirm?mc:'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',color:'#0A0A0A',fontWeight:'800',flexShrink:0}}>{autoConfirm?'✓':''}</div>
+            <div>
+              <div style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>⚡ {t.firstAvailable}</div>
+              <div style={{fontSize:'12px',color:c.M2}}>{isEs?'Confirma automáticamente cuando X personas digan Sí':'Auto-confirms when X people say Yes'}</div>
+            </div>
+          </div>
+          {autoConfirm&&<div style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px 14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'0 0 12px 12px',borderTop:'none'}}>
+            <span style={{fontSize:'13px',color:c.M2}}>{t.confirmWith}</span>
+            <input type="number" min="1" max="50" value={autoConfirmN} onChange={e=>setAutoConfirmN(parseInt(e.target.value)||2)} style={{width:'60px',background:c.CARD,border:`1px solid ${mc}40`,borderRadius:'8px',padding:'6px 10px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',textAlign:'center'}}/>
+            <span style={{fontSize:'13px',color:c.M2}}>{t.peopleLbl}</span>
+          </div>}
+        </div>
+        {/* SURPRISE MODE */}
+        <div style={{marginBottom:'20px'}}>
+          <div onClick={()=>setSurprise(s=>!s)} style={{display:'flex',alignItems:'center',gap:'12px',padding:'14px 16px',background:c.CARD,border:`1px solid ${surpriseMode?mc+'50':c.BD}`,borderRadius:'12px',cursor:'pointer'}}>
+            <div style={{width:'22px',height:'22px',borderRadius:'50%',border:`2px solid ${surpriseMode?mc:c.BD}`,background:surpriseMode?mc:'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',color:'#0A0A0A',fontWeight:'800',flexShrink:0}}>{surpriseMode?'✓':''}</div>
+            <div><div style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>🎭 {t.surpriseMode_lbl||'🎭'}</div><div style={{fontSize:'12px',color:c.M2}}>{t.surpriseModeSub}</div></div>
+          </div>
+        </div>
+        {/* GIFT */}
+        <div style={{marginBottom:'20px'}}>
+          <div onClick={()=>setGiftOn(g=>!g)} style={{display:'flex',alignItems:'center',gap:'12px',padding:'14px 16px',background:c.CARD,border:`1px solid ${giftOn?c.A+'50':c.BD}`,borderRadius:'12px',cursor:'pointer',marginBottom:'10px'}}>
+            <div style={{width:'22px',height:'22px',borderRadius:'50%',border:`2px solid ${giftOn?c.A:c.BD}`,background:giftOn?c.A:'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',color:'#0A0A0A',fontWeight:'800',flexShrink:0}}>{giftOn?'✓':''}</div>
+            <div><div style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>{t.gift}</div><div style={{fontSize:'12px',color:c.M2}}>{t.giftSub}</div></div>
+          </div>
+          {giftOn&&<div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'14px',display:'flex',flexDirection:'column',gap:'8px'}}>
+            {[[gift.name,t.giftName,'name'],[gift.link,t.giftLink,'link'],[gift.price,t.giftPrice,'price'],[gift.stripeLink||'',t.payLink,'stripeLink']].map(([v,ph,k])=><input key={k} value={v} onChange={e=>setGift(g=>({...g,[k]:e.target.value}))} type={k==='price'?'number':'text'} placeholder={ph} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>)}
+          </div>}
+        </div>
+        {/* BRING */}
+        <div style={{marginBottom:'20px'}}>
+          <Lbl c={c}>{t.bring}</Lbl>
+          {bring.map(b=><div key={b.id} style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
+            <input value={b.text} onChange={e=>setBring(p=>p.map(x=>x.id===b.id?{...x,text:e.target.value}:x))} placeholder={t.newItem} style={{flex:1,background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none'}}/>
+            {bring.length>1&&<button onClick={()=>setBring(p=>p.filter(x=>x.id!==b.id))} title={t.removeItem} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M,cursor:'pointer',fontSize:'16px',borderRadius:'8px',width:'36px'}}>×</button>}
+          </div>)}
+          <Btn onClick={()=>setBring(p=>[...p,{id:Date.now(),text:''}])} v="secondary" sm c={c}>{t.addItem}</Btn>
+        </div>
+        {/* POLL */}
+        <div style={{marginBottom:'20px'}}>
+          <Lbl c={c}>🗳️ {t.pollQuestion}</Lbl>
+          <input value={poll.q} onChange={e=>setPoll(p=>({...p,q:e.target.value}))} placeholder={t.pollPlaceholder} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box',marginBottom:'8px'}}/>
+          {poll.q.trim()&&<div style={{display:'flex',flexDirection:'column',gap:'6px'}}>
+            {poll.opts.map((o,i)=><div key={i} style={{display:'flex',gap:'6px'}}>
+              <input value={o} onChange={e=>setPoll(p=>({...p,opts:p.opts.map((x,j)=>j===i?e.target.value:x)}))} placeholder={`${t.optionLbl} ${i+1}`} style={{flex:1,background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none'}}/>
+              {poll.opts.length>2&&<button onClick={()=>setPoll(p=>({...p,opts:p.opts.filter((_,j)=>j!==i)}))} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'6px 10px',color:c.M,cursor:'pointer',fontSize:'14px'}}>×</button>}
+            </div>)}
+            {poll.opts.length<5&&<button onClick={()=>setPoll(p=>({...p,opts:[...p.opts,'']}))} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'7px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px'}}>+ {t.addPollOption}</button>}
+          </div>}
+        </div>
+        {/* PAYMENT */}
+        <div style={{marginBottom:'24px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'14px',padding:'16px'}}>
+          <Lbl c={c}>{t.payData}</Lbl>
+          <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
+            {[['bizumPhone',t.bizumPh],['paypalUser','PayPal.me user'],['revolutUser','Revolut.me user']].map(([k,ph])=><input key={k} value={payment[k]} onChange={e=>setPayment(p=>({...p,[k]:e.target.value}))} placeholder={ph} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>)}
+          </div>
+          <div style={{fontSize:'11px',color:c.M2,marginTop:'8px'}}>{t.payNote}</div>
+        </div>
+        <Btn onClick={create} disabled={saving} full style={{padding:'16px',fontSize:'16px',background:mc,color:'#0A0A0A'}} c={c}>{saving?t.saving:t.createBtn}</Btn>
+      </>}
+    </div>
+  </>);
+}
+
+
+// ─── SHARE ────────────────────────────────────────────

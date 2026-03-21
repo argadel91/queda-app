@@ -1,0 +1,135 @@
+import React, { useState, useEffect, useRef } from 'react'
+import T from '../constants/translations.js'
+import { getMC } from '../constants/theme.js'
+import { saveResp, loadResps, db } from '../lib/supabase.js'
+import { ls, addMyPlan } from '../lib/storage.js'
+import { fmtDate, daysUntil } from '../lib/utils.js'
+import { Btn, Card, Lbl, Inp, Txa, HR, Back, ModeBadge } from '../components/ui.jsx'
+
+export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,authUser,profile}){
+  const pLang=appLang;const t=T[pLang];const isEs=pLang==='es';
+  const mc=getMC(plan.mode,c);
+  const prevKey='q_myresp_'+plan.id;
+  const prev=ls.get(prevKey,null);
+  const urlName=new URLSearchParams(location.search).get('name')||'';
+  const[name,setName]=useState(prev?.name||urlName||profile?.name||ls.get('q_myname',''));
+  const[avail,setAvail]=useState(prev?.avail||{});
+  const[timePref,setTimePref]=useState(prev?.timePref||{});
+  const[how,setHow]=useState(prev?.how||'');const[howOther,setHowOther]=useState(prev?.howOther||'');
+  const[comment,setComment]=useState(prev?.comment||'');
+  const[guestRole,setGuestRole]=useState(prev?.role||t.roles[1]||'');
+  const[saving,setSaving]=useState(false);const[done,setDone]=useState(false);
+  const[altDate,setAltDate]=useState('');const[altNote,setAltNote]=useState('');
+  const[pollVote,setPollVote]=useState(prev?.pollVote||null);
+  useEffect(()=>{if(name.trim())ls.set('q_myname',name.trim());},[name]);
+  const setDA=(d,val)=>setAvail(p=>({...p,[d]:p[d]===val?undefined:val}));
+  const togT=(d,h)=>setTimePref(p=>({...p,[d]:(p[d]||[]).includes(h)?(p[d]||[]).filter(x=>x!==h):[...(p[d]||[]),h]}));
+  const AVCOL={yes:'#22c55e',maybe:'#f59e0b',no:'#ef4444'};
+  const AVICON={yes:'✅',maybe:'🤔',no:'❌'};
+  const AVLBL={yes:t.avYes,maybe:t.avMaybe,no:t.avNo};
+  const submit=async()=>{
+    if(!name.trim())return;setSaving(true);
+    const changeLog=[...(prev?.changeLog||[])];
+    if(prev)changeLog.unshift({at:new Date().toISOString(),desc:t.respUpdated});
+    const resp={name:name.trim(),avail,timePref,how:how==='other'?howOther:how,howOther,comment,role:guestRole,altDate:altDate||null,altNote:altNote||null,pollVote:pollVote||null,changeLog,at:new Date().toISOString()};
+    await saveResp(plan.id,name.trim(),resp);
+    if(authUser)try{await db.from('responses').update({user_id:authUser.id}).eq('plan_id',plan.id).eq('name',name.trim());}catch{}
+    addMyPlan(plan.id,plan.name,'invited',plan.mode);
+    ls.set(prevKey,resp);setSaving(false);setDone(true);
+  };
+  const budget=(plan.stops||[]).reduce((s,p2)=>s+(parseFloat(p2.cost)||0),0);
+  if(done){
+    const planUrl=location.href.split('?')[0]+'?code='+plan.id;
+    const respName=name.trim()||'Alguien';
+    const waOrgText=pLang==='es'?`Hola ${plan.organizer}, soy *${respName}* y acabo de responder al plan *${plan.name}*. Mira las respuestas! ${planUrl}`:`Hi ${plan.organizer}, I'm *${respName}* and just responded to *${plan.name}*. Check the responses! ${planUrl}`;
+  return(<div style={{padding:'60px 24px',maxWidth:'420px',margin:'0 auto',textAlign:'center'}}>
+    <div style={{fontSize:'64px',marginBottom:'20px'}}>{plan.mode==='intimate'?'💘':'🎉'}</div>
+    <h2 style={{fontFamily:"'Syne',serif",fontSize:'28px',fontWeight:'800',color:mc,marginBottom:'10px'}}>{t.savedTitle}</h2>
+    <p style={{color:c.M2,marginBottom:'20px'}}>{t.savedSub}</p>
+    {plan.organizer&&<a href={`https://wa.me/?text=${encodeURIComponent(waOrgText)}`} target="_blank" rel="noreferrer" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',padding:'13px 20px',background:'#25D366',borderRadius:'12px',color:'#fff',textDecoration:'none',fontWeight:'700',fontSize:'14px',marginBottom:'16px'}}>💬 {`${isEs?'Avisar a':'Notify'} ${plan.organizer}`}</a>}
+    <div style={{background:`${mc}0D`,border:`1px solid ${mc}30`,borderRadius:'14px',padding:'20px'}}>
+      <div style={{fontSize:'15px',fontWeight:'600',color:c.T,marginBottom:'6px'}}>{t.viralQ}</div>
+      <div style={{fontSize:'13px',color:c.M2,marginBottom:'14px'}}>{t.viralSub}</div>
+      <Btn onClick={onCreateOwn} style={{padding:'11px 24px',background:mc,color:'#0A0A0A'}} c={c}>{t.viralBtn}</Btn>
+    </div>
+  </div>);
+  }
+  return(<div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
+    <Back onClick={()=>{if(Object.keys(avail).length>0&&!window.confirm(t.unsavedWarning))return;onBack();}} label={t.back} c={c}/>
+    <div style={{background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'12px',padding:'12px 14px',marginBottom:'16px',display:'flex',alignItems:'center',gap:'10px'}}>
+      <ModeBadge mode={plan.mode||'social'} lang={pLang} c={c}/>
+      <div style={{flex:1,minWidth:0}}><div style={{fontSize:'15px',color:c.T,fontWeight:'600',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{plan.name}</div><div style={{fontSize:'12px',color:c.M2}}>@ {plan.organizer}</div></div>
+    </div>
+    {prev&&<div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',marginBottom:'14px',fontSize:'12px',color:c.M2}}>✏️ {t.editingPrev}</div>}
+    {plan.confirmedDate&&<div style={{background:`${mc}15`,border:`1px solid ${mc}50`,borderRadius:'12px',padding:'12px 14px',marginBottom:'16px',display:'flex',gap:'10px',alignItems:'center'}}><span style={{fontSize:'18px'}}>📌</span><div><div style={{fontSize:'11px',color:mc,fontWeight:'700',textTransform:'uppercase',letterSpacing:'.06em'}}>{t.confirmedDate}</div><div style={{fontSize:'14px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,pLang)}</div></div></div>}
+    {plan.desc&&<p style={{fontSize:'14px',color:c.T,lineHeight:1.7,marginBottom:'16px',padding:'12px 14px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px'}}>{plan.desc}</p>}
+    {budget>0&&<div style={{background:`${mc}0D`,border:`1px solid ${mc}30`,borderRadius:'10px',padding:'12px 16px',marginBottom:'16px',display:'flex',justifyContent:'space-between'}}><span style={{color:c.M2,fontSize:'13px'}}>{t.estPer||'Estimado'}</span><span style={{color:mc,fontWeight:'700'}}>{budget.toFixed(0)}€</span></div>}
+    <HR c={c}/>
+    <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.yourName}</Lbl><Inp value={name} onChange={v=>{setName(v);ls.set('q_myname',v);}} placeholder={t.yourNamePh} c={c}/></div>
+    {plan.mode==='professional'&&<div style={{marginBottom:'14px'}}><Lbl c={c}>{t.guestRole}</Lbl><select value={guestRole} onChange={e=>setGuestRole(e.target.value)} style={{background:c.CARD,border:`1px solid ${c.BD}`,color:c.T,fontSize:'14px',padding:'12px 14px',borderRadius:'10px',width:'100%',fontFamily:'inherit'}}>{t.roles.map(r=><option key={r} value={r}>{r}</option>)}</select></div>}
+
+        {/* DATE + TIME + YES/MAYBE/NO — each slot independent */}
+    <div style={{marginBottom:'20px'}}>
+      <Lbl c={c}>{plan.mode==='intimate'?(t.intimateAvail):plan.mode==='professional'?(t.proAvail):t.yourAvail}</Lbl>
+      <div style={{fontSize:'12px',color:c.M2,marginBottom:'12px',lineHeight:1.5}}>{t.markIndividually}</div>
+      {(plan.dates||[]).map(d=>{
+        const ts=plan.times?.[d]||[];
+        const slots=ts.length>0?ts.map(h=>({key:`${d}_${h}`,label:h})):[{key:d,label:null}];
+        return(<div key={d} style={{marginBottom:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'14px',overflow:'hidden'}}>
+          <div style={{padding:'10px 14px',background:c.CARD,borderBottom:`1px solid ${c.BD}`,fontSize:'13px',color:c.T,fontWeight:'600',textTransform:'capitalize',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <span>{fmtDate(d,pLang)}</span>
+            {slots.length>1&&<button onClick={()=>{const u={};slots.forEach(s=>{u[s.key]='no';});setAvail(p=>({...p,...u}));}} title={t.markAllNoTitle} style={{background:'none',border:'none',color:'#ef4444',fontSize:'11px',cursor:'pointer',fontFamily:'inherit',opacity:0.7}}>❌ {t.allNoLbl}</button>}
+          </div>
+          {slots.map((slot,si)=>{
+            const val=avail[slot.key];
+            return(<div key={slot.key} style={{borderBottom:si<slots.length-1?`1px solid ${c.BD}`:'none'}}>
+              {slot.label&&<div style={{padding:'8px 14px 4px',fontSize:'12px',color:mc,fontWeight:'700'}}>🕐 {slot.label}</div>}
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'1px',background:c.BD}}>
+                {(['yes','maybe','no']).map(v=><button key={v} onClick={()=>setAvail(p=>({...p,[slot.key]:p[slot.key]===v?undefined:v}))} style={{padding:'10px 6px',background:val===v?AVCOL[v]+'25':c.CARD,color:val===v?AVCOL[v]:c.M2,cursor:'pointer',border:'none',fontFamily:'inherit',fontSize:'12px',fontWeight:val===v?'700':'400',transition:'all .1s'}}>
+                  {AVICON[v]}<br/><span style={{fontSize:'10px'}}>{AVLBL[v].replace(/[✅🤔❌]\s?/,'')}</span>
+                </button>)}
+              </div>
+              {val==='maybe'&&<div style={{padding:'6px 12px',background:'#f59e0b10',fontSize:'11px',color:'#f59e0b'}}>{t.maybeNote}</div>}
+            </div>);
+          })}
+        </div>);
+      })}
+      <button onClick={()=>{const u={};(plan.dates||[]).forEach(d=>{const ts=plan.times?.[d]||[];const slots=ts.length>0?ts.map(h=>`${d}_${h}`):[d];slots.forEach(k=>{if(!avail[k])u[k]='yes';});});setAvail(p=>({...p,...u}));}} title={t.markAllYesTitle} style={{width:'100%',padding:'8px',background:'none',border:`1px dashed ${c.BD}`,borderRadius:'10px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',marginTop:'4px'}}>✅ {t.allYesLbl}</button>
+    </div>
+    {/* Suggest alternative date */}
+    {Object.keys(avail).length>0&&Object.values(avail).every(v=>v==='no')&&<div style={{background:'#f59e0b10',border:'1px solid #f59e0b30',borderRadius:'12px',padding:'14px',marginBottom:'14px'}}>
+      <div style={{fontSize:'13px',color:'#f59e0b',fontWeight:'600',marginBottom:'8px'}}>😕 {t.noDateWorks}</div>
+      <input type="date" value={altDate||''} onChange={e=>setAltDate(e.target.value)} min={new Date().toISOString().split('T')[0]} style={{background:c.CARD,border:'1px solid #f59e0b50',borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box',marginBottom:'6px'}}/>
+      {altDate&&<input value={altNote||''} onChange={e=>setAltNote(e.target.value)} placeholder={t.optionalNote} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'12px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
+    </div>}
+    {plan.mode!=='professional'&&<div style={{marginBottom:'14px'}}>
+      <Lbl c={c}>{t.howGet} <span style={{fontWeight:'400',textTransform:'none',fontSize:'11px'}}>{t.howOpt}</span></Lbl>
+      <select value={how} onChange={e=>setHow(e.target.value)} style={{background:c.CARD,border:`1px solid ${c.BD}`,color:how?c.T:c.M,fontSize:'14px',padding:'12px 14px',borderRadius:'10px',width:'100%',fontFamily:'inherit',marginBottom:how==='other'?'8px':'0'}}>
+        <option value="">—</option>
+        <option value="car">{t.car}</option><option value="moto">{t.moto}</option>
+        <option value="transit">{t.transit}</option><option value="taxi">{t.taxi}</option>
+        <option value="walk">{t.walk}</option><option value="bike">{t.bike}</option>
+        <option value="other">{t.other}</option>
+      </select>
+      {how==='other'&&<Inp value={howOther} onChange={setHowOther} placeholder={t.otherPh} c={c}/>}
+    </div>}
+
+    {/* POLL VOTE */}
+    {plan.poll?.q&&<div style={{marginBottom:'16px'}}>
+      <Lbl c={c}>🗳️ {plan.poll.q}</Lbl>
+      <div style={{display:'flex',flexDirection:'column',gap:'6px'}}>
+        {plan.poll.opts.filter(o=>o.trim()).map((o,i)=><button key={i} onClick={()=>setPollVote(v=>v===o?null:o)} style={{padding:'10px 14px',background:pollVote===o?`${mc}20`:c.CARD,border:`1px solid ${pollVote===o?mc+'50':c.BD}`,borderRadius:'10px',color:pollVote===o?mc:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:pollVote===o?'600':'400',textAlign:'left',transition:'all .1s'}}>{pollVote===o?'◉ ':' ◯ '}{o}</button>)}
+      </div>
+    </div>}
+    {/* COMMENT */}
+    <div style={{marginBottom:'20px'}}>
+      <Lbl c={c}>{t.commentLbl}</Lbl>
+      <Txa value={comment} onChange={setComment} placeholder={t.commentPh} rows={2} c={c}/>
+    </div>
+
+    <Btn onClick={submit} disabled={!name.trim()||saving} full style={{padding:'15px',fontSize:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?t.saving:plan.mode==='professional'?(t.confirmAttendance):plan.mode==='intimate'?(t.confirmBtn):t.saveAvail}</Btn>
+  </div>);
+}
+
+
+// ─── ACCOMMODATION + AFTER PLAN SUGGESTIONS ──────────
