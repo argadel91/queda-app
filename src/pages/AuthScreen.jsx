@@ -26,12 +26,9 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
   const handleLogin=async()=>{
     if(!validate())return;
     setLoading(true);setErr('');
-    // Safety: always reload after 3 seconds no matter what
-    const safetyReload=setTimeout(()=>window.location.reload(),3000);
     try{
       const{data,error}=await authSignIn(email.trim().toLowerCase(),password);
       if(error){
-        clearTimeout(safetyReload);
         if(error.message?.includes('Invalid login')||error.message?.includes('invalid_grant')){
           setErr(t.authWrongPass);
         }else if(error.message?.includes('Email not confirmed')){
@@ -41,11 +38,17 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
         }
         setLoading(false);return;
       }
-      // Success - small delay to let Supabase persist session, then reload
-      clearTimeout(safetyReload);
-      setTimeout(()=>window.location.reload(),500);
+      // Login successful — load or create profile, then enter app
+      let prof=null;
+      try{prof=await loadProfile(data.user.id);}catch(e){console.error('loadProfile error:',e);}
+      if(!prof){
+        let savedName=data.user.email.split('@')[0];
+        try{savedName=localStorage.getItem('q_reg_name')||savedName;localStorage.removeItem('q_reg_name');}catch{}
+        prof={name:savedName,email:data.user.email,lang,contacts:[]};
+        try{await saveProfile(data.user.id,prof);}catch(e){console.error('saveProfile error:',e);}
+      }
+      onAuth(data.user,prof||{name:data.user.email.split('@')[0],email:data.user.email,lang,contacts:[]});
     }catch(e){
-      clearTimeout(safetyReload);
       console.error('Login error:',e);
       setErr(t.authConnError);
       setLoading(false);

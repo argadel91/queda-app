@@ -53,16 +53,15 @@ export default function App(){
     getSession().then(async session=>{
       clearTimeout(timeout);
       if(session?.user){
-        try{
-          let prof=await loadProfile(session.user.id);
-          if(!prof){
-            prof={name:session.user.email.split('@')[0],email:session.user.email,contacts:[]};
-            await saveProfile(session.user.id,prof);
-          }
-          setAuthUser(session.user);
-          setProfile(prof);
-          if(prof?.lang)setLang(prof.lang);
-        }catch(e){console.error('Profile load error:',e);}
+        let prof=null;
+        try{prof=await loadProfile(session.user.id);}catch(e){console.error('Profile load error:',e);}
+        if(!prof){
+          prof={name:session.user.email?.split('@')[0]||'User',email:session.user.email||'',contacts:[]};
+          try{await saveProfile(session.user.id,prof);}catch(e){console.error('Profile save error:',e);}
+        }
+        setAuthUser(session.user);
+        setProfile(prof);
+        if(prof?.lang)setLang(prof.lang);
       }
       setAuthLoading(false);
     }).catch(e=>{
@@ -82,12 +81,16 @@ export default function App(){
         return;
       }
       if(session?.user){
-        try{
-          const prof=await loadProfile(session.user.id);
-          setAuthUser(session.user);
-          setProfile(prof);
-          if(prof?.lang)setLang(prof.lang);
-        }catch(e){console.error(e);}
+        let prof=null;
+        try{prof=await loadProfile(session.user.id);}catch(e){console.error('Profile load in auth change:',e);}
+        if(!prof){
+          prof={name:session.user.email?.split('@')[0]||'User',email:session.user.email||'',contacts:[]};
+          try{await saveProfile(session.user.id,prof);}catch(e){console.error('Profile save in auth change:',e);}
+        }
+        setAuthUser(session.user);
+        setProfile(prof);
+        if(prof?.lang)setLang(prof.lang);
+        setAuthLoading(false);
       }else{
         setAuthUser(null);setProfile(null);
         setResetMode(false);
