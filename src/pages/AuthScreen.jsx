@@ -26,9 +26,12 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
   const handleLogin=async()=>{
     if(!validate())return;
     setLoading(true);setErr('');
+    // Safety: always reload after 3 seconds no matter what
+    const safetyReload=setTimeout(()=>window.location.reload(),3000);
     try{
       const{data,error}=await authSignIn(email.trim().toLowerCase(),password);
       if(error){
+        clearTimeout(safetyReload);
         if(error.message?.includes('Invalid login')||error.message?.includes('invalid_grant')){
           setErr(t.authWrongPass);
         }else if(error.message?.includes('Email not confirmed')){
@@ -38,9 +41,11 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
         }
         setLoading(false);return;
       }
-      // Login successful — reload and let App.jsx handle session + profile
+      // Success - reload immediately
+      clearTimeout(safetyReload);
       window.location.reload();
     }catch(e){
+      clearTimeout(safetyReload);
       console.error('Login error:',e);
       setErr(t.authConnError);
       setLoading(false);
@@ -133,50 +138,50 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
       </div>
 
       {/* Form */}
-      <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
+      <form onSubmit={e=>{e.preventDefault();mode==='reset'?handleReset():mode==='register'?handleRegister():handleLogin();}} style={{display:'flex',flexDirection:'column',gap:'12px'}}>
         {mode==='reset'&&<div style={{fontSize:'14px',color:c.M2,marginBottom:'4px'}}>{t.authResetInfo}</div>}
 
         {mode==='register'&&<>
           <div>
             <div style={{fontSize:'11px',color:c.M,fontWeight:'600',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'5px'}}>{t.authNameLabel}</div>
-            <input value={name} onChange={e=>setName(e.target.value)} placeholder={t.authDisplayName} style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+            <input id="name" name="name" autoComplete="name" value={name} onChange={e=>setName(e.target.value)} placeholder={t.authDisplayName} style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
           </div>
           <div>
             <div style={{fontSize:'11px',color:c.M,fontWeight:'600',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'5px'}}>{t.authAliasLabel}</div>
             <div style={{position:'relative'}}>
               <span style={{position:'absolute',left:'14px',top:'50%',transform:'translateY(-50%)',color:c.M,fontSize:'15px',fontWeight:'600'}}>@</span>
-              <input value={username} onChange={e=>setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g,'').slice(0,20))} placeholder="tu_alias" style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px 12px 30px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+              <input id="username" name="username" autoComplete="username" value={username} onChange={e=>setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g,'').slice(0,20))} placeholder="tu_alias" style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px 12px 30px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
             </div>
           </div>
         </>}
 
         <div>
           <div style={{fontSize:'11px',color:c.M,fontWeight:'600',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'5px'}}>Email</div>
-          <input value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&(mode==='reset'?handleReset():mode==='register'?handleRegister():handleLogin())} type="email" placeholder={t.emailPh} autoFocus style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+          <input id="email" name="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} type="email" placeholder={t.emailPh} autoFocus style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
         </div>
 
         {mode!=='reset'&&<div>
           <div style={{fontSize:'11px',color:c.M,fontWeight:'600',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'5px'}}>{t.authPassword}</div>
           <div style={{position:'relative'}}>
-            <input value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==='Enter'&&(mode==='register'?handleRegister():handleLogin())} type={showPass?'text':'password'} placeholder={mode==='register'?(t.authMinChars):'••••••••'} style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 44px 12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
-            <button onClick={()=>setShowPass(s=>!s)} style={{position:'absolute',right:'12px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'16px',padding:'4px'}}>{showPass?'🙈':'👁'}</button>
+            <input id="password" name="password" autoComplete={mode==='register'?'new-password':'current-password'} value={password} onChange={e=>setPassword(e.target.value)} type={showPass?'text':'password'} placeholder={mode==='register'?(t.authMinChars):'••••••••'} style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 44px 12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+            <button type="button" onClick={()=>setShowPass(s=>!s)} style={{position:'absolute',right:'12px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'16px',padding:'4px'}}>{showPass?'🙈':'👁'}</button>
           </div>
         </div>}
 
         {err&&<div style={{color:'#ef4444',fontSize:'13px',padding:'8px 12px',background:'#ef444410',borderRadius:'8px',border:'1px solid #ef444430'}}>{err}</div>}
         {msg&&<div style={{color:'#22c55e',fontSize:'13px',padding:'8px 12px',background:'#22c55e10',borderRadius:'8px',border:'1px solid #22c55e30'}}>{msg}</div>}
 
-        <button onClick={mode==='reset'?handleReset:mode==='register'?handleRegister:handleLogin} disabled={loading} style={{width:'100%',padding:'14px',background:c.A,color:'#0A0A0A',border:'none',borderRadius:'10px',fontSize:'16px',fontWeight:'700',cursor:loading?'not-allowed':'pointer',fontFamily:'inherit',opacity:loading?0.7:1,marginTop:'4px'}}>
+        <button type="submit" disabled={loading} style={{width:'100%',padding:'14px',background:c.A,color:'#0A0A0A',border:'none',borderRadius:'10px',fontSize:'16px',fontWeight:'700',cursor:loading?'not-allowed':'pointer',fontFamily:'inherit',opacity:loading?0.7:1,marginTop:'4px'}}>
           {loading?'...':(mode==='reset'?(t.authSendEmail):(mode==='register'?t.authCreateAccount:t.authSignInTab))}
         </button>
 
-        {mode==='login'&&<button onClick={()=>{setMode('reset');setErr('');setMsg('');}} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'13px',fontFamily:'inherit',padding:'4px',textAlign:'center'}}>
+        {mode==='login'&&<button type="button" onClick={()=>{setMode('reset');setErr('');setMsg('');}} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'13px',fontFamily:'inherit',padding:'4px',textAlign:'center'}}>
           {t.authForgotPass}
         </button>}
-        {mode==='reset'&&<button onClick={()=>{setMode('login');setErr('');setMsg('');}} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'13px',fontFamily:'inherit',padding:'4px',textAlign:'center'}}>
+        {mode==='reset'&&<button type="button" onClick={()=>{setMode('login');setErr('');setMsg('');}} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'13px',fontFamily:'inherit',padding:'4px',textAlign:'center'}}>
           {t.authBackLogin}
         </button>}
-      </div>
+      </form>
       </>}
     </div>
   </div>);
