@@ -69,7 +69,7 @@ export default function App(){
       console.error('Session check error:',e);
       setAuthLoading(false);
     });
-    const{data:{subscription}}=db.auth.onAuthStateChange(async(event,session)=>{
+    const{data:{subscription}}=db.auth.onAuthStateChange((event,session)=>{
       // Clear auth tokens from URL hash
       if(window.location.hash&&(window.location.hash.includes('access_token')||window.location.hash.includes('type=recovery'))){
         window.history.replaceState(null,'',window.location.pathname+window.location.search);
@@ -81,16 +81,22 @@ export default function App(){
         return;
       }
       if(session?.user){
-        let prof=null;
-        try{prof=await loadProfile(session.user.id);}catch(e){console.error('Profile load in auth change:',e);}
-        if(!prof){
-          prof={name:session.user.email?.split('@')[0]||'User',email:session.user.email||'',contacts:[]};
-          try{await saveProfile(session.user.id,prof);}catch(e){console.error('Profile save in auth change:',e);}
-        }
-        setAuthUser(session.user);
-        setProfile(prof);
-        if(prof?.lang)setLang(prof.lang);
-        setAuthLoading(false);
+        // Load profile in background - don't block auth
+        loadProfile(session.user.id).then(prof=>{
+          if(!prof){
+            prof={name:session.user.email?.split('@')[0]||'User',email:session.user.email||'',contacts:[]};
+            saveProfile(session.user.id,prof).catch(e=>console.error('saveProfile:',e));
+          }
+          setAuthUser(session.user);
+          setProfile(prof);
+          if(prof?.lang)setLang(prof.lang);
+          setAuthLoading(false);
+        }).catch(e=>{
+          console.error('Profile load in auth change:',e);
+          setAuthUser(session.user);
+          setProfile({name:session.user.email?.split('@')[0]||'User',email:session.user.email||'',contacts:[]});
+          setAuthLoading(false);
+        });
       }else{
         setAuthUser(null);setProfile(null);
         setResetMode(false);
@@ -99,7 +105,7 @@ export default function App(){
     return()=>subscription.unsubscribe();
   },[]);
 
-  const handleAuth=(user,prof)=>{alert('App: handleAuth called');setAuthUser(user);setProfile(prof);if(prof?.lang)setLang(prof.lang);alert('App: handleAuth done, authUser set');};
+  const handleAuth=(user,prof)=>{setAuthUser(user);setProfile(prof);if(prof?.lang)setLang(prof.lang);};
   const handleSignOut=async()=>{try{await authSignOut();}catch(e){console.error('signOut error:',e);}ls.set('q_state',{});ls.set('q_plans',[]);window.location.reload();};
   const updateProfile=async(updates)=>{
     if(!authUser)return;
