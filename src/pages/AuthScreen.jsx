@@ -38,17 +38,8 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
         }
         setLoading(false);return;
       }
-      let prof=await loadProfile(data.user.id);
-      if(!prof){
-        // First login after email confirmation — use saved registration name if available
-        let savedName=data.user.email.split('@')[0];
-        let savedUsername=null;
-        try{savedName=localStorage.getItem('q_reg_name')||savedName;savedUsername=localStorage.getItem('q_reg_username')||null;localStorage.removeItem('q_reg_name');localStorage.removeItem('q_reg_username');}catch{}
-        prof={name:savedName,username:savedUsername,email:data.user.email,lang,contacts:[]};
-        await saveProfile(data.user.id,prof);
-      }
-      onAuth(data.user,prof);
-      setTimeout(()=>window.location.reload(),100);
+      // Login successful — reload and let App.jsx handle session + profile
+      window.location.reload();
     }catch(e){
       console.error('Login error:',e);
       setErr(t.authConnError);
