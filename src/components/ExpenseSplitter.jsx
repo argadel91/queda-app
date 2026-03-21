@@ -43,12 +43,12 @@ export default function ExpenseSplitter({plan, rs, mc, c, lang}){
       <select value={who} onChange={e=>setWho(e.target.value)} style={{background:c.CARD,border:`1px solid ${c.BD}`,color:who?c.T:c.M,fontSize:'13px',padding:'9px 12px',borderRadius:'8px',fontFamily:'inherit',width:'100%'}}>
         <option value="">{t.whoPaidLbl}</option>
         {attendees.map(a=><option key={a} value={a}>{a}</option>)}
-        <option value={isEs?'Yo':'Me'}>{t.meOrganiser}</option>
+        <option value={t.meOrganiser.split(' ')[0]}>{t.meOrganiser}</option>
       </select>
       <input value={what} onChange={e=>setWhat(e.target.value)} placeholder={t.whatWasIt}  style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'9px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none'}}/>
       <div style={{display:'flex',gap:'8px'}}>
         <input type="number" value={amt} onChange={e=>setAmt(e.target.value)} placeholder="€" style={{flex:1,background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'9px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none'}}/>
-        <button onClick={add} disabled={!who||!what||!amt} style={{padding:'9px 16px',background:who&&what&&amt?mc:'transparent',border:`1px solid ${who&&what&&amt?mc:c.BD}`,borderRadius:'8px',color:who&&what&&amt?'#0A0A0A':c.M,cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'13px'}}>{isEs?'OK':'OK'}</button>
+        <button onClick={add} disabled={!who||!what||!amt} style={{padding:'9px 16px',background:who&&what&&amt?mc:'transparent',border:`1px solid ${who&&what&&amt?mc:c.BD}`,borderRadius:'8px',color:who&&what&&amt?'#0A0A0A':c.M,cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'13px'}}>{'OK'}</button>
       </div>
     </div>}
     {expenses.map(e=><div key={e.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 0',borderBottom:`1px solid ${c.BD}`,fontSize:'13px'}}>

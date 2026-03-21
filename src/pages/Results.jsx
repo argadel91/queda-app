@@ -71,27 +71,27 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
   const du=plan.confirmedDate?daysUntil(plan.confirmedDate):null;
   const confirmDate=async d=>{setConf(true);const up={...plan,confirmedDate:d};await updatePlan(up);setPlan(up);setConf(false);};
   const waConfirm=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`📌 *${plan.name}* — ${t.dateConfirmedMsg}\n\n🗓️ ${fmtDate(plan.confirmedDate,lang)}\n\n${url}`),'_blank');};
-  const waRem=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(isEs?`⏰ Recordatorio: *${plan.name}* se acerca!\n${url}`:`⏰ Reminder: *${plan.name}* is coming up!\n${url}`),'_blank');setRem(true);};
+  const waRem=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`⏰ ${t.reminderMsg.replace('{name}',plan.name)}\n${url}`),'_blank');setRem(true);};
   const togglePub=async()=>{const up={...plan,isPublic:!plan.isPublic};await updatePlan(up);setPlan(up);};
   const howL=v=>({car:t.car,moto:t.moto,transit:t.transit,taxi:t.taxi,walk:t.walk,bike:t.bike}[v]||v);
   const TABS=['who','plan','dia','ir','extras'];
   const tlbl=k=>t.tabs[k]||k;
   return(<>
     {payModal&&<PayModal plan={plan} amount={payAmt} onClose={()=>setPay(false)} c={c} lang={lang}/>}
-    {newRespAlert&&<div style={{position:'fixed',top:'70px',left:'50%',transform:'translateX(-50%)',background:mc,color:'#0A0A0A',padding:'10px 18px',borderRadius:'30px',fontWeight:'700',fontSize:'13px',zIndex:200,boxShadow:'0 4px 20px rgba(0,0,0,.4)',whiteSpace:'nowrap',animation:'slideDown .3s ease'}}>💬 {isEs?`Nueva respuesta de ${newRespAlert}`:`New response from ${newRespAlert}`}</div>}
+    {newRespAlert&&<div style={{position:'fixed',top:'70px',left:'50%',transform:'translateX(-50%)',background:mc,color:'#0A0A0A',padding:'10px 18px',borderRadius:'30px',fontWeight:'700',fontSize:'13px',zIndex:200,boxShadow:'0 4px 20px rgba(0,0,0,.4)',whiteSpace:'nowrap',animation:'slideDown .3s ease'}}>💬 {`${t.newRespFrom.replace('{name}',newRespAlert)}`}</div>}
     <div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
       <Back onClick={onBack} label={t.back} c={c}/>
       <PostPlanSurvey plan={plan} c={c} lang={lang} mc={mc}/>
       {/* Countdown */}
       {plan.confirmedDate&&du!=null&&du>=0&&du<=3&&<div style={{background:`${mc}15`,border:`1px solid ${mc}40`,borderRadius:'12px',padding:'12px 16px',marginBottom:'14px',display:'flex',gap:'10px',alignItems:'center'}}>
         <div style={{fontSize:'20px'}}>{du===0?'🎉':du===1?'⏰':'📅'}</div>
-        <div><div style={{fontSize:'13px',fontWeight:'700',color:mc}}>{du===0?(isEs?'¡Es hoy!':"It's today!"):du===1?(t.tomorrowLbl):`${du} ${t.daysLbl} ⏳`}</div>
+        <div><div style={{fontSize:'13px',fontWeight:'700',color:mc}}>{du===0?(t.itsToday):du===1?(t.tomorrowLbl):`${du} ${t.daysLbl} ⏳`}</div>
         <div style={{fontSize:'12px',color:c.M2,textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,lang)}</div></div>
       </div>}
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'6px'}}>
         <div><h2 style={{fontFamily:"'Syne',serif",fontSize:'24px',fontWeight:'800',color:c.T,margin:'0 0 4px'}}>{plan.name}</h2><ModeBadge mode={plan.mode||'social'} lang={lang} c={c}/></div>
         <div style={{display:'flex',gap:'5px'}}>
-          <button onClick={()=>{const url=location.href.split('?')[0]+'?code='+plan.id;const txt=isEs?`¡Responde al plan *${plan.name}*!\n${url}`:`Respond to *${plan.name}*!\n${url}`;window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}} title={t.shareWATitle} style={{background:'#25D36618',border:'1px solid #25D36640',borderRadius:'8px',padding:'6px 10px',color:'#25D366',cursor:'pointer',fontSize:'13px'}}>💬</button>
+          <button onClick={()=>{const url=location.href.split('?')[0]+'?code='+plan.id;const txt=`${t.respondToPlan.replace('{name}',plan.name)}\n${url}`;window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}} title={t.shareWATitle} style={{background:'#25D36618',border:'1px solid #25D36640',borderRadius:'8px',padding:'6px 10px',color:'#25D366',cursor:'pointer',fontSize:'13px'}}>💬</button>
           <button onClick={()=>{const url=location.href.split('?')[0]+'?code='+plan.id;navigator.clipboard?.writeText(url);}} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}} title={t.copyLinkTitle}>🔗</button>
           {typeof Notification!=='undefined'&&Notification.permission==='default'&&<button onClick={()=>Notification.requestPermission()} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}} title={t.enableNotif}>🔔</button>}
           <button onClick={refresh} title={t.refreshResp} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}}>↻</button>
@@ -107,7 +107,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
         </div>
       </div>}
       {isOrgRef.current&&<div style={{marginBottom:'16px',display:'flex',gap:'6px',alignItems:'center',flexWrap:'wrap'}}>
-        <button onClick={togglePub} title={plan.isPublic?(isEs?'El plan aparece en Descubrir — haz clic para hacerlo privado':'Plan is visible in Discover — click to make it private'):(t.makePublicTitle)} style={{padding:'8px 16px',background:plan.isPublic?`${mc}15`:c.CARD,border:`1px solid ${plan.isPublic?mc+'50':c.BD}`,borderRadius:'10px',color:plan.isPublic?mc:c.M2,fontSize:'12px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>{plan.isPublic?t.isPublicLbl:t.makePublic}</button>
+        <button onClick={togglePub} title={plan.isPublic?t.planInDiscover:(t.makePublicTitle)} style={{padding:'8px 16px',background:plan.isPublic?`${mc}15`:c.CARD,border:`1px solid ${plan.isPublic?mc+'50':c.BD}`,borderRadius:'10px',color:plan.isPublic?mc:c.M2,fontSize:'12px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>{plan.isPublic?t.isPublicLbl:t.makePublic}</button>
       </div>}
       {/* Smart summary for organizer */}
       {isOrgRef.current&&!ldg&&total>0&&!plan.confirmedDate&&(()=>{
@@ -178,7 +178,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'5px'}}>
                 <div><span style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>{r.name}</span>{r.role&&r.role!==t.roles[0]&&<span style={{fontSize:'11px',color:c.M2,marginLeft:'6px'}}>· {r.role}</span>}{r.how&&<span style={{fontSize:'12px',color:c.M2,marginLeft:'6px'}}>· {howL(r.how)}</span>}</div>
                 <div style={{display:'flex',gap:'6px',alignItems:'center'}}>
-                  {r.changeLog?.length>0&&(()=>{const last=r.changeLog[0];const recent=last&&(Date.now()-new Date(last.at).getTime())<3600000;return<span title={isEs?('Editado '+r.changeLog.length+' vez/veces'):('Edited '+r.changeLog.length+' time(s)')} style={{fontSize:'11px',color:recent?'#f59e0b':c.M2,fontWeight:recent?'700':'400'}}>✏️{recent?' nuevo':''}</span>;})()}
+                  {r.changeLog?.length>0&&(()=>{const last=r.changeLog[0];const recent=last&&(Date.now()-new Date(last.at).getTime())<3600000;return<span title={t.editedTimes.replace('{n}',r.changeLog.length)} style={{fontSize:'11px',color:recent?'#f59e0b':c.M2,fontWeight:recent?'700':'400'}}>✏️{recent?' nuevo':''}</span>;})()}
                 </div>
               </div>
               {r.comment&&<div style={{fontSize:'13px',color:c.M2,fontStyle:'italic',marginBottom:'6px',padding:'6px 10px',background:c.CARD2,borderRadius:'8px'}}>"{r.comment}"</div>}
@@ -189,7 +189,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
           </Card>
           {/* PLAN CARD for sharing */}
           {plan.confirmedDate&&<Card c={c} style={{marginBottom:'12px'}}>
-            <Lbl c={c}>{isEs?'🃏 Tarjeta del plan':'🃏 Plan card'}</Lbl>
+            <Lbl c={c}>{t.planCard}</Lbl>
             <div id="plan-share-card" style={{background:`linear-gradient(135deg,${mc}20,${mc}05)`,border:`2px solid ${mc}40`,borderRadius:'12px',padding:'16px',textAlign:'center',fontFamily:"'Syne',serif"}}>
               <div style={{fontSize:'28px',marginBottom:'6px'}}>{plan.mode==='intimate'?'💘':plan.mode==='professional'?'💼':'🎉'}</div>
               <div style={{fontSize:'18px',fontWeight:'800',color:c.T,marginBottom:'4px'}}>{plan.name}</div>
@@ -279,8 +279,8 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
         {/* Empty state when no extras */}
         {!plan.gift&&!plan.bring?.filter(b=>b.text||typeof b==='string').length&&!plan.dressCode&&budget===0&&!plan.confirmedDate&&<div style={{textAlign:'center',padding:'40px 24px',color:c.M2}}>
           <div style={{fontSize:'32px',marginBottom:'12px'}}>🎁</div>
-          <div style={{fontSize:'14px'}}>{isEs?'Este plan no tiene extras configurados.':'This plan has no extras configured.'}</div>
-          {isOrgRef.current&&<div style={{fontSize:'12px',marginTop:'8px',color:c.M}}>{isEs?'Puedes añadirlos al editar el plan.':'You can add them when editing the plan.'}</div>}
+          <div style={{fontSize:'14px'}}>{t.noExtrasConfigured}</div>
+          {isOrgRef.current&&<div style={{fontSize:'12px',marginTop:'8px',color:c.M}}>{t.addThemEditing}</div>}
         </div>}
         {/* Expense splitter - always show for splitting costs */}
         <ExpenseSplitter plan={plan} rs={rs||[]} mc={mc} c={c} lang={lang}/>
@@ -305,7 +305,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
         </Card>}
         {/* Plan share card */}
         {plan.confirmedDate&&<Card c={c}>
-          <Lbl c={c}>{isEs?'🃏 Tarjeta del plan':'🃏 Plan card'}</Lbl>
+          <Lbl c={c}>{t.planCard}</Lbl>
           <div style={{background:`linear-gradient(135deg,${mc}20,${mc}05)`,border:`2px solid ${mc}40`,borderRadius:'12px',padding:'16px',textAlign:'center',fontFamily:"'Syne',serif"}}>
             <div style={{fontSize:'28px',marginBottom:'6px'}}>{plan.mode==='intimate'?'💘':plan.mode==='professional'?'💼':'🎉'}</div>
             <div style={{fontSize:'18px',fontWeight:'800',color:c.T,marginBottom:'4px'}}>{plan.name}</div>

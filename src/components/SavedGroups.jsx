@@ -32,7 +32,7 @@ export default function SavedGroups({plan, c, lang}){
       <div><div style={{fontSize:'13px',color:c.T,fontWeight:'500'}}>{g.name}</div><div style={{fontSize:'11px',color:c.M2,marginTop:'2px'}}>{t.groupForPlan}</div></div>
       <button onClick={()=>delGroup(g.id)} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'16px'}}>×</button>
     </div>)}
-    {otherGroups.length>0&&<div style={{fontSize:'12px',color:c.M2,marginTop:'4px'}}>{isEs?`${otherGroups.length} grupo${otherGroups.length!==1?'s':''} guardado${otherGroups.length!==1?'s':''} de otros planes`:`${otherGroups.length} saved group${otherGroups.length!==1?'s':''} from other plans`}</div>}
+    {otherGroups.length>0&&<div style={{fontSize:'12px',color:c.M2,marginTop:'4px'}}>{t.otherGroupsSaved.replace('{n}',otherGroups.length)}</div>}
   </div>);
 }
 

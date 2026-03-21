@@ -97,7 +97,7 @@ export default function App(){
   },[]);
 
   const handleAuth=(user,prof)=>{setAuthUser(user);setProfile(prof);if(prof?.lang)setLang(prof.lang);};
-  const handleSignOut=async()=>{await authSignOut();ls.set('q_state',{});window.location.reload();};
+  const handleSignOut=async()=>{try{await authSignOut();}catch(e){console.error('signOut error:',e);}ls.set('q_state',{});ls.set('q_plans',[]);window.location.reload();};
   const updateProfile=async(updates)=>{
     if(!authUser)return;
     const updated={...profile,...updates};

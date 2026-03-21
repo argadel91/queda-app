@@ -46,7 +46,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
     <div style={{fontSize:'64px',marginBottom:'20px'}}>{plan.mode==='intimate'?'💘':'🎉'}</div>
     <h2 style={{fontFamily:"'Syne',serif",fontSize:'28px',fontWeight:'800',color:mc,marginBottom:'10px'}}>{t.savedTitle}</h2>
     <p style={{color:c.M2,marginBottom:'20px'}}>{t.savedSub}</p>
-    {plan.organizer&&<a href={`https://wa.me/?text=${encodeURIComponent(waOrgText)}`} target="_blank" rel="noreferrer" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',padding:'13px 20px',background:'#25D366',borderRadius:'12px',color:'#fff',textDecoration:'none',fontWeight:'700',fontSize:'14px',marginBottom:'16px'}}>💬 {`${isEs?'Avisar a':'Notify'} ${plan.organizer}`}</a>}
+    {plan.organizer&&<a href={`https://wa.me/?text=${encodeURIComponent(waOrgText)}`} target="_blank" rel="noreferrer" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',padding:'13px 20px',background:'#25D366',borderRadius:'12px',color:'#fff',textDecoration:'none',fontWeight:'700',fontSize:'14px',marginBottom:'16px'}}>💬 {`${t.notifyTo} ${plan.organizer}`}</a>}
     <div style={{background:`${mc}0D`,border:`1px solid ${mc}30`,borderRadius:'14px',padding:'20px'}}>
       <div style={{fontSize:'15px',fontWeight:'600',color:c.T,marginBottom:'6px'}}>{t.viralQ}</div>
       <div style={{fontSize:'13px',color:c.M2,marginBottom:'14px'}}>{t.viralSub}</div>

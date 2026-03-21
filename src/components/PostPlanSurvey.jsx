@@ -26,7 +26,7 @@ export default function PostPlanSurvey({plan, c, lang, mc}){
     <div style={{marginBottom:'14px'}}>
       <div style={{fontSize:'12px',color:c.M2,marginBottom:'8px'}}>{t.wouldRepeat}</div>
       <div style={{display:'flex',gap:'8px'}}>
-        {[{v:true,l:isEs?'Sí':'Yes'},{v:false,l:'No'},{v:'maybe',l:t.maybeLbl}].map(o=><button key={String(o.v)} onClick={()=>setRepeat(o.v)} style={{flex:1,padding:'8px',borderRadius:'10px',border:`1px solid ${repeat===o.v?mc+'60':c.BD}`,background:repeat===o.v?`${mc}20`:c.CARD,color:repeat===o.v?mc:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:repeat===o.v?'700':'400'}}>{o.l}</button>)}
+        {[{v:true,l:t.yesLbl||'Yes'},{v:false,l:'No'},{v:'maybe',l:t.maybeLbl}].map(o=><button key={String(o.v)} onClick={()=>setRepeat(o.v)} style={{flex:1,padding:'8px',borderRadius:'10px',border:`1px solid ${repeat===o.v?mc+'60':c.BD}`,background:repeat===o.v?`${mc}20`:c.CARD,color:repeat===o.v?mc:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:repeat===o.v?'700':'400'}}>{o.l}</button>)}
       </div>
     </div>
     <textarea value={feedback} onChange={e=>setFeedback(e.target.value)} placeholder={t.improveNext} rows={2} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',resize:'none',boxSizing:'border-box',marginBottom:'10px',lineHeight:1.5}}/>

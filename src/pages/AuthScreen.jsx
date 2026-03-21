@@ -32,9 +32,9 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
         if(error.message?.includes('Invalid login')||error.message?.includes('invalid_grant')){
           setErr(t.authWrongPass);
         }else if(error.message?.includes('Email not confirmed')){
-          setErr(isEs?'Confirma tu email antes de entrar.':'Please confirm your email first.');
+          setErr(t.confirmEmailFirst);
         }else{
-          setErr(error.message||(isEs?'Error al iniciar sesión.':'Sign in error.'));
+          setErr(error.message||t.signInError);
         }
         setLoading(false);return;
       }
@@ -65,7 +65,7 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
         if(error.message?.includes('already registered')||error.message?.includes('already been registered')){
           setErr(t.authAlreadyReg);
         }else{
-          setErr(error.message||(isEs?'Error al crear la cuenta.':'Error creating account.'));
+          setErr(error.message||t.createAccountError);
         }
         setLoading(false);return;
       }
@@ -91,7 +91,7 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
     if(!email.trim()||!email.includes('@')){setErr(t.authInvalidEmail);return;}
     setLoading(true);setErr('');
     const{error}=await authResetPassword(email.trim().toLowerCase());
-    if(error){setErr(isEs?'Error al enviar el email.':'Error sending email.');setLoading(false);return;}
+    if(error){setErr(t.sendEmailError);setLoading(false);return;}
     setMsg(t.authEmailSent);
     setLoading(false);
   };
@@ -120,13 +120,13 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
       {/* Email confirmation screen */}
       {mode==='confirmEmail'&&<div style={{textAlign:'center',padding:'20px 0'}}>
         <div style={{fontSize:'52px',marginBottom:'16px'}}>📧</div>
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'24px',fontWeight:'800',color:c.T,marginBottom:'10px'}}>{isEs?'¡Revisa tu email!':'Check your email!'}</h2>
-        <p style={{color:c.M2,fontSize:'14px',lineHeight:1.6,marginBottom:'8px'}}>{isEs?`Hemos enviado un enlace de confirmación a:`:'We sent a confirmation link to:'}</p>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'24px',fontWeight:'800',color:c.T,marginBottom:'10px'}}>{t.checkYourEmail}</h2>
+        <p style={{color:c.M2,fontSize:'14px',lineHeight:1.6,marginBottom:'8px'}}>{t.sentConfirmTo}</p>
         <p style={{color:c.A,fontSize:'15px',fontWeight:'600',marginBottom:'20px'}}>{email}</p>
-        <p style={{color:c.M2,fontSize:'13px',lineHeight:1.6,marginBottom:'24px'}}>{isEs?'Haz clic en el enlace del email para activar tu cuenta. Después vuelve aquí e inicia sesión.':'Click the link in the email to activate your account. Then come back here and sign in.'}</p>
-        <p style={{color:c.M,fontSize:'12px',marginBottom:'20px'}}>{isEs?'Si no lo ves, revisa la carpeta de spam.':'If you don\'t see it, check your spam folder.'}</p>
+        <p style={{color:c.M2,fontSize:'13px',lineHeight:1.6,marginBottom:'24px'}}>{t.clickToConfirm}</p>
+        <p style={{color:c.M,fontSize:'12px',marginBottom:'20px'}}>{t.checkSpam}</p>
         <button onClick={()=>{setMode('login');setErr('');setMsg('');}} style={{width:'100%',padding:'14px',background:c.A,color:'#0A0A0A',border:'none',borderRadius:'10px',fontSize:'16px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>
-          {isEs?'Ir a Iniciar sesión →':'Go to Sign in →'}
+          {t.goToSignIn}
         </button>
       </div>}
 
@@ -147,11 +147,11 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
 
         {mode==='register'&&<>
           <div>
-            <div style={{fontSize:'11px',color:c.M,fontWeight:'600',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'5px'}}>{t.authNameLabel||(isEs?'Tu nombre':'Your name')}</div>
+            <div style={{fontSize:'11px',color:c.M,fontWeight:'600',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'5px'}}>{t.authNameLabel}</div>
             <input value={name} onChange={e=>setName(e.target.value)} placeholder={t.authDisplayName} style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
           </div>
           <div>
-            <div style={{fontSize:'11px',color:c.M,fontWeight:'600',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'5px'}}>{t.authAliasLabel||(isEs?'Alias (opcional)':'Alias (optional)')}</div>
+            <div style={{fontSize:'11px',color:c.M,fontWeight:'600',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'5px'}}>{t.authAliasLabel}</div>
             <div style={{position:'relative'}}>
               <span style={{position:'absolute',left:'14px',top:'50%',transform:'translateY(-50%)',color:c.M,fontSize:'15px',fontWeight:'600'}}>@</span>
               <input value={username} onChange={e=>setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g,'').slice(0,20))} placeholder="tu_alias" style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px 12px 30px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
@@ -161,7 +161,7 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
 
         <div>
           <div style={{fontSize:'11px',color:c.M,fontWeight:'600',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'5px'}}>Email</div>
-          <input value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&(mode==='reset'?handleReset():mode==='register'?handleRegister():handleLogin())} type="email" placeholder={isEs?'tu@email.com':'you@email.com'} autoFocus style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+          <input value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&(mode==='reset'?handleReset():mode==='register'?handleRegister():handleLogin())} type="email" placeholder={t.emailPh} autoFocus style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
         </div>
 
         {mode!=='reset'&&<div>

@@ -68,7 +68,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
           <div><Lbl c={c}>{t.maxGuests}</Lbl><input type="number" min="1" max="999" value={maxGuests} onChange={e=>setMaxGuests(e.target.value)} placeholder={t.noLimit} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/></div>
           <div><Lbl c={c}>{t.willAttend}</Lbl>
             <div style={{display:'flex',gap:'6px'}}>
-              {[{v:true,l:isEs?'Sí':'Yes'},{v:false,l:'No'}].map(o=><button key={String(o.v)} onClick={()=>setOrgAttends(o.v)} style={{flex:1,padding:'12px 6px',borderRadius:'10px',border:`1px solid ${orgAttends===o.v?mc+'50':c.BD}`,background:orgAttends===o.v?`${mc}15`:c.CARD,color:orgAttends===o.v?mc:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:orgAttends===o.v?'700':'400'}}>{o.l}</button>)}
+              {[{v:true,l:t.yesLbl},{v:false,l:'No'}].map(o=><button key={String(o.v)} onClick={()=>setOrgAttends(o.v)} style={{flex:1,padding:'12px 6px',borderRadius:'10px',border:`1px solid ${orgAttends===o.v?mc+'50':c.BD}`,background:orgAttends===o.v?`${mc}15`:c.CARD,color:orgAttends===o.v?mc:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:orgAttends===o.v?'700':'400'}}>{o.l}</button>)}
             </div>
           </div>
         </div>
@@ -153,7 +153,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
             <div style={{width:'22px',height:'22px',borderRadius:'50%',border:`2px solid ${autoConfirm?mc:c.BD}`,background:autoConfirm?mc:'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',color:'#0A0A0A',fontWeight:'800',flexShrink:0}}>{autoConfirm?'✓':''}</div>
             <div>
               <div style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>⚡ {t.firstAvailable}</div>
-              <div style={{fontSize:'12px',color:c.M2}}>{isEs?'Confirma automáticamente cuando X personas digan Sí':'Auto-confirms when X people say Yes'}</div>
+              <div style={{fontSize:'12px',color:c.M2}}>{t.autoConfirmDesc}</div>
             </div>
           </div>
           {autoConfirm&&<div style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px 14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'0 0 12px 12px',borderTop:'none'}}>

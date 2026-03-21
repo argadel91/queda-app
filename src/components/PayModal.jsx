@@ -32,7 +32,7 @@ export default function PayModal({plan,amount,onClose,c,lang}){
         {stripe&&<a href={stripe.startsWith('http')?stripe:'https://'+stripe} target="_blank" rel="noreferrer" style={{display:'block',textAlign:'center',padding:'13px',background:'#635BFF',borderRadius:'12px',color:'#fff',textDecoration:'none',fontSize:'15px',fontWeight:'700'}}>💳 Stripe</a>}
       </div>}
       {tab==='invoice'&&<div style={{background:c.CARD2,borderRadius:'12px',padding:'16px',fontSize:'13px',lineHeight:'2',color:c.T}}>
-        <div style={{display:'flex',justifyContent:'space-between'}}><span style={{color:c.M2}}>{isEs?'De':'From'}</span><span style={{fontWeight:'600'}}>{plan.organizer}</span></div>
+        <div style={{display:'flex',justifyContent:'space-between'}}><span style={{color:c.M2}}>{lang==='es'?'De':lang==='pt'?'De':lang==='fr'?'De':lang==='it'?'Da':lang==='de'?'Von':'From'}</span><span style={{fontWeight:'600'}}>{plan.organizer}</span></div>
         <div style={{display:'flex',justifyContent:'space-between'}}><span style={{color:c.M2}}>{t.payDescription}</span><span>{plan.name}</span></div>
         <div style={{display:'flex',justifyContent:'space-between',borderTop:`1px solid ${c.BD}`,marginTop:'8px',paddingTop:'8px'}}><span style={{fontWeight:'700'}}>TOTAL</span><span style={{fontWeight:'800',color:c.A,fontSize:'18px'}}>{amt}€</span></div>
         <Btn onClick={()=>window.print()} v="secondary" full c={c} style={{marginTop:'12px'}}>🖨️ {t.payPrint}</Btn>

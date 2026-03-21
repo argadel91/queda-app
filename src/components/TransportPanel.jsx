@@ -16,11 +16,11 @@ export default function TransportPanel({to,planCity,c,lang}){
     const carR=res['car'];
     if(carR){
       const distKm=parseFloat(carR.dist);setRoadDist(distKm);
-      if(distKm<1)setSuggestion({icon:'🚶',msg:isEs?'Puedes ir andando — menos de 1km':'You can walk — less than 1km'});
-      else if(distKm<5)setSuggestion({icon:'🚲',msg:`${distKm}km — ${isEs?'ideal para bici o patinete':'great for cycling'}`});
-      else if(distKm<30)setSuggestion({icon:'🚗',msg:`${distKm}km — ${isEs?'en coche o transporte público':'by car or public transport'}`});
-      else if(distKm<300)setSuggestion({icon:'🚂',msg:`${distKm}km — ${isEs?'considera el tren':'consider the train'}`});
-      else setSuggestion({icon:'✈️',msg:`${distKm}km — ${isEs?'viaje largo, considera un vuelo':'long trip, consider a flight'}`});
+      if(distKm<1)setSuggestion({icon:'🚶',msg:t.distWalk});
+      else if(distKm<5)setSuggestion({icon:'🚲',msg:`${distKm}km — ${t.suggestBike}`});
+      else if(distKm<30)setSuggestion({icon:'🚗',msg:`${distKm}km — ${t.suggestCar}`});
+      else if(distKm<300)setSuggestion({icon:'🚂',msg:`${distKm}km — ${t.suggestTrain}`});
+      else setSuggestion({icon:'✈️',msg:`${distKm}km — ${t.suggestFlight}`});
     }
     setTimes(res);setL(false);
   },()=>setAsked(false),{timeout:8000});};
