@@ -41,9 +41,9 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
         }
         setLoading(false);return;
       }
-      // Success - reload immediately
+      // Success - small delay to let Supabase persist session, then reload
       clearTimeout(safetyReload);
-      window.location.reload();
+      setTimeout(()=>window.location.reload(),500);
     }catch(e){
       clearTimeout(safetyReload);
       console.error('Login error:',e);
