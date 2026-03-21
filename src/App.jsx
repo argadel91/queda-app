@@ -99,7 +99,7 @@ export default function App(){
     return()=>subscription.unsubscribe();
   },[]);
 
-  const handleAuth=(user,prof)=>{setAuthUser(user);setProfile(prof);if(prof?.lang)setLang(prof.lang);};
+  const handleAuth=(user,prof)=>{alert('App: handleAuth called');setAuthUser(user);setProfile(prof);if(prof?.lang)setLang(prof.lang);alert('App: handleAuth done, authUser set');};
   const handleSignOut=async()=>{try{await authSignOut();}catch(e){console.error('signOut error:',e);}ls.set('q_state',{});ls.set('q_plans',[]);window.location.reload();};
   const updateProfile=async(updates)=>{
     if(!authUser)return;

@@ -27,7 +27,9 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
     if(!validate())return;
     setLoading(true);setErr('');
     try{
+      alert('1: calling signIn');
       const{data,error}=await authSignIn(email.trim().toLowerCase(),password);
+      alert('2: signIn returned, error=' + (error ? error.message : 'none'));
       if(error){
         if(error.message?.includes('Invalid login')||error.message?.includes('invalid_grant')){
           setErr(t.authWrongPass);
@@ -38,17 +40,11 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
         }
         setLoading(false);return;
       }
-      // Login successful — load or create profile, then enter app
-      let prof=null;
-      try{prof=await loadProfile(data.user.id);}catch(e){console.error('loadProfile error:',e);}
-      if(!prof){
-        let savedName=data.user.email.split('@')[0];
-        try{savedName=localStorage.getItem('q_reg_name')||savedName;localStorage.removeItem('q_reg_name');}catch{}
-        prof={name:savedName,email:data.user.email,lang,contacts:[]};
-        try{await saveProfile(data.user.id,prof);}catch(e){console.error('saveProfile error:',e);}
-      }
-      onAuth(data.user,prof||{name:data.user.email.split('@')[0],email:data.user.email,lang,contacts:[]});
+      alert('3: calling onAuth');
+      onAuth(data.user,{name:data.user.email.split('@')[0],email:data.user.email,contacts:[]});
+      alert('4: onAuth done');
     }catch(e){
+      alert('ERROR: ' + e.message);
       console.error('Login error:',e);
       setErr(t.authConnError);
       setLoading(false);
