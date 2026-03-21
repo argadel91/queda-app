@@ -5,7 +5,7 @@ import { loadProfile, saveProfile } from '../lib/supabase.js'
 
 export default function AuthScreen({onAuth,c,lang,onLangChange}){
   const t=T[lang];const isEs=lang==='es';
-  const[mode,setMode]=useState('login'); // login | register | reset
+  const[mode,setMode]=useState('login'); // login | register | reset | confirmEmail
   const[email,setEmail]=useState('');
   const[password,setPassword]=useState('');
   const[name,setName]=useState('');
@@ -34,18 +34,20 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
         }else if(error.message?.includes('Email not confirmed')){
           setErr(isEs?'Confirma tu email antes de entrar.':'Please confirm your email first.');
         }else{
-          setErr(error.message||isEs?'Error al iniciar sesión.':'Sign in error.');
+          setErr(error.message||(isEs?'Error al iniciar sesión.':'Sign in error.'));
         }
         setLoading(false);return;
       }
       let prof=await loadProfile(data.user.id);
       if(!prof){
-        // No profile exists yet - create one
-        prof={name:data.user.email.split('@')[0],email:data.user.email,lang,contacts:[]};
+        // First login after email confirmation — use saved registration name if available
+        let savedName=data.user.email.split('@')[0];
+        let savedUsername=null;
+        try{savedName=localStorage.getItem('q_reg_name')||savedName;savedUsername=localStorage.getItem('q_reg_username')||null;localStorage.removeItem('q_reg_name');localStorage.removeItem('q_reg_username');}catch{}
+        prof={name:savedName,username:savedUsername,email:data.user.email,lang,contacts:[]};
         await saveProfile(data.user.id,prof);
       }
       onAuth(data.user,prof);
-      // Small delay then reload to ensure state is clean
       setTimeout(()=>window.location.reload(),100);
     }catch(e){
       console.error('Login error:',e);
@@ -63,13 +65,21 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
         if(error.message?.includes('already registered')||error.message?.includes('already been registered')){
           setErr(t.authAlreadyReg);
         }else{
-          setErr(error.message||isEs?'Error al crear la cuenta.':'Error creating account.');
+          setErr(error.message||(isEs?'Error al crear la cuenta.':'Error creating account.'));
         }
         setLoading(false);return;
       }
-      const prof={name:name.trim(),username:username.trim()||null,email:email.trim().toLowerCase(),lang,contacts:[]};
-      await saveProfile(data.user.id,prof);
-      onAuth(data.user,prof);
+      // If Supabase returned a session, user can enter directly (email confirmation disabled)
+      if(data.session){
+        const prof={name:name.trim(),username:username.trim()||null,email:email.trim().toLowerCase(),lang,contacts:[]};
+        await saveProfile(data.user.id,prof);
+        onAuth(data.user,prof);
+        setTimeout(()=>window.location.reload(),100);
+      }else{
+        // Email confirmation is required — save name for after confirmation
+        try{localStorage.setItem('q_reg_name',name.trim());localStorage.setItem('q_reg_username',username.trim());}catch{}
+        setMode('confirmEmail');
+      }
     }catch(e){
       console.error('Register error:',e);
       setErr(t.authConnError);
@@ -107,9 +117,24 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
         </div>
       </div>
 
+      {/* Email confirmation screen */}
+      {mode==='confirmEmail'&&<div style={{textAlign:'center',padding:'20px 0'}}>
+        <div style={{fontSize:'52px',marginBottom:'16px'}}>📧</div>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'24px',fontWeight:'800',color:c.T,marginBottom:'10px'}}>{isEs?'¡Revisa tu email!':'Check your email!'}</h2>
+        <p style={{color:c.M2,fontSize:'14px',lineHeight:1.6,marginBottom:'8px'}}>{isEs?`Hemos enviado un enlace de confirmación a:`:'We sent a confirmation link to:'}</p>
+        <p style={{color:c.A,fontSize:'15px',fontWeight:'600',marginBottom:'20px'}}>{email}</p>
+        <p style={{color:c.M2,fontSize:'13px',lineHeight:1.6,marginBottom:'24px'}}>{isEs?'Haz clic en el enlace del email para activar tu cuenta. Después vuelve aquí e inicia sesión.':'Click the link in the email to activate your account. Then come back here and sign in.'}</p>
+        <p style={{color:c.M,fontSize:'12px',marginBottom:'20px'}}>{isEs?'Si no lo ves, revisa la carpeta de spam.':'If you don\'t see it, check your spam folder.'}</p>
+        <button onClick={()=>{setMode('login');setErr('');setMsg('');}} style={{width:'100%',padding:'14px',background:c.A,color:'#0A0A0A',border:'none',borderRadius:'10px',fontSize:'16px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>
+          {isEs?'Ir a Iniciar sesión →':'Go to Sign in →'}
+        </button>
+      </div>}
+
+      {/* Normal auth forms */}
+      {mode!=='confirmEmail'&&<>
       {/* Mode tabs */}
       <div style={{display:'flex',gap:'4px',background:c.CARD2,borderRadius:'10px',padding:'4px',marginBottom:'28px'}}>
-        {[[`login`,t.authSignInTab],[`register`,t.authRegisterTab]].map(([m,lbl])=>(
+        {[['login',t.authSignInTab],['register',t.authRegisterTab]].map(([m,lbl])=>(
           <button key={m} onClick={()=>{setMode(m);setErr('');setMsg('');}} style={{flex:1,padding:'9px',borderRadius:'7px',border:'none',background:mode===m?c.CARD:'transparent',color:mode===m?c.T:c.M2,fontWeight:mode===m?'700':'400',cursor:'pointer',fontFamily:'inherit',fontSize:'14px',transition:'all .15s'}}>
             {lbl}
           </button>
@@ -122,11 +147,11 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
 
         {mode==='register'&&<>
           <div>
-            <div style={{fontSize:'11px',color:c.M,fontWeight:'600',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'5px'}}>{t.authNameLabel||isEs?'Tu nombre':'Your name'}</div>
+            <div style={{fontSize:'11px',color:c.M,fontWeight:'600',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'5px'}}>{t.authNameLabel||(isEs?'Tu nombre':'Your name')}</div>
             <input value={name} onChange={e=>setName(e.target.value)} placeholder={t.authDisplayName} style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
           </div>
           <div>
-            <div style={{fontSize:'11px',color:c.M,fontWeight:'600',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'5px'}}>{t.authAliasLabel||isEs?'Alias (opcional)':'Alias (optional)'}</div>
+            <div style={{fontSize:'11px',color:c.M,fontWeight:'600',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'5px'}}>{t.authAliasLabel||(isEs?'Alias (opcional)':'Alias (optional)')}</div>
             <div style={{position:'relative'}}>
               <span style={{position:'absolute',left:'14px',top:'50%',transform:'translateY(-50%)',color:c.M,fontSize:'15px',fontWeight:'600'}}>@</span>
               <input value={username} onChange={e=>setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g,'').slice(0,20))} placeholder="tu_alias" style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px 12px 30px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
@@ -161,9 +186,7 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
           {t.authBackLogin}
         </button>}
       </div>
+      </>}
     </div>
   </div>);
 }
-
-
-// ─── RESET PASSWORD SCREEN ────────────────────────────
