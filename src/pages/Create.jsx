@@ -34,7 +34,8 @@ const emptyOption = () => ({
 });
 
 const emptyStop = (id, suggestedStart) => ({
-  id, options: [emptyOption()], startTime: suggestedStart || '', duration: '', tolerance: '', notes: ''
+  id, options: [emptyOption()], startTime: suggestedStart || '', duration: '', tolerance: '', notes: '',
+  maxCapacity: '', orgAttends: true,
 });
 
 export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
@@ -54,8 +55,6 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
   const[dressCode,setDressCode]=useState(null);const[dressNote,setDressNote]=useState('');
   const[autoConfirm,setAutoConfirm]=useState(false);const[autoConfirmN,setAutoConfirmN]=useState(3);
   const[surpriseMode,setSurprise]=useState(false);
-  const[maxGuests,setMaxGuests]=useState('');
-  const[orgAttends,setOrgAttends]=useState(true);
   const[poll,setPoll]=useState({q:'',opts:['','']});
   const[giftOn,setGiftOn]=useState(false);const[gift,setGift]=useState({name:'',link:'',price:'',stripeLink:''});
   const[bring,setBring]=useState([{id:1,text:''}]);
@@ -86,15 +85,15 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
     if(d.selDates)setSelDates(d.selDates);
     if(d.stops)setStops(d.stops);if(d.dressCode!==undefined)setDressCode(d.dressCode);if(d.dressNote)setDressNote(d.dressNote);
     if(d.autoConfirm!==undefined)setAutoConfirm(d.autoConfirm);if(d.autoConfirmN!==undefined)setAutoConfirmN(d.autoConfirmN);
-    if(d.surpriseMode!==undefined)setSurprise(d.surpriseMode);if(d.maxGuests)setMaxGuests(d.maxGuests);
-    if(d.orgAttends!==undefined)setOrgAttends(d.orgAttends);if(d.poll)setPoll(d.poll);
+    if(d.surpriseMode!==undefined)setSurprise(d.surpriseMode);
+    if(d.poll)setPoll(d.poll);
     if(d.giftOn!==undefined)setGiftOn(d.giftOn);if(d.gift)setGift(d.gift);if(d.bring)setBring(d.bring);
     if(d.payment)setPayment(d.payment);if(d.step)setStep(d.step);
     setDraftRestored(true);
   },[]);// eslint-disable-line react-hooks/exhaustive-deps
 
   // Save draft helper
-  const saveDraft=(s)=>ls.set(draftKey,{name,desc,org,orgRole,isPublic,pubFilter,deadline,hasDeadline,selDates,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,maxGuests,orgAttends,poll,giftOn,gift,bring,payment,step:s!==undefined?s:step});
+  const saveDraft=(s)=>ls.set(draftKey,{name,desc,org,orgRole,isPublic,pubFilter,deadline,hasDeadline,selDates,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,poll,giftOn,gift,bring,payment,step:s!==undefined?s:step});
   // Auto-save every 30s
   useEffect(()=>{const id=setInterval(()=>saveDraft(),30000);return()=>clearInterval(id);});
   const clearDraft=()=>{try{localStorage.removeItem(draftKey)}catch{}};
@@ -127,7 +126,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
   const create=async()=>{
     setSaving(true);
     try{
-      const plan={id:genId(),name:name.trim(),desc:desc.trim(),organizer:org.trim(),orgRole:orgRole.trim()||null,mode,dates:[...selDates].sort(),timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,maxGuests:maxGuests?parseInt(maxGuests):null,orgAttends,poll:poll.q.trim()?poll:null,gift:giftOn?gift:null,bring:bring.filter(b=>b.text.trim()),payment,confirmedDate:null,isPublic,pubFilter:isPublic?pubFilter:null,deadline:hasDeadline&&deadline?deadline:null,lang,createdAt:new Date().toISOString()};
+      const plan={id:genId(),name:name.trim(),desc:desc.trim(),organizer:org.trim(),orgRole:orgRole.trim()||null,mode,dates:[...selDates].sort(),timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,poll:poll.q.trim()?poll:null,gift:giftOn?gift:null,bring:bring.filter(b=>b.text.trim()),payment,confirmedDate:null,isPublic,pubFilter:isPublic?pubFilter:null,deadline:hasDeadline&&deadline?deadline:null,lang,createdAt:new Date().toISOString()};
       if(authUser)await savePlanWithUser(plan,authUser.id);else await savePlan(plan);
       addMyPlan(plan.id,plan.name,'organizer',mode);
       ls.set('q_state',{screen:'share',planId:plan.id,isOrg:true});clearDraft();onCreated(plan);
@@ -217,19 +216,6 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
         <div style={{marginBottom:'14px'}}>
           <Lbl c={c}>{isEs?'Tu rol (opcional)':'Your role (optional)'}</Lbl>
           <Inp value={orgRole} onChange={setOrgRole} placeholder={isEs?'Ej. Profesor, Manager, Cumpleanero...':'e.g. Professor, Manager, Birthday person...'} c={c}/>
-        </div>
-
-        {/* Attend + Max guests */}
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'14px'}}>
-          <div><Lbl c={c}>{t.willAttend}</Lbl>
-            <div style={{display:'flex',gap:'6px'}}>
-              {[{v:true,l:t.yesLbl},{v:false,l:'No'}].map(o=><button key={String(o.v)} onClick={()=>setOrgAttends(o.v)} style={{flex:1,padding:'12px 6px',borderRadius:'10px',border:`1px solid ${orgAttends===o.v?mc+'50':c.BD}`,background:orgAttends===o.v?`${mc}15`:c.CARD,color:orgAttends===o.v?mc:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:orgAttends===o.v?'700':'400'}}>{o.l}</button>)}
-            </div>
-          </div>
-          <div><Lbl c={c}>{t.maxGuests}</Lbl>
-            <input type="number" min="1" max="999" value={maxGuests} onChange={e=>setMaxGuests(e.target.value)} placeholder={t.noLimit} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
-            <div style={{fontSize:'12px',color:c.M2,marginTop:'4px'}}>{maxGuests?`${orgAttends?1:0} / ${maxGuests}`:(isEs?'Sin limite':'No limit')}</div>
-          </div>
         </div>
 
         {/* Public / Private toggle */}
@@ -357,6 +343,19 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
           <div>
             <div style={{fontSize:'11px',color:c.M2,fontWeight:'600',marginBottom:'4px',textTransform:'uppercase',letterSpacing:'.04em'}}>{isEs?'Notas':'Notes'}</div>
             <textarea value={s.notes} onChange={e=>updStop(s.id,'notes',e.target.value)} placeholder={isEs?'Notas opcionales...':'Optional notes...'} rows={2} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'9px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box',resize:'vertical'}}/>
+          </div>
+
+          {/* Organizer attends this stop? */}
+          <div style={{display:'flex',alignItems:'center',gap:'8px',marginTop:'8px'}}>
+            <span style={{fontSize:'13px',color:c.M2}}>{t.orgAttendsStop||'You attend?'}</span>
+            {[{v:true,l:'Sí'},{v:false,l:'No'}].map(o=><button key={String(o.v)} onClick={()=>updStop(s.id,'orgAttends',o.v)} style={{padding:'6px 14px',borderRadius:'8px',border:`1px solid ${s.orgAttends===o.v?mc+'50':c.BD}`,background:s.orgAttends===o.v?`${mc}15`:c.CARD,color:s.orgAttends===o.v?mc:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:s.orgAttends===o.v?'700':'400'}}>{o.l}</button>)}
+          </div>
+
+          {/* Max capacity for this stop */}
+          <div style={{display:'flex',alignItems:'center',gap:'8px',marginTop:'8px'}}>
+            <span style={{fontSize:'13px',color:c.M2}}>{t.stopCapacity||'Max people'}</span>
+            <input type="number" min="1" max="999" value={s.maxCapacity||''} onChange={e=>updStop(s.id,'maxCapacity',e.target.value)} placeholder={t.noLimit||'∞'} style={{width:'70px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'6px 10px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',textAlign:'center'}}/>
+            {s.orgAttends&&s.maxCapacity&&<span style={{fontSize:'12px',color:c.M2}}>({1}/{s.maxCapacity})</span>}
           </div>
         </div>})}
 

@@ -21,9 +21,20 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
   const[saving,setSaving]=useState(false);const[done,setDone]=useState(false);const[err,setErr]=useState('');
   const[altDate,setAltDate]=useState('');const[altNote,setAltNote]=useState('');
   const[pollVote,setPollVote]=useState(prev?.pollVote||null);
-  const[isFull,setIsFull]=useState(false);
+  const[stopAttend,setStopAttend]=useState(prev?.stopAttend||{});
   const[stopPrefs,setStopPrefs]=useState(prev?.stopPrefs||{});
-  useEffect(()=>{if(plan.maxGuests){loadResps(plan.id).then(resps=>{const yesCount=resps.filter(r=>r&&Object.values(r.avail||{}).some(v=>v==='yes')).length;setIsFull(yesCount>=plan.maxGuests);});}},[plan.id,plan.maxGuests]);
+  const[stopCounts,setStopCounts]=useState({});
+  useEffect(()=>{
+    if(!plan.stops?.some(s=>s.maxCapacity))return;
+    loadResps(plan.id).then(allRs=>{
+      const counts={};
+      plan.stops.forEach(s=>{
+        counts[s.id]=(allRs||[]).filter(r=>r.stopAttend?.[s.id]==='yes').length;
+      });
+      setStopCounts(counts);
+    });
+  },[plan.id]);
+  const stopYesCount=(sid)=>(stopCounts[sid]||0);
   const multiStops=(plan.stops||[]).filter(s=>s.options&&s.options.length>1);
   useEffect(()=>{if(name.trim())ls.set('q_myname',name.trim());},[name]);
   const setDA=(d,val)=>{setErr('');setAvail(p=>({...p,[d]:p[d]===val?undefined:val}));};
@@ -37,7 +48,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
     setSaving(true);
     const changeLog=[...(prev?.changeLog||[])];
     if(prev)changeLog.unshift({at:new Date().toISOString(),desc:t.respUpdated});
-    const resp={name:name.trim(),avail,timePref,how:how==='other'?howOther:how,howOther,comment,role:guestRole,altDate:altDate||null,altNote:altNote||null,pollVote:pollVote||null,stopPrefs:Object.keys(stopPrefs).length>0?stopPrefs:null,changeLog,at:new Date().toISOString()};
+    const resp={name:name.trim(),avail,timePref,how:how==='other'?howOther:how,howOther,comment,role:guestRole,altDate:altDate||null,altNote:altNote||null,pollVote:pollVote||null,stopAttend:Object.keys(stopAttend).length>0?stopAttend:null,stopPrefs:Object.keys(stopPrefs).length>0?stopPrefs:null,changeLog,at:new Date().toISOString()};
     await saveResp(plan.id,name.trim(),resp);
     if(authUser)try{await db.from('responses').update({user_id:authUser.id}).eq('plan_id',plan.id).eq('name',name.trim());}catch{}
     addMyPlan(plan.id,plan.name,'invited',plan.mode);
@@ -80,12 +91,6 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
         </div>
         <input value={plan.customRoles.includes(guestRole)?'':guestRole} onChange={e=>{setGuestRole(e.target.value);}} placeholder={t.otherRolePh||'Or type your own...'} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
       </>:<input value={guestRole} onChange={e=>setGuestRole(e.target.value)} placeholder={t.yourRolePh||'e.g. Manager, Student, Client...'} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
-    </div>}
-
-    {/* CAPACITY CHECK */}
-    {isFull&&!prev&&<div style={{background:'#ef444415',border:'1px solid #ef444440',borderRadius:'12px',padding:'16px',marginBottom:'16px',textAlign:'center'}}>
-      <div style={{fontSize:'24px',marginBottom:'8px'}}>🚫</div>
-      <div style={{fontSize:'14px',color:'#ef4444',fontWeight:'600',lineHeight:1.5}}>{t.planFull}</div>
     </div>}
 
         {/* DATE + TIME + YES/MAYBE/NO — each slot independent */}
@@ -151,6 +156,37 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
       })}
     </div>}
 
+    {/* STOP ATTENDANCE */}
+    {plan.stops?.length>0&&<div style={{marginBottom:'20px'}}>
+      <Lbl c={c}>{t.whichStops||'Which stops will you attend?'}</Lbl>
+      <div style={{fontSize:'12px',color:c.M2,marginBottom:'12px',lineHeight:1.5}}>{t.stopAttendHint||'You can join for part of the plan'}</div>
+      {plan.stops.map((s,i)=>{
+        const firstOpt=s.options?.[0]||s;
+        const stopName=firstOpt.name||`${t.stop} ${i+1}`;
+        const isFull=s.maxCapacity&&stopYesCount(s.id)>=parseInt(s.maxCapacity);
+        return(<div key={s.id} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'12px 14px',marginBottom:'8px'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'6px'}}>
+            <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
+              <div style={{width:'24px',height:'24px',borderRadius:'50%',background:`${mc}25`,border:`1px solid ${mc}50`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',fontWeight:'800',color:mc}}>{i+1}</div>
+              <span style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>{stopName}</span>
+            </div>
+            {s.startTime&&<span style={{fontSize:'12px',color:c.M2}}>🕐 {s.startTime}{s.duration?` · ${s.duration}`:''}</span>}
+          </div>
+          {isFull&&!stopAttend[s.id]&&<div style={{fontSize:'12px',color:'#ef4444',marginBottom:'6px'}}>⚠️ {t.stopFull||'This stop is full'}</div>}
+          <div style={{display:'flex',gap:'6px'}}>
+            {[{v:'yes',l:'✅ '+t.avYes.replace(/[✅]\s?/,''),cl:'#22c55e'},{v:'no',l:'❌ '+t.avNo.replace(/[❌]\s?/,''),cl:'#ef4444'}].map(o=><button key={o.v} onClick={()=>{if(o.v==='yes'&&isFull&&stopAttend[s.id]!=='yes')return;setStopAttend(p=>({...p,[s.id]:p[s.id]===o.v?undefined:o.v}));}} disabled={o.v==='yes'&&isFull&&stopAttend[s.id]!=='yes'} style={{flex:1,padding:'10px',borderRadius:'10px',border:`1px solid ${stopAttend[s.id]===o.v?o.cl+'50':c.BD}`,background:stopAttend[s.id]===o.v?o.cl+'20':c.CARD,color:stopAttend[s.id]===o.v?o.cl:c.M2,cursor:o.v==='yes'&&isFull&&stopAttend[s.id]!=='yes'?'not-allowed':'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:stopAttend[s.id]===o.v?'700':'400',opacity:o.v==='yes'&&isFull&&stopAttend[s.id]!=='yes'?.4:1}}>{o.l}</button>)}
+          </div>
+          {/* Option preference if multiple options */}
+          {s.options?.length>1&&stopAttend[s.id]==='yes'&&<div style={{marginTop:'8px'}}>
+            <div style={{fontSize:'12px',color:c.M2,marginBottom:'4px'}}>{t.chooseOption}</div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
+              {s.options.map((opt,oi)=><button key={opt.id} onClick={()=>setStopPrefs(p=>({...p,[s.id]:opt.id}))} style={{padding:'6px 12px',borderRadius:'20px',border:`1px solid ${stopPrefs[s.id]===opt.id?mc+'60':c.BD}`,background:stopPrefs[s.id]===opt.id?`${mc}15`:c.CARD,color:stopPrefs[s.id]===opt.id?mc:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:stopPrefs[s.id]===opt.id?'700':'400'}}>{String.fromCharCode(65+oi)} {opt.name||''}</button>)}
+            </div>
+          </div>}
+        </div>);
+      })}
+    </div>}
+
     {plan.mode!=='professional'&&<div style={{marginBottom:'14px'}}>
       <Lbl c={c}>{t.howGet} <span style={{fontWeight:'400',textTransform:'none',fontSize:'11px'}}>{t.howOpt}</span></Lbl>
       <select value={how} onChange={e=>setHow(e.target.value)} style={{background:c.CARD,border:`1px solid ${c.BD}`,color:how?c.T:c.M,fontSize:'14px',padding:'12px 14px',borderRadius:'10px',width:'100%',fontFamily:'inherit',marginBottom:how==='other'?'8px':'0'}}>
@@ -177,7 +213,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
     </div>
 
     {err&&<div style={{color:'#ef4444',fontSize:'13px',padding:'8px 12px',background:'#ef444410',borderRadius:'8px',border:'1px solid #ef444430',marginBottom:'10px'}}>{err}</div>}
-    <Btn onClick={submit} disabled={!name.trim()||saving||(isFull&&!prev)} full style={{padding:'15px',fontSize:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?t.saving:plan.mode==='professional'?(t.confirmAttendance):plan.mode==='intimate'?(t.confirmBtn):t.saveAvail}</Btn>
+    <Btn onClick={submit} disabled={!name.trim()||saving} full style={{padding:'15px',fontSize:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?t.saving:plan.mode==='professional'?(t.confirmAttendance):plan.mode==='intimate'?(t.confirmBtn):t.saveAvail}</Btn>
   </div>);
 }
 

@@ -275,6 +275,64 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
                 {nm>0&&<div style={{position:'absolute',left:`${pct}%`,top:0,height:'100%',width:`${(nm/total)*100}%`,background:'#f59e0b'}}/>}
               </div>
             </div>);})}
+          {/* PARTICIPATION SUMMARY */}
+          {!plan.confirmedDate&&total>0&&plan.stops?.length>0&&(()=>{
+            const totalStops=plan.stops.length;
+            const dateScores=(plan.dates||[]).map(d=>{
+              const yesRs=rs.filter(r=>r.avail?.[d]==='yes');
+              const people=yesRs.length;
+              const totalAtt=yesRs.reduce((sum,r)=>{
+                return sum+(plan.stops||[]).filter(s=>r.stopAttend?.[s.id]==='yes').length;
+              },0);
+              const maxAtt=people*totalStops;
+              const pct=maxAtt>0?Math.round(totalAtt/maxAtt*100):0;
+              return{d,people,totalAtt,maxAtt,pct};
+            }).filter(x=>x.people>0).sort((a,b)=>b.totalAtt-a.totalAtt||b.people-a.people);
+            if(dateScores.length===0)return null;
+            const best=dateScores[0];
+            const hasTie=dateScores.length>1&&dateScores[1].totalAtt===best.totalAtt;
+            return<Card c={c} style={{marginBottom:'14px'}}>
+              <Lbl c={c}>📊 {t.participationSummary||'Participation summary'}</Lbl>
+              {dateScores.map((ds,i)=>{
+                const isBest=i===0&&!hasTie;
+                return<div key={ds.d} style={{padding:'10px 0',borderBottom:i<dateScores.length-1?`1px solid ${c.BD}`:'none'}}>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'6px'}}>
+                    <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
+                      {isBest&&<span>⭐</span>}
+                      <span style={{fontSize:'14px',color:isBest?mc:c.T,fontWeight:isBest?'700':'400',textTransform:'capitalize'}}>{fmtShort(ds.d,lang)}</span>
+                    </div>
+                    <div style={{display:'flex',gap:'8px',fontSize:'12px'}}>
+                      <span style={{color:c.T,fontWeight:'600'}}>{ds.people} 👥</span>
+                      <span style={{color:mc,fontWeight:'600'}}>{ds.pct}%</span>
+                    </div>
+                  </div>
+                  {/* Per-stop breakdown */}
+                  <div style={{display:'flex',gap:'4px',flexWrap:'wrap'}}>
+                    {(plan.stops||[]).map((s,si)=>{
+                      const stopName=s.options?.[0]?.name||`${t.stop||'Stop'} ${si+1}`;
+                      const cnt=rs.filter(r=>r.avail?.[ds.d]==='yes'&&r.stopAttend?.[s.id]==='yes').length;
+                      const max=s.maxCapacity?parseInt(s.maxCapacity):null;
+                      const full=max&&cnt>=max;
+                      return<span key={s.id} style={{fontSize:'11px',padding:'3px 8px',borderRadius:'12px',background:full?'#ef444420':cnt>0?`${mc}15`:c.CARD2,color:full?'#ef4444':cnt>0?mc:c.M2,border:`1px solid ${full?'#ef444430':cnt>0?mc+'30':c.BD}`}}>
+                        {stopName}: {cnt}{max?`/${max}`:''}
+                      </span>;
+                    })}
+                  </div>
+                  {/* Who's NOT going to a specific stop */}
+                  {(()=>{
+                    const yesRs=rs.filter(r=>r.avail?.[ds.d]==='yes');
+                    const missing=(plan.stops||[]).flatMap(s=>{
+                      const stopName=s.options?.[0]?.name||`Stop ${(plan.stops||[]).indexOf(s)+1}`;
+                      return yesRs.filter(r=>r.stopAttend?.[s.id]==='no').map(r=>`${r.name} → ${stopName}`);
+                    });
+                    if(missing.length===0)return null;
+                    return<div style={{fontSize:'11px',color:c.M2,marginTop:'4px'}}>⚠️ {missing.join(', ')}</div>;
+                  })()}
+                </div>;
+              })}
+              {hasTie&&<div style={{marginTop:'8px',padding:'8px 12px',background:'#f59e0b15',border:'1px solid #f59e0b30',borderRadius:'8px',fontSize:'12px',color:'#f59e0b'}}>⚠️ {t.tiedDates}</div>}
+            </Card>;
+          })()}
           {/* POLL RESULTS */}
           {plan.poll?.q&&rs.some(r=>r.pollVote)&&<Card c={c}>
             <Lbl c={c}>🗳️ {plan.poll.q}</Lbl>
