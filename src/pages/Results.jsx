@@ -97,8 +97,8 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
   const best=total>0?slots.reduce((b,s)=>score(s.key)>score(b.key)?s:b,slots[0]):null;
   const budget=(plan.stops||[]).reduce((s,p2)=>s+(parseFloat(p2.cost)||0),0);
   const giftPer=plan.gift?.price?parseFloat(plan.gift.price):0;
-  const fs=plan.stops?.find(s=>s.lat&&s.lng);
-  const city=plan.city||plan.cityFull?.split(',')[0]||'';
+  const fs=plan.stops?.find(s=>(s.options?.[0]?.lat&&s.options?.[0]?.lng)||(s.lat&&s.lng));
+  const city=plan.city||plan.cityFull?.split(',')[0]||plan.stops?.flatMap(s=>s.options||[]).find(o=>o?.address)?.address?.split(',').slice(-2,-1)[0]?.trim()||'';
   const du=plan.confirmedDate?daysUntil(plan.confirmedDate):null;
   const confirmDate=async(d,st)=>{setConf(true);const up={...plan,confirmedDate:d,confirmedStartTime:st||''};await updatePlan(up);setPlan(up);setConf(false);};
   const waConfirm=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`📌 *${plan.name}* — ${t.dateConfirmedMsg}\n\n🗓️ ${fmtDate(plan.confirmedDate,lang)}${plan.confirmedStartTime?' · 🕐 '+plan.confirmedStartTime:''}\n\n${url}`),'_blank');};
@@ -374,7 +374,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
               <div style={{fontSize:'18px',fontWeight:'800',color:c.T,marginBottom:'4px'}}>{plan.name}</div>
               <div style={{fontSize:'13px',color:mc,fontWeight:'600',marginBottom:'8px',textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,lang)}{plan.confirmedStartTime?' · 🕐 '+plan.confirmedStartTime:''}</div>
               {plan.times?.[plan.confirmedDate]?.length>0&&<div style={{fontSize:'12px',color:c.M2,marginBottom:'6px'}}>🕐 {plan.times[plan.confirmedDate].join(' · ')}</div>}
-              {(plan.stops||[]).filter(s=>s.name).slice(0,3).map((s,i)=><div key={i} style={{fontSize:'12px',color:c.M2}}>{i===0?'📍':'↓'} {s.name}</div>)}
+              {(plan.stops||[]).filter(s=>(s.options?.[0]?.name||s.name)).slice(0,3).map((s,i)=><div key={i} style={{fontSize:'12px',color:c.M2}}>{i===0?'📍':'↓'} {s.options?.[0]?.name||s.name}</div>)}
               <div style={{marginTop:'10px',fontSize:'11px',color:c.M2}}>queda. · {plan.id}</div>
             </div>
             <div style={{fontSize:'12px',color:c.M2,marginTop:'8px',textAlign:'center'}}>{t.hintScreenshot}</div>
@@ -398,29 +398,29 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
       {/* PLAN tab = Route + budget + inline map */}
       {!ldg&&tab==='plan'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><>
         {(plan.stops||[]).length===0&&<Card c={c} style={{textAlign:'center',padding:'28px'}}><div style={{fontSize:'32px',marginBottom:'8px'}}>📍</div><div style={{color:c.M2,fontSize:'14px'}}>{t.noStopsMsg}</div></Card>}
-        {(plan.stops||[]).map((s,i)=><div key={s.id||i} style={{display:'flex',gap:'12px',marginBottom:'10px'}}>
+        {(plan.stops||[]).map((s,i)=>{const opt=s.options?.[0]||s;return<div key={s.id||i} style={{display:'flex',gap:'12px',marginBottom:'10px'}}>
           <div style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
             <div style={{width:'28px',height:'28px',borderRadius:'50%',background:`${mc}20`,border:`1.5px solid ${mc}60`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',fontWeight:'800',color:mc,flexShrink:0}}>{i+1}</div>
             {i<plan.stops.length-1&&<div style={{width:'2px',flex:1,background:c.BD,margin:'4px 0'}}/>}
           </div>
           <Card c={c} style={{flex:1,marginBottom:0}}>
             <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>{s.cat}</div>
-            <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'4px'}}>{s.name||'—'}</div>
-            {s.address&&<div style={{fontSize:'12px',color:c.M2,marginBottom:'6px'}}>📍 {s.address}</div>}
-            <VenueInfo stop={s} c={c} lang={lang}/>
+            <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'4px'}}>{opt.name||'—'}</div>
+            {opt.address&&<div style={{fontSize:'12px',color:c.M2,marginBottom:'6px'}}>📍 {opt.address}</div>}
+            <VenueInfo stop={opt} c={c} lang={lang}/>
             <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginTop:'8px'}}>
               {parseFloat(s.cost)>0&&<Badge color={mc}>{s.cost}€/pers.</Badge>}
-              {(s.address||s.name)&&<a href={`https://maps.google.com/?q=${encodeURIComponent((s.name||'')+(s.address?' '+s.address:''))}`} target="_blank" rel="noreferrer" style={{fontSize:'12px',color:c.M2,textDecoration:'none',padding:'4px 10px',border:`1px solid ${c.BD}`,borderRadius:'8px'}}>Google Maps 🗺️</a>}
+              {(opt.address||opt.name)&&<a href={`https://maps.google.com/?q=${encodeURIComponent((opt.name||'')+(opt.address?' '+opt.address:''))}`} target="_blank" rel="noreferrer" style={{fontSize:'12px',color:c.M2,textDecoration:'none',padding:'4px 10px',border:`1px solid ${c.BD}`,borderRadius:'8px'}}>Google Maps 🗺️</a>}
               {s.link&&<a href={s.link.startsWith('http')?s.link:'https://'+s.link} target="_blank" rel="noreferrer" style={{fontSize:'12px',color:mc,textDecoration:'none',padding:'4px 10px',border:`1px solid ${mc}40`,borderRadius:'8px'}}>{t.bookLbl} ↗</a>}
             </div>
           </Card>
-        </div>)}
+        </div>})}
         {budget>0&&<><HR c={c}/>
           <div style={{display:'flex',justifyContent:'space-between',padding:'14px 16px',background:`${mc}0D`,border:`1px solid ${mc}30`,borderRadius:'12px',marginBottom:'8px'}}><span style={{color:c.M2}}>{t.perPerson}</span><span style={{color:mc,fontSize:'22px',fontWeight:'800'}}>{budget.toFixed(0)}€</span></div>
           {giftPer>0&&<div style={{display:'flex',justifyContent:'space-between',padding:'12px 16px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',marginBottom:'8px'}}><span style={{color:c.M2,fontSize:'14px'}}>+ {t.giftLbl}</span><span style={{color:c.T,fontWeight:'600'}}>{giftPer.toFixed(0)}€</span></div>}
           <div style={{display:'flex',justifyContent:'space-between',padding:'14px 16px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px'}}><span style={{color:c.T,fontWeight:'700'}}>{t.totalLbl}</span><span style={{color:mc,fontSize:'18px',fontWeight:'800'}}>{(budget+giftPer).toFixed(0)}€</span></div>
         </>}
-        {plan.stops?.some(s=>s.lat&&s.lng)&&<><HR c={c}/><RouteMap stops={plan.stops} c={c}/></>}
+        {plan.stops?.some(s=>(s.options?.[0]?.lat&&s.options?.[0]?.lng)||(s.lat&&s.lng))&&<><HR c={c}/><RouteMap stops={(plan.stops||[]).map(s=>{const o=s.options?.[0]||s;return{...s,lat:o.lat||s.lat,lng:o.lng||s.lng,name:o.name||s.name,address:o.address||s.address};})} c={c}/></>}
       </></React.Suspense>}
 
       {/* DÍA tab = Weather + Outfit */}
@@ -446,9 +446,9 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
 
       {/* IR tab = Transport */}
       {!ldg&&tab==='ir'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><>
-        {fs?<>
-          <Card c={c} style={{marginBottom:'12px'}}><Lbl c={c}>{t.dest}</Lbl><div style={{fontSize:'15px',color:c.T,fontWeight:'600'}}>{fs.name}</div>{fs.address&&<div style={{fontSize:'13px',color:c.M2}}>{fs.address}</div>}</Card>
-          <TransportPanel to={fs} planCity={city} c={c} lang={lang}/>
+        {fs?<>{(()=>{const fso=fs.options?.[0]||fs;return<>
+          <Card c={c} style={{marginBottom:'12px'}}><Lbl c={c}>{t.dest}</Lbl><div style={{fontSize:'15px',color:c.T,fontWeight:'600'}}>{fso.name}</div>{fso.address&&<div style={{fontSize:'13px',color:c.M2}}>{fso.address}</div>}</Card>
+          <TransportPanel to={{...fso,lat:fso.lat||fs.lat,lng:fso.lng||fs.lng}} planCity={city} c={c} lang={lang}/></>})()}
           {rs.filter(r=>r.how).length>0&&<><HR c={c}/><Lbl c={c}>{t.howEach}</Lbl>{rs.filter(r=>r.how).map((r,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:`1px solid ${c.BD}`,fontSize:'14px'}}><span style={{color:c.T}}>{r.name}</span><span style={{color:c.M2}}>{howL(r.how)}</span></div>)}</>}
         </>:<Card c={c} style={{textAlign:'center',padding:'28px'}}><div style={{fontSize:'32px',marginBottom:'8px'}}>📍</div><div style={{color:c.M2,fontSize:'14px'}}>{t.noStops}</div></Card>}
       </></React.Suspense>}
@@ -490,7 +490,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
             <div style={{fontSize:'18px',fontWeight:'800',color:c.T,marginBottom:'4px'}}>{plan.name}</div>
             <div style={{fontSize:'13px',color:mc,fontWeight:'600',marginBottom:'6px',textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,lang)}{plan.confirmedStartTime?' · 🕐 '+plan.confirmedStartTime:''}</div>
             {plan.times?.[plan.confirmedDate]?.length>0&&<div style={{fontSize:'12px',color:c.M2,marginBottom:'4px'}}>🕐 {plan.times[plan.confirmedDate].join(' · ')}</div>}
-            {(plan.stops||[]).filter(s=>s.name).slice(0,3).map((s,i)=><div key={i} style={{fontSize:'12px',color:c.M2}}>{i===0?'📍':'↓'} {s.name}</div>)}
+            {(plan.stops||[]).filter(s=>(s.options?.[0]?.name||s.name)).slice(0,3).map((s,i)=><div key={i} style={{fontSize:'12px',color:c.M2}}>{i===0?'📍':'↓'} {s.options?.[0]?.name||s.name}</div>)}
             <div style={{marginTop:'8px',fontSize:'11px',color:c.M}}>queda. · {plan.id}</div>
           </div>
           <div style={{fontSize:'12px',color:c.M2,textAlign:'center',marginTop:'8px'}}>{t.hintScreenshot}</div>

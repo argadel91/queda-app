@@ -25,12 +25,6 @@ const calcEndTime = (start, duration) => {
   return `${String(end.getHours()).padStart(2,'0')}:${String(end.getMinutes()).padStart(2,'0')}`;
 };
 
-const addMinutes=(time,mins)=>{
-  if(!time)return'';
-  const[h,m]=(time.split(':')).map(Number);
-  const d=new Date(2000,0,1,h,m+mins);
-  return`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-};
 
 const emptyOption = () => ({
   id: Date.now(), name: '', address: '', lat: null, lng: null, rating: null, ratingCount: null,
@@ -324,13 +318,25 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'10px'}}>
             <div>
               <div style={{fontSize:'11px',color:c.M2,fontWeight:'600',marginBottom:'4px',textTransform:'uppercase',letterSpacing:'.04em'}}>{isEs?'Hora inicio':'Start time'}</div>
-              <input type="time" value={s.startTime} onChange={e=>updStop(s.id,'startTime',e.target.value)} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'9px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
+              <input type="time" value={s.startTime} onChange={e=>{updStop(s.id,'startTime',e.target.value);if(i===0)setStartTimes(p=>{const n=[...p];n[0]=e.target.value;return n;});}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'9px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
             </div>
             <div>
               <div style={{fontSize:'11px',color:c.M2,fontWeight:'600',marginBottom:'4px',textTransform:'uppercase',letterSpacing:'.04em'}}>{isEs?'Fin estimado':'Est. end'}</div>
               <div style={{padding:'9px 12px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',fontSize:'13px',color:endTime?c.T:c.M2,minHeight:'18px'}}>{endTime||'--:--'}</div>
             </div>
           </div>
+
+          {/* Alternative start times (first stop only) */}
+          {i===0&&<>
+            {startTimes.length>1&&<div style={{marginTop:'6px'}}>
+              {startTimes.slice(1).map((st,j)=><div key={j} style={{display:'flex',gap:'6px',marginBottom:'4px',alignItems:'center'}}>
+                <span style={{fontSize:'12px',color:c.M2}}>or</span>
+                <input type="time" value={st} onChange={e=>{const n=[...startTimes];n[j+1]=e.target.value;setStartTimes(n);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'6px 10px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none'}}/>
+                <button onClick={()=>setStartTimes(p=>p.filter((_,k)=>k!==j+1))} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'14px'}}>×</button>
+              </div>)}
+            </div>}
+            <button onClick={()=>setStartTimes(p=>[...p,''])} style={{background:'none',border:`1px dashed ${c.BD}`,borderRadius:'6px',padding:'4px 10px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'11px',marginTop:'4px'}}>{t.addStartTime||'+ Alternative time'}</button>
+          </>}
 
           {/* Duration chips */}
           <div style={{marginBottom:'8px'}}>
@@ -388,39 +394,6 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
         </div>}
         <Lbl c={c}>{t.selectDates}</Lbl>
         <CalendarPicker selected={selDates} onChange={setSelDates} c={c} lang={lang}/>
-        {selDates.length>0&&<>
-          <HR c={c}/>
-          <Lbl c={c}>{t.startTimesLbl||'Possible start times'}</Lbl>
-          <div style={{fontSize:'12px',color:c.M2,marginBottom:'10px'}}>{t.startTimesHint||'When could the plan start? Invitees will vote on date + time combinations.'}</div>
-          {startTimes.map((st,i)=><div key={i} style={{display:'flex',gap:'8px',marginBottom:'8px',alignItems:'center'}}>
-            <input type="time" value={st} onChange={e=>{const n=[...startTimes];n[i]=e.target.value;setStartTimes(n);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',flex:1}}/>
-            {startTimes.length>1&&<button onClick={()=>setStartTimes(p=>p.filter((_,j)=>j!==i))} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M,cursor:'pointer',fontSize:'16px',borderRadius:'8px',width:'36px',height:'36px'}}>×</button>}
-          </div>)}
-          {startTimes.length<5&&<button onClick={()=>setStartTimes(p=>[...p,''])} style={{background:'none',border:`1px dashed ${c.BD}`,borderRadius:'8px',padding:'8px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',width:'100%'}}>+ {t.addStartTime||'Add another time option'}</button>}
-        </>}
-        {startTimes.filter(t=>t).length>0&&stops.some(s=>s.duration)&&<>
-          <HR c={c}/>
-          <Lbl c={c}>{t.timelinePreview||'Timeline preview'}</Lbl>
-          {startTimes.filter(t=>t).map((st,i)=>{
-            let current=st;
-            return<div key={i} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'12px 14px',marginBottom:'8px'}}>
-              <div style={{fontSize:'13px',color:mc,fontWeight:'700',marginBottom:'8px'}}>🕐 {t.startsAt||'Starts at'} {st}</div>
-              {stops.map((s,si)=>{
-                const startH=current;
-                const endH=calcEndTime(current,s.duration);
-                const opt=s.options?.[0];
-                const name=opt?.name||`${t.stop||'Stop'} ${si+1}`;
-                current=addMinutes(endH,30);
-                return<div key={s.id} style={{display:'flex',gap:'8px',alignItems:'center',marginBottom:'4px',fontSize:'13px'}}>
-                  <span style={{color:mc,fontWeight:'700',minWidth:'50px'}}>{startH}</span>
-                  <span style={{color:c.M2}}>→</span>
-                  <span style={{color:c.T}}>{name}</span>
-                  <span style={{color:c.M2,marginLeft:'auto'}}>{s.duration||'?'}</span>
-                </div>;
-              })}
-            </div>;
-          })}
-        </>}
         <div style={{marginTop:'20px'}}><Btn onClick={()=>stepLabels.length>3?changeStep(3):create()} disabled={selDates.length<1||saving} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{stepLabels.length>3?t.cont:(saving?t.saving:t.createBtn)}</Btn></div>
       </>}
 
