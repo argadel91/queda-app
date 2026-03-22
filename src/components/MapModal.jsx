@@ -117,16 +117,16 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
   };
 
   // Render in a portal outside React's tree to avoid DOM conflicts with Google Maps
-  const portalRoot=useRef(null);
+  const[portalEl,setPortalEl]=useState(null);
   useEffect(()=>{
     const div=document.createElement('div');
     div.id='map-modal-portal';
     document.body.appendChild(div);
-    portalRoot.current=div;
+    setPortalEl(div);
     return()=>{div.remove();};
   },[]);
 
-  if(!portalRoot.current)return null;
+  if(!portalEl)return null;
   return ReactDOM.createPortal(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.85)',zIndex:200,display:'flex',flexDirection:'column'}}>
     <div style={{padding:'12px 16px',display:'flex',alignItems:'center',gap:'8px',background:c.CARD,borderBottom:`1px solid ${c.BD}`}}>
       <div style={{flex:1,position:'relative'}}>
@@ -150,5 +150,5 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
       </div>
       <button onClick={()=>onSelect(selected)} style={{padding:'10px 18px',background:c.A||'#CDFF6C',color:'#0A0A0A',border:'none',borderRadius:'10px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',fontSize:'14px',flexShrink:0}}>{t.selectPlace||'Select'}</button>
     </div>}
-  </div>,portalRoot.current);
+  </div>,portalEl);
 }
