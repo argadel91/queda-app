@@ -12,13 +12,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   </React.StrictMode>
 )
 
-// Load Google Maps dynamically (keep key out of HTML)
+// Load Google Maps dynamically with async bootstrap
 const gmKey = import.meta.env.VITE_GOOGLE_MAPS_KEY || ''
 if (gmKey && !document.querySelector('script[src*="maps.googleapis.com"]')) {
   const s = document.createElement('script')
-  s.src = `https://maps.googleapis.com/maps/api/js?key=${gmKey}&libraries=places&v=weekly`
+  s.src = `https://maps.googleapis.com/maps/api/js?key=${gmKey}&loading=async&libraries=places&v=weekly`
   s.async = true
-  s.defer = true
   document.head.appendChild(s)
 }
 

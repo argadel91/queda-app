@@ -1,13 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
 
-const waitForGoogle = () => new Promise(resolve => {
-  if (window.google?.maps) return resolve()
-  const check = setInterval(() => {
-    if (window.google?.maps) { clearInterval(check); resolve() }
-  }, 100)
-  setTimeout(() => clearInterval(check), 10000)
-})
-
 export default function RouteMap({stops,c}){
   const mapRef=useRef(null);
   const[ready,setReady]=useState(false);
@@ -15,10 +7,17 @@ export default function RouteMap({stops,c}){
 
   useEffect(()=>{
     let cancelled=false;
-    waitForGoogle().then(()=>{
+    const init=async()=>{
+      if(!window.google?.maps){
+        await new Promise(resolve=>{
+          const check=setInterval(()=>{if(window.google?.maps){clearInterval(check);resolve();}},100);
+          setTimeout(()=>clearInterval(check),10000);
+        });
+      }
       if(cancelled||!mapRef.current||valid.length===0)return;
+      const{Map}=await google.maps.importLibrary('maps');
       setReady(true);
-      const map=new google.maps.Map(mapRef.current,{
+      const map=new Map(mapRef.current,{
         disableDefaultUI:true,
         zoomControl:true,
         gestureHandling:'greedy'
@@ -28,8 +27,7 @@ export default function RouteMap({stops,c}){
         const pos={lat:s.lat,lng:s.lng};
         bounds.extend(pos);
         new google.maps.Marker({
-          position:pos,
-          map,
+          position:pos,map,
           label:{text:String(i+1),color:'#0A0A0A',fontWeight:'800',fontSize:'12px'},
           icon:{path:google.maps.SymbolPath.CIRCLE,scale:14,fillColor:'#CDFF6C',fillOpacity:1,strokeColor:'#CDFF6C',strokeWeight:2}
         });
@@ -40,10 +38,11 @@ export default function RouteMap({stops,c}){
       }
       map.fitBounds(bounds,{top:30,right:30,bottom:30,left:30});
       if(valid.length===1)map.setZoom(15);
-    });
+    };
+    init();
     return()=>{cancelled=true;};
   },[stops]);
 
-  if(valid.length===0)return <div style={{textAlign:'center',padding:'20px',color:c?.M2,fontSize:'13px'}}>No map locations set</div>;
-  return <div ref={mapRef} style={{width:'100%',height:'280px',borderRadius:'12px',overflow:'hidden',border:`1px solid ${c?.BD}`}}>{!ready&&<div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',color:c?.M}}>...</div>}</div>;
+  if(valid.length===0)return<div style={{textAlign:'center',padding:'20px',color:c?.M2,fontSize:'13px'}}>No map locations set</div>;
+  return<div ref={mapRef} style={{width:'100%',height:'280px',borderRadius:'12px',overflow:'hidden',border:`1px solid ${c?.BD}`}}>{!ready&&<div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',color:c?.M}}>...</div>}</div>;
 }

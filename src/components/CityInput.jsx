@@ -1,49 +1,57 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { getCityTz } from '../constants/weather.js'
 
-const waitForGoogle = () => new Promise(resolve => {
-  if (window.google?.maps?.places) return resolve()
-  const check = setInterval(() => {
-    if (window.google?.maps?.places) { clearInterval(check); resolve() }
-  }, 100)
-  setTimeout(() => clearInterval(check), 10000)
-})
+const getPlacesLib = async () => {
+  if (!window.google?.maps) {
+    await new Promise(resolve => {
+      const check = setInterval(() => {
+        if (window.google?.maps) { clearInterval(check); resolve() }
+      }, 100)
+      setTimeout(() => clearInterval(check), 10000)
+    })
+  }
+  return google.maps.importLibrary('places')
+}
 
 export default function CityInput({value,onChange,onSelect,placeholder,c}){
   const[results,setResults]=useState([]);
   const[open,setOpen]=useState(false);
-  const[ready,setReady]=useState(false);
   const debRef=useRef(null);
-  const mapDiv=useRef(null);
-  const serviceRef=useRef(null);
 
-  useEffect(()=>{
-    // Create a hidden div for PlacesService (requires a map or div)
-    const div=document.createElement('div');
-    mapDiv.current=div;
-    waitForGoogle().then(()=>{
-      serviceRef.current=new google.maps.places.PlacesService(div);
-      setReady(true);
-    });
-  },[]);
-
-  const search=(q)=>{
+  const search=async(q)=>{
     if(debRef.current)clearTimeout(debRef.current);
-    if(!q||q.length<2||!serviceRef.current){setResults([]);setOpen(false);return;}
-    debRef.current=setTimeout(()=>{
-      serviceRef.current.textSearch({query:q+' city',type:'locality'},(res,status)=>{
-        if(status==='OK'&&res){
-          const cities=res.slice(0,5).map(r=>{
-            const name=r.name||'';
-            const addr=r.formatted_address||'';
-            const parts=addr.split(',').map(s=>s.trim());
-            const country=parts[parts.length-1]||'';
-            return{name,country,addr,lat:r.geometry.location.lat(),lng:r.geometry.location.lng()};
-          });
+    if(!q||q.length<2){setResults([]);setOpen(false);return;}
+    debRef.current=setTimeout(async()=>{
+      try{
+        const{Place}=await getPlacesLib();
+        const{places}=await Place.searchByText({textQuery:q,fields:['displayName','formattedAddress','location','addressComponents'],includedType:'locality',maxResultCount:5});
+        if(places?.length){
+          const cities=places.map(p=>({
+            name:p.displayName||'',
+            country:p.addressComponents?.find(c=>c.types?.includes('country'))?.longText||'',
+            lat:p.location?.lat(),
+            lng:p.location?.lng()
+          }));
           setResults(cities);
-          setOpen(cities.length>0);
+          setOpen(true);
         }else{setResults([]);setOpen(false);}
-      });
+      }catch{
+        // Fallback to legacy textSearch if new API not available
+        try{
+          const div=document.createElement('div');
+          const service=new google.maps.places.PlacesService(div);
+          service.textSearch({query:q+' city'},(res,status)=>{
+            if(status==='OK'&&res){
+              const cities=res.slice(0,5).map(r=>{
+                const addr=r.formatted_address||'';
+                const country=addr.split(',').pop()?.trim()||'';
+                return{name:r.name||'',country,lat:r.geometry.location.lat(),lng:r.geometry.location.lng()};
+              });
+              setResults(cities);setOpen(cities.length>0);
+            }else{setResults([]);setOpen(false);}
+          });
+        }catch{setResults([]);setOpen(false);}
+      }
     },300);
   };
 
@@ -65,5 +73,3 @@ export default function CityInput({value,onChange,onSelect,placeholder,c}){
     </div>}
   </div>);
 }
-
-// ─── MAP MODAL ────────────────────────────────────────

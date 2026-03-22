@@ -1,13 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react'
 import T from '../constants/translations.js'
 
-const waitForGoogle = () => new Promise(resolve => {
-  if (window.google?.maps) return resolve()
-  const check = setInterval(() => {
-    if (window.google?.maps) { clearInterval(check); resolve() }
-  }, 100)
-  setTimeout(() => clearInterval(check), 10000)
-})
+const getGoogleLibs = async () => {
+  if (!window.google?.maps) {
+    await new Promise(resolve => {
+      const check = setInterval(() => {
+        if (window.google?.maps) { clearInterval(check); resolve() }
+      }, 100)
+      setTimeout(() => clearInterval(check), 10000)
+    })
+  }
+  const [maps, places] = await Promise.all([
+    google.maps.importLibrary('maps'),
+    google.maps.importLibrary('places')
+  ])
+  return { maps, places }
+}
 
 export default function MapModal({onSelect,onClose,c,lang,init}){
   const t=T[lang];
@@ -19,34 +27,20 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
   const[loading,setLoading]=useState(true);
   const[results,setResults]=useState([]);
 
-  const placeMarker=(map,lat,lng)=>{
+  const placeMarker=(map,lat,lng,Marker)=>{
     if(markerRef.current)markerRef.current.setMap(null);
-    markerRef.current=new google.maps.Marker({position:{lat,lng},map,animation:google.maps.Animation.DROP});
+    markerRef.current=new Marker({position:{lat,lng},map});
     map.panTo({lat,lng});
-  };
-
-  const searchPlaces=(query)=>{
-    const map=mapObjRef.current;
-    if(!map||!query?.trim())return;
-    const service=new google.maps.places.PlacesService(map);
-    service.textSearch({query,bounds:map.getBounds()},(res,status)=>{
-      if(status==='OK'&&res){
-        setResults(res.slice(0,6).map(r=>({
-          name:r.name||'',
-          address:r.formatted_address||'',
-          lat:r.geometry.location.lat(),
-          lng:r.geometry.location.lng()
-        })));
-      }else{setResults([]);}
-    });
   };
 
   useEffect(()=>{
     let cancelled=false;
-    waitForGoogle().then(()=>{
+    getGoogleLibs().then(({maps,places})=>{
       if(cancelled||!mapRef.current)return;
       setLoading(false);
-      const map=new google.maps.Map(mapRef.current,{
+      const Map=maps.Map||google.maps.Map;
+      const Marker=google.maps.Marker;
+      const map=new Map(mapRef.current,{
         center:{lat:40.4168,lng:-3.7038},
         zoom:5,
         disableDefaultUI:true,
@@ -55,7 +49,7 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
       });
       mapObjRef.current=map;
 
-      // Click to select
+      // Click to reverse geocode
       map.addListener('click',(e)=>{
         const lat=e.latLng.lat();const lng=e.latLng.lng();
         const geocoder=new google.maps.Geocoder();
@@ -65,12 +59,11 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
             const sel={name:r.address_components?.[0]?.long_name||'',address:r.formatted_address||'',lat,lng};
             setSelected(sel);setResults([]);
             if(inputRef.current)inputRef.current.value=r.formatted_address||'';
-            placeMarker(map,lat,lng);
+            placeMarker(map,lat,lng,Marker);
           }
         });
       });
 
-      // Initial geocode
       if(init){
         const geocoder=new google.maps.Geocoder();
         geocoder.geocode({address:init},(res,status)=>{
@@ -84,6 +77,29 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
     return()=>{cancelled=true;if(markerRef.current)markerRef.current.setMap(null);};
   },[]);
 
+  const searchPlaces=async(query)=>{
+    if(!query?.trim())return;
+    try{
+      const{Place}=await google.maps.importLibrary('places');
+      const{places}=await Place.searchByText({textQuery:query,fields:['displayName','formattedAddress','location'],maxResultCount:6});
+      if(places?.length){
+        setResults(places.map(p=>({name:p.displayName||'',address:p.formattedAddress||'',lat:p.location?.lat(),lng:p.location?.lng()})));
+      }else{setResults([]);}
+    }catch{
+      // Fallback to legacy PlacesService
+      try{
+        const map=mapObjRef.current;
+        if(!map)return;
+        const service=new google.maps.places.PlacesService(map);
+        service.textSearch({query,bounds:map.getBounds()},(res,status)=>{
+          if(status==='OK'&&res){
+            setResults(res.slice(0,6).map(r=>({name:r.name||'',address:r.formatted_address||'',lat:r.geometry.location.lat(),lng:r.geometry.location.lng()})));
+          }else{setResults([]);}
+        });
+      }catch{setResults([]);}
+    }
+  };
+
   const handleKeyDown=(e)=>{
     if(e.key==='Enter'){e.preventDefault();searchPlaces(inputRef.current?.value);}
   };
@@ -92,20 +108,18 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
     const map=mapObjRef.current;
     setSelected(r);setResults([]);
     if(inputRef.current)inputRef.current.value=r.name;
-    if(map){map.setCenter({lat:r.lat,lng:r.lng});map.setZoom(16);placeMarker(map,r.lat,r.lng);}
-  };
-
-  const clearInput=()=>{
-    if(inputRef.current)inputRef.current.value='';
-    setSelected(null);setResults([]);
-    inputRef.current?.focus();
+    if(map){map.setCenter({lat:r.lat,lng:r.lng});map.setZoom(16);
+      if(markerRef.current)markerRef.current.setMap(null);
+      markerRef.current=new google.maps.Marker({position:{lat:r.lat,lng:r.lng},map});
+      map.panTo({lat:r.lat,lng:r.lng});
+    }
   };
 
   return(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.85)',zIndex:200,display:'flex',flexDirection:'column'}}>
     <div style={{padding:'12px 16px',display:'flex',alignItems:'center',gap:'8px',background:c.CARD,borderBottom:`1px solid ${c.BD}`}}>
       <div style={{flex:1,position:'relative'}}>
         <input ref={inputRef} defaultValue={init||''} onKeyDown={handleKeyDown} placeholder={t.searchPlacePh||'Search for a place... (press Enter)'} autoFocus style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 36px 10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
-        <button onClick={clearInput} style={{position:'absolute',right:'10px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'16px',padding:'8px'}}>×</button>
+        <button onClick={()=>{if(inputRef.current){inputRef.current.value='';setSelected(null);setResults([]);inputRef.current.focus();}}} style={{position:'absolute',right:'10px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'16px',padding:'8px'}}>×</button>
       </div>
       <button onClick={()=>searchPlaces(inputRef.current?.value)} style={{background:c.A||'#CDFF6C',border:'none',borderRadius:'10px',padding:'8px 14px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:'700'}}>🔍</button>
       <button onClick={onClose} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'8px 14px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'600'}}>✕</button>
