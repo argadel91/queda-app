@@ -32,6 +32,7 @@ export default function RouteMap({stops,c}){
     loadGM().then(async()=>{
       if(cancelled)return;
       await google.maps.importLibrary('maps');
+      await google.maps.importLibrary('geometry');
 
       const map=new google.maps.Map(mapDiv,{
         disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy'
@@ -57,14 +58,21 @@ export default function RouteMap({stops,c}){
             travelMode:google.maps.TravelMode.DRIVING
           },(result,status)=>{
             if(status==='OK'&&result.routes?.length){
-              // Extract all points from the route and draw as polyline
-              const path=[];
-              result.routes[0].legs.forEach(leg=>{
-                leg.steps.forEach(step=>{
-                  step.path?.forEach(p=>path.push(p));
+              // Decode overview_polyline for the smoothest route line
+              let path;
+              try{
+                const encoded=result.routes[0].overview_polyline;
+                path=google.maps.geometry.encoding.decodePath(encoded);
+              }catch(decodeErr){
+                // Fallback: extract points from steps
+                path=[];
+                result.routes[0].legs.forEach(leg=>{
+                  leg.steps.forEach(step=>{
+                    step.path?.forEach(p=>path.push(p));
+                  });
                 });
-              });
-              if(path.length>0){
+              }
+              if(path&&path.length>0){
                 polyRef.current=new google.maps.Polyline({path,map,strokeColor:'#CDFF6C',strokeOpacity:0.9,strokeWeight:4});
               }
             }else{
