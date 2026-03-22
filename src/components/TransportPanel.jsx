@@ -5,7 +5,7 @@ import VenueInfo from './VenueInfo.jsx'
 import { TMODES, getOsrmTime } from '../constants/weather.js'
 
 export default function TransportPanel({to,planCity,c,lang}){
-  const t=T[lang];const isEs=lang==='es';
+  const t=T[lang];
   const[times,setTimes]=useState({});const[ldg,setL]=useState(false);
   const[pos,setPos]=useState(null);const[asked,setAsked]=useState(false);
   const[roadDist,setRoadDist]=useState(null);const[suggestion,setSuggestion]=useState(null);

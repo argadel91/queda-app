@@ -60,7 +60,7 @@ export default function Share({plan,onViewResults,onBack,c,lang}){
       <div style={{fontSize:'13px',color:c.M2}}>@ {plan.organizer} · {plan.dates?.length||0} {lang==='es'?'fecha':'date'}{plan.dates?.length!==1?'s':''}</div>
     </div>
     {count!==null&&<div style={{textAlign:'center',padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',marginBottom:'14px',fontSize:'14px',color:c.T}}>
-      {count===0?(lang==='es'?'Nadie ha respondido a\u00FAn':'Nobody has responded yet'):<><span style={{color:mc,fontWeight:'800',fontSize:'20px'}}>{count}</span> {lang==='es'?`persona${count!==1?'s':''} ha${count!==1?'n':''} respondido`:`person${count!==1?'s':''} responded`}</>}
+      {count===0?t.noResponsesYet:<><span style={{color:mc,fontWeight:'800',fontSize:'20px'}}>{count}</span> {t.personResponded(count)}</>}
     </div>}
     <div style={{marginBottom:'6px'}}>
       <div style={{fontSize:'12px',color:c.M2,marginBottom:'4px'}}>{t.shareLangLbl||'Message language'}</div>

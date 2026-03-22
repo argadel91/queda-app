@@ -6,7 +6,7 @@ import { Btn, Card, Lbl, ModeBadge, Back } from '../components/ui.jsx'
 import { ls } from '../lib/storage.js'
 
 export default function PlanPreview({plan,onRespond,onBack,c,lang}){
-  const t=T[lang];const isEs=lang==='es';const mc=getMC(plan.mode,c);
+  const t=T[lang];const mc=getMC(plan.mode,c);
   const budget=(plan.stops||[]).reduce((s,p)=>s+(parseFloat(p.cost)||0),0);
   const prev=ls.get('q_myresp_'+plan.id,null);
   const hasPrev=!!prev;

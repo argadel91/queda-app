@@ -7,12 +7,13 @@ import { daysUntil, fmtDate, fmtShort, dayStart } from '../lib/utils.js'
 import { Btn, Card, Lbl, Back, ModeBadge } from '../components/ui.jsx'
 
 export default function Profile({onBack,onOpen,c,lang,authUser,profile,onUpdateProfile,onSignOut}){
-  const t=T[lang];const isEs=lang==='es';
+  const t=T[lang];
   const[plans,setPlans]=useState(getMyPlans());
   const[confirm,setConfirm]=useState(null);
   const[editingName,setEditingName]=useState(false);
   const[newName,setNewName]=useState(profile?.name||'');
-  const saveName=async()=>{if(!newName.trim())return;await onUpdateProfile({name:newName.trim()});setEditingName(false);};
+  const[newUsername,setNewUsername]=useState(profile?.username||'');
+  const saveName=async()=>{if(!newName.trim())return;await onUpdateProfile({name:newName.trim(),username:newUsername.trim()||null});setEditingName(false);};
   const[tab,setTab]=useState('upcoming');
   const[dates,setDates]=useState({});const[modes,setModes]=useState({});
   const now=dayStart();
@@ -51,13 +52,17 @@ export default function Profile({onBack,onOpen,c,lang,authUser,profile,onUpdateP
           <div style={{fontSize:'16px',fontWeight:'700',color:c.T,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{profile?.name||'—'}</div>
           <div style={{fontSize:'12px',color:c.M2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{profile?.username&&<span style={{color:c.A,fontWeight:'600',marginRight:'6px'}}>@{profile.username}</span>}{authUser.email}</div>
         </div>
-        <button onClick={()=>setEditingName(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 10px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px'}}>✏️</button>
+        <button onClick={()=>setEditingName(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px'}}>✏️</button>
       </div>
-      {editingName&&<div style={{display:'flex',gap:'8px',marginBottom:'10px'}}>
+      {editingName&&<><div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
         <input value={newName} onChange={e=>setNewName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&saveName()} placeholder={t.editName} autoFocus style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none'}}/>
         <button onClick={saveName} style={{padding:'8px 14px',background:c.A,border:'none',borderRadius:'8px',color:'#0A0A0A',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',fontSize:'13px'}}>OK</button>
         <button onClick={()=>setEditingName(false)} style={{padding:'8px 10px',background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px'}}>×</button>
-      </div>}
+      </div>
+      <div style={{display:'flex',gap:'8px',marginBottom:'10px',alignItems:'center'}}>
+        <span style={{color:c.M,fontSize:'15px',fontWeight:'600'}}>@</span>
+        <input value={newUsername} onChange={e=>setNewUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g,'').slice(0,20))} placeholder={t.authAliasPlaceholder||'username'} style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none'}}/>
+      </div></>}
       <button onClick={onSignOut} style={{width:'100%',padding:'9px',background:'transparent',border:'1px solid #ef444440',borderRadius:'10px',color:'#ef4444',cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'500'}}>
         {t.signOut}
       </button>

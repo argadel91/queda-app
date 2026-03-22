@@ -27,6 +27,7 @@ const T ={
     previewBy:'Organizado por',previewDates:'Fechas propuestas',previewBudget:'Presupuesto estimado',previewJoin:'Marcar disponibilidad →',editAvail:'Editar mi respuesta →',
     yourAvail:'¿Cuándo puedes?',
     avYes:'✅ Sí',avMaybe:'🤔 Quizás',avNo:'❌ No puedo',
+    markAtLeastOne:'Marca al menos una fecha',
     maybeNote:`Lo añade a «quizás» — el organizador lo verá.`,
     bestTime:'¿A qué hora mejor?',howGet:'¿Cómo llegas?',howOpt:'(opcional)',
     car:'🚗 Coche',moto:'🏍️ Moto',transit:'🚇 Transporte público',taxi:'🚕 Taxi/Uber',walk:'🚶 Andando',bike:'🚲 Bici/Patinete',other:'✏️ Otro',otherPh:'¿Cómo llegas?',
@@ -302,6 +303,7 @@ const T ={
     changeLbl:'Cambiar',
     cat:['🍽️ Restaurante','🍸 Bar','🎉 Discoteca','☕ Café','🎭 Actividad','🏠 Casa','🍕 Informal','📍 Otro'],
     shareLangLbl:'Idioma del mensaje',copyCode:'Copiar código',codeCopied:'✓ ¡Código copiado!',draftRestored:'Borrador restaurado',draftDiscard:'Descartar',autoConfirmTitle:'Auto-confirmación',peopleSaid:'personas dijeron sí para',autoConfirmQ:'¿Confirmar esta fecha automáticamente?',notYet:'Todavía no',editPlan:'Editar plan',saveLbl:'Guardar',addToCalendar:'Añadir al calendario',
+    personalisedLinkDesc:'Genera un link con el nombre del invitado ya relleno.',createError:'Error al crear el plan. Comprueba tu conexión.',someone:'Alguien',noResponsesYet:'Nadie ha respondido aún',personResponded:n=>n===1?'persona ha respondido':`personas han respondido`,
   },
   en:{
     tagline:'Plans without chaos.',sub:'Dates, times, route, outfit, weather and payments in one code.',
@@ -330,6 +332,7 @@ const T ={
     previewBy:'Organised by',previewDates:'Proposed dates',previewBudget:'Estimated budget',previewJoin:'Mark availability →',editAvail:'Edit my response →',
     yourAvail:'When can you make it?',
     avYes:'✅ Yes',avMaybe:'🤔 Maybe',avNo:"❌ Can't make it",
+    markAtLeastOne:'Mark at least one date',
     maybeNote:`Added to «maybe» — the organiser will see this.`,
     bestTime:'Best time?',howGet:'How are you getting there?',howOpt:'(optional)',
     car:'🚗 By car',moto:'🏍️ By motorbike',transit:'🚇 Public transport',taxi:'🚕 Taxi/Uber',walk:'🚶 Walking',bike:'🚲 Bike/Scooter',other:'✏️ Other',otherPh:'How are you getting there?',
@@ -605,6 +608,7 @@ const T ={
     changeLbl:'Change',
     cat:['🍽️ Restaurant','🍸 Bar','🎉 Club','☕ Café','🎭 Activity','🏠 Home','🍕 Casual','📍 Other'],
     shareLangLbl:'Message language',copyCode:'Copy code',codeCopied:'✓ Code copied!',draftRestored:'Draft restored',draftDiscard:'Discard',autoConfirmTitle:'Auto-confirmation',peopleSaid:'people said yes for',autoConfirmQ:'Auto-confirm this date?',notYet:'Not yet',editPlan:'Edit plan',saveLbl:'Save',addToCalendar:'Add to calendar',
+    personalisedLinkDesc:"Generate a link with the guest's name pre-filled.",createError:'Error creating the plan. Check your connection.',someone:'Someone',noResponsesYet:'Nobody has responded yet',personResponded:n=>n===1?'person responded':`people responded`,
   },
   pt:{
     tagline:'Planos sem caos.',sub:'Datas, horários, rota, look, tempo e pagamentos num só código.',
@@ -632,6 +636,7 @@ const T ={
     shareWa:'Partilhar no WhatsApp 💬',copyLink:'Copiar link 🔗',copied:'✓ Copiado!',viewRes:'Ver resultados →',
     previewBy:'Organizado por',previewDates:'Datas propostas',previewBudget:'Orçamento estimado',previewJoin:'Marcar disponibilidade →',editAvail:'Editar a minha resposta →',
     yourAvail:'Quando podes?',avYes:'✅ Sim',avMaybe:'🤔 Talvez',avNo:'❌ Não posso',
+    markAtLeastOne:'Marca pelo menos uma data',
     maybeNote:`Adicionado a «talvez» — o organizador verá.`,
     bestTime:'A que horas preferes?',howGet:'Como chegas?',howOpt:'(opcional)',
     car:'🚗 De carro',moto:'🏍️ De mota',transit:'🚇 Transporte público',taxi:'🚕 Táxi/Uber',walk:'🚶 A pé',bike:'🚲 Bicicleta',other:'✏️ Outro',otherPh:'Como chegas?',
@@ -903,6 +908,7 @@ const T ={
     changeLbl:'Alterar',
     cat:['🍽️ Restaurante','🍸 Bar','🎉 Discoteca','☕ Café','🎭 Atividade','🏠 Casa','🍕 Informal','📍 Outro'],
     shareLangLbl:'Idioma da mensagem',copyCode:'Copiar código',codeCopied:'✓ Código copiado!',draftRestored:'Rascunho restaurado',draftDiscard:'Descartar',autoConfirmTitle:'Auto-confirmação',peopleSaid:'pessoas disseram sim para',autoConfirmQ:'Confirmar esta data automaticamente?',notYet:'Ainda não',editPlan:'Editar plano',saveLbl:'Guardar',addToCalendar:'Adicionar ao calendário',
+    personalisedLinkDesc:'Gera um link com o nome do convidado já preenchido.',createError:'Erro ao criar o plano. Verifica a tua conexão.',someone:'Alguém',noResponsesYet:'Ninguém respondeu ainda',personResponded:n=>n===1?'pessoa respondeu':`pessoas responderam`,
   },
   fr:{
     tagline:`Des plans sans chaos.`,sub:`Dates, horaires, itinéraire, tenue, météo et paiements en un code.`,
@@ -928,6 +934,7 @@ const T ={
     shareWa:`Partager sur WhatsApp 💬`,copyLink:`Copier le lien 🔗`,copied:`✓ Copié !`,viewRes:`Voir les résultats →`,
     previewBy:`Organisé par`,previewDates:`Dates proposées`,previewBudget:`Budget estimé`,previewJoin:`Indiquer mes disponibilités →`,editAvail:`Modifier ma réponse →`,
     yourAvail:`Quand es-tu disponible ?`,avYes:`✅ Oui`,avMaybe:`🤔 Peut-être`,avNo:`❌ Je ne peux pas`,
+    markAtLeastOne:`Marque au moins une date`,
     maybeNote:`Ajouté à «peut-être» — l'organisateur le verra.`,
     bestTime:`À quelle heure de préférence ?`,howGet:`Comment tu y vas ?`,howOpt:`(optionnel)`,
     car:`🚗 En voiture`,moto:`🏍️ En moto`,transit:`🚇 Transports en commun`,taxi:`🚕 Taxi/Uber`,walk:`🚶 À pied`,bike:`🚲 Vélo`,other:`✏️ Autre`,otherPh:`Comment tu y vas ?`,
@@ -1211,6 +1218,7 @@ const T ={
     cat:[`🍽️ Restaurant`,`🍸 Bar`,`🎉 Boîte de nuit`,`☕ Café`,`🎭 Activité`,`🏠 Maison`,`🍕 Informel`,`📍 Autre`],
     estPer:`Estimé par personne`,
     shareLangLbl:`Langue du message`,copyCode:`Copier le code`,codeCopied:`✓ Code copié !`,draftRestored:`Brouillon restauré`,draftDiscard:`Supprimer`,autoConfirmTitle:`Confirmation auto`,peopleSaid:`personnes ont dit oui pour`,autoConfirmQ:`Confirmer cette date automatiquement ?`,notYet:`Pas encore`,editPlan:`Modifier le plan`,saveLbl:`Enregistrer`,addToCalendar:`Ajouter au calendrier`,
+    personalisedLinkDesc:`Génère un lien avec le nom de l'invité pré-rempli.`,createError:`Erreur lors de la création du plan. Vérifie ta connexion.`,someone:`Quelqu'un`,noResponsesYet:`Personne n'a encore répondu`,personResponded:n=>n===1?`personne a répondu`:`personnes ont répondu`,
   },
   de:{
     tagline:'Pläne ohne Chaos.',sub:'Termine, Zeiten, Route, Outfit, Wetter und Zahlungen in einem Code.',
@@ -1236,6 +1244,7 @@ const T ={
     shareWa:'Per WhatsApp teilen 💬',copyLink:'Link kopieren 🔗',copied:'✓ Kopiert!',viewRes:'Ergebnisse anzeigen →',
     previewBy:'Organisiert von',previewDates:'Vorgeschlagene Termine',previewBudget:'Geschätztes Budget',previewJoin:'Verfügbarkeit angeben →',editAvail:'Antwort bearbeiten →',
     yourAvail:'Wann kannst du?',avYes:'✅ Ja',avMaybe:'🤔 Vielleicht',avNo:'❌ Kann nicht',
+    markAtLeastOne:'Markiere mindestens ein Datum',
     maybeNote:`Als «Vielleicht» gespeichert — der Organisator sieht es.`,
     bestTime:'Welche Uhrzeit passt besser?',howGet:'Wie kommst du hin?',howOpt:'(optional)',
     car:'🚗 Mit dem Auto',moto:'🏍️ Mit dem Motorrad',transit:'🚇 Öffentliche Verkehrsmittel',taxi:'🚕 Taxi/Uber',walk:'🚶 Zu Fuß',bike:'🚲 Fahrrad',other:'✏️ Andere',otherPh:'Wie kommst du hin?',
@@ -1509,6 +1518,7 @@ const T ={
     changeLbl:'Ändern',
     cat:['🍽️ Restaurant','🍸 Bar','🎉 Club','☕ Café','🎭 Aktivität','🏠 Zuhause','🍕 Casual','📍 Andere'],
     shareLangLbl:'Nachrichtensprache',copyCode:'Code kopieren',codeCopied:'✓ Code kopiert!',draftRestored:'Entwurf wiederhergestellt',draftDiscard:'Verwerfen',autoConfirmTitle:'Auto-Bestätigung',peopleSaid:'Personen sagten Ja für',autoConfirmQ:'Dieses Datum automatisch bestätigen?',notYet:'Noch nicht',editPlan:'Plan bearbeiten',saveLbl:'Speichern',addToCalendar:'Zum Kalender hinzufügen',
+    personalisedLinkDesc:'Erstelle einen Link mit dem Namen des Gastes vorausgefüllt.',createError:'Fehler beim Erstellen des Plans. Überprüfe deine Verbindung.',someone:'Jemand',noResponsesYet:'Noch hat niemand geantwortet',personResponded:n=>n===1?'Person hat geantwortet':`Personen haben geantwortet`,
   },
   it:{
     tagline:`Piani senza caos.`,sub:`Date, orari, percorso, outfit, meteo e pagamenti in un codice.`,
@@ -1534,6 +1544,7 @@ const T ={
     shareWa:`Condividi su WhatsApp 💬`,copyLink:`Copia link 🔗`,copied:`✓ Copiato!`,viewRes:`Vedi risultati →`,
     previewBy:`Organizzato da`,previewDates:`Date proposte`,previewBudget:`Budget stimato`,previewJoin:`Indica la tua disponibilità →`,editAvail:`Modifica la mia risposta →`,
     yourAvail:`Quando puoi?`,avYes:`✅ Sì`,avMaybe:`🤔 Forse`,avNo:`❌ Non posso`,
+    markAtLeastOne:`Segna almeno una data`,
     maybeNote:`Aggiunto a «forse» — l'organizzatore lo vedrà.`,
     bestTime:`A che ora preferisci?`,howGet:`Come ci arrivi?`,howOpt:`(opzionale)`,
     car:`🚗 In auto`,moto:`🏍️ In moto`,transit:`🚇 Trasporto pubblico`,taxi:`🚕 Taxi/Uber`,walk:`🚶 A piedi`,bike:`🚲 Bici`,other:`✏️ Altro`,otherPh:`Come ci arrivi?`,
@@ -1817,6 +1828,7 @@ const T ={
     cat:[`🍽️ Ristorante`,`🍸 Bar`,`🎉 Discoteca`,`☕ Caffè`,`🎭 Attività`,`🏠 Casa`,`🍕 Informale`,`📍 Altro`],
     estPer:`Stimato a persona`,
     shareLangLbl:`Lingua del messaggio`,copyCode:`Copia codice`,codeCopied:`✓ Codice copiato!`,draftRestored:`Bozza ripristinata`,draftDiscard:`Scarta`,autoConfirmTitle:`Conferma automatica`,peopleSaid:`persone hanno detto sì per`,autoConfirmQ:`Confermare questa data automaticamente?`,notYet:`Non ancora`,editPlan:`Modifica piano`,saveLbl:`Salva`,addToCalendar:`Aggiungi al calendario`,
+    personalisedLinkDesc:`Genera un link con il nome dell'invitato già compilato.`,createError:`Errore nella creazione del piano. Controlla la tua connessione.`,someone:`Qualcuno`,noResponsesYet:`Nessuno ha ancora risposto`,personResponded:n=>n===1?`persona ha risposto`:`persone hanno risposto`,
   },
 };
 

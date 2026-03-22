@@ -20,7 +20,7 @@ export default function WeatherWidget({city,date,c,lang,showAdvice=false}){
     }catch{setState('notfound');}})();
   },[city,date]);
   if(!city||!date||state==='idle')return null;
-  const isEs=lang==='es';const du=date?daysUntil(date):0;
+  const du=date?daysUntil(date):0;
   const t=T[lang];
   if(state==='early')return<div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'12px 14px',display:'flex',gap:'10px',alignItems:'center'}}><div style={{fontSize:'22px'}}>📅</div><div><div style={{fontSize:'13px',color:c.T,fontWeight:'500'}}>{t.tooEarlyT}</div><div style={{fontSize:'12px',color:c.M2}}>{du-16} {t.tooEarlyD}</div></div></div>;
   if(state==='notfound')return<div style={{fontSize:'12px',color:c.M2,padding:'6px'}}>{t.cityNotFound}</div>;

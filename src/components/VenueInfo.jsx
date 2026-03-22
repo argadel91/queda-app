@@ -3,7 +3,7 @@ import T from '../constants/translations.js'
 import { fetchVenue, CL } from '../constants/weather.js'
 
 export default function VenueInfo({name,lat,lng,c,lang}){
-  const t=T[lang];const isEs=lang==='es';
+  const t=T[lang];
   const[info,setInfo]=useState(null);const[tried,setTried]=useState(false);
   useEffect(()=>{if(!lat||!lng||tried)return;setTried(true);fetchVenue(name,lat,lng).then(setInfo);},[lat,lng]);
   if(!lat||!lng)return null;

@@ -18,17 +18,19 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
   const[how,setHow]=useState(prev?.how||'');const[howOther,setHowOther]=useState(prev?.howOther||'');
   const[comment,setComment]=useState(prev?.comment||'');
   const[guestRole,setGuestRole]=useState(prev?.role||t.roles[1]||'');
-  const[saving,setSaving]=useState(false);const[done,setDone]=useState(false);
+  const[saving,setSaving]=useState(false);const[done,setDone]=useState(false);const[err,setErr]=useState('');
   const[altDate,setAltDate]=useState('');const[altNote,setAltNote]=useState('');
   const[pollVote,setPollVote]=useState(prev?.pollVote||null);
   useEffect(()=>{if(name.trim())ls.set('q_myname',name.trim());},[name]);
-  const setDA=(d,val)=>setAvail(p=>({...p,[d]:p[d]===val?undefined:val}));
+  const setDA=(d,val)=>{setErr('');setAvail(p=>({...p,[d]:p[d]===val?undefined:val}));};
   const togT=(d,h)=>setTimePref(p=>({...p,[d]:(p[d]||[]).includes(h)?(p[d]||[]).filter(x=>x!==h):[...(p[d]||[]),h]}));
   const AVCOL={yes:'#22c55e',maybe:'#f59e0b',no:'#ef4444'};
   const AVICON={yes:'✅',maybe:'🤔',no:'❌'};
   const AVLBL={yes:t.avYes,maybe:t.avMaybe,no:t.avNo};
   const submit=async()=>{
-    if(!name.trim())return;setSaving(true);
+    if(!name.trim())return;
+    if(Object.keys(avail).length===0){setErr(t.markAtLeastOne);return;}
+    setSaving(true);
     const changeLog=[...(prev?.changeLog||[])];
     if(prev)changeLog.unshift({at:new Date().toISOString(),desc:t.respUpdated});
     const resp={name:name.trim(),avail,timePref,how:how==='other'?howOther:how,howOther,comment,role:guestRole,altDate:altDate||null,altNote:altNote||null,pollVote:pollVote||null,changeLog,at:new Date().toISOString()};
@@ -40,7 +42,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
   const budget=(plan.stops||[]).reduce((s,p2)=>s+(parseFloat(p2.cost)||0),0);
   if(done){
     const planUrl=location.href.split('?')[0]+'?code='+plan.id;
-    const respName=name.trim()||'Alguien';
+    const respName=name.trim()||t.someone;
     const waOrgText=pLang==='es'?`Hola ${plan.organizer}, soy *${respName}* y acabo de responder al plan *${plan.name}*. Mira las respuestas! ${planUrl}`:`Hi ${plan.organizer}, I'm *${respName}* and just responded to *${plan.name}*. Check the responses! ${planUrl}`;
   return(<div style={{padding:'60px 24px',maxWidth:'420px',margin:'0 auto',textAlign:'center'}}>
     <div style={{fontSize:'64px',marginBottom:'20px'}}>{plan.mode==='intimate'?'💘':'🎉'}</div>
@@ -78,14 +80,14 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
         return(<div key={d} style={{marginBottom:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'14px',overflow:'hidden'}}>
           <div style={{padding:'10px 14px',background:c.CARD,borderBottom:`1px solid ${c.BD}`,fontSize:'13px',color:c.T,fontWeight:'600',textTransform:'capitalize',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
             <span>{fmtDate(d,pLang)}</span>
-            {slots.length>1&&<button onClick={()=>{const u={};slots.forEach(s=>{u[s.key]='no';});setAvail(p=>({...p,...u}));}} title={t.markAllNoTitle} style={{background:'none',border:'none',color:'#ef4444',fontSize:'11px',cursor:'pointer',fontFamily:'inherit',opacity:0.7}}>❌ {t.allNoLbl}</button>}
+            {slots.length>1&&<button onClick={()=>{const u={};slots.forEach(s=>{u[s.key]='no';});setErr('');setAvail(p=>({...p,...u}));}} title={t.markAllNoTitle} style={{background:'none',border:'none',color:'#ef4444',fontSize:'11px',cursor:'pointer',fontFamily:'inherit',opacity:0.7}}>❌ {t.allNoLbl}</button>}
           </div>
           {slots.map((slot,si)=>{
             const val=avail[slot.key];
             return(<div key={slot.key} style={{borderBottom:si<slots.length-1?`1px solid ${c.BD}`:'none'}}>
               {slot.label&&<div style={{padding:'8px 14px 4px',fontSize:'12px',color:mc,fontWeight:'700'}}>🕐 {slot.label}</div>}
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'1px',background:c.BD}}>
-                {(['yes','maybe','no']).map(v=><button key={v} onClick={()=>setAvail(p=>({...p,[slot.key]:p[slot.key]===v?undefined:v}))} style={{padding:'10px 6px',background:val===v?AVCOL[v]+'25':c.CARD,color:val===v?AVCOL[v]:c.M2,cursor:'pointer',border:'none',fontFamily:'inherit',fontSize:'12px',fontWeight:val===v?'700':'400',transition:'all .1s'}}>
+                {(['yes','maybe','no']).map(v=><button key={v} onClick={()=>{setErr('');setAvail(p=>({...p,[slot.key]:p[slot.key]===v?undefined:v}));}} style={{padding:'10px 6px',background:val===v?AVCOL[v]+'25':c.CARD,color:val===v?AVCOL[v]:c.M2,cursor:'pointer',border:'none',fontFamily:'inherit',fontSize:'12px',fontWeight:val===v?'700':'400',transition:'all .1s'}}>
                   {AVICON[v]}<br/><span style={{fontSize:'10px'}}>{AVLBL[v].replace(/[✅🤔❌]\s?/,'')}</span>
                 </button>)}
               </div>
@@ -94,7 +96,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
           })}
         </div>);
       })}
-      <button onClick={()=>{const u={};(plan.dates||[]).forEach(d=>{const ts=plan.times?.[d]||[];const slots=ts.length>0?ts.map(h=>`${d}_${h}`):[d];slots.forEach(k=>{if(!avail[k])u[k]='yes';});});setAvail(p=>({...p,...u}));}} title={t.markAllYesTitle} style={{width:'100%',padding:'8px',background:'none',border:`1px dashed ${c.BD}`,borderRadius:'10px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',marginTop:'4px'}}>✅ {t.allYesLbl}</button>
+      <button onClick={()=>{const u={};(plan.dates||[]).forEach(d=>{const ts=plan.times?.[d]||[];const slots=ts.length>0?ts.map(h=>`${d}_${h}`):[d];slots.forEach(k=>{if(!avail[k])u[k]='yes';});});setErr('');setAvail(p=>({...p,...u}));}} title={t.markAllYesTitle} style={{width:'100%',padding:'8px',background:'none',border:`1px dashed ${c.BD}`,borderRadius:'10px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',marginTop:'4px'}}>✅ {t.allYesLbl}</button>
     </div>
     {/* Suggest alternative date */}
     {Object.keys(avail).length>0&&Object.values(avail).every(v=>v==='no')&&<div style={{background:'#f59e0b10',border:'1px solid #f59e0b30',borderRadius:'12px',padding:'14px',marginBottom:'14px'}}>
@@ -127,6 +129,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
       <Txa value={comment} onChange={setComment} placeholder={t.commentPh} rows={2} c={c}/>
     </div>
 
+    {err&&<div style={{color:'#ef4444',fontSize:'13px',padding:'8px 12px',background:'#ef444410',borderRadius:'8px',border:'1px solid #ef444430',marginBottom:'10px'}}>{err}</div>}
     <Btn onClick={submit} disabled={!name.trim()||saving} full style={{padding:'15px',fontSize:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?t.saving:plan.mode==='professional'?(t.confirmAttendance):plan.mode==='intimate'?(t.confirmBtn):t.saveAvail}</Btn>
   </div>);
 }

@@ -54,10 +54,10 @@ export default function App(){
       clearTimeout(timeout);
       if(session?.user){
         let prof=null;
-        try{prof=await loadProfile(session.user.id);}catch(e){console.error('Profile load error:',e);}
+        try{prof=await loadProfile(session.user.id);}catch{}
         if(!prof){
           prof={name:session.user.email?.split('@')[0]||'User',email:session.user.email||'',contacts:[]};
-          try{await saveProfile(session.user.id,prof);}catch(e){console.error('Profile save error:',e);}
+          try{await saveProfile(session.user.id,prof);}catch{}
         }
         setAuthUser(session.user);
         setProfile(prof);
@@ -66,7 +66,6 @@ export default function App(){
       setAuthLoading(false);
     }).catch(e=>{
       clearTimeout(timeout);
-      console.error('Session check error:',e);
       setAuthLoading(false);
     });
     const{data:{subscription}}=db.auth.onAuthStateChange((event,session)=>{
@@ -85,7 +84,7 @@ export default function App(){
         loadProfile(session.user.id).then(prof=>{
           if(!prof){
             prof={name:session.user.email?.split('@')[0]||'User',email:session.user.email||'',contacts:[]};
-            saveProfile(session.user.id,prof).catch(e=>console.error('saveProfile:',e));
+            saveProfile(session.user.id,prof).catch(()=>{});
           }
           setAuthUser(session.user);
           setProfile(prof);
@@ -94,7 +93,6 @@ export default function App(){
           else if(prof?.lang)setLang(prof.lang);
           setAuthLoading(false);
         }).catch(e=>{
-          console.error('Profile load in auth change:',e);
           setAuthUser(session.user);
           setProfile({name:session.user.email?.split('@')[0]||'User',email:session.user.email||'',contacts:[]});
           setAuthLoading(false);
@@ -108,7 +106,7 @@ export default function App(){
   },[]);
 
   const handleAuth=(user,prof)=>{setAuthUser(user);setProfile(prof);if(prof?.lang)setLang(prof.lang);};
-  const handleSignOut=async()=>{try{await authSignOut();}catch(e){console.error('signOut error:',e);}ls.set('q_state',{});ls.set('q_plans',[]);window.location.reload();};
+  const handleSignOut=async()=>{try{await authSignOut();}catch{}ls.set('q_state',{});ls.set('q_plans',[]);window.location.reload();};
   const updateProfile=async(updates)=>{
     if(!authUser)return;
     const updated={...profile,...updates};
@@ -143,7 +141,7 @@ export default function App(){
             {LANG_FLAGS[lang]||'🌐'} <span style={{fontSize:'11px'}}>{lang.toUpperCase()}</span> <span style={{fontSize:'10px',color:c.M}}>▾</span>
           </button>
           {langOpen&&<div style={{position:'absolute',right:0,top:'calc(100% + 4px)',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',boxShadow:'0 8px 24px rgba(0,0,0,.3)',zIndex:100,overflow:'hidden',minWidth:'130px'}}>
-            {LANGS.map(l=><button key={l} onClick={()=>{setLang(l);ls.set('q_lang',l);if(authUser)saveProfile(authUser.id,{...profile,lang:l}).catch(e=>console.error(e));setLangOpen(false);}} style={{display:'flex',alignItems:'center',gap:'8px',width:'100%',padding:'10px 14px',background:l===lang?`${c.A}15`:'transparent',border:'none',borderBottom:`1px solid ${c.BD}`,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',color:l===lang?c.A:c.T,fontWeight:l===lang?'700':'400',textAlign:'left'}}>
+            {LANGS.map(l=><button key={l} onClick={()=>{setLang(l);ls.set('q_lang',l);if(authUser)saveProfile(authUser.id,{...profile,lang:l}).catch(()=>{});setLangOpen(false);}} style={{display:'flex',alignItems:'center',gap:'8px',width:'100%',padding:'10px 14px',background:l===lang?`${c.A}15`:'transparent',border:'none',borderBottom:`1px solid ${c.BD}`,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',color:l===lang?c.A:c.T,fontWeight:l===lang?'700':'400',textAlign:'left'}}>
               <span>{LANG_FLAGS[l]}</span><span>{({es:'Español',en:'English',pt:'Português',fr:'Français',de:'Deutsch',it:'Italiano'})[l]}</span>
               {l===lang&&<span style={{marginLeft:'auto',color:c.A}}>✓</span>}
             </button>)}

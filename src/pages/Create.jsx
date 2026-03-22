@@ -71,7 +71,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
       if(authUser)await savePlanWithUser(plan,authUser.id);else await savePlan(plan);
       addMyPlan(plan.id,plan.name,'organizer',mode);
       ls.set('q_state',{screen:'share',planId:plan.id,isOrg:true});clearDraft();onCreated(plan);
-    }catch(e){console.error(e);showErr('Error al crear el plan. Comprueba tu conexión.');}
+    }catch(e){showErr(t.createError);}
     setSaving(false);
   };
   const is=(v,ph,k,sid)=><input value={v} onChange={e=>upd(sid,k,e.target.value)} placeholder={ph} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'9px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>;

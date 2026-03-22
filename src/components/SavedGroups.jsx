@@ -5,7 +5,7 @@ import { ls, getGroups, saveGroups } from '../lib/storage.js'
 import { Btn, Card, Lbl } from './ui.jsx'
 
 export default function SavedGroups({plan, c, lang}){
-  const t=T[lang];const isEs=lang==='es'; const mc=getMC(plan.mode,c);
+  const t=T[lang]; const mc=getMC(plan.mode,c);
   const[groups,setGroups]=useState(getGroups());
   const[open,setOpen]=useState(false);
   const[newName,setNewName]=useState('');

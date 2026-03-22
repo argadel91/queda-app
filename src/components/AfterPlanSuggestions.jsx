@@ -3,7 +3,7 @@ import T from '../constants/translations.js'
 import { getMC } from '../constants/theme.js'
 
 export default function AfterPlanSuggestions({plan, c, lang}){
-  const t=T[lang];const isEs=lang==='es'; const mc=getMC(plan.mode,c);
+  const t=T[lang]; const mc=getMC(plan.mode,c);
   const city=plan.city||'';
   const cityEnc=encodeURIComponent(city);
   const date=plan.confirmedDate||plan.dates?.[0]||'';

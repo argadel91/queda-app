@@ -4,7 +4,7 @@ import { ls } from '../lib/storage.js'
 import { Card, Btn, Lbl } from './ui.jsx'
 
 export default function ExpenseSplitter({plan, rs, mc, c, lang}){
-  const t=T[lang];const isEs=lang==='es';
+  const t=T[lang];
   const[expenses,setExp]=useState(()=>ls.get('q_exp_'+plan.id,[]));
   const[open,setOpen]=useState(false);
   const[who,setWho]=useState('');const[what,setWhat]=useState('');const[amt,setAmt]=useState('');
@@ -53,7 +53,7 @@ export default function ExpenseSplitter({plan, rs, mc, c, lang}){
     </div>}
     {expenses.map(e=><div key={e.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 0',borderBottom:`1px solid ${c.BD}`,fontSize:'13px'}}>
       <div><span style={{color:mc,fontWeight:'600'}}>{e.who}</span><span style={{color:c.M2}}> — {e.what}</span></div>
-      <div style={{display:'flex',gap:'8px',alignItems:'center'}}><span style={{color:c.T,fontWeight:'700'}}>{e.amt.toFixed(2)}€</span><button onClick={()=>rem(e.id)} title={lang==='es'?'Eliminar gasto':'Remove expense'} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'14px',padding:'0'}}>×</button></div>
+      <div style={{display:'flex',gap:'8px',alignItems:'center'}}><span style={{color:c.T,fontWeight:'700'}}>{e.amt.toFixed(2)}€</span><button onClick={()=>rem(e.id)} title={lang==='es'?'Eliminar gasto':'Remove expense'} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'14px',padding:'0'}}>×</button></div>
     </div>)}
     {expenses.length>0&&<>
       <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderTop:`1px solid ${c.BD}`,marginTop:'4px',fontSize:'14px'}}><span style={{color:c.M2}}>{t.statTotal}</span><span style={{color:mc,fontWeight:'800'}}>{total.toFixed(2)}€</span></div>

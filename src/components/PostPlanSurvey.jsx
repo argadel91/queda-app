@@ -5,7 +5,7 @@ import { daysUntil } from '../lib/utils.js'
 import { Btn } from './ui.jsx'
 
 export default function PostPlanSurvey({plan, c, lang, mc}){
-  const t=T[lang];const isEs=lang==='es';
+  const t=T[lang];
   const key='q_survey_'+plan.id;
   const[done,setDone]=useState(!!ls.get(key,null));
   const[rating,setRating]=useState(0);

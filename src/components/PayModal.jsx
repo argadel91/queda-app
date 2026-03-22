@@ -3,7 +3,7 @@ import T from '../constants/translations.js'
 import { Btn, Lbl, Inp } from './ui.jsx'
 
 export default function PayModal({plan,amount,onClose,c,lang}){
-  const t=T[lang];const isEs=lang==='es';const[tab,setTab]=useState('bizum');
+  const t=T[lang];const[tab,setTab]=useState('bizum');
   const[bizum,setBizum]=useState(plan.payment?.bizumPhone||'');const[paypal,setPaypal]=useState(plan.payment?.paypalUser||'');const[revolut,setRevolut]=useState(plan.payment?.revolutUser||'');const[stripe,setStripe]=useState(plan.gift?.stripeLink||'');
   const amt=amount||'?';const tabs=[{k:'bizum',l:'📱 Bizum'},{k:'paypal',l:'🅿️ PayPal'},{k:'revolut',l:'🔄 Revolut'},{k:'stripe',l:'💳 Stripe'},{k:'invoice',l:'🧾 Factura'}];
   return(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.85)',display:'flex',alignItems:'flex-end',justifyContent:'center',zIndex:100}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>

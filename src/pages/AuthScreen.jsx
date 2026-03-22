@@ -4,7 +4,7 @@ import { authSignIn, authSignUp, authResetPassword, authSignInWithProvider } fro
 import { loadProfile, saveProfile } from '../lib/supabase.js'
 
 export default function AuthScreen({onAuth,c,lang,onLangChange}){
-  const t=T[lang];const isEs=lang==='es';
+  const t=T[lang];
   const[mode,setMode]=useState('login'); // login | register | reset | confirmEmail
   const[email,setEmail]=useState('');
   const[password,setPassword]=useState('');
@@ -40,7 +40,6 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
       }
       onAuth(data.user,{name:data.user.email.split('@')[0],email:data.user.email,contacts:[]});
     }catch(e){
-      console.error('Login error:',e);
       setErr(t.authConnError);
       setLoading(false);
     }
@@ -71,7 +70,6 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
         setMode('confirmEmail');
       }
     }catch(e){
-      console.error('Register error:',e);
       setErr(t.authConnError);
     }
     setLoading(false);

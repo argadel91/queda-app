@@ -4,7 +4,6 @@ import { getOutfitTip } from '../constants/weather.js'
 import { daysUntil } from '../lib/utils.js'
 
 export default function OutfitCard({dressCode, dressNote, city, date, mc, c, lang, t}){
-  const isEs=lang==='es';
   const[weather,setW]=useState(null);
   useEffect(()=>{
     if(!city||!date)return;

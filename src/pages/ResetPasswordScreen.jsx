@@ -3,7 +3,7 @@ import { db } from '../lib/supabase.js'
 import T from '../constants/translations.js'
 
 export default function ResetPasswordScreen({onDone,c,lang}){
-  const t=T[lang];const isEs=lang==='es';
+  const t=T[lang];
   const[password,setPassword]=useState('');
   const[password2,setPassword2]=useState('');
   const[loading,setLoading]=useState(false);

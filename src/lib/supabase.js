@@ -8,7 +8,7 @@ export const db = createClient(SB_URL, SB_KEY)
 // Toast error system
 let _toastFn = null
 export const setToastFn = fn => { _toastFn = fn }
-export const showErr = msg => { if (_toastFn) _toastFn(msg); else console.error(msg) }
+export const showErr = msg => { if (_toastFn) _toastFn(msg); }
 export const showSuccess = msg => { if (_toastFn) _toastFn(msg, 'success'); }
 export const showInfo = msg => { if (_toastFn) _toastFn(msg, 'info'); }
 
@@ -20,7 +20,6 @@ export const savePlan = async p => {
 export const savePlanWithUser = async (p, uid) => {
   try { await db.from('plans').upsert({ id: p.id, data: p, is_public: !!p.isPublic, user_id: uid }) }
   catch (e) {
-    console.error('savePlanWithUser failed:', e)
     try { await db.from('plans').upsert({ id: p.id, data: p, is_public: !!p.isPublic }) }
     catch (e2) { showErr('Error guardando el plan.'); throw e2 }
   }
@@ -46,7 +45,7 @@ export const saveResp = async (planId, name, resp) => {
     const { data: ex } = await db.from('responses').select('id').eq('plan_id', planId).eq('name', name).maybeSingle()
     if (ex?.id) { await db.from('responses').update({ data: resp }).eq('id', ex.id) }
     else { await db.from('responses').insert({ plan_id: planId, name, data: resp }) }
-  } catch (e) { console.error(e) }
+  } catch {}
 }
 export const loadResps = async id => {
   try { const { data } = await db.from('responses').select('data').eq('plan_id', id); return (data || []).map(r => r.data) }
@@ -60,5 +59,5 @@ export const loadProfile = async uid => {
 }
 export const saveProfile = async (uid, prof) => {
   try { await db.from('profiles').upsert({ id: uid, ...prof, updated_at: new Date().toISOString() }) }
-  catch (e) { console.error(e) }
+  catch {}
 }

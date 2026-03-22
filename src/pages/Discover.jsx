@@ -6,7 +6,7 @@ import { daysUntil, fmtDate } from '../lib/utils.js'
 import { Btn, Card, Lbl, Back, ModeBadge } from '../components/ui.jsx'
 
 export default function Discover({onBack,onJoin,c,lang}){
-  const t=T[lang];const isEs=lang==='es';
+  const t=T[lang];
   const[plans,setPlans]=useState([]);const[ldg,setL]=useState(true);
   const[fc,setFC]=useState('');const[modeF,setModeF]=useState('all');
   useEffect(()=>{(async()=>{setL(true);setPlans(await loadPublicPlans());setL(false);})();},[]);
