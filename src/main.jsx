@@ -10,9 +10,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   </ErrorBoundary>
 )
 
-// Load Google Maps dynamically with async bootstrap
-const gmKey = import.meta.env.VITE_GOOGLE_MAPS_KEY || ''
-if (gmKey && !document.querySelector('script[src*="maps.googleapis.com"]')) {
+// Google Maps loader — only loads when first needed
+window.__loadGoogleMaps = () => {
+  if (window.__gmLoading || window.google?.maps) return
+  window.__gmLoading = true
+  const gmKey = import.meta.env.VITE_GOOGLE_MAPS_KEY || ''
+  if (!gmKey) return
   const s = document.createElement('script')
   s.src = `https://maps.googleapis.com/maps/api/js?key=${gmKey}&loading=async&libraries=places&v=weekly`
   s.async = true

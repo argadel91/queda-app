@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { getCityTz } from '../constants/weather.js'
 
 const getPlacesLib = async () => {
+  if (window.__loadGoogleMaps) window.__loadGoogleMaps()
   if (!window.google?.maps) {
     await new Promise(resolve => {
       const check = setInterval(() => {

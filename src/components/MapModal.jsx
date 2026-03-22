@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react'
 import T from '../constants/translations.js'
 
-const waitForGoogle = () => new Promise(resolve => {
-  if (window.google?.maps) return resolve()
-  const check = setInterval(() => {
-    if (window.google?.maps) { clearInterval(check); resolve() }
-  }, 100)
-  setTimeout(() => { clearInterval(check); resolve() }, 10000)
-})
+const waitForGoogle = () => {
+  if (window.__loadGoogleMaps) window.__loadGoogleMaps()
+  return new Promise(resolve => {
+    if (window.google?.maps) return resolve()
+    const check = setInterval(() => {
+      if (window.google?.maps) { clearInterval(check); resolve() }
+    }, 100)
+    setTimeout(() => { clearInterval(check); resolve() }, 10000)
+  })
+}
 
 export default function MapModal({visible,onSelect,onClose,c,lang,init}){
   const t=T[lang];
@@ -19,8 +22,9 @@ export default function MapModal({visible,onSelect,onClose,c,lang,init}){
   const[results,setResults]=useState([]);
   const[ready,setReady]=useState(false);
 
-  // Init map once, never destroy
+  // Init map on first open, never destroy
   useEffect(()=>{
+    if(!visible)return;
     let cancelled=false;
     waitForGoogle().then(async()=>{
       if(cancelled||!mapRef.current||mapObjRef.current)return;
@@ -53,7 +57,7 @@ export default function MapModal({visible,onSelect,onClose,c,lang,init}){
       });
     });
     return()=>{cancelled=true;};
-  },[]);
+  },[visible]);
 
   // When opened, recenter if init changed
   useEffect(()=>{
