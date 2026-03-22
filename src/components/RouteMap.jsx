@@ -32,7 +32,6 @@ export default function RouteMap({stops,c}){
     loadGM().then(async()=>{
       if(cancelled)return;
       await google.maps.importLibrary('maps');
-      await google.maps.importLibrary('marker');
 
       const map=new google.maps.Map(mapDiv,{
         disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy'
@@ -43,11 +42,7 @@ export default function RouteMap({stops,c}){
       valid.forEach((s,i)=>{
         const pos={lat:s.lat,lng:s.lng};
         bounds.extend(pos);
-        // Create label element for AdvancedMarkerElement
-        const label=document.createElement('div');
-        label.style.cssText='width:28px;height:28px;border-radius:50%;background:#CDFF6C;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#0A0A0A;';
-        label.textContent=String(i+1);
-        const marker=new google.maps.marker.AdvancedMarkerElement({position:pos,map,content:label});
+        const marker=new google.maps.Marker({position:pos,map,label:{text:String(i+1),color:'#0A0A0A',fontWeight:'800',fontSize:'12px'},icon:{path:google.maps.SymbolPath.CIRCLE,scale:16,fillColor:'#CDFF6C',fillOpacity:1,strokeColor:'#9ABF50',strokeWeight:2}});
         markersRef.current.push(marker);
       });
 
