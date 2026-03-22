@@ -58,11 +58,22 @@ export default function Landing({onGetStarted, c, lang, onLangChange}){
             {emoji:'🔔',label:t.landingF6||'Email reminders'},
             {emoji:'🌍',label:t.landingF7||'6 languages'},
             {emoji:'📱',label:t.landingF8||'Works on mobile'},
-            {emoji:'🤖',label:t.landingF9||'AI Assistant'},
           ].map((f,i)=><div key={i} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'14px',display:'flex',alignItems:'center',gap:'10px'}}>
             <span style={{fontSize:'20px'}}>{f.emoji}</span>
             <span style={{fontSize:'13px',fontWeight:'600'}}>{f.label}</span>
           </div>)}
+        </div>
+      </div>
+
+      {/* AI Assistant showcase */}
+      <div style={{padding:'24px 0 48px'}}>
+        <div style={{background:`${c.A}08`,border:`1px solid ${c.A}25`,borderRadius:'20px',padding:'32px 24px',textAlign:'center'}}>
+          <div style={{fontSize:'48px',marginBottom:'12px'}}>🤖</div>
+          <h2 style={{fontFamily:"'Syne',serif",fontSize:'24px',fontWeight:'800',marginBottom:'8px'}}>{t.landingAITitle||'Meet queda AI'}</h2>
+          <p style={{fontSize:'15px',color:c.M2,lineHeight:1.7,marginBottom:'20px',maxWidth:'360px',margin:'0 auto 20px'}}>{t.landingAISub||'Your personal planning assistant. Ask for restaurant ideas, dress code tips, or help organizing your event.'}</p>
+          <div style={{display:'flex',flexWrap:'wrap',gap:'8px',justifyContent:'center'}}>
+            {[t.chatSuggest1||'Restaurant for 8?',t.chatSuggest2||'Dress code for a party?',t.chatSuggest3||'How do I share?'].map((s,i)=><span key={i} style={{padding:'8px 16px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'20px',fontSize:'13px',color:c.T}}>💬 {s}</span>)}
+          </div>
         </div>
       </div>
 
