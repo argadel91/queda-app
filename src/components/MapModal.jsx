@@ -173,35 +173,34 @@ const showResults = (items) => {
 
 let _pendingSel = null
 
-const enrichPlace = (sel) => new Promise(resolve => {
-  if (!sel.placeId || !_map) return resolve(sel)
+const enrichPlace = async (sel) => {
+  if (!sel.placeId) return sel
   try {
-    const service = new google.maps.places.PlacesService(_map)
-    service.getDetails({ placeId: sel.placeId, fields: ['website','formatted_phone_number','opening_hours','price_level','rating','user_ratings_total','photos','editorial_summary','dine_in','takeout','delivery','reservable','serves_beer','serves_wine','outdoor_seating','wheelchair_accessible_entrance','url'] }, (place, status) => {
-      if (status === 'OK' && place) {
-        sel.website = place.website || null
-        sel.phone = place.formatted_phone_number || null
-        sel.hours = place.opening_hours?.weekday_text || null
-        sel.isOpen = place.opening_hours?.isOpen?.() ?? null
-        if (!sel.rating) sel.rating = place.rating || null
-        if (!sel.ratingCount) sel.ratingCount = place.user_ratings_total || null
-        if (!sel.priceLevel && place.price_level) sel.priceLevel = place.price_level
-        if (!sel.photo && place.photos?.[0]) sel.photo = place.photos[0].getUrl?.({ maxWidth: 400 }) || null
-        sel.summary = place.editorial_summary?.overview || null
-        sel.dineIn = place.dine_in ?? null
-        sel.takeout = place.takeout ?? null
-        sel.delivery = place.delivery ?? null
-        sel.reservable = place.reservable ?? null
-        sel.servesBeer = place.serves_beer ?? null
-        sel.servesWine = place.serves_wine ?? null
-        sel.outdoorSeating = place.outdoor_seating ?? null
-        sel.wheelchair = place.wheelchair_accessible_entrance ?? null
-        sel.googleMapsURI = place.url || null
-      }
-      resolve(sel)
-    })
-  } catch { resolve(sel) }
-})
+    const { Place } = await google.maps.importLibrary('places')
+    const place = new Place({ id: sel.placeId })
+    await place.fetchFields({ fields: ['displayName','websiteURI','nationalPhoneNumber','regularOpeningHours','priceLevel','rating','userRatingCount','photos','editorialSummary','googleMapsURI','dineIn','takeout','delivery','reservable','servesBreakfast','servesLunch','servesDinner','servesBeer','servesWine','outdoorSeating','goodForChildren','accessibilityOptions'] })
+    sel.website = place.websiteURI || null
+    sel.phone = place.nationalPhoneNumber || null
+    sel.hours = place.regularOpeningHours?.weekdayDescriptions || null
+    sel.isOpen = place.regularOpeningHours?.isOpen?.() ?? null
+    if (!sel.rating) sel.rating = place.rating || null
+    if (!sel.ratingCount) sel.ratingCount = place.userRatingCount || null
+    if (place.priceLevel) sel.priceLevel = place.priceLevel
+    if (!sel.photo && place.photos?.[0]) sel.photo = place.photos[0].getURI?.({ maxWidth: 400 }) || null
+    sel.summary = place.editorialSummary || null
+    sel.googleMapsURI = place.googleMapsURI || null
+    sel.dineIn = place.dineIn ?? null
+    sel.takeout = place.takeout ?? null
+    sel.delivery = place.delivery ?? null
+    sel.reservable = place.reservable ?? null
+    sel.servesBeer = place.servesBeer ?? null
+    sel.servesWine = place.servesWine ?? null
+    sel.outdoorSeating = place.outdoorSeating ?? null
+    sel.goodForChildren = place.goodForChildren ?? null
+    sel.wheelchair = place.accessibilityOptions?.wheelchairAccessibleEntrance ?? null
+  } catch {}
+  return sel
+}
 
 const selectPlace = (sel) => {
   _pendingSel = sel
