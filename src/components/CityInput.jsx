@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { getCityTz } from '../constants/weather.js'
 
 const waitForGoogle = () => new Promise(resolve => {
@@ -10,14 +10,25 @@ const waitForGoogle = () => new Promise(resolve => {
 })
 
 export default function CityInput({value,onChange,onSelect,placeholder,c}){
+  const wrapRef=useRef(null);
   const inputRef=useRef(null);
   const acRef=useRef(null);
 
+  // Create input outside React to avoid removeChild conflict
   useEffect(()=>{
-    let cancelled=false;
+    if(!wrapRef.current)return;
+    const input=document.createElement('input');
+    input.placeholder=placeholder||'';
+    input.value=value||'';
+    input.style.cssText=`background:${c.CARD};border:1px solid ${c.BD};border-radius:10px;padding:12px 14px;color:${c.T};font-size:14px;font-family:inherit;outline:none;width:100%;box-sizing:border-box;`;
+    input.addEventListener('input',()=>onChange(input.value));
+    wrapRef.current.innerHTML='';
+    wrapRef.current.appendChild(input);
+    inputRef.current=input;
+
     waitForGoogle().then(()=>{
-      if(cancelled||!inputRef.current||acRef.current)return;
-      const ac=new google.maps.places.Autocomplete(inputRef.current,{
+      if(!input.isConnected||acRef.current)return;
+      const ac=new google.maps.places.Autocomplete(input,{
         types:['(cities)'],
         fields:['name','geometry','address_components','formatted_address']
       });
@@ -31,17 +42,25 @@ export default function CityInput({value,onChange,onSelect,placeholder,c}){
         const lat=place.geometry.location.lat();
         const lon=place.geometry.location.lng();
         const tz=getCityTz(city);
+        input.value=label;
         onChange(label);
         onSelect({label,city,country,lat,lon,tz});
       });
       acRef.current=ac;
     });
-    return()=>{cancelled=true;};
+
+    return()=>{
+      // Clean up pac-container elements Google leaves behind
+      document.querySelectorAll('.pac-container').forEach(el=>el.remove());
+    };
   },[]);
 
-  return(<div style={{position:'relative'}}>
-    <input ref={inputRef} value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
-  </div>);
+  // Sync value from parent
+  useEffect(()=>{
+    if(inputRef.current&&value!==undefined)inputRef.current.value=value;
+  },[value]);
+
+  return <div ref={wrapRef} style={{position:'relative'}}/>;
 }
 
 // ─── MAP MODAL ────────────────────────────────────────
