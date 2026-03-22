@@ -25,6 +25,10 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
   const[conf,setConf]=useState(false);const[remSent,setRem]=useState(false);
   const[payModal,setPay]=useState(false);const[payAmt,setPayAmt]=useState(0);
   const[newRespAlert,setAlert]=useState(null);
+  const[autoConfirmPending,setAutoConfirmPending]=useState(null);
+  const[editMode,setEditMode]=useState(false);
+  const[editName,setEditName]=useState(ip.name);
+  const[editDesc,setEditDesc]=useState(ip.desc||'');
   const isOrgRef=useRef(isOrg);
   const prevCountRef=useRef(null);
   const refresh=useCallback(async(silent=false)=>{
@@ -48,11 +52,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
     if(isOrgRef.current&&plan.autoConfirm&&!plan.confirmedDate){
       const cntYFn=d=>newRs.filter(r=>r.avail?.[d]==='yes').length;
       const autoDate=(plan.dates||[]).find(d=>cntYFn(d)>=plan.autoConfirmN);
-      if(autoDate){
-        const up={...plan,confirmedDate:autoDate};
-        await updatePlan(up);setPlan(up);
-        if(silent){const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`⚡ *${plan.name}* — ${plan.lang==='es'?'¡fecha auto-confirmada!':'date auto-confirmed!'}\n\n🗓️ ${fmtDate(autoDate,plan.lang||'es')}\n\n${url}`),'_blank');}
-      }
+      if(autoDate&&!autoConfirmPending)setAutoConfirmPending(autoDate);
     }
     if(!silent)setL(false);
   },[plan.id,rs]);
@@ -78,6 +78,29 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
   const tlbl=k=>t.tabs[k]||k;
   return(<>
     {payModal&&<PayModal plan={plan} amount={payAmt} onClose={()=>setPay(false)} c={c} lang={lang}/>}
+    {autoConfirmPending&&<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setAutoConfirmPending(null)}>
+      <div onClick={e=>e.stopPropagation()} style={{background:c.CARD,border:`1px solid ${mc}40`,borderRadius:'16px',padding:'24px',width:'100%',maxWidth:'340px',textAlign:'center'}}>
+        <div style={{fontSize:'32px',marginBottom:'12px'}}>⚡</div>
+        <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'8px'}}>{t.autoConfirmTitle}</div>
+        <div style={{fontSize:'14px',color:c.M2,marginBottom:'6px'}}>{cntY(autoConfirmPending)} {t.peopleSaid} {fmtShort(autoConfirmPending,lang)}</div>
+        <div style={{fontSize:'13px',color:c.M2,marginBottom:'20px'}}>{t.autoConfirmQ}</div>
+        <div style={{display:'flex',gap:'8px'}}>
+          <button onClick={()=>setAutoConfirmPending(null)} style={{flex:1,padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontWeight:'600',fontSize:'14px'}}>{t.notYet}</button>
+          <button onClick={async()=>{await confirmDate(autoConfirmPending);setAutoConfirmPending(null);}} style={{flex:1,padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.confirmBtn}</button>
+        </div>
+      </div>
+    </div>}
+    {editMode&&<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setEditMode(false)}>
+      <div onClick={e=>e.stopPropagation()} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'16px',padding:'24px',width:'100%',maxWidth:'380px'}}>
+        <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>{t.editPlan}</div>
+        <div style={{marginBottom:'12px'}}><div style={{fontSize:'13px',color:c.M,marginBottom:'4px'}}>{t.planName}</div><input value={editName} onChange={e=>setEditName(e.target.value)} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/></div>
+        <div style={{marginBottom:'16px'}}><div style={{fontSize:'13px',color:c.M,marginBottom:'4px'}}>{t.desc}</div><textarea value={editDesc} onChange={e=>setEditDesc(e.target.value)} rows={3} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box',resize:'vertical'}}/></div>
+        <div style={{display:'flex',gap:'8px'}}>
+          <button onClick={()=>setEditMode(false)} style={{flex:1,padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontWeight:'600',fontSize:'14px'}}>{t.cancel}</button>
+          <button onClick={async()=>{const up={...plan,name:editName.trim()||plan.name,desc:editDesc.trim()};await updatePlan(up);setPlan(up);setEditMode(false);}} style={{flex:1,padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.saveLbl}</button>
+        </div>
+      </div>
+    </div>}
     {newRespAlert&&<div style={{position:'fixed',top:'70px',left:'50%',transform:'translateX(-50%)',background:mc,color:'#0A0A0A',padding:'10px 18px',borderRadius:'30px',fontWeight:'700',fontSize:'13px',zIndex:200,boxShadow:'0 4px 20px rgba(0,0,0,.4)',whiteSpace:'nowrap',animation:'slideDown .3s ease'}}>💬 {`${t.newRespFrom.replace('{name}',newRespAlert)}`}</div>}
     <div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
       <Back onClick={onBack} label={t.back} c={c}/>
@@ -89,7 +112,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
         <div style={{fontSize:'12px',color:c.M2,textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,lang)}</div></div>
       </div>}
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'6px'}}>
-        <div><h2 style={{fontFamily:"'Syne',serif",fontSize:'24px',fontWeight:'800',color:c.T,margin:'0 0 4px'}}>{plan.name}</h2><ModeBadge mode={plan.mode||'social'} lang={lang} c={c}/></div>
+        <div><div style={{display:'flex',alignItems:'center'}}><h2 style={{fontFamily:"'Syne',serif",fontSize:'24px',fontWeight:'800',color:c.T,margin:'0 0 4px'}}>{plan.name}</h2>{isOrgRef.current&&<button onClick={()=>setEditMode(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',marginLeft:'8px'}}>✏️</button>}</div><ModeBadge mode={plan.mode||'social'} lang={lang} c={c}/></div>
         <div style={{display:'flex',gap:'5px'}}>
           <button onClick={()=>{const url=location.href.split('?')[0]+'?code='+plan.id;const txt=`${t.respondToPlan.replace('{name}',plan.name)}\n${url}`;window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}} title={t.shareWATitle} style={{background:'#25D36618',border:'1px solid #25D36640',borderRadius:'8px',padding:'6px 10px',color:'#25D366',cursor:'pointer',fontSize:'13px'}}>💬</button>
           <button onClick={()=>{const url=location.href.split('?')[0]+'?code='+plan.id;navigator.clipboard?.writeText(url);}} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}} title={t.copyLinkTitle}>🔗</button>
@@ -143,6 +166,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
               </div>
             </div>
             {isOrgRef.current&&!plan.confirmedDate&&<Btn onClick={()=>confirmDate(best)} disabled={conf} full sm c={c} accent={mc}>{conf?t.confirming:t.confirmThis}</Btn>}
+            {best&&<button onClick={()=>generateICS({...plan,confirmedDate:best},lang)} style={{width:'100%',padding:'8px',background:'none',border:`1px dashed ${c.BD}`,borderRadius:'8px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',marginTop:'6px'}}>{t.addToCalendar} 📅</button>}
           </div>}
           {(plan.dates||[]).map(d=>{const ny=cntY(d);const nm=cntM(d);const pct=(ny/mx)*100;const isBest=d===best&&ny>0;const isConf=d===plan.confirmedDate;return(
             <div key={d} style={{marginBottom:'12px'}}>

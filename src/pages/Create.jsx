@@ -32,8 +32,33 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
   const[bring,setBring]=useState([{id:1,text:''}]);
   const[payment,setPayment]=useState({bizumPhone:'',paypalUser:'',revolutUser:''});
   const[saving,setSaving]=useState(false);
+  const[openSections,setOpenSections]=useState({dress:true});
+  const[draftRestored,setDraftRestored]=useState(false);
+  const draftKey=`q_draft_${mode}`;
   const planTz=cityData?.tz||getCityTz(city);
   useEffect(()=>{if(org.trim())ls.set('q_myname',org.trim());},[org]);
+  // Restore draft on mount
+  useEffect(()=>{
+    const d=ls.get(draftKey,null);if(!d)return;
+    if(d.name)setName(d.name);if(d.desc)setDesc(d.desc);if(d.org)setOrg(d.org);if(d.orgEmail)setOrgEmail(d.orgEmail);
+    if(d.city)setCity(d.city);if(d.cityData)setCityData(d.cityData);
+    if(d.selDates)setSelDates(d.selDates);if(d.selTimes)setSelTimes(d.selTimes);
+    if(d.stops)setStops(d.stops);if(d.dressCode!==undefined)setDressCode(d.dressCode);if(d.dressNote)setDressNote(d.dressNote);
+    if(d.autoConfirm!==undefined)setAutoConfirm(d.autoConfirm);if(d.autoConfirmN!==undefined)setAutoConfirmN(d.autoConfirmN);
+    if(d.surpriseMode!==undefined)setSurprise(d.surpriseMode);if(d.maxGuests)setMaxGuests(d.maxGuests);
+    if(d.orgAttends!==undefined)setOrgAttends(d.orgAttends);if(d.poll)setPoll(d.poll);
+    if(d.giftOn!==undefined)setGiftOn(d.giftOn);if(d.gift)setGift(d.gift);if(d.bring)setBring(d.bring);
+    if(d.payment)setPayment(d.payment);if(d.isPublic!==undefined)setIsPublic(d.isPublic);if(d.step)setStep(d.step);
+    setDraftRestored(true);
+  },[]);// eslint-disable-line react-hooks/exhaustive-deps
+  // Save draft helper
+  const saveDraft=(s)=>ls.set(draftKey,{name,desc,org,orgEmail,city,cityData,selDates,selTimes,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,maxGuests,orgAttends,poll,giftOn,gift,bring,payment,isPublic,step:s!==undefined?s:step});
+  // Auto-save every 30s
+  useEffect(()=>{const id=setInterval(()=>saveDraft(),30000);return()=>clearInterval(id);});
+  const clearDraft=()=>{try{localStorage.removeItem(draftKey)}catch{}};
+  const discardDraft=()=>{clearDraft();setDraftRestored(false);window.location.reload();};
+  // Save on step change
+  const changeStep=(s)=>{saveDraft(s);setStep(s);};
   const addStop=()=>setStops(p=>[...p,{id:Date.now(),name:'',cat:t.cat[0],address:'',cost:'',link:'',lat:null,lng:null}]);
   const upd=(id,k,v)=>setStops(p=>p.map(s=>s.id===id?{...s,[k]:v}:s));
   const remStop=id=>setStops(p=>p.filter(s=>s.id!==id));
@@ -45,7 +70,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
       const plan={id:genId(),name:name.trim(),desc:desc.trim(),organizer:org.trim(),organizerEmail:orgEmail.trim(),organizerRole:orgRole,mode,dates:[...selDates].sort(),times:selTimes,timezone:planTz,city:city.split(',')[0].trim(),cityFull:city,cityLat:cityData?.lat,cityLon:cityData?.lon,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,maxGuests:maxGuests?parseInt(maxGuests):null,orgAttends,poll:poll.q.trim()?poll:null,gift:giftOn?gift:null,bring:bring.filter(b=>b.text.trim()),payment,confirmedDate:null,isPublic:mode!=='intimate'?isPublic:false,lang,createdAt:new Date().toISOString()};
       if(authUser)await savePlanWithUser(plan,authUser.id);else await savePlan(plan);
       addMyPlan(plan.id,plan.name,'organizer',mode);
-      ls.set('q_state',{screen:'share',planId:plan.id,isOrg:true});onCreated(plan);
+      ls.set('q_state',{screen:'share',planId:plan.id,isOrg:true});clearDraft();onCreated(plan);
     }catch(e){console.error(e);showErr('Error al crear el plan. Comprueba tu conexión.');}
     setSaving(false);
   };
@@ -53,7 +78,14 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
   return(<>
     {mapStop!==null&&<MapModal onSelect={sel=>{upd(mapStop,'name',sel.name);upd(mapStop,'address',sel.address);upd(mapStop,'lat',sel.lat);upd(mapStop,'lng',sel.lng);if(!city&&sel.address)setCity(sel.address.split(',').slice(-3,-1).join(',').trim()||'');setMapStop(null);}} onClose={()=>setMapStop(null)} c={c} lang={lang} init={stops.find(s=>s.id===mapStop)?.name||city||''}/>}
     <div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
-      <Back onClick={step===0?onBack:()=>setStep(s=>s-1)} label={t.back} c={c}/>
+      {draftRestored&&<div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:'8px',padding:'10px 14px',marginBottom:'12px',background:mc+'18',border:`1px solid ${mc}40`,borderRadius:'10px',fontSize:'13px'}}>
+        <span style={{color:mc,fontWeight:'600'}}>{t.draftRestored||'Draft restored'}</span>
+        <div style={{display:'flex',gap:'6px'}}>
+          <button onClick={discardDraft} style={{background:'none',border:`1px solid ${mc}40`,borderRadius:'6px',padding:'4px 10px',color:mc,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:'600'}}>{t.draftDiscard||'Discard'}</button>
+          <button onClick={()=>setDraftRestored(false)} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'16px',lineHeight:1}}>x</button>
+        </div>
+      </div>}
+      <Back onClick={step===0?onBack:()=>changeStep(step-1)} label={t.back} c={c}/>
       <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'20px'}}><ModeBadge mode={mode} lang={lang} c={c}/><div style={{flex:1,height:'1px',background:c.BD}}/></div>
       <Stepper cur={step} labels={stepLabels} c={c} accent={mc}/>
 
@@ -78,7 +110,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
           <div><div style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>🌍 {isPublic?t.isPublicLbl:(t.privatePlan)}</div><div style={{fontSize:'12px',color:c.M2}}>{isPublic?(t.appearsInDiscover):(t.codeOnly)}</div></div>
         </div>}
         {mode==='intimate'&&<div style={{height:'24px'}}/>}
-        <Btn onClick={()=>setStep(1)} disabled={!name.trim()||!org.trim()} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn>
+        <Btn onClick={()=>changeStep(1)} disabled={!name.trim()||!org.trim()} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn>
       </>}
 
       {step===1&&<>
@@ -105,7 +137,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
             <TimePicker times={selTimes[d]||[]} onChange={times=>setSelTimes(p=>({...p,[d]:times}))} c={c} lang={lang} tz={planTz}/>
           </div>)}
         </>}
-        <div style={{marginTop:'20px'}}><Btn onClick={()=>setStep(2)} disabled={selDates.length<1} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
+        <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(2)} disabled={selDates.length<1} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
       </>}
 
       {step===2&&<>
@@ -113,7 +145,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
         <p style={{color:c.M2,fontSize:'13px',marginBottom:'14px'}}>{t.routeSub}</p>
         {city&&<div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',marginBottom:'14px',display:'flex',alignItems:'center',gap:'8px',fontSize:'13px'}}>
           <span>📍</span><span style={{color:c.T,fontWeight:'500'}}>{city}</span>
-          <span style={{color:c.M2,fontSize:'11px',marginLeft:'auto',cursor:'pointer'}} onClick={()=>setStep(1)}>✏️</span>
+          <span style={{color:c.M2,fontSize:'11px',marginLeft:'auto',cursor:'pointer'}} onClick={()=>changeStep(1)}>✏️</span>
         </div>}
         <HR c={c}/>
         {stops.map((s,i)=><div key={s.id} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'14px',padding:'16px',marginBottom:'10px'}}>
@@ -134,63 +166,71 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
         </div>)}
         <Btn onClick={addStop} v="secondary" full sm style={{marginBottom:'14px'}} c={c}>{t.addStop}</Btn>
         {budget>0&&<div style={{background:`${mc}0D`,border:`1px solid ${mc}30`,borderRadius:'12px',padding:'14px 16px',marginBottom:'14px',display:'flex',justifyContent:'space-between'}}><span style={{color:c.M2}}>{t.estPer}</span><span style={{color:mc,fontSize:'22px',fontWeight:'800'}}>{budget.toFixed(0)}€</span></div>}
-        <Btn onClick={()=>stepLabels.length>3?setStep(3):create()} disabled={saving} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{stepLabels.length>3?t.cont:(saving?t.saving:t.createBtn)}</Btn>
+        <Btn onClick={()=>stepLabels.length>3?changeStep(3):create()} disabled={saving} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{stepLabels.length>3?t.cont:(saving?t.saving:t.createBtn)}</Btn>
       </>}
 
-      {step===3&&stepLabels.length>3&&<>
+      {step===3&&stepLabels.length>3&&(()=>{
+        const togSec=id=>setOpenSections(p=>({...p,[id]:!p[id]}));
+        const Sec=({id,icon,label,hasData,children})=>{const open=!!openSections[id];return<div style={{marginBottom:'12px'}}>
+          <div onClick={()=>togSec(id)} style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px 16px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:open?'12px 12px 0 0':'12px',cursor:'pointer',userSelect:'none'}}>
+            <span style={{fontSize:'15px'}}>{icon}</span>
+            <span style={{flex:1,fontSize:'14px',fontWeight:'600',color:c.T}}>{label}</span>
+            {hasData&&!open&&<span style={{width:'8px',height:'8px',borderRadius:'50%',background:'#22c55e',flexShrink:0}}/>}
+            <span style={{fontSize:'13px',color:c.M2,flexShrink:0}}>{open?'▾':'▸'}</span>
+          </div>
+          {open&&<div style={{padding:'14px 16px',border:`1px solid ${c.BD}`,borderTop:'none',borderRadius:'0 0 12px 12px',background:c.CARD2}}>{children}</div>}
+        </div>};
+        return<>
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'20px'}}>{t.extrasTitle}</h2>
         {/* DRESS CODE */}
-        <div style={{marginBottom:'20px'}}>
-          <Lbl c={c}>{t.dcLbl}</Lbl>
+        <Sec id="dress" icon="👔" label={t.dcLbl} hasData={dressCode!==null}>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'6px',marginBottom:'8px'}}>
             {t.dressCodes.map(opt=><div key={opt.k} onClick={()=>setDressCode(dressCode===opt.k?null:opt.k)} style={{padding:'10px 12px',borderRadius:'10px',border:`1px solid ${dressCode===opt.k?mc+'50':c.BD}`,background:dressCode===opt.k?`${mc}12`:c.CARD,cursor:'pointer',fontSize:'13px',color:dressCode===opt.k?mc:c.T,fontWeight:dressCode===opt.k?'600':'400'}}>{opt.l}</div>)}
           </div>
           {dressCode&&<input value={dressNote} onChange={e=>setDressNote(e.target.value)} placeholder={dressCode==='custom'?t.dcCustomPh:t.dcNote} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'11px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
-        </div>
+        </Sec>
         {/* AUTO-CONFIRM MODE */}
-        <div style={{marginBottom:'20px'}}>
+        <Sec id="auto" icon="⚡" label={t.firstAvailable} hasData={autoConfirm}>
           <div onClick={()=>setAutoConfirm(a=>!a)} style={{display:'flex',alignItems:'center',gap:'12px',padding:'14px 16px',background:c.CARD,border:`1px solid ${autoConfirm?mc+'50':c.BD}`,borderRadius:'12px',cursor:'pointer'}}>
             <div style={{width:'22px',height:'22px',borderRadius:'50%',border:`2px solid ${autoConfirm?mc:c.BD}`,background:autoConfirm?mc:'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',color:'#0A0A0A',fontWeight:'800',flexShrink:0}}>{autoConfirm?'✓':''}</div>
             <div>
-              <div style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>⚡ {t.firstAvailable}</div>
+              <div style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>{t.firstAvailable}</div>
               <div style={{fontSize:'12px',color:c.M2}}>{t.autoConfirmDesc}</div>
             </div>
           </div>
-          {autoConfirm&&<div style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px 14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'0 0 12px 12px',borderTop:'none'}}>
+          {autoConfirm&&<div style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px 14px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'0 0 12px 12px',borderTop:'none',marginTop:'-1px'}}>
             <span style={{fontSize:'13px',color:c.M2}}>{t.confirmWith}</span>
             <input type="number" min="1" max="50" value={autoConfirmN} onChange={e=>setAutoConfirmN(parseInt(e.target.value)||2)} style={{width:'60px',background:c.CARD,border:`1px solid ${mc}40`,borderRadius:'8px',padding:'6px 10px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',textAlign:'center'}}/>
             <span style={{fontSize:'13px',color:c.M2}}>{t.peopleLbl}</span>
           </div>}
-        </div>
+        </Sec>
         {/* SURPRISE MODE */}
-        <div style={{marginBottom:'20px'}}>
+        <Sec id="surprise" icon="🎭" label={t.surpriseMode_lbl||'Surprise Mode'} hasData={surpriseMode}>
           <div onClick={()=>setSurprise(s=>!s)} style={{display:'flex',alignItems:'center',gap:'12px',padding:'14px 16px',background:c.CARD,border:`1px solid ${surpriseMode?mc+'50':c.BD}`,borderRadius:'12px',cursor:'pointer'}}>
             <div style={{width:'22px',height:'22px',borderRadius:'50%',border:`2px solid ${surpriseMode?mc:c.BD}`,background:surpriseMode?mc:'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',color:'#0A0A0A',fontWeight:'800',flexShrink:0}}>{surpriseMode?'✓':''}</div>
-            <div><div style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>🎭 {t.surpriseMode_lbl||'🎭'}</div><div style={{fontSize:'12px',color:c.M2}}>{t.surpriseModeSub}</div></div>
+            <div><div style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>{t.surpriseMode_lbl||'🎭'}</div><div style={{fontSize:'12px',color:c.M2}}>{t.surpriseModeSub}</div></div>
           </div>
-        </div>
+        </Sec>
         {/* GIFT */}
-        <div style={{marginBottom:'20px'}}>
+        <Sec id="gift" icon="🎁" label={t.gift} hasData={giftOn}>
           <div onClick={()=>setGiftOn(g=>!g)} style={{display:'flex',alignItems:'center',gap:'12px',padding:'14px 16px',background:c.CARD,border:`1px solid ${giftOn?c.A+'50':c.BD}`,borderRadius:'12px',cursor:'pointer',marginBottom:'10px'}}>
             <div style={{width:'22px',height:'22px',borderRadius:'50%',border:`2px solid ${giftOn?c.A:c.BD}`,background:giftOn?c.A:'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',color:'#0A0A0A',fontWeight:'800',flexShrink:0}}>{giftOn?'✓':''}</div>
             <div><div style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>{t.gift}</div><div style={{fontSize:'12px',color:c.M2}}>{t.giftSub}</div></div>
           </div>
-          {giftOn&&<div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'14px',display:'flex',flexDirection:'column',gap:'8px'}}>
+          {giftOn&&<div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'14px',display:'flex',flexDirection:'column',gap:'8px'}}>
             {[[gift.name,t.giftName,'name'],[gift.link,t.giftLink,'link'],[gift.price,t.giftPrice,'price'],[gift.stripeLink||'',t.payLink,'stripeLink']].map(([v,ph,k])=><input key={k} value={v} onChange={e=>setGift(g=>({...g,[k]:e.target.value}))} type={k==='price'?'number':'text'} placeholder={ph} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>)}
           </div>}
-        </div>
+        </Sec>
         {/* BRING */}
-        <div style={{marginBottom:'20px'}}>
-          <Lbl c={c}>{t.bring}</Lbl>
+        <Sec id="bring" icon="🧺" label={t.bring} hasData={bring.some(b=>b.text.trim())}>
           {bring.map(b=><div key={b.id} style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
             <input value={b.text} onChange={e=>setBring(p=>p.map(x=>x.id===b.id?{...x,text:e.target.value}:x))} placeholder={t.newItem} style={{flex:1,background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none'}}/>
             {bring.length>1&&<button onClick={()=>setBring(p=>p.filter(x=>x.id!==b.id))} title={t.removeItem} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M,cursor:'pointer',fontSize:'16px',borderRadius:'8px',width:'36px'}}>×</button>}
           </div>)}
           <Btn onClick={()=>setBring(p=>[...p,{id:Date.now(),text:''}])} v="secondary" sm c={c}>{t.addItem}</Btn>
-        </div>
+        </Sec>
         {/* POLL */}
-        <div style={{marginBottom:'20px'}}>
-          <Lbl c={c}>🗳️ {t.pollQuestion}</Lbl>
+        <Sec id="poll" icon="🗳️" label={t.pollQuestion} hasData={poll.q.trim()!==''}>
           <input value={poll.q} onChange={e=>setPoll(p=>({...p,q:e.target.value}))} placeholder={t.pollPlaceholder} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box',marginBottom:'8px'}}/>
           {poll.q.trim()&&<div style={{display:'flex',flexDirection:'column',gap:'6px'}}>
             {poll.opts.map((o,i)=><div key={i} style={{display:'flex',gap:'6px'}}>
@@ -199,17 +239,16 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
             </div>)}
             {poll.opts.length<5&&<button onClick={()=>setPoll(p=>({...p,opts:[...p.opts,'']}))} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'7px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px'}}>+ {t.addPollOption}</button>}
           </div>}
-        </div>
+        </Sec>
         {/* PAYMENT */}
-        <div style={{marginBottom:'24px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'14px',padding:'16px'}}>
-          <Lbl c={c}>{t.payData}</Lbl>
+        <Sec id="payment" icon="💳" label={t.payData} hasData={Object.values(payment).some(v=>v.trim())}>
           <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
             {[['bizumPhone',t.bizumPh],['paypalUser','PayPal.me user'],['revolutUser','Revolut.me user']].map(([k,ph])=><input key={k} value={payment[k]} onChange={e=>setPayment(p=>({...p,[k]:e.target.value}))} placeholder={ph} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>)}
           </div>
           <div style={{fontSize:'11px',color:c.M2,marginTop:'8px'}}>{t.payNote}</div>
-        </div>
+        </Sec>
         <Btn onClick={create} disabled={saving} full style={{padding:'16px',fontSize:'16px',background:mc,color:'#0A0A0A'}} c={c}>{saving?t.saving:t.createBtn}</Btn>
-      </>}
+      </>})()}
     </div>
   </>);
 }

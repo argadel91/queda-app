@@ -9,6 +9,8 @@ export const db = createClient(SB_URL, SB_KEY)
 let _toastFn = null
 export const setToastFn = fn => { _toastFn = fn }
 export const showErr = msg => { if (_toastFn) _toastFn(msg); else console.error(msg) }
+export const showSuccess = msg => { if (_toastFn) _toastFn(msg, 'success'); }
+export const showInfo = msg => { if (_toastFn) _toastFn(msg, 'info'); }
 
 // Plans
 export const savePlan = async p => {

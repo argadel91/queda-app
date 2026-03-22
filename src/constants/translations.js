@@ -217,7 +217,6 @@ const T ={
     refreshResp:`Actualizar respuestas`,
     waGroupMsg:`Enviar mensaje de WhatsApp al grupo con la fecha confirmada`,
     waReminderMsg:`Enviar un recordatorio del plan por WhatsApp`,
-    addToCalendar:`Añadir al calendario`,
     confirmDateTitle:`Confirmar esta fecha para todo el grupo`,
     detailPerPerson:`Detalle por persona`,
     noStopsMsg:`Este plan no tiene paradas definidas.`,
@@ -302,6 +301,7 @@ const T ={
     editedTimes:'Editado {n} vez/veces',
     changeLbl:'Cambiar',
     cat:['🍽️ Restaurante','🍸 Bar','🎉 Discoteca','☕ Café','🎭 Actividad','🏠 Casa','🍕 Informal','📍 Otro'],
+    shareLangLbl:'Idioma del mensaje',copyCode:'Copiar código',codeCopied:'✓ ¡Código copiado!',draftRestored:'Borrador restaurado',draftDiscard:'Descartar',autoConfirmTitle:'Auto-confirmación',peopleSaid:'personas dijeron sí para',autoConfirmQ:'¿Confirmar esta fecha automáticamente?',notYet:'Todavía no',editPlan:'Editar plan',saveLbl:'Guardar',addToCalendar:'Añadir al calendario',
   },
   en:{
     tagline:'Plans without chaos.',sub:'Dates, times, route, outfit, weather and payments in one code.',
@@ -520,7 +520,6 @@ const T ={
     refreshResp:`Refresh responses`,
     waGroupMsg:`Send WhatsApp message to the group with the confirmed date`,
     waReminderMsg:`Send a plan reminder via WhatsApp`,
-    addToCalendar:`Add to calendar`,
     confirmDateTitle:`Confirm this date for the whole group`,
     detailPerPerson:`Detail per person`,
     noStopsMsg:`This plan has no stops defined.`,
@@ -605,6 +604,7 @@ const T ={
     editedTimes:'Edited {n} time(s)',
     changeLbl:'Change',
     cat:['🍽️ Restaurant','🍸 Bar','🎉 Club','☕ Café','🎭 Activity','🏠 Home','🍕 Casual','📍 Other'],
+    shareLangLbl:'Message language',copyCode:'Copy code',codeCopied:'✓ Code copied!',draftRestored:'Draft restored',draftDiscard:'Discard',autoConfirmTitle:'Auto-confirmation',peopleSaid:'people said yes for',autoConfirmQ:'Auto-confirm this date?',notYet:'Not yet',editPlan:'Edit plan',saveLbl:'Save',addToCalendar:'Add to calendar',
   },
   pt:{
     tagline:'Planos sem caos.',sub:'Datas, horários, rota, look, tempo e pagamentos num só código.',
@@ -804,7 +804,6 @@ const T ={
     refreshResp:`Atualizar respostas`,
     waGroupMsg:`Enviar mensagem WhatsApp ao grupo com a data confirmada`,
     waReminderMsg:`Enviar um lembrete do plano por WhatsApp`,
-    addToCalendar:`Adicionar ao calendário`,
     confirmDateTitle:`Confirmar esta data para todo o grupo`,
     detailPerPerson:`Detalhe por pessoa`,
     noStopsMsg:`Este plano não tem paragens definidas.`,
@@ -903,6 +902,7 @@ const T ={
     editedTimes:'Editado {n} vez(es)',
     changeLbl:'Alterar',
     cat:['🍽️ Restaurante','🍸 Bar','🎉 Discoteca','☕ Café','🎭 Atividade','🏠 Casa','🍕 Informal','📍 Outro'],
+    shareLangLbl:'Idioma da mensagem',copyCode:'Copiar código',codeCopied:'✓ Código copiado!',draftRestored:'Rascunho restaurado',draftDiscard:'Descartar',autoConfirmTitle:'Auto-confirmação',peopleSaid:'pessoas disseram sim para',autoConfirmQ:'Confirmar esta data automaticamente?',notYet:'Ainda não',editPlan:'Editar plano',saveLbl:'Guardar',addToCalendar:'Adicionar ao calendário',
   },
   fr:{
     tagline:`Des plans sans chaos.`,sub:`Dates, horaires, itinéraire, tenue, météo et paiements en un code.`,
@@ -1109,7 +1109,6 @@ const T ={
     refreshResp:`Actualiser les réponses`,
     waGroupMsg:`Envoyer un message WhatsApp au groupe avec la date confirmée`,
     waReminderMsg:`Envoyer un rappel du plan par WhatsApp`,
-    addToCalendar:`Ajouter au calendrier`,
     confirmDateTitle:`Confirmer cette date pour tout le groupe`,
     detailPerPerson:`Détail par personne`,
     noStopsMsg:`Ce plan n'a pas d'étapes définies.`,
@@ -1211,6 +1210,7 @@ const T ={
     changeLbl:'Changer',
     cat:[`🍽️ Restaurant`,`🍸 Bar`,`🎉 Boîte de nuit`,`☕ Café`,`🎭 Activité`,`🏠 Maison`,`🍕 Informel`,`📍 Autre`],
     estPer:`Estimé par personne`,
+    shareLangLbl:`Langue du message`,copyCode:`Copier le code`,codeCopied:`✓ Code copié !`,draftRestored:`Brouillon restauré`,draftDiscard:`Supprimer`,autoConfirmTitle:`Confirmation auto`,peopleSaid:`personnes ont dit oui pour`,autoConfirmQ:`Confirmer cette date automatiquement ?`,notYet:`Pas encore`,editPlan:`Modifier le plan`,saveLbl:`Enregistrer`,addToCalendar:`Ajouter au calendrier`,
   },
   de:{
     tagline:'Pläne ohne Chaos.',sub:'Termine, Zeiten, Route, Outfit, Wetter und Zahlungen in einem Code.',
@@ -1408,7 +1408,6 @@ const T ={
     refreshResp:`Antworten aktualisieren`,
     waGroupMsg:`WhatsApp-Nachricht mit bestätigtem Termin an die Gruppe senden`,
     waReminderMsg:`Plan-Erinnerung per WhatsApp senden`,
-    addToCalendar:`Zum Kalender hinzufügen`,
     confirmDateTitle:`Dieses Datum für die gesamte Gruppe bestätigen`,
     detailPerPerson:`Detail pro Person`,
     noStopsMsg:`Dieser Plan hat keine Stationen.`,
@@ -1509,6 +1508,7 @@ const T ={
     editedTimes:'{n} Mal bearbeitet',
     changeLbl:'Ändern',
     cat:['🍽️ Restaurant','🍸 Bar','🎉 Club','☕ Café','🎭 Aktivität','🏠 Zuhause','🍕 Casual','📍 Andere'],
+    shareLangLbl:'Nachrichtensprache',copyCode:'Code kopieren',codeCopied:'✓ Code kopiert!',draftRestored:'Entwurf wiederhergestellt',draftDiscard:'Verwerfen',autoConfirmTitle:'Auto-Bestätigung',peopleSaid:'Personen sagten Ja für',autoConfirmQ:'Dieses Datum automatisch bestätigen?',notYet:'Noch nicht',editPlan:'Plan bearbeiten',saveLbl:'Speichern',addToCalendar:'Zum Kalender hinzufügen',
   },
   it:{
     tagline:`Piani senza caos.`,sub:`Date, orari, percorso, outfit, meteo e pagamenti in un codice.`,
@@ -1727,7 +1727,6 @@ const T ={
     refreshResp:`Aggiorna risposte`,
     waGroupMsg:`Invia messaggio WhatsApp al gruppo con la data confermata`,
     waReminderMsg:`Invia un promemoria del piano via WhatsApp`,
-    addToCalendar:`Aggiungi al calendario`,
     confirmDateTitle:`Conferma questa data per tutto il gruppo`,
     detailPerPerson:`Dettaglio per persona`,
     noStopsMsg:`Questo piano non ha tappe definite.`,
@@ -1817,6 +1816,7 @@ const T ={
     changeLbl:'Cambia',
     cat:[`🍽️ Ristorante`,`🍸 Bar`,`🎉 Discoteca`,`☕ Caffè`,`🎭 Attività`,`🏠 Casa`,`🍕 Informale`,`📍 Altro`],
     estPer:`Stimato a persona`,
+    shareLangLbl:`Lingua del messaggio`,copyCode:`Copia codice`,codeCopied:`✓ Codice copiato!`,draftRestored:`Bozza ripristinata`,draftDiscard:`Scarta`,autoConfirmTitle:`Conferma automatica`,peopleSaid:`persone hanno detto sì per`,autoConfirmQ:`Confermare questa data automaticamente?`,notYet:`Non ancora`,editPlan:`Modifica piano`,saveLbl:`Salva`,addToCalendar:`Aggiungi al calendario`,
   },
 };
 

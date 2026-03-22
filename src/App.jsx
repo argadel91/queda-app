@@ -41,7 +41,7 @@ export default function App(){
   const[resetMode,setResetMode]=useState(false); // password recovery flow
   const c=useMemo(()=>C(theme),[theme]);
   useEffect(()=>{applyTheme(theme);},[theme]);
-  useEffect(()=>{setToastFn(msg=>{setToast(msg);setTimeout(()=>setToast(null),4000);});},[]);
+  useEffect(()=>{setToastFn((msg,type='error')=>{setToast({msg,type});setTimeout(()=>setToast(null),4000);});},[]);
   const tgTheme=()=>setTheme(t=>{const n=t==='dark'?'light':'dark';applyTheme(n);ls.set('q_theme',n);return n;});
   const LANGS=['es','en','pt','fr','de','it'];
   const LANG_FLAGS={es:'🇪🇸',en:'🇬🇧',pt:'🇵🇹',fr:'🇫🇷',de:'🇩🇪',it:'🇮🇹'};
@@ -133,7 +133,7 @@ export default function App(){
   if(resetMode)return<ResetPasswordScreen onDone={()=>{setResetMode(false);authSignOut();}} c={c} lang={lang}/>;
   if(!authUser)return<AuthScreen onAuth={handleAuth} c={c} lang={lang} onLangChange={l=>{setLang(l);ls.set('q_lang',l);}}/>
   return(<div style={{minHeight:'100vh',background:c.BG,color:c.T,fontFamily:"'DM Sans',system-ui,sans-serif"}} onClick={()=>{setLangOpen(false);setAvatarOpen(false);}}>
-    {toast&&<div style={{position:'fixed',bottom:'24px',left:'50%',transform:'translateX(-50%)',background:'#ef4444',color:'#fff',padding:'12px 20px',borderRadius:'30px',fontWeight:'600',fontSize:'13px',zIndex:300,boxShadow:'0 4px 20px rgba(0,0,0,.4)',whiteSpace:'nowrap',animation:'slideDown .3s ease'}}>⚠️ {toast}</div>}
+    {toast&&<div style={{position:'fixed',bottom:'24px',left:'50%',transform:'translateX(-50%)',background:toast.type==='success'?'#22c55e':toast.type==='info'?c.A:'#ef4444',color:toast.type==='info'?'#0A0A0A':'#fff',padding:'12px 20px',borderRadius:'30px',fontWeight:'600',fontSize:'13px',zIndex:300,boxShadow:'0 4px 20px rgba(0,0,0,.4)',whiteSpace:'nowrap',animation:'slideDown .3s ease'}}>{toast.type==='success'?'✓':toast.type==='info'?'ℹ':'⚠️'} {toast.msg}</div>}
     <div style={{borderBottom:`1px solid ${c.BD}`,padding:'14px 24px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,background:c.BG+'F0',backdropFilter:'blur(10px)',zIndex:10}}>
       <div onClick={()=>nav('home')} style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'22px',cursor:'pointer',color:c.T,letterSpacing:'-.02em'}}>queda<span style={{color:c.A}}>.</span></div>
       <div style={{display:'flex',alignItems:'center',gap:'6px'}}>

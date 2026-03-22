@@ -7,18 +7,49 @@ import { Btn, Card, Lbl, Back, ModeBadge, HR } from '../components/ui.jsx'
 import PersonalisedLink from '../components/PersonalisedLink.jsx'
 import SavedGroups from '../components/SavedGroups.jsx'
 
+const FLAGS={es:'\u{1F1EA}\u{1F1F8}',en:'\u{1F1EC}\u{1F1E7}',pt:'\u{1F1F5}\u{1F1F9}',fr:'\u{1F1EB}\u{1F1F7}',de:'\u{1F1E9}\u{1F1EA}',it:'\u{1F1EE}\u{1F1F9}'};
+const LANGS=['es','en','pt','fr','de','it'];
+
+const waMsgs={
+  social:{
+    es:(n,u,id)=>`\u00A1Oye! \u00DAnete al plan *${n}*.\n\nMarca cu\u00E1ndo puedes:\n${u}\n\nC\u00F3digo: *${id}*`,
+    en:(n,u,id)=>`Hey! Join *${n}*.\n\nMark when you can:\n${u}\n\nCode: *${id}*`,
+    pt:(n,u,id)=>`Ol\u00E1! Junta-te ao plano *${n}*.\n\nMarca quando podes:\n${u}\n\nC\u00F3digo: *${id}*`,
+    fr:(n,u,id)=>`Salut ! Rejoins le plan *${n}*.\n\nIndique tes dispos :\n${u}\n\nCode : *${id}*`,
+    de:(n,u,id)=>`Hey! Mach mit bei *${n}*.\n\nMarkiere wann du kannst:\n${u}\n\nCode: *${id}*`,
+    it:(n,u,id)=>`Ciao! Unisciti al piano *${n}*.\n\nSegna quando puoi:\n${u}\n\nCodice: *${id}*`
+  },
+  intimate:{
+    es:(n,u)=>`Te tengo una propuesta... \u{1F440}\n\n${u}`,
+    en:(n,u)=>`I have a proposal for you \u{1F440}\n\n${u}`,
+    pt:(n,u)=>`Tenho uma proposta para ti... \u{1F440}\n\n${u}`,
+    fr:(n,u)=>`J'ai une proposition pour toi... \u{1F440}\n\n${u}`,
+    de:(n,u)=>`Ich hab einen Vorschlag f\u00FCr dich... \u{1F440}\n\n${u}`,
+    it:(n,u)=>`Ho una proposta per te... \u{1F440}\n\n${u}`
+  },
+  professional:{
+    es:(n,u,id)=>`Le convoco a *${n}*.\n\nConfirme asistencia:\n${u}\n\nC\u00F3digo: *${id}*`,
+    en:(n,u,id)=>`You are invited to *${n}*.\n\nConfirm attendance:\n${u}\n\nCode: *${id}*`,
+    pt:(n,u,id)=>`Est\u00E1 convidado para *${n}*.\n\nConfirme presen\u00E7a:\n${u}\n\nC\u00F3digo: *${id}*`,
+    fr:(n,u,id)=>`Vous \u00EAtes invit\u00E9(e) \u00E0 *${n}*.\n\nConfirmez votre pr\u00E9sence :\n${u}\n\nCode : *${id}*`,
+    de:(n,u,id)=>`Sie sind eingeladen zu *${n}*.\n\nBitte best\u00E4tigen Sie:\n${u}\n\nCode: *${id}*`,
+    it:(n,u,id)=>`\u00C8 invitato/a a *${n}*.\n\nConfermi la presenza:\n${u}\n\nCodice: *${id}*`
+  }
+};
+
 export default function Share({plan,onViewResults,onBack,c,lang}){
   const t=T[lang];const mc=getMC(plan.mode,c);
-  const[copied,setCopied]=useState(false);const[count,setCount]=useState(null);
+  const[copied,setCopied]=useState(false);const[codeCopied,setCodeCopied]=useState(false);const[count,setCount]=useState(null);const[shareLang,setShareLang]=useState(lang);
   const url=location.href.split('?')[0]+'?code='+plan.id;
   const copy=()=>{navigator.clipboard?.writeText(url).catch(()=>{});setCopied(true);setTimeout(()=>setCopied(false),2000);};
-  const msgs={social:(n,u,id)=>lang==='es'?`¡Oye! Únete al plan *${n}*.\n\nMarca cuándo puedes:\n${u}\n\nCódigo: *${id}*`:`Hey! Join *${n}*.\n\nMark when you can:\n${u}\n\nCode: *${id}*`,intimate:(n,u)=>lang==='es'?`Te tengo una propuesta... 👀\n\n${u}`:`I have a proposal for you 👀\n\n${u}`,professional:(n,u,id)=>lang==='es'?`Le convoco a *${n}*.\n\nConfirme asistencia:\n${u}\n\nCódigo: *${id}*`:`You are invited to *${n}*.\n\nConfirm attendance:\n${u}\n\nCode: *${id}*`};
-  const wa=()=>window.open('https://wa.me/?text='+encodeURIComponent((msgs[plan.mode||'social']||msgs.social)(plan.name,url,plan.id)),'_blank');
+  const copyCode=()=>{navigator.clipboard?.writeText(plan.id).catch(()=>{});setCodeCopied(true);setTimeout(()=>setCodeCopied(false),2000);};
+  const getMsg=()=>{const mode=plan.mode||'social';const msgs=waMsgs[mode]||waMsgs.social;const fn=msgs[shareLang]||msgs.en;return fn(plan.name,url,plan.id);};
+  const wa=()=>window.open('https://wa.me/?text='+encodeURIComponent(getMsg()),'_blank');
   useEffect(()=>{const f=async()=>{const rs=await loadResps(plan.id);setCount(rs.length);};f();const iv=setInterval(f,15000);return()=>clearInterval(iv);},[plan.id]);
   return(<div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
     <Back onClick={onBack} label={t.back} c={c}/>
     <div style={{textAlign:'center',marginBottom:'28px'}}>
-      <div style={{fontSize:'52px',marginBottom:'14px'}}>{plan.mode==='intimate'?'💘':plan.mode==='professional'?'💼':'🎉'}</div>
+      <div style={{fontSize:'52px',marginBottom:'14px'}}>{plan.mode==='intimate'?'\u{1F498}':plan.mode==='professional'?'\u{1F4BC}':'\u{1F389}'}</div>
       <h2 style={{fontFamily:"'Syne',serif",fontSize:'28px',fontWeight:'800',color:c.T,marginBottom:'8px'}}>{t.planCreated}</h2>
       <p style={{color:c.M2,fontSize:'14px'}}>{t.shareWith}</p>
     </div>
@@ -29,9 +60,16 @@ export default function Share({plan,onViewResults,onBack,c,lang}){
       <div style={{fontSize:'13px',color:c.M2}}>@ {plan.organizer} · {plan.dates?.length||0} {lang==='es'?'fecha':'date'}{plan.dates?.length!==1?'s':''}</div>
     </div>
     {count!==null&&<div style={{textAlign:'center',padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',marginBottom:'14px',fontSize:'14px',color:c.T}}>
-      {count===0?(lang==='es'?'Nadie ha respondido aún':'Nobody has responded yet'):<><span style={{color:mc,fontWeight:'800',fontSize:'20px'}}>{count}</span> {lang==='es'?`persona${count!==1?'s':''} ha${count!==1?'n':''} respondido`:`person${count!==1?'s':''} responded`}</>}
+      {count===0?(lang==='es'?'Nadie ha respondido a\u00FAn':'Nobody has responded yet'):<><span style={{color:mc,fontWeight:'800',fontSize:'20px'}}>{count}</span> {lang==='es'?`persona${count!==1?'s':''} ha${count!==1?'n':''} respondido`:`person${count!==1?'s':''} responded`}</>}
     </div>}
+    <div style={{marginBottom:'6px'}}>
+      <div style={{fontSize:'12px',color:c.M2,marginBottom:'4px'}}>{t.shareLangLbl||'Message language'}</div>
+      <div style={{display:'flex',gap:'4px',justifyContent:'center'}}>
+        {LANGS.map(l=><button key={l} onClick={()=>setShareLang(l)} style={{padding:'4px 8px',borderRadius:'8px',border:shareLang===l?`2px solid ${mc}`:`1px solid ${c.BD}`,background:shareLang===l?`${mc}20`:c.CARD,cursor:'pointer',fontSize:'16px',lineHeight:1}}>{FLAGS[l]}</button>)}
+      </div>
+    </div>
     <button onClick={wa} style={{width:'100%',padding:'15px',borderRadius:'12px',border:'none',background:'#25D366',color:'#fff',fontSize:'15px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',marginBottom:'10px'}}>{t.shareWa}</button>
+    <Btn onClick={copyCode} full style={{marginBottom:'10px',padding:'14px'}} c={c}>{codeCopied?(t.codeCopied||'Copied!'):(t.copyCode||'Copy code')}</Btn>
     <Btn onClick={copy} full style={{marginBottom:'10px',padding:'14px'}} c={c}>{copied?t.copied:t.copyLink}</Btn>
     <HR c={c}/>
     <PersonalisedLink plan={plan} c={c} lang={lang}/>
