@@ -25,11 +25,9 @@ export default function Landing({onGetStarted, c, lang, onLangChange}){
     <div style={{maxWidth:'600px',margin:'0 auto',padding:'0 24px'}}>
       {/* Hero */}
       <div style={{paddingTop:'60px',paddingBottom:'48px',textAlign:'center'}}>
-        <div style={{display:'inline-block',background:`${c.A}15`,border:`1px solid ${c.A}30`,borderRadius:'20px',padding:'4px 14px',fontSize:'12px',color:c.A,fontWeight:'600',marginBottom:'20px'}}>{t.landingBadge||'Free forever'}</div>
         <h1 style={{fontFamily:"'Syne',serif",fontSize:'52px',fontWeight:'800',lineHeight:1.05,marginBottom:'16px',letterSpacing:'-.03em'}}>{t.landingHero1||'Group plans,'}<br/><span style={{color:c.A}}>{t.landingHero2||'zero chaos.'}</span></h1>
         <p style={{fontSize:'17px',color:c.M2,lineHeight:1.7,marginBottom:'32px',maxWidth:'420px',margin:'0 auto 32px'}}>{t.landingSub||'Dates, venues, routes, weather, outfits & payments — all in one shareable code.'}</p>
-        <button onClick={onGetStarted} style={{padding:'16px 40px',background:c.A,color:'#0A0A0A',border:'none',borderRadius:'14px',fontSize:'17px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',marginBottom:'8px'}}>{t.landingCTA||'Get started — it\'s free'}</button>
-        <div style={{fontSize:'13px',color:c.M,marginTop:'8px'}}>{t.landingNoCreditCard||'No credit card required'}</div>
+        <button onClick={onGetStarted} style={{padding:'16px 40px',background:c.A,color:'#0A0A0A',border:'none',borderRadius:'14px',fontSize:'17px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>{t.landingCTA2||'Get started'}</button>
       </div>
 
       {/* How it works */}
@@ -81,7 +79,7 @@ export default function Landing({onGetStarted, c, lang, onLangChange}){
       <div style={{padding:'40px 0 60px',textAlign:'center'}}>
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'28px',fontWeight:'800',marginBottom:'16px'}}>{t.landingBottomTitle||'Ready to plan?'}</h2>
         <p style={{fontSize:'15px',color:c.M2,marginBottom:'24px'}}>{t.landingBottomSub||'Create your first plan in 2 minutes.'}</p>
-        <button onClick={onGetStarted} style={{padding:'16px 40px',background:c.A,color:'#0A0A0A',border:'none',borderRadius:'14px',fontSize:'17px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>{t.landingCTA||'Get started — it\'s free'}</button>
+        <button onClick={onGetStarted} style={{padding:'16px 40px',background:c.A,color:'#0A0A0A',border:'none',borderRadius:'14px',fontSize:'17px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>{t.landingCTA2||'Get started'}</button>
       </div>
 
       {/* Footer */}
