@@ -80,6 +80,9 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
       <div style={{fontSize:'13px',color:c.M2,marginBottom:'14px'}}>{t.viralSub}</div>
       <Btn onClick={onCreateOwn} style={{padding:'11px 24px',background:mc,color:'#0A0A0A'}} c={c}>{t.viralBtn}</Btn>
     </div>
+    <div style={{textAlign:'center',padding:'20px 0',fontSize:'12px',color:c.M}}>
+      <span style={{fontFamily:"'Syne',serif",fontWeight:'800'}}>queda<span style={{color:c.A}}>.</span></span> — {t.landingFooter||'Group plans, zero chaos.'}
+    </div>
   </div>);
   }
   return(<div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>

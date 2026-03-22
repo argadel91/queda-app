@@ -72,6 +72,8 @@ export default function Share({plan,onViewResults,onBack,c,lang}){
     {count!==null&&<div style={{textAlign:'center',padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',marginBottom:'14px',fontSize:'14px',color:c.T}}>
       {count===0?t.noResponsesYet:<><span style={{color:mc,fontWeight:'800',fontSize:'20px'}}>{count}</span> {t.personResponded(count)}</>}
     </div>}
+    <PersonalisedLink plan={plan} c={c} lang={lang}/>
+    <HR c={c}/>
     <div style={{marginBottom:'6px'}}>
       <div style={{fontSize:'12px',color:c.M2,marginBottom:'4px'}}>{t.shareLangLbl||'Message language'}</div>
       <div style={{display:'flex',gap:'4px',justifyContent:'center'}}>
@@ -84,8 +86,6 @@ export default function Share({plan,onViewResults,onBack,c,lang}){
     <button onClick={()=>window.open('mailto:?subject='+encodeURIComponent(plan.name)+'&body='+encodeURIComponent(getMsg()))} style={{width:'100%',padding:'15px',borderRadius:'12px',border:'none',background:c.CARD,border:`1px solid ${c.BD}`,color:c.T,fontSize:'15px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',marginBottom:'10px'}}>{t.shareEmail||'Email ✉️'}</button>
     <Btn onClick={copyCode} full style={{marginBottom:'10px',padding:'14px'}} c={c}>{codeCopied?(t.codeCopied||'Copied!'):(t.copyCode||'Copy code')}</Btn>
     <Btn onClick={copy} full style={{marginBottom:'10px',padding:'14px'}} c={c}>{copied?t.copied:t.copyLink}</Btn>
-    <HR c={c}/>
-    <PersonalisedLink plan={plan} c={c} lang={lang}/>
     <HR c={c}/>
     <SavedGroups plan={plan} c={c} lang={lang}/>
     <HR c={c}/>

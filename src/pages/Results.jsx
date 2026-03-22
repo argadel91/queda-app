@@ -270,7 +270,12 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
       <div style={{display:'flex',gap:'5px',overflowX:'auto',paddingBottom:'4px',marginBottom:'20px'}}>
         {TABS.map(tb=><button key={tb} onClick={()=>setTab(tb)} style={{padding:'7px 11px',borderRadius:'20px',border:`1px solid ${tab===tb?mc+'60':c.BD}`,background:tab===tb?`${mc}15`:c.CARD,color:tab===tb?mc:c.M2,fontSize:'12px',fontWeight:tab===tb?'700':'400',cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap',flexShrink:0}}>{tlbl(tb)}</button>)}
       </div>
-      {ldg&&<div style={{textAlign:'center',color:c.M,padding:'48px'}}>...</div>}
+      {ldg&&<div style={{padding:'16px'}}>
+  {[1,2,3].map(i=><div key={i} style={{marginBottom:'12px'}}>
+    <div style={{height:'14px',background:c.CARD2,borderRadius:'6px',width:i===1?'60%':'80%',marginBottom:'8px',animation:'pulse 1.5s ease infinite'}}/>
+    <div style={{height:'10px',background:c.CARD2,borderRadius:'6px',width:i===2?'40%':'70%',animation:'pulse 1.5s ease infinite'}}/>
+  </div>)}
+</div>}
 
       {/* WHO */}
       {!ldg&&tab==='who'&&(total===0

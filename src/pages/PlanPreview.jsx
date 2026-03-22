@@ -41,6 +41,9 @@ export default function PlanPreview({plan,onRespond,onBack,c,lang}){
       </div>}
       <button onClick={onRespond} style={{width:'100%',padding:'16px',borderRadius:'14px',border:'none',background:mc,color:'#0A0A0A',fontSize:'16px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',marginBottom:'10px'}}>{hasPrev?t.editAvail:t.previewJoin}</button>
       <button onClick={onBack} style={{width:'100%',padding:'12px',borderRadius:'14px',border:`1px solid ${c.BD}`,background:'transparent',color:c.M2,fontSize:'14px',cursor:'pointer',fontFamily:'inherit'}}>{t.back}</button>
+      <div style={{textAlign:'center',padding:'20px 0',fontSize:'12px',color:c.M}}>
+        <span style={{fontFamily:"'Syne',serif",fontWeight:'800'}}>queda<span style={{color:c.A}}>.</span></span> — {t.landingFooter||'Group plans, zero chaos.'}
+      </div>
     </div>
   </div>);
 }

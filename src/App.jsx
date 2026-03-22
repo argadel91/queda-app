@@ -136,8 +136,34 @@ export default function App(){
   if(authLoading)return(<div style={{minHeight:'100vh',background:c.BG,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'16px'}}><div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'28px',color:c.T}}>queda<span style={{color:c.A}}>.</span></div><div style={{width:'24px',height:'24px',border:`3px solid ${c.BD}`,borderTop:`3px solid ${c.A}`,borderRadius:'50%',animation:'spin 1s linear infinite'}}/></div>);
   if(resetMode)return<ResetPasswordScreen onDone={()=>{setResetMode(false);authSignOut();}} c={c} lang={lang}/>;
   const hasCode=new URLSearchParams(location.search).get('code');
+  const[previewPlan,setPreviewPlan]=useState(null);
+  useEffect(()=>{
+    const code=new URLSearchParams(location.search).get('code');
+    if(code&&!authUser&&!previewPlan){
+      loadPlan(code).then(p=>{if(p)setPreviewPlan(p);});
+    }
+  },[authUser]);
   if(!authUser){
-    if(showAuth||hasCode)return<AuthScreen onAuth={handleAuth} c={c} lang={lang} onLangChange={l=>{setLang(l);ls.set('q_lang',l);}}/>
+    if(showAuth)return<AuthScreen onAuth={handleAuth} c={c} lang={lang} onLangChange={l=>{setLang(l);ls.set('q_lang',l);}}/>
+    if(previewPlan)return<div style={{minHeight:'100vh',background:c.BG,color:c.T,fontFamily:"'DM Sans',system-ui,sans-serif"}}>
+      <div style={{maxWidth:'420px',margin:'0 auto',padding:'40px 24px',textAlign:'center'}}>
+        <div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'22px',marginBottom:'32px'}}>queda<span style={{color:c.A}}>.</span></div>
+        <div style={{fontSize:'48px',marginBottom:'16px'}}>{previewPlan.mode==='intimate'?'💘':previewPlan.mode==='professional'?'💼':'🎉'}</div>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'28px',fontWeight:'800',marginBottom:'8px'}}>{previewPlan.name}</h2>
+        <div style={{fontSize:'14px',color:c.M2,marginBottom:'4px'}}>@ {previewPlan.organizer}</div>
+        {previewPlan.desc&&<p style={{fontSize:'14px',color:c.M2,lineHeight:1.6,marginBottom:'16px'}}>{previewPlan.desc}</p>}
+        {previewPlan.stops?.length>0&&<div style={{marginBottom:'16px'}}>
+          {previewPlan.stops.slice(0,3).map((s,i)=>{const opt=s.options?.[0]||s;return opt.name?<div key={i} style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'6px',justifyContent:'center'}}>
+            {opt.photo&&<img src={opt.photo} alt="" style={{width:'32px',height:'32px',borderRadius:'6px',objectFit:'cover'}}/>}
+            <span style={{fontSize:'14px',color:c.T}}>{opt.name}</span>
+            {opt.rating&&<span style={{fontSize:'12px',color:c.A}}>⭐{opt.rating}</span>}
+          </div>:null;})}
+        </div>}
+        <div style={{fontSize:'13px',color:c.M2,marginBottom:'24px'}}>{previewPlan.dates?.length||0} {T[lang]?.datesStep||'dates'} · {previewPlan.stops?.length||0} {T[lang]?.stop||'stops'}</div>
+        <button onClick={()=>setShowAuth(true)} style={{width:'100%',padding:'16px',background:c.A,color:'#0A0A0A',border:'none',borderRadius:'14px',fontSize:'17px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',marginBottom:'10px'}}>{T[lang]?.landingCTA||'Join this plan'}</button>
+        <div style={{fontSize:'12px',color:c.M}}>{T[lang]?.landingNoCreditCard||'Free, no credit card'}</div>
+      </div>
+    </div>;
     return<Landing onGetStarted={()=>setShowAuth(true)} c={c} lang={lang} onLangChange={l=>{setLang(l);ls.set('q_lang',l);}}/>
   }
   return(<div style={{minHeight:'100vh',background:c.BG,color:c.T,fontFamily:"'DM Sans',system-ui,sans-serif"}} onClick={()=>{setLangOpen(false);setAvatarOpen(false);}}>
