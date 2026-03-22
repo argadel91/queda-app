@@ -35,7 +35,7 @@ export default function RouteMap({stops,c}){
       await google.maps.importLibrary('marker');
 
       const map=new google.maps.Map(mapDiv,{
-        disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy',mapId:'queda-route'
+        disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy'
       });
       mapRef.current=map;
 
@@ -56,19 +56,15 @@ export default function RouteMap({stops,c}){
           const directionsService=new google.maps.DirectionsService();
           const directionsRenderer=new google.maps.DirectionsRenderer({map,suppressMarkers:true,polylineOptions:{strokeColor:'#CDFF6C',strokeOpacity:0.8,strokeWeight:3}});
           dirRendererRef.current=directionsRenderer;
-          const toLoc=s=>s.placeId?{placeId:s.placeId}:s.address?s.address:{lat:s.lat,lng:s.lng};
-          const waypoints=valid.slice(1,-1).map(s=>({location:toLoc(s),stopover:true}));
-          // Use WALKING for short distances (more precise routes to doors), DRIVING for long
-          const dist=Math.sqrt(Math.pow(valid[0].lat-valid[valid.length-1].lat,2)+Math.pow(valid[0].lng-valid[valid.length-1].lng,2));
-          const mode=dist>0.05?google.maps.TravelMode.DRIVING:google.maps.TravelMode.WALKING;
+          const waypoints=valid.slice(1,-1).map(s=>({location:new google.maps.LatLng(s.lat,s.lng),stopover:true}));
           directionsService.route({
-            origin:toLoc(valid[0]),
-            destination:toLoc(valid[valid.length-1]),
+            origin:new google.maps.LatLng(valid[0].lat,valid[0].lng),
+            destination:new google.maps.LatLng(valid[valid.length-1].lat,valid[valid.length-1].lng),
             waypoints,
-            travelMode:mode
+            travelMode:google.maps.TravelMode.DRIVING
           },(result,status)=>{
-            if(status==='OK')directionsRenderer.setDirections(result);
-            else{
+            if(status==='OK'){directionsRenderer.setDirections(result);}
+            else{console.log('Directions failed:',status);
               // Fallback to straight line
               polyRef.current=new google.maps.Polyline({
                 path:valid.map(s=>({lat:s.lat,lng:s.lng})),map,
