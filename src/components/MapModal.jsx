@@ -76,7 +76,7 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
       }
     });
     return()=>{cancelled=true;if(markerRef.current)markerRef.current.setMap(null);};
-  },[]);
+  },[portalEl]);
 
   const searchPlaces=async(query)=>{
     if(!query?.trim())return;
