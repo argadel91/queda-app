@@ -155,7 +155,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
   const handleMapSelect = (sel) => {
     if(!mapTarget) return;
     const {stopId, optionId} = mapTarget;
-    const fields = ['name','address','lat','lng','rating','ratingCount','priceLevel','website','phone','hours','isOpen','googleMapsURI','photo','summary','types','dineIn','takeout','delivery','reservable','servesBeer','servesWine','outdoorSeating','goodForChildren','wheelchair'];
+    const fields = ['name','address','lat','lng','placeId','rating','ratingCount','priceLevel','website','phone','hours','isOpen','googleMapsURI','photo','summary','types','dineIn','takeout','delivery','reservable','servesBeer','servesWine','outdoorSeating','goodForChildren','wheelchair'];
     fields.forEach(k => { if(sel[k] !== undefined && sel[k] !== null) updOption(stopId, optionId, k, sel[k]); });
     setMapTarget(null);
   };
