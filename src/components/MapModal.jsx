@@ -12,6 +12,28 @@ const loadGM = () => {
   })
 }
 
+const extractPlace = (p) => {
+  const photoUrl = p.photos?.[0] ? p.photos[0].getURI?.({ maxWidth: 400 }) || null : null
+  const hours = p.regularOpeningHours?.weekdayDescriptions || null
+  const isOpen = p.regularOpeningHours?.isOpen?.() ?? null
+  return {
+    name: p.displayName || '', address: p.formattedAddress || '',
+    lat: p.location?.lat(), lng: p.location?.lng(),
+    rating: p.rating || null, ratingCount: p.userRatingCount || null,
+    priceLevel: p.priceLevel ?? null,
+    website: p.websiteURI || null, phone: p.nationalPhoneNumber || null,
+    hours, isOpen, googleMapsURI: p.googleMapsURI || null,
+    types: p.types || [], businessStatus: p.businessStatus || null,
+    photo: photoUrl, summary: p.editorialSummary || null,
+    dineIn: p.dineIn ?? null, takeout: p.takeout ?? null, delivery: p.delivery ?? null,
+    reservable: p.reservable ?? null,
+    servesBreakfast: p.servesBreakfast ?? null, servesLunch: p.servesLunch ?? null, servesDinner: p.servesDinner ?? null,
+    servesBeer: p.servesBeer ?? null, servesWine: p.servesWine ?? null,
+    outdoorSeating: p.outdoorSeating ?? null, goodForChildren: p.goodForChildren ?? null,
+    wheelchair: p.accessibilityOptions?.wheelchairAccessibleEntrance ?? null,
+  }
+}
+
 // Persistent map container outside React
 let _overlay = null
 let _mapDiv = null
@@ -101,8 +123,9 @@ const initOverlay = async () => {
     if (!q) return
     try {
       const { Place } = await google.maps.importLibrary('places')
-      const { places } = await Place.searchByText({ textQuery: q, fields: ['displayName', 'formattedAddress', 'location'], maxResultCount: 6 })
-      showResults(places?.map(p => ({ name: p.displayName || '', address: p.formattedAddress || '', lat: p.location?.lat(), lng: p.location?.lng() })) || [])
+      const allFields = ['displayName','formattedAddress','location','rating','userRatingCount','priceLevel','websiteURI','nationalPhoneNumber','regularOpeningHours','editorialSummary','googleMapsURI','types','businessStatus','photos','dineIn','takeout','delivery','reservable','servesBreakfast','servesLunch','servesDinner','servesBeer','servesWine','outdoorSeating','goodForChildren','accessibilityOptions']
+      const { places } = await Place.searchByText({ textQuery: q, fields: allFields, maxResultCount: 6 })
+      showResults(places?.map(p => extractPlace(p)) || [])
     } catch {
       try {
         const service = new google.maps.places.PlacesService(_map)
@@ -130,7 +153,9 @@ const showResults = (items) => {
     row.style.cssText = 'padding:12px 16px;cursor:pointer;border-bottom:1px solid #2A2A2A;'
     row.onmouseenter = () => { row.style.background = '#1C1C1C' }
     row.onmouseleave = () => { row.style.background = 'transparent' }
-    row.innerHTML = `<div style="font-size:14px;color:#F0EBE1;font-weight:500">${r.name}</div><div style="font-size:12px;color:#888">${r.address}</div>`
+    const ratingHtml = r.rating ? `<span style="color:#CDFF6C;font-weight:700">⭐ ${r.rating}</span>${r.ratingCount ? ` <span style="color:#666">(${r.ratingCount})</span>` : ''}` : ''
+    const priceHtml = r.priceLevel ? ` · ${'€'.repeat(r.priceLevel)}` : ''
+    row.innerHTML = `<div style="font-size:14px;color:#F0EBE1;font-weight:500">${r.name}</div><div style="font-size:12px;color:#888">${r.address}</div>${ratingHtml || priceHtml ? `<div style="font-size:11px;margin-top:2px">${ratingHtml}${priceHtml}</div>` : ''}`
     row.onclick = () => { selectPlace(r); document.getElementById('gmap-input').value = r.name; document.getElementById('gmap-results').style.display = 'none' }
     el.appendChild(row)
   })
@@ -144,7 +169,10 @@ const selectPlace = (sel) => {
   const bar = document.getElementById('gmap-selbar')
   if (bar) {
     bar.style.display = 'flex'
-    bar.innerHTML = `<div style="flex:1;min-width:0"><div style="font-size:14px;color:#F0EBE1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sel.name}</div><div style="font-size:12px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sel.address}</div></div>`
+    const rInfo = sel.rating ? `⭐ ${sel.rating}${sel.ratingCount ? ` (${sel.ratingCount})` : ''}` : ''
+    const pInfo = sel.priceLevel ? ' · ' + '€'.repeat(sel.priceLevel) : ''
+    const oInfo = sel.isOpen !== null ? (sel.isOpen ? ' · <span style="color:#22c55e">Open</span>' : ' · <span style="color:#ef4444">Closed</span>') : ''
+    bar.innerHTML = `<div style="flex:1;min-width:0"><div style="font-size:14px;color:#F0EBE1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sel.name}</div><div style="font-size:12px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sel.address}</div>${rInfo || pInfo || oInfo ? `<div style="font-size:11px;color:#888;margin-top:2px">${rInfo}${pInfo}${oInfo}</div>` : ''}</div>`
     const btn = document.createElement('button')
     btn.textContent = 'Select'
     btn.style.cssText = 'padding:10px 18px;background:#CDFF6C;color:#0A0A0A;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;flex-shrink:0;'

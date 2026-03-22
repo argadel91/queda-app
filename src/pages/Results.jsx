@@ -259,7 +259,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
             <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>{s.cat}</div>
             <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'4px'}}>{s.name||'—'}</div>
             {s.address&&<div style={{fontSize:'12px',color:c.M2,marginBottom:'6px'}}>📍 {s.address}</div>}
-            <VenueInfo name={s.name} lat={s.lat} lng={s.lng} c={c} lang={lang}/>
+            <VenueInfo stop={s} c={c} lang={lang}/>
             <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginTop:'8px'}}>
               {parseFloat(s.cost)>0&&<Badge color={mc}>{s.cost}€/pers.</Badge>}
               {(s.address||s.name)&&<a href={`https://maps.google.com/?q=${encodeURIComponent((s.name||'')+(s.address?' '+s.address:''))}`} target="_blank" rel="noreferrer" style={{fontSize:'12px',color:c.M2,textDecoration:'none',padding:'4px 10px',border:`1px solid ${c.BD}`,borderRadius:'8px'}}>Google Maps 🗺️</a>}
