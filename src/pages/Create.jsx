@@ -84,7 +84,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile,te
   };
   const is=(v,ph,k,sid)=><input value={v} onChange={e=>upd(sid,k,e.target.value)} placeholder={ph} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'9px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>;
   return(<>
-    {mapStop!==null&&<MapModal onSelect={sel=>{upd(mapStop,'name',sel.name);upd(mapStop,'address',sel.address);upd(mapStop,'lat',sel.lat);upd(mapStop,'lng',sel.lng);if(!city&&sel.address)setCity(sel.address.split(',').slice(-3,-1).join(',').trim()||'');setMapStop(null);}} onClose={()=>setMapStop(null)} c={c} lang={lang} init={stops.find(s=>s.id===mapStop)?.name||city||''}/>}
+    <MapModal visible={mapStop!==null} onSelect={sel=>{upd(mapStop,'name',sel.name);upd(mapStop,'address',sel.address);upd(mapStop,'lat',sel.lat);upd(mapStop,'lng',sel.lng);if(!city&&sel.address)setCity(sel.address.split(',').slice(-3,-1).join(',').trim()||'');setMapStop(null);}} onClose={()=>setMapStop(null)} c={c} lang={lang} init={mapStop!==null?(stops.find(s=>s.id===mapStop)?.name||city||''):''}/>
     <div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
       {draftRestored&&<div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:'8px',padding:'10px 14px',marginBottom:'12px',background:mc+'18',border:`1px solid ${mc}40`,borderRadius:'10px',fontSize:'13px'}}>
         <span style={{color:mc,fontWeight:'600'}}>{t.draftRestored||'Draft restored'}</span>

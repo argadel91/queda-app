@@ -9,27 +9,35 @@ const waitForGoogle = () => new Promise(resolve => {
   setTimeout(() => { clearInterval(check); resolve() }, 10000)
 })
 
-export default function MapModal({onSelect,onClose,c,lang,init}){
+export default function MapModal({visible,onSelect,onClose,c,lang,init}){
   const t=T[lang];
   const mapRef=useRef(null);
-  const mapObj=useRef(null);
+  const mapObjRef=useRef(null);
   const markerRef=useRef(null);
   const inputRef=useRef(null);
   const[selected,setSelected]=useState(null);
   const[results,setResults]=useState([]);
-  const[loading,setLoading]=useState(true);
+  const[ready,setReady]=useState(false);
 
+  // Init map once, never destroy
   useEffect(()=>{
-    if(!mapRef.current||!window.L)return;
-    const map=L.map(mapRef.current,{zoomControl:true}).setView([40.4168,-3.7038],5);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
-    mapObj.current=map;
-    setLoading(false);
+    let cancelled=false;
+    waitForGoogle().then(async()=>{
+      if(cancelled||!mapRef.current||mapObjRef.current)return;
+      await google.maps.importLibrary('maps');
+      await google.maps.importLibrary('places');
+      const map=new google.maps.Map(mapRef.current,{
+        center:{lat:40.4168,lng:-3.7038},
+        zoom:5,
+        disableDefaultUI:true,
+        zoomControl:true,
+        gestureHandling:'greedy'
+      });
+      mapObjRef.current=map;
+      setReady(true);
 
-    map.on('click',async(e)=>{
-      const{lat,lng}=e.latlng;
-      try{
-        await waitForGoogle();
+      map.addListener('click',(e)=>{
+        const lat=e.latLng.lat();const lng=e.latLng.lng();
         const geocoder=new google.maps.Geocoder();
         geocoder.geocode({location:{lat,lng}},(res,status)=>{
           if(status==='OK'&&res[0]){
@@ -37,56 +45,52 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
             const sel={name:r.address_components?.[0]?.long_name||'',address:r.formatted_address||'',lat,lng};
             setSelected(sel);setResults([]);
             if(inputRef.current)inputRef.current.value=r.formatted_address||'';
-            if(markerRef.current)map.removeLayer(markerRef.current);
-            markerRef.current=L.marker([lat,lng]).addTo(map);
+            if(markerRef.current)markerRef.current.setMap(null);
+            markerRef.current=new google.maps.Marker({position:{lat,lng},map});
+            map.panTo({lat,lng});
           }
         });
-      }catch{
-        // Fallback to Nominatim reverse geocoding
-        try{
-          const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`).then(x=>x.json());
-          const sel={name:r.address?.road||r.display_name?.split(',')[0]||'',address:r.display_name||'',lat,lng};
-          setSelected(sel);setResults([]);
-          if(inputRef.current)inputRef.current.value=r.display_name||'';
-          if(markerRef.current)map.removeLayer(markerRef.current);
-          markerRef.current=L.marker([lat,lng]).addTo(map);
-        }catch{}
-      }
+      });
     });
+    return()=>{cancelled=true;};
+  },[]);
 
+  // When opened, recenter if init changed
+  useEffect(()=>{
+    if(!visible||!mapObjRef.current)return;
+    setSelected(null);setResults([]);
+    if(inputRef.current)inputRef.current.value=init||'';
+    const map=mapObjRef.current;
+    setTimeout(()=>google.maps.event.trigger(map,'resize'),100);
     if(init){
-      waitForGoogle().then(()=>{
-        const geocoder=new google.maps.Geocoder();
-        geocoder.geocode({address:init},(res,status)=>{
-          if(status==='OK'&&res[0]){
-            const loc=res[0].geometry.location;
-            map.setView([loc.lat(),loc.lng()],13);
-          }
-        });
-      }).catch(()=>{
-        fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(init)}&format=json&limit=1`).then(r=>r.json()).then(r=>{
-          if(r[0])map.setView([parseFloat(r[0].lat),parseFloat(r[0].lon)],13);
-        }).catch(()=>{});
+      const geocoder=new google.maps.Geocoder();
+      geocoder.geocode({address:init},(res,status)=>{
+        if(status==='OK'&&res[0]){
+          const loc=res[0].geometry.location;
+          map.setCenter(loc);map.setZoom(13);
+        }
       });
     }
-
-    return()=>{map.remove();};
-  },[]);
+  },[visible,init]);
 
   const searchPlaces=async(query)=>{
     if(!query?.trim())return;
     try{
-      await waitForGoogle();
       const{Place}=await google.maps.importLibrary('places');
       const{places}=await Place.searchByText({textQuery:query,fields:['displayName','formattedAddress','location'],maxResultCount:6});
       if(places?.length){
         setResults(places.map(p=>({name:p.displayName||'',address:p.formattedAddress||'',lat:p.location?.lat(),lng:p.location?.lng()})));
       }else{setResults([]);}
     }catch{
-      // Fallback to Nominatim
       try{
-        const r=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=6&addressdetails=1`).then(x=>x.json());
-        setResults(r.map(x=>({name:x.display_name?.split(',')[0]||'',address:x.display_name||'',lat:parseFloat(x.lat),lng:parseFloat(x.lon)})));
+        const map=mapObjRef.current;
+        if(!map)return;
+        const service=new google.maps.places.PlacesService(map);
+        service.textSearch({query,bounds:map.getBounds()},(res,status)=>{
+          if(status==='OK'&&res){
+            setResults(res.slice(0,6).map(r=>({name:r.name||'',address:r.formatted_address||'',lat:r.geometry.location.lat(),lng:r.geometry.location.lng()})));
+          }else{setResults([]);}
+        });
       }catch{setResults([]);}
     }
   };
@@ -96,20 +100,20 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
   };
 
   const pickResult=(r)=>{
-    const map=mapObj.current;
+    const map=mapObjRef.current;
     setSelected(r);setResults([]);
     if(inputRef.current)inputRef.current.value=r.name;
     if(map){
-      map.setView([r.lat,r.lng],16);
-      if(markerRef.current)map.removeLayer(markerRef.current);
-      markerRef.current=L.marker([r.lat,r.lng]).addTo(map);
+      map.setCenter({lat:r.lat,lng:r.lng});map.setZoom(16);
+      if(markerRef.current)markerRef.current.setMap(null);
+      markerRef.current=new google.maps.Marker({position:{lat:r.lat,lng:r.lng},map});
     }
   };
 
-  return(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.85)',zIndex:200,display:'flex',flexDirection:'column'}}>
+  return(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.85)',zIndex:200,display:visible?'flex':'none',flexDirection:'column'}}>
     <div style={{padding:'12px 16px',display:'flex',alignItems:'center',gap:'8px',background:c.CARD,borderBottom:`1px solid ${c.BD}`}}>
       <div style={{flex:1,position:'relative'}}>
-        <input ref={inputRef} defaultValue={init||''} onKeyDown={handleKeyDown} placeholder={t.searchPlacePh||'Search for a place... (press Enter)'} autoFocus style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 36px 10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+        <input ref={inputRef} defaultValue={init||''} onKeyDown={handleKeyDown} placeholder={t.searchPlacePh||'Search for a place... (press Enter)'} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 36px 10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
         <button onClick={()=>{if(inputRef.current){inputRef.current.value='';setSelected(null);setResults([]);inputRef.current.focus();}}} style={{position:'absolute',right:'10px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'16px',padding:'8px'}}>×</button>
       </div>
       <button onClick={()=>searchPlaces(inputRef.current?.value)} style={{background:c.A||'#CDFF6C',border:'none',borderRadius:'10px',padding:'8px 14px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:'700'}}>🔍</button>
@@ -121,7 +125,7 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
         <div style={{fontSize:'12px',color:c.M2}}>{r.address}</div>
       </div>)}
     </div>}
-    <div ref={mapRef} style={{flex:1}}>{loading&&<div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',color:c.M}}>...</div>}</div>
+    <div ref={mapRef} style={{flex:1}}>{!ready&&<div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',color:c.M}}>...</div>}</div>
     {selected&&<div style={{padding:'14px 16px',background:c.CARD,borderTop:`1px solid ${c.BD}`,display:'flex',alignItems:'center',gap:'10px'}}>
       <div style={{flex:1,minWidth:0}}>
         <div style={{fontSize:'14px',color:c.T,fontWeight:'600',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{selected.name}</div>
