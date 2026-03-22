@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import T from '../constants/translations.js'
 import { getMC } from '../constants/theme.js'
 import { ls, getMyPlans } from '../lib/storage.js'
-import { loadResps } from '../lib/supabase.js'
+import { db, loadResps } from '../lib/supabase.js'
 import { Btn, Card, Lbl, Back, ModeBadge, HR } from '../components/ui.jsx'
 import PersonalisedLink from '../components/PersonalisedLink.jsx'
 import SavedGroups from '../components/SavedGroups.jsx'
@@ -45,7 +45,15 @@ export default function Share({plan,onViewResults,onBack,c,lang}){
   const copyCode=()=>{navigator.clipboard?.writeText(plan.id).catch(()=>{});setCodeCopied(true);setTimeout(()=>setCodeCopied(false),2000);};
   const getMsg=()=>{const mode=plan.mode||'social';const msgs=waMsgs[mode]||waMsgs.social;const fn=msgs[shareLang]||msgs.en;return fn(plan.name,url,plan.id);};
   const wa=()=>window.open('https://wa.me/?text='+encodeURIComponent(getMsg()),'_blank');
-  useEffect(()=>{const f=async()=>{const rs=await loadResps(plan.id);setCount(rs.length);};f();const iv=setInterval(f,15000);return()=>clearInterval(iv);},[plan.id]);
+  // NOTE: Requires "Realtime" enabled on the "responses" table in Supabase dashboard
+  useEffect(()=>{
+    const f=async()=>{const rs=await loadResps(plan.id);setCount(rs.length);};
+    f();
+    const channel=db.channel('share-responses-'+plan.id)
+      .on('postgres_changes',{event:'*',schema:'public',table:'responses',filter:'plan_id=eq.'+plan.id},()=>f())
+      .subscribe();
+    return()=>{db.removeChannel(channel);};
+  },[plan.id]);
   return(<div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
     <Back onClick={onBack} label={t.back} c={c}/>
     <div style={{textAlign:'center',marginBottom:'28px'}}>
@@ -69,6 +77,9 @@ export default function Share({plan,onViewResults,onBack,c,lang}){
       </div>
     </div>
     <button onClick={wa} style={{width:'100%',padding:'15px',borderRadius:'12px',border:'none',background:'#25D366',color:'#fff',fontSize:'15px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',marginBottom:'10px'}}>{t.shareWa}</button>
+    <button onClick={()=>window.open('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(getMsg()),'_blank')} style={{width:'100%',padding:'15px',borderRadius:'12px',border:'none',background:'#0088cc',color:'#fff',fontSize:'15px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',marginBottom:'10px'}}>{t.shareTelegram||'Telegram 📨'}</button>
+    <button onClick={()=>window.open('sms:?body='+encodeURIComponent(getMsg()))} style={{width:'100%',padding:'15px',borderRadius:'12px',border:'none',background:c.CARD,border:`1px solid ${c.BD}`,color:c.T,fontSize:'15px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',marginBottom:'10px'}}>{t.shareSMS||'SMS 💬'}</button>
+    <button onClick={()=>window.open('mailto:?subject='+encodeURIComponent(plan.name)+'&body='+encodeURIComponent(getMsg()))} style={{width:'100%',padding:'15px',borderRadius:'12px',border:'none',background:c.CARD,border:`1px solid ${c.BD}`,color:c.T,fontSize:'15px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',marginBottom:'10px'}}>{t.shareEmail||'Email ✉️'}</button>
     <Btn onClick={copyCode} full style={{marginBottom:'10px',padding:'14px'}} c={c}>{codeCopied?(t.codeCopied||'Copied!'):(t.copyCode||'Copy code')}</Btn>
     <Btn onClick={copy} full style={{marginBottom:'10px',padding:'14px'}} c={c}>{copied?t.copied:t.copyLink}</Btn>
     <HR c={c}/>

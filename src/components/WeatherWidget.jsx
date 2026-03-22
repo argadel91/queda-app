@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import T from '../constants/translations.js'
 import { WX, WX_ES, WX_EN, weatherAdvice } from '../constants/weather.js'
 import { daysUntil } from '../lib/utils.js'
+import { cached } from '../lib/cache.js'
 
 export default function WeatherWidget({city,date,c,lang,showAdvice=false}){
   const[w,setW]=useState(null);const[state,setState]=useState('idle');
@@ -11,10 +12,10 @@ export default function WeatherWidget({city,date,c,lang,showAdvice=false}){
     if(du>16){setState('early');return;}
     setState('loading');setW(null);
     (async()=>{try{
-      const geo=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=${lang}`).then(r=>r.json());
+      const geo=await cached(`geo-${city}-${lang}`,()=>fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=${lang}`).then(r=>r.json()));
       if(!geo.results?.length){setState('notfound');return;}
       const{latitude:lat,longitude:lon}=geo.results[0];
-      const wd=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,windspeed_10m_max&timezone=auto&start_date=${date}&end_date=${date}`).then(r=>r.json());
+      const wd=await cached(`weather-${city}-${date}`,()=>fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,windspeed_10m_max&timezone=auto&start_date=${date}&end_date=${date}`).then(r=>r.json()));
       if(wd.daily){setState('ok');setW({code:wd.daily.weathercode[0],max:Math.round(wd.daily.temperature_2m_max[0]),min:Math.round(wd.daily.temperature_2m_min[0]),rain:wd.daily.precipitation_probability_max[0],wind:Math.round(wd.daily.windspeed_10m_max?.[0]||0)});}
       else setState('notfound');
     }catch{setState('notfound');}})();

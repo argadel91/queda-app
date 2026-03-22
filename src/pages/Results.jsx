@@ -1,21 +1,21 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import T from '../constants/translations.js'
 import { getMC } from '../constants/theme.js'
-import { updatePlan, loadResps, saveResp } from '../lib/supabase.js'
+import { db, updatePlan, loadResps, saveResp } from '../lib/supabase.js'
 import { ls } from '../lib/storage.js'
 import { daysUntil, fmtDate, fmtShort } from '../lib/utils.js'
 import { Btn, Card, Lbl, ModeBadge, Badge, Back, HR, Inp, Txa } from '../components/ui.jsx'
 import WeatherWidget from '../components/WeatherWidget.jsx'
-import TransportPanel from '../components/TransportPanel.jsx'
+const TransportPanel = React.lazy(() => import('../components/TransportPanel.jsx'))
 import OutfitCard from '../components/OutfitCard.jsx'
-import ExpenseSplitter from '../components/ExpenseSplitter.jsx'
+const ExpenseSplitter = React.lazy(() => import('../components/ExpenseSplitter.jsx'))
 import PostPlanSurvey from '../components/PostPlanSurvey.jsx'
 import SavedGroups from '../components/SavedGroups.jsx'
-import AfterPlanSuggestions from '../components/AfterPlanSuggestions.jsx'
+const AfterPlanSuggestions = React.lazy(() => import('../components/AfterPlanSuggestions.jsx'))
 import PayModal from '../components/PayModal.jsx'
 import PersonalisedLink from '../components/PersonalisedLink.jsx'
 import { generateICS } from '../lib/ics.js'
-import RouteMap from '../components/RouteMap.jsx'
+const RouteMap = React.lazy(() => import('../components/RouteMap.jsx'))
 import VenueInfo from '../components/VenueInfo.jsx'
 
 export default function Results({plan:ip,onBack,isOrg,c,lang}){
@@ -57,7 +57,13 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
     if(!silent)setL(false);
   },[plan.id,rs]);
   useEffect(()=>{refresh();},[plan.id]);
-  useEffect(()=>{const iv=setInterval(()=>refresh(true),12000);return()=>clearInterval(iv);},[refresh]);
+  // NOTE: Requires "Realtime" enabled on the "responses" table in Supabase dashboard
+  useEffect(()=>{
+    const channel=db.channel('responses-'+plan.id)
+      .on('postgres_changes',{event:'*',schema:'public',table:'responses',filter:'plan_id=eq.'+plan.id},()=>refresh(true))
+      .subscribe();
+    return()=>{db.removeChannel(channel);};
+  },[plan.id]);
   const total=rs.length;
   const cntY=d=>rs.filter(r=>r.avail?.[d]==='yes').length;
   const cntM=d=>rs.filter(r=>r.avail?.[d]==='maybe').length;
@@ -241,7 +247,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
         </>)}
 
       {/* PLAN tab = Route + budget + inline map */}
-      {!ldg&&tab==='plan'&&<>
+      {!ldg&&tab==='plan'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><>
         {(plan.stops||[]).length===0&&<Card c={c} style={{textAlign:'center',padding:'28px'}}><div style={{fontSize:'32px',marginBottom:'8px'}}>📍</div><div style={{color:c.M2,fontSize:'14px'}}>{t.noStopsMsg}</div></Card>}
         {(plan.stops||[]).map((s,i)=><div key={s.id||i} style={{display:'flex',gap:'12px',marginBottom:'10px'}}>
           <div style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
@@ -266,7 +272,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
           <div style={{display:'flex',justifyContent:'space-between',padding:'14px 16px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px'}}><span style={{color:c.T,fontWeight:'700'}}>{t.totalLbl}</span><span style={{color:mc,fontSize:'18px',fontWeight:'800'}}>{(budget+giftPer).toFixed(0)}€</span></div>
         </>}
         {plan.stops?.some(s=>s.lat&&s.lng)&&<><HR c={c}/><RouteMap stops={plan.stops} c={c}/></>}
-      </>}
+      </></React.Suspense>}
 
       {/* DÍA tab = Weather + Outfit */}
       {!ldg&&tab==='dia'&&<div style={{display:'flex',flexDirection:'column',gap:'16px'}}>
@@ -290,16 +296,16 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
       </div>}
 
       {/* IR tab = Transport */}
-      {!ldg&&tab==='ir'&&<>
+      {!ldg&&tab==='ir'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><>
         {fs?<>
           <Card c={c} style={{marginBottom:'12px'}}><Lbl c={c}>{t.dest}</Lbl><div style={{fontSize:'15px',color:c.T,fontWeight:'600'}}>{fs.name}</div>{fs.address&&<div style={{fontSize:'13px',color:c.M2}}>{fs.address}</div>}</Card>
           <TransportPanel to={fs} planCity={city} c={c} lang={lang}/>
           {rs.filter(r=>r.how).length>0&&<><HR c={c}/><Lbl c={c}>{t.howEach}</Lbl>{rs.filter(r=>r.how).map((r,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:`1px solid ${c.BD}`,fontSize:'14px'}}><span style={{color:c.T}}>{r.name}</span><span style={{color:c.M2}}>{howL(r.how)}</span></div>)}</>}
         </>:<Card c={c} style={{textAlign:'center',padding:'28px'}}><div style={{fontSize:'32px',marginBottom:'8px'}}>📍</div><div style={{color:c.M2,fontSize:'14px'}}>{t.noStops}</div></Card>}
-      </>}
+      </></React.Suspense>}
 
       {/* EXTRAS tab = Gift + Expenses + Pay + Plan card */}
-      {!ldg&&tab==='extras'&&<div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
+      {!ldg&&tab==='extras'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
         {/* Empty state when no extras */}
         {!plan.gift&&!plan.bring?.filter(b=>b.text||typeof b==='string').length&&!plan.dressCode&&budget===0&&!plan.confirmedDate&&<div style={{textAlign:'center',padding:'40px 24px',color:c.M2}}>
           <div style={{fontSize:'32px',marginBottom:'12px'}}>🎁</div>
@@ -349,7 +355,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
             <span style={{fontSize:'12px',color:c.M2}}>— {r.name}</span>
           </div>)}
         </Card>}
-      </div>}
+      </div></React.Suspense>}
 
     </div>
   </>);

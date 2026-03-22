@@ -1,6 +1,7 @@
 import React from 'react'
 import T from '../constants/translations.js'
 import { getMC } from '../constants/theme.js'
+import { affLink, uberLink, withUtm } from '../lib/affiliates.js'
 
 export default function AfterPlanSuggestions({plan, c, lang}){
   const t=T[lang]; const mc=getMC(plan.mode,c);
@@ -14,7 +15,7 @@ export default function AfterPlanSuggestions({plan, c, lang}){
       <div style={{fontSize:'13px',fontWeight:'600',color:c.T,marginBottom:'10px'}}>🏨 {t.stayOvernight}</div>
       <div style={{fontSize:'12px',color:c.M2,marginBottom:'10px',lineHeight:1.5}}>{t.accommodationSub}</div>
       <div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>
-        {[{n:'Booking',u:`https://www.booking.com/search.html?ss=${cityEnc}&checkin=${date}`,i:'🔵'},{n:'Airbnb',u:`https://www.airbnb.com/s/${cityEnc}/homes?checkin=${date}`,i:'🏠'},{n:'Travala',u:`https://www.travala.com/hotels?destination=${cityEnc}`,i:'💎'},{n:'Hotels.com',u:`https://www.hotels.com/search.do?destination=${cityEnc}&startDate=${date}`,i:'🏨'}].map(h=><a key={h.n} href={h.u} target="_blank" rel="noreferrer" style={{padding:'7px 10px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',textDecoration:'none',fontSize:'12px',color:c.T,fontWeight:'500'}}>{h.i} {h.n}</a>)}
+        {[{n:'Booking',u:affLink(`https://www.booking.com/search.html?ss=${cityEnc}&checkin=${date}`,'booking'),i:'🔵'},{n:'Airbnb',u:affLink(`https://www.airbnb.com/s/${cityEnc}/homes?checkin=${date}`,'airbnb'),i:'🏠'},{n:'Travala',u:affLink(`https://www.travala.com/hotels?destination=${cityEnc}`,'travala'),i:'💎'},{n:'Hotels.com',u:affLink(`https://www.hotels.com/search.do?destination=${cityEnc}&startDate=${date}`,'hotels'),i:'🏨'}].map(h=><a key={h.n} href={h.u} target="_blank" rel="noreferrer" style={{padding:'7px 10px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',textDecoration:'none',fontSize:'12px',color:c.T,fontWeight:'500'}}>{h.i} {h.n}</a>)}
       </div>
     </div>
     {/* Smart after-plan tips */}
@@ -22,11 +23,11 @@ export default function AfterPlanSuggestions({plan, c, lang}){
       <div style={{fontSize:'13px',fontWeight:'600',color:c.T,marginBottom:'10px'}}>💡 {t.ifNightRunsOn}</div>
       <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
         {[
-          {icon:'🚕',text:t.taxiTip,link:'https://m.uber.com/',linkText:'Uber'},
+          {icon:'🚕',text:t.taxiTip,link:uberLink(),linkText:'Uber'},
           {icon:'🍔',text:t.burgerTip,link:null,linkText:null},
-          {icon:'🎵',text:t.continueParty,link:`https://www.google.com/maps/search/nightclub+near+${cityEnc}`,linkText:'Google Maps'},
-          {icon:'🌅',text:t.breakfastTip,link:`https://www.google.com/maps/search/breakfast+near+${cityEnc}`,linkText:'Google Maps'},
-          plan.mode==='intimate'?{icon:'🌹',text:t.specialNightTip,link:('https://www.airbnb.com/s/'+cityEnc+'/homes?room_types%5B%5D=Entire+home%2Fapt&checkin='+date),linkText:'Airbnb'}:null,
+          {icon:'🎵',text:t.continueParty,link:withUtm(`https://www.google.com/maps/search/nightclub+near+${cityEnc}`),linkText:'Google Maps'},
+          {icon:'🌅',text:t.breakfastTip,link:withUtm(`https://www.google.com/maps/search/breakfast+near+${cityEnc}`),linkText:'Google Maps'},
+          plan.mode==='intimate'?{icon:'🌹',text:t.specialNightTip,link:affLink('https://www.airbnb.com/s/'+cityEnc+'/homes?room_types%5B%5D=Entire+home%2Fapt&checkin='+date,'airbnb'),linkText:'Airbnb'}:null,
         ].filter(Boolean).map((tip,i)=><div key={i} style={{display:'flex',gap:'10px',alignItems:'flex-start',padding:'8px 0',borderBottom:i<4?`1px solid ${c.BD}`:'none'}}><span style={{fontSize:'18px',flexShrink:0}}>{tip.icon}</span><div><div style={{fontSize:'13px',color:c.T,lineHeight:1.5}}>{tip.text}</div>{tip.link&&<a href={tip.link} target="_blank" rel="noreferrer" style={{fontSize:'12px',color:mc,textDecoration:'none',fontWeight:'600'}}>{tip.linkText} →</a>}</div></div>)}
       </div>
     </div>

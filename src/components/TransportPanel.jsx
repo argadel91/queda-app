@@ -3,6 +3,7 @@ import T from '../constants/translations.js'
 import { Card, Btn, Lbl } from './ui.jsx'
 import VenueInfo from './VenueInfo.jsx'
 import { TMODES, getOsrmTime } from '../constants/weather.js'
+import { affLink, uberLink, withUtm } from '../lib/affiliates.js'
 
 export default function TransportPanel({to,planCity,c,lang}){
   const t=T[lang];
@@ -26,7 +27,7 @@ export default function TransportPanel({to,planCity,c,lang}){
   },()=>setAsked(false),{timeout:8000});};
   if(!to?.lat&&!to?.lng)return null;
   const dest=`${to.lat},${to.lng}`;const destQ=encodeURIComponent(`${to.name||''} ${to.address||''}`.trim()||planCity||'');
-  const gmTransit=`https://www.google.com/maps/dir/?api=1&destination=${dest}&travelmode=transit`;
+  const gmTransit=withUtm(`https://www.google.com/maps/dir/?api=1&destination=${dest}&travelmode=transit`);
   const tf=mins=>mins<60?`${mins} min`:`${Math.floor(mins/60)}h ${mins%60}min`;
   const flightCity=encodeURIComponent(planCity||to.name||'');
   return(<div style={{marginTop:'12px'}}>
@@ -42,17 +43,17 @@ export default function TransportPanel({to,planCity,c,lang}){
     {!asked&&<button onClick={req} style={{width:'100%',padding:'11px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',marginBottom:'8px'}}>📍 {t.calcBtn}</button>}
     {(asked&&!pos&&!ldg||ldg)&&<div style={{fontSize:'12px',color:c.M,textAlign:'center',padding:'8px'}}>{t.calcLoading}</div>}
     {!ldg&&Object.keys(times).length>0&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'6px',marginBottom:'8px'}}>
-      {TMODES.map(m=>{const tm=times[m.k];if(!tm)return null;const gmUrl=m.k==='foot'?`https://www.google.com/maps/dir/?api=1&destination=${dest}&travelmode=walking`:m.k==='car'||m.k==='moto'?`https://www.google.com/maps/dir/?api=1&destination=${dest}&travelmode=driving`:gmTransit;return<a key={m.k} href={gmUrl} target="_blank" rel="noreferrer" style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 12px',textDecoration:'none',display:'block'}}><div style={{fontSize:'13px',color:c.T,fontWeight:'500'}}>{m[lang]||m.en}</div><div style={{fontSize:'15px',color:c.A,fontWeight:'700'}}>{tf(tm.mins)}</div><div style={{fontSize:'11px',color:c.M2}}>{tm.dist} km</div></a>;})}
+      {TMODES.map(m=>{const tm=times[m.k];if(!tm)return null;const gmUrl=m.k==='foot'?withUtm(`https://www.google.com/maps/dir/?api=1&destination=${dest}&travelmode=walking`):m.k==='car'||m.k==='moto'?withUtm(`https://www.google.com/maps/dir/?api=1&destination=${dest}&travelmode=driving`):gmTransit;return<a key={m.k} href={gmUrl} target="_blank" rel="noreferrer" style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 12px',textDecoration:'none',display:'block'}}><div style={{fontSize:'13px',color:c.T,fontWeight:'500'}}>{m[lang]||m.en}</div><div style={{fontSize:'15px',color:c.A,fontWeight:'700'}}>{tf(tm.mins)}</div><div style={{fontSize:'11px',color:c.M2}}>{tm.dist} km</div></a>;})}
     </div>}
     {/* Quick links: taxis, trains */}
     <div style={{display:'flex',gap:'6px',flexWrap:'wrap',marginBottom:'10px'}}>
-      {[{n:'Uber',u:'https://m.uber.com/',i:'⚫'},{n:'Cabify',u:'https://cabify.com/',i:'🟣'},{n:'Renfe',u:'https://www.renfe.com/',i:'🚆'},{n:'Trainline',u:'https://www.thetrainline.com/',i:'🎫'},{n:'BlaBlaCar',u:`https://www.blablacar.es/search-rides?fn=&tn=${encodeURIComponent(planCity||'')}&db=${new Date().toISOString().split('T')[0]}`,i:'🚗'}].map(tx=><a key={tx.n} href={tx.u} target="_blank" rel="noreferrer" style={{padding:'6px 10px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',textDecoration:'none',fontSize:'12px',color:c.T,fontWeight:'500'}}>{tx.i} {tx.n}</a>)}
+      {[{n:'Uber',u:uberLink(),i:'⚫'},{n:'Cabify',u:'https://cabify.com/',i:'🟣'},{n:'Renfe',u:'https://www.renfe.com/',i:'🚆'},{n:'Trainline',u:affLink('https://www.thetrainline.com/','trainline'),i:'🎫'},{n:'BlaBlaCar',u:affLink(`https://www.blablacar.es/search-rides?fn=&tn=${encodeURIComponent(planCity||'')}&db=${new Date().toISOString().split('T')[0]}`,'blablacar'),i:'🚗'}].map(tx=><a key={tx.n} href={tx.u} target="_blank" rel="noreferrer" style={{padding:'6px 10px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',textDecoration:'none',fontSize:'12px',color:c.T,fontWeight:'500'}}>{tx.i} {tx.n}</a>)}
     </div>
     {/* Flights section */}
     {(roadDist===null||roadDist>200)&&<div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px'}}>
       <div style={{fontSize:'13px',color:c.T,fontWeight:'500',marginBottom:'8px'}}>✈️ {t.flights}</div>
       <div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>
-        {[{n:'Google Flights',u:`https://www.google.com/travel/flights?q=flights+to+${flightCity}`,i:'🔍'},{n:'Skyscanner',u:`https://www.skyscanner.net/transport/flights/anywhere/${flightCity.replace(/%20/g,'-').toLowerCase()}/`,i:'🌐'},{n:'Travala',u:`https://www.travala.com/flights?to=${flightCity}`,i:'💎'}].map(f=><a key={f.n} href={f.u} target="_blank" rel="noreferrer" style={{padding:'7px 10px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',textDecoration:'none',fontSize:'12px',color:c.T,fontWeight:'500'}}>{f.i} {f.n}</a>)}
+        {[{n:'Google Flights',u:withUtm(`https://www.google.com/travel/flights?q=flights+to+${flightCity}`),i:'🔍'},{n:'Skyscanner',u:affLink(`https://www.skyscanner.net/transport/flights/anywhere/${flightCity.replace(/%20/g,'-').toLowerCase()}/`,'skyscanner'),i:'🌐'},{n:'Travala',u:affLink(`https://www.travala.com/flights?to=${flightCity}`,'travala'),i:'💎'}].map(f=><a key={f.n} href={f.u} target="_blank" rel="noreferrer" style={{padding:'7px 10px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',textDecoration:'none',fontSize:'12px',color:c.T,fontWeight:'500'}}>{f.i} {f.n}</a>)}
       </div>
     </div>}
   </div>);

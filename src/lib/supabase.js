@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
-const SB_URL = 'https://gxkdibhfzjkjxuuhuwfv.supabase.co'
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4a2RpYmhmempranh1dWh1d2Z2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MzI2MzksImV4cCI6MjA4OTUwODYzOX0.mjxrUTzVjCverPfyKORYuArcq-j07B_kfm6j3MLWev4'
+const SB_URL = import.meta.env.VITE_SUPABASE_URL || 'https://gxkdibhfzjkjxuuhuwfv.supabase.co'
+const SB_KEY = import.meta.env.VITE_SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4a2RpYmhmempranh1dWh1d2Z2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MzI2MzksImV4cCI6MjA4OTUwODYzOX0.mjxrUTzVjCverPfyKORYuArcq-j07B_kfm6j3MLWev4'
 
 export const db = createClient(SB_URL, SB_KEY)
 
