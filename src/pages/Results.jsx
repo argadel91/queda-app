@@ -180,19 +180,23 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
       {isOrgRef.current&&plan.confirmedDate&&daysUntil(plan.confirmedDate)<0&&!plan.attendanceMarked&&(
         <Card c={c} style={{marginBottom:'14px'}}>
           <Lbl c={c}>📋 {t.whoCame}</Lbl>
-          {rs.filter(r=>r.avail?.[plan.confirmedDate]==='yes').map((r,i)=>(
-            <div key={i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 0',borderBottom:`1px solid ${c.BD}`}}>
-              <label style={{display:'flex',alignItems:'center',gap:'8px',cursor:'pointer'}}>
-                <input type="checkbox" checked={!!attendance[r.name]?.came} onChange={e=>{const a={...attendance};a[r.name]={...a[r.name],came:e.target.checked};setAttendance(a);}}/>
-                <span style={{fontSize:'14px',color:c.T}}>{r.name}</span>
-              </label>
+          {rs.filter(r=>r.avail?.[plan.confirmedDate]==='yes').map((r,i)=>{
+            const st=attendance[r.name]?.came;// true=came, false=didnt, 'unknown'=dunno, undefined=unmarked
+            return(<div key={i} style={{padding:'10px 0',borderBottom:`1px solid ${c.BD}`}}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'6px'}}>
+                <span style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>{r.name}</span>
+                <div style={{display:'flex',gap:'4px'}}>
+                  {[{v:true,l:'✅',cl:'#22c55e'},{v:false,l:'❌',cl:'#ef4444'},{v:'unknown',l:'❓',cl:'#f59e0b'}].map(o=><button key={String(o.v)} onClick={()=>{const a={...attendance};a[r.name]={...a[r.name],came:o.v};setAttendance(a);}} style={{padding:'4px 10px',borderRadius:'8px',border:`1px solid ${st===o.v?o.cl+'60':c.BD}`,background:st===o.v?o.cl+'20':'transparent',color:st===o.v?o.cl:c.M2,cursor:'pointer',fontSize:'13px',fontFamily:'inherit'}}>{o.l}</button>)}
+                </div>
+              </div>
               <div style={{display:'flex',gap:'2px'}}>
                 {[1,2,3,4,5].map(s=><button key={s} onClick={()=>{const a={...attendance};a[r.name]={...a[r.name],stars:s};setAttendance(a);}} style={{background:'none',border:'none',cursor:'pointer',fontSize:'16px',color:(attendance[r.name]?.stars||0)>=s?'#f59e0b':'#555',padding:'2px'}}>{(attendance[r.name]?.stars||0)>=s?'★':'☆'}</button>)}
               </div>
-            </div>
-          ))}
+            </div>);
+          })}
           <div style={{display:'flex',gap:'8px',marginTop:'12px'}}>
             <button onClick={()=>{const a={...attendance};rs.filter(r=>r.avail?.[plan.confirmedDate]==='yes').forEach(r=>{a[r.name]={...a[r.name],came:true};});setAttendance(a);}} style={{padding:'8px 14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.M2,fontSize:'12px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>{t.markAllCame}</button>
+            <button onClick={()=>{const a={...attendance};rs.filter(r=>r.avail?.[plan.confirmedDate]==='yes').forEach(r=>{a[r.name]={...a[r.name],came:'unknown'};});setAttendance(a);}} style={{padding:'8px 14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.M2,fontSize:'12px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>{t.markAllUnknown||'❓ All unknown'}</button>
             <Btn onClick={async()=>{const up={...plan,attendance,attendanceMarked:true};await updatePlan(up);setPlan(up);}} sm c={c} accent={mc}>{t.saveAttendance}</Btn>
           </div>
         </Card>
