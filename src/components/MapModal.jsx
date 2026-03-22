@@ -13,9 +13,6 @@ const loadGM = () => {
 }
 
 const extractPlace = (p) => {
-  console.log('PLACE RAW:', JSON.stringify(p, (k,v) => typeof v === 'function' ? '[fn]' : v, 2))
-  console.log('PLACE KEYS:', Object.keys(p))
-  console.log('RATING:', p.rating, 'PRICE:', p.priceLevel, 'PHOTOS:', p.photos?.length)
   const photoUrl = p.photos?.[0] ? p.photos[0].getURI?.({ maxWidth: 400 }) || null : null
   const hours = p.regularOpeningHours?.weekdayDescriptions || null
   const isOpen = p.regularOpeningHours?.isOpen?.() ?? null
@@ -129,12 +126,22 @@ const initOverlay = async () => {
       const allFields = ['displayName','formattedAddress','location','rating','userRatingCount','priceLevel','websiteURI','nationalPhoneNumber','regularOpeningHours','editorialSummary','googleMapsURI','types','businessStatus','photos','dineIn','takeout','delivery','reservable','servesBreakfast','servesLunch','servesDinner','servesBeer','servesWine','outdoorSeating','goodForChildren','accessibilityOptions']
       const { places } = await Place.searchByText({ textQuery: q, fields: allFields, maxResultCount: 6 })
       showResults(places?.map(p => extractPlace(p)) || [])
-    } catch {
+    } catch (err) {
+      // searchByText not available, using fallback
       try {
         const service = new google.maps.places.PlacesService(_map)
         service.textSearch({ query: q, bounds: _map.getBounds() }, (res, status) => {
           if (status === 'OK' && res) {
-            showResults(res.slice(0, 6).map(r => ({ name: r.name || '', address: r.formatted_address || '', lat: r.geometry.location.lat(), lng: r.geometry.location.lng() })))
+            // Get basic results first, then enrich with details
+            const basic = res.slice(0, 6).map(r => ({
+              name: r.name || '', address: r.formatted_address || '',
+              lat: r.geometry.location.lat(), lng: r.geometry.location.lng(),
+              placeId: r.place_id, rating: r.rating || null, ratingCount: r.user_ratings_total || null,
+              priceLevel: r.price_level ?? null,
+              photo: r.photos?.[0]?.getUrl?.({ maxWidth: 400 }) || null,
+              types: r.types || []
+            }))
+            showResults(basic)
           }
         })
       } catch {}
@@ -164,7 +171,40 @@ const showResults = (items) => {
   })
 }
 
+let _pendingSel = null
+
+const enrichPlace = (sel) => new Promise(resolve => {
+  if (!sel.placeId || !_map) return resolve(sel)
+  try {
+    const service = new google.maps.places.PlacesService(_map)
+    service.getDetails({ placeId: sel.placeId, fields: ['website','formatted_phone_number','opening_hours','price_level','rating','user_ratings_total','photos','editorial_summary','dine_in','takeout','delivery','reservable','serves_beer','serves_wine','outdoor_seating','wheelchair_accessible_entrance','url'] }, (place, status) => {
+      if (status === 'OK' && place) {
+        sel.website = place.website || null
+        sel.phone = place.formatted_phone_number || null
+        sel.hours = place.opening_hours?.weekday_text || null
+        sel.isOpen = place.opening_hours?.isOpen?.() ?? null
+        if (!sel.rating) sel.rating = place.rating || null
+        if (!sel.ratingCount) sel.ratingCount = place.user_ratings_total || null
+        if (!sel.priceLevel && place.price_level) sel.priceLevel = place.price_level
+        if (!sel.photo && place.photos?.[0]) sel.photo = place.photos[0].getUrl?.({ maxWidth: 400 }) || null
+        sel.summary = place.editorial_summary?.overview || null
+        sel.dineIn = place.dine_in ?? null
+        sel.takeout = place.takeout ?? null
+        sel.delivery = place.delivery ?? null
+        sel.reservable = place.reservable ?? null
+        sel.servesBeer = place.serves_beer ?? null
+        sel.servesWine = place.serves_wine ?? null
+        sel.outdoorSeating = place.outdoor_seating ?? null
+        sel.wheelchair = place.wheelchair_accessible_entrance ?? null
+        sel.googleMapsURI = place.url || null
+      }
+      resolve(sel)
+    })
+  } catch { resolve(sel) }
+})
+
 const selectPlace = (sel) => {
+  _pendingSel = sel
   if (_marker) _marker.setMap(null)
   _marker = new google.maps.Marker({ position: { lat: sel.lat, lng: sel.lng }, map: _map })
   _map.setCenter({ lat: sel.lat, lng: sel.lng })
@@ -179,7 +219,7 @@ const selectPlace = (sel) => {
     const btn = document.createElement('button')
     btn.textContent = 'Select'
     btn.style.cssText = 'padding:10px 18px;background:#CDFF6C;color:#0A0A0A;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;flex-shrink:0;'
-    btn.onclick = () => { hideOverlay(); if (_onSelectCb) _onSelectCb(sel) }
+    btn.onclick = async () => { btn.textContent='...'; const enriched = await enrichPlace(_pendingSel || sel); hideOverlay(); if (_onSelectCb) _onSelectCb(enriched) }
     bar.appendChild(btn)
   }
 }
