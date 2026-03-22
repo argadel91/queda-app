@@ -98,7 +98,13 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
   const budget=(plan.stops||[]).reduce((s,p2)=>s+(parseFloat(p2.cost)||0),0);
   const giftPer=plan.gift?.price?parseFloat(plan.gift.price):0;
   const fs=plan.stops?.find(s=>(s.options?.[0]?.lat&&s.options?.[0]?.lng)||(s.lat&&s.lng));
-  const city=plan.city||plan.cityFull?.split(',')[0]||plan.stops?.flatMap(s=>s.options||[]).find(o=>o?.address)?.address?.split(',').slice(-2,-1)[0]?.trim()||'';
+  const city=(()=>{
+    if(plan.city&&!/^\d/.test(plan.city))return plan.city;
+    const addr=plan.stops?.flatMap(s=>s.options||[]).find(o=>o?.address)?.address||plan.cityFull||'';
+    const parts=addr.split(',').map(p=>p.trim()).filter(Boolean);
+    const c=parts.slice(-3,-1).map(p=>p.replace(/^\d{4,6}\s*/,'').trim()).filter(Boolean);
+    return c[0]||plan.city||'';
+  })();
   const du=plan.confirmedDate?daysUntil(plan.confirmedDate):null;
   const confirmDate=async(d,st)=>{setConf(true);const up={...plan,confirmedDate:d,confirmedStartTime:st||''};await updatePlan(up);setPlan(up);setConf(false);};
   const waConfirm=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`📌 *${plan.name}* — ${t.dateConfirmedMsg}\n\n🗓️ ${fmtDate(plan.confirmedDate,lang)}${plan.confirmedStartTime?' · 🕐 '+plan.confirmedStartTime:''}\n\n${url}`),'_blank');};

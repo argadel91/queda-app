@@ -67,7 +67,13 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
   const draftKey=`q_draft_${mode}`;
 
   // Auto-deduce city from first stop with coordinates
-  const autoCity = useMemo(() => stops.flatMap(s=>s.options||[]).find(o=>o?.address)?.address?.split(',').slice(-3,-1).join(',').trim() || '', [stops]);
+  const autoCity = useMemo(() => {
+    const addr = stops.flatMap(s=>s.options||[]).find(o=>o?.address)?.address || '';
+    const parts = addr.split(',').map(p=>p.trim()).filter(Boolean);
+    // Remove country (last), get city (second to last or third to last, skip postal codes)
+    const relevant = parts.slice(-3,-1).map(p=>p.replace(/^\d{4,6}\s*/,'').trim()).filter(Boolean);
+    return relevant.join(', ');
+  }, [stops]);
   const autoCityShort = autoCity.split(',')[0]?.trim() || '';
   const firstCoords = useMemo(() => {
     const o = stops.flatMap(s=>s.options||[]).find(o=>o?.lat && o?.lng);
@@ -174,7 +180,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
         {opt.servesBeer&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>🍺</span>}
         {opt.servesWine&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>🍷</span>}
         {opt.wheelchair&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>♿</span>}
-        {opt.types?.length>0&&opt.types.slice(0,3).map(tp=><span key={tp} style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2,textTransform:'capitalize'}}>{tp.replace(/_/g,' ')}</span>)}
+        {opt.types?.length>0&&(()=>{const TYPE_ICONS={restaurant:'🍽️',bar:'🍸',cafe:'☕',bakery:'🥐',night_club:'🪩',gym:'💪',park:'🌳',museum:'🏛️',hotel:'🏨',store:'🏪',school:'🏫',university:'🎓'};const main=opt.types.find(t=>TYPE_ICONS[t]);return main?<span style={{padding:'2px 8px',borderRadius:'12px',background:`${mc}10`,color:mc,fontWeight:'600'}}>{TYPE_ICONS[main]} {main.replace(/_/g,' ')}</span>:null;})()}
       </div>
       {opt.summary&&<div style={{fontSize:'11px',color:c.M2,fontStyle:'italic',marginTop:'4px'}}>"{opt.summary}"</div>}
     </div>;

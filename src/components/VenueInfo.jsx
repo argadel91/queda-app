@@ -2,6 +2,16 @@ import React, { useState } from 'react'
 import T from '../constants/translations.js'
 
 const PRICE = { 1: '€', 2: '€€', 3: '€€€', 4: '€€€€' }
+const TYPE_ICONS = {restaurant:'🍽️',bar:'🍸',cafe:'☕',bakery:'🥐',night_club:'🪩',gym:'💪',park:'🌳',museum:'🏛️',hotel:'🏨',shopping_mall:'🛍️',store:'🏪',school:'🏫',university:'🎓',hospital:'🏥',church:'⛪',movie_theater:'🎬',bowling_alley:'🎳',spa:'💆',stadium:'🏟️',zoo:'🦁',beach:'🏖️',library:'📚',airport:'✈️',train_station:'🚆',bus_station:'🚌'}
+
+const getTypeLabel = (types) => {
+  if (!types?.length) return null;
+  for (const t of types) {
+    if (TYPE_ICONS[t]) return TYPE_ICONS[t] + ' ' + t.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+  }
+  const main = types.find(t=>!['establishment','point_of_interest','food','political'].includes(t));
+  return main ? main.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()) : null;
+}
 
 export default function VenueInfo({ stop, c, lang }) {
   const t = T[lang];
@@ -10,9 +20,11 @@ export default function VenueInfo({ stop, c, lang }) {
 
   const gmUrl = stop.googleMapsURI || `https://www.google.com/maps/search/${encodeURIComponent(stop.name || '')}/@${stop.lat},${stop.lng},17z`;
   const hasDetails = stop.rating || stop.website || stop.phone || stop.hours || stop.photo;
+  const typeLabel = getTypeLabel(stop.types);
 
   // Tags: always visible
   const tags = [];
+  if (typeLabel) tags.push(typeLabel);
   if (stop.rating) tags.push(`⭐ ${stop.rating}${stop.ratingCount ? ` (${stop.ratingCount})` : ''}`);
   if (stop.priceLevel) tags.push(PRICE[stop.priceLevel] || '');
   if (stop.isOpen === true) tags.push('🟢 ' + (t.venueOpen || 'Open'));
