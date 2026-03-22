@@ -121,6 +121,43 @@ export default function App(){
     if(updates.lang)setLang(updates.lang);
   };
 
+  // Dynamic title + meta tags for SEO & share previews
+  useEffect(()=>{
+    if(plan){
+      document.title=`${plan.name} — queda.`;
+      const desc=document.querySelector('meta[name="description"]');
+      if(desc)desc.content=`${plan.organizer} te invita a ${plan.name}. ${plan.stops?.length||0} paradas.`;
+      const ogTitle=document.querySelector('meta[property="og:title"]');
+      if(ogTitle)ogTitle.content=`${plan.name} — queda.`;
+      const ogDesc=document.querySelector('meta[property="og:description"]');
+      if(ogDesc)ogDesc.content=`${plan.organizer} te invita. ${plan.dates?.length||0} fechas, ${plan.stops?.length||0} paradas.`;
+      const ogUrl=document.querySelector('meta[property="og:url"]');
+      if(ogUrl)ogUrl.content=`https://www.queda.xyz?code=${plan.id}`;
+      const twTitle=document.querySelector('meta[name="twitter:title"]');
+      if(twTitle)twTitle.content=`${plan.name} — queda.`;
+      const twDesc=document.querySelector('meta[name="twitter:description"]');
+      if(twDesc)twDesc.content=`${plan.organizer} te invita. ${plan.dates?.length||0} fechas, ${plan.stops?.length||0} paradas.`;
+      const canonical=document.querySelector('link[rel="canonical"]');
+      if(canonical)canonical.href=`https://www.queda.xyz?code=${plan.id}`;
+    }else{
+      document.title='queda.';
+      const desc=document.querySelector('meta[name="description"]');
+      if(desc)desc.content='Plan group events without the chaos. Dates, routes, outfits, weather & payments — all in one shareable code.';
+      const ogTitle=document.querySelector('meta[property="og:title"]');
+      if(ogTitle)ogTitle.content='queda. — Group plans, zero chaos';
+      const ogDesc=document.querySelector('meta[property="og:description"]');
+      if(ogDesc)ogDesc.content='Dates, routes, outfits, weather & payments in one code. Free.';
+      const ogUrl=document.querySelector('meta[property="og:url"]');
+      if(ogUrl)ogUrl.content='https://www.queda.xyz';
+      const twTitle=document.querySelector('meta[name="twitter:title"]');
+      if(twTitle)twTitle.content='queda. — Group plans, zero chaos';
+      const twDesc=document.querySelector('meta[name="twitter:description"]');
+      if(twDesc)twDesc.content='Dates, routes, outfits, weather & payments in one code. Free.';
+      const canonical=document.querySelector('link[rel="canonical"]');
+      if(canonical)canonical.href='https://www.queda.xyz';
+    }
+  },[plan,screen]);
+
   useEffect(()=>{
     const code=new URLSearchParams(location.search).get('code');
     if(code){loadPlan(code).then(p=>{if(p){setPlan(p);setIsOrg(false);setScreen('preview');}});return;}
