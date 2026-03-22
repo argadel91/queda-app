@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import T from '../constants/translations.js'
 import { getMC } from '../constants/theme.js'
 import { db, updatePlan, loadResps, saveResp, savePlan } from '../lib/supabase.js'
-import { ls } from '../lib/storage.js'
+import { ls, addMyPlan } from '../lib/storage.js'
 import { daysUntil, fmtDate, fmtShort, genId } from '../lib/utils.js'
 import { Btn, Card, Lbl, ModeBadge, Badge, Back, HR, Inp, Txa } from '../components/ui.jsx'
 import WeatherWidget from '../components/WeatherWidget.jsx'
@@ -233,6 +233,38 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
       )}
       {ratingDone&&plan.confirmedDate&&daysUntil(plan.confirmedDate)<0&&(
         <div style={{background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'12px',padding:'10px 16px',marginBottom:'14px',fontSize:'13px',color:mc,fontWeight:'600',textAlign:'center'}}>✅ {t.thanksFeedback}</div>
+      )}
+      {plan.confirmedDate&&daysUntil(plan.confirmedDate)<0&&(
+        <Card c={c} style={{marginBottom:'14px'}}>
+          <Lbl c={c}>📸 {t.shareMemory||'Share the memory'}</Lbl>
+          <div id="memory-card" style={{background:`linear-gradient(135deg,${mc}30,${mc}08)`,border:`2px solid ${mc}50`,borderRadius:'16px',padding:'24px',textAlign:'center'}}>
+            <div style={{fontSize:'36px',marginBottom:'8px'}}>{plan.mode==='intimate'?'💘':plan.mode==='professional'?'💼':'🎉'}</div>
+            <div style={{fontFamily:"'Syne',serif",fontSize:'22px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{plan.name}</div>
+            <div style={{fontSize:'14px',color:mc,fontWeight:'600',marginBottom:'12px',textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,lang)}{plan.confirmedStartTime?' · '+plan.confirmedStartTime:''}</div>
+            {(plan.stops||[]).filter(s=>(s.options?.[0]?.name||s.name)).slice(0,4).map((s,i)=>{
+              const opt=s.options?.[0]||s;
+              return<div key={i} style={{fontSize:'13px',color:c.M2,marginBottom:'2px'}}>{i===0?'📍':'↓'} {opt.name||s.name}</div>;
+            })}
+            {rs.length>0&&<div style={{marginTop:'12px',display:'flex',justifyContent:'center',gap:'4px',flexWrap:'wrap'}}>
+              {rs.filter(r=>{const a=plan.attendance?.[r.name];return a?.came===true;}).slice(0,8).map((r,i)=><div key={i} style={{width:'28px',height:'28px',borderRadius:'50%',background:mc,color:'#0A0A0A',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',fontWeight:'800'}}>{r.name[0].toUpperCase()}</div>)}
+              {rs.filter(r=>plan.attendance?.[r.name]?.came===true).length>8&&<div style={{width:'28px',height:'28px',borderRadius:'50%',background:c.CARD2,color:c.M2,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'10px'}}>+{rs.filter(r=>plan.attendance?.[r.name]?.came===true).length-8}</div>}
+            </div>}
+            <div style={{marginTop:'16px',fontSize:'11px',color:c.M}}>queda.</div>
+          </div>
+          <div style={{textAlign:'center',marginTop:'8px',fontSize:'12px',color:c.M2}}>{t.screenshotHint||'Screenshot and share on your stories!'}</div>
+        </Card>
+      )}
+      {plan.confirmedDate&&daysUntil(plan.confirmedDate)<0&&(
+        <div style={{textAlign:'center',padding:'20px',background:`${mc}08`,border:`1px dashed ${mc}40`,borderRadius:'16px',marginBottom:'14px'}}>
+          <div style={{fontSize:'28px',marginBottom:'8px'}}>🔄</div>
+          <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'4px'}}>{t.repeatPlan||'Repeat the plan?'}</div>
+          <div style={{fontSize:'13px',color:c.M2,marginBottom:'12px'}}>{t.repeatPlanSub||'Same stops, new dates. One click.'}</div>
+          <Btn onClick={async()=>{
+            const newId=genId();
+            const dup={...plan,id:newId,dates:[],startTimes:[],confirmedDate:null,confirmedStartTime:null,isPublic:false,pubFilter:null,attendance:null,attendanceMarked:false,createdAt:new Date().toISOString()};
+            try{await savePlan(dup);addMyPlan(newId,dup.name,'organizer',dup.mode);navigator.clipboard?.writeText(newId);alert((t.planDuplicated||'Plan created!')+' '+newId);}catch{}
+          }} c={c} accent={mc}>{t.repeatBtn||'Create again 🔄'}</Btn>
+        </div>
       )}
       {/* TABS */}
       <div style={{display:'flex',gap:'5px',overflowX:'auto',paddingBottom:'4px',marginBottom:'20px'}}>

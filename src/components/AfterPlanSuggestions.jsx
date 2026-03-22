@@ -10,6 +10,24 @@ export default function AfterPlanSuggestions({plan, c, lang}){
   const date=plan.confirmedDate||plan.dates?.[0]||'';
   const dateEnc=encodeURIComponent(date);
   return(<div style={{marginTop:'16px',display:'flex',flexDirection:'column',gap:'10px'}}>
+    {/* Nearby places */}
+    {plan.stops?.some(s=>(s.options?.[0]?.lat||s.lat))&&(()=>{
+      const opt=plan.stops.flatMap(s=>s.options||[s]).find(o=>o.lat&&o.lng)||{};
+      const lat=opt.lat;const lng=opt.lng;
+      if(!lat||!lng)return null;
+      const links=[
+        {emoji:'🍽️',label:t.nearbyRestaurants||'Restaurants nearby',url:`https://www.google.com/maps/search/restaurants/@${lat},${lng},15z`},
+        {emoji:'🍸',label:t.nearbyBars||'Bars nearby',url:`https://www.google.com/maps/search/bars/@${lat},${lng},15z`},
+        {emoji:'☕',label:t.nearbyCafes||'Cafés nearby',url:`https://www.google.com/maps/search/cafes/@${lat},${lng},15z`},
+        {emoji:'🎭',label:t.nearbyActivities||'Activities nearby',url:`https://www.google.com/maps/search/things+to+do/@${lat},${lng},15z`},
+      ];
+      return <div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'14px',padding:'16px',marginBottom:'10px'}}>
+        <div style={{fontSize:'13px',fontWeight:'600',color:c.T,marginBottom:'10px'}}>📍 {t.nearbyPlaces||'Explore nearby'}</div>
+        <div style={{display:'flex',flexWrap:'wrap',gap:'6px'}}>
+          {links.map((l,i)=><a key={i} href={withUtm(l.url)} target="_blank" rel="noreferrer" style={{display:'flex',alignItems:'center',gap:'6px',padding:'8px 14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',textDecoration:'none',fontSize:'13px',color:c.T,fontWeight:'500'}}>{l.emoji} {l.label}</a>)}
+        </div>
+      </div>;
+    })()}
     {/* Accommodation */}
     <div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'14px',padding:'16px'}}>
       <div style={{fontSize:'13px',fontWeight:'600',color:c.T,marginBottom:'10px'}}>🏨 {t.stayOvernight}</div>
