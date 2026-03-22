@@ -308,6 +308,9 @@ const T ={
     cat:['🍽️ Restaurante','🍸 Bar','🎉 Discoteca','☕ Café','🎭 Actividad','🏠 Casa','🍕 Informal','📍 Otro'],
     shareLangLbl:'Idioma del mensaje',copyCode:'Copiar código',codeCopied:'✓ ¡Código copiado!',draftRestored:'Borrador restaurado',draftDiscard:'Descartar',autoConfirmTitle:'Auto-confirmación',peopleSaid:'personas dijeron sí para',autoConfirmQ:'¿Confirmar esta fecha automáticamente?',notYet:'Todavía no',editPlan:'Editar plan',saveLbl:'Guardar',addToCalendar:'Añadir al calendario',
     personalisedLinkDesc:'Genera un link con el nombre del invitado ya relleno.',createError:'Error al crear el plan. Comprueba tu conexión.',someone:'Alguien',noResponsesYet:'Nadie ha respondido aún',personResponded:n=>n===1?'persona ha respondido':`personas han respondido`,
+    personalInfo:'Información personal',genderLbl:'Género',genderFemale:'Mujer',genderMale:'Hombre',genderOther:'Otro',genderCustomPh:'¿Cómo te identificas?',birthdateLbl:'Fecha de nacimiento',locationLbl:'Ubicación',yearsOld:'años',
+    completeProfile:'Completa tu perfil para mejores recomendaciones en Discover',completeProfileDiscover:'Completa tu perfil para ver planes hechos para ti',
+    filterGender:'¿Quién puede unirse?',filterAny:'Cualquiera',filterAgeMin:'Edad mín.',filterAgeMax:'Edad máx.',filterRadius:'Distancia máxima',filterNoLimit:'Sin límite',publishBtn:'Publicar',
   },
   en:{
     tagline:'Plans without chaos.',sub:'Dates, times, route, outfit, weather and payments in one code.',
@@ -617,6 +620,9 @@ const T ={
     cat:['🍽️ Restaurant','🍸 Bar','🎉 Club','☕ Café','🎭 Activity','🏠 Home','🍕 Casual','📍 Other'],
     shareLangLbl:'Message language',copyCode:'Copy code',codeCopied:'✓ Code copied!',draftRestored:'Draft restored',draftDiscard:'Discard',autoConfirmTitle:'Auto-confirmation',peopleSaid:'people said yes for',autoConfirmQ:'Auto-confirm this date?',notYet:'Not yet',editPlan:'Edit plan',saveLbl:'Save',addToCalendar:'Add to calendar',
     personalisedLinkDesc:"Generate a link with the guest's name pre-filled.",createError:'Error creating the plan. Check your connection.',someone:'Someone',noResponsesYet:'Nobody has responded yet',personResponded:n=>n===1?'person responded':`people responded`,
+    personalInfo:'Personal info',genderLbl:'Gender',genderFemale:'Woman',genderMale:'Man',genderOther:'Other',genderCustomPh:'How do you identify?',birthdateLbl:'Date of birth',locationLbl:'Location',yearsOld:'years',
+    completeProfile:'Complete your profile for better Discover recommendations',completeProfileDiscover:'Complete your profile to see plans tailored to you',
+    filterGender:'Who can join?',filterAny:'Anyone',filterAgeMin:'Min age',filterAgeMax:'Max age',filterRadius:'Max distance',filterNoLimit:'No limit',publishBtn:'Publish',
   },
   pt:{
     tagline:'Planos sem caos.',sub:'Datas, horários, rota, look, tempo e pagamentos num só código.',
@@ -921,6 +927,9 @@ const T ={
     cat:['🍽️ Restaurante','🍸 Bar','🎉 Discoteca','☕ Café','🎭 Atividade','🏠 Casa','🍕 Informal','📍 Outro'],
     shareLangLbl:'Idioma da mensagem',copyCode:'Copiar código',codeCopied:'✓ Código copiado!',draftRestored:'Rascunho restaurado',draftDiscard:'Descartar',autoConfirmTitle:'Auto-confirmação',peopleSaid:'pessoas disseram sim para',autoConfirmQ:'Confirmar esta data automaticamente?',notYet:'Ainda não',editPlan:'Editar plano',saveLbl:'Guardar',addToCalendar:'Adicionar ao calendário',
     personalisedLinkDesc:'Gera um link com o nome do convidado já preenchido.',createError:'Erro ao criar o plano. Verifica a tua conexão.',someone:'Alguém',noResponsesYet:'Ninguém respondeu ainda',personResponded:n=>n===1?'pessoa respondeu':`pessoas responderam`,
+    personalInfo:'Informação pessoal',genderLbl:'Género',genderFemale:'Mulher',genderMale:'Homem',genderOther:'Outro',genderCustomPh:'Como te identificas?',birthdateLbl:'Data de nascimento',locationLbl:'Localização',yearsOld:'anos',
+    completeProfile:'Completa o teu perfil para melhores recomendações no Discover',completeProfileDiscover:'Completa o teu perfil para ver planos feitos para ti',
+    filterGender:'Quem pode juntar-se?',filterAny:'Qualquer',filterAgeMin:'Idade mín.',filterAgeMax:'Idade máx.',filterRadius:'Distância máxima',filterNoLimit:'Sem limite',publishBtn:'Publicar',
   },
   fr:{
     tagline:`Des plans sans chaos.`,sub:`Dates, horaires, itinéraire, tenue, météo et paiements en un code.`,
@@ -1235,6 +1244,9 @@ const T ={
     estPer:`Estimé par personne`,
     shareLangLbl:`Langue du message`,copyCode:`Copier le code`,codeCopied:`✓ Code copié !`,draftRestored:`Brouillon restauré`,draftDiscard:`Supprimer`,autoConfirmTitle:`Confirmation auto`,peopleSaid:`personnes ont dit oui pour`,autoConfirmQ:`Confirmer cette date automatiquement ?`,notYet:`Pas encore`,editPlan:`Modifier le plan`,saveLbl:`Enregistrer`,addToCalendar:`Ajouter au calendrier`,
     personalisedLinkDesc:`Génère un lien avec le nom de l'invité pré-rempli.`,createError:`Erreur lors de la création du plan. Vérifie ta connexion.`,someone:`Quelqu'un`,noResponsesYet:`Personne n'a encore répondu`,personResponded:n=>n===1?`personne a répondu`:`personnes ont répondu`,
+    personalInfo:`Infos personnelles`,genderLbl:`Genre`,genderFemale:`Femme`,genderMale:`Homme`,genderOther:`Autre`,genderCustomPh:`Comment tu t'identifies ?`,birthdateLbl:`Date de naissance`,locationLbl:`Localisation`,yearsOld:`ans`,
+    completeProfile:`Complète ton profil pour de meilleures recommandations sur Discover`,completeProfileDiscover:`Complète ton profil pour voir des plans faits pour toi`,
+    filterGender:`Qui peut rejoindre ?`,filterAny:`Tout le monde`,filterAgeMin:`Âge min.`,filterAgeMax:`Âge max.`,filterRadius:`Distance max`,filterNoLimit:`Sans limite`,publishBtn:`Publier`,
   },
   de:{
     tagline:'Pläne ohne Chaos.',sub:'Termine, Zeiten, Route, Outfit, Wetter und Zahlungen in einem Code.',
@@ -1539,6 +1551,9 @@ const T ={
     cat:['🍽️ Restaurant','🍸 Bar','🎉 Club','☕ Café','🎭 Aktivität','🏠 Zuhause','🍕 Casual','📍 Andere'],
     shareLangLbl:'Nachrichtensprache',copyCode:'Code kopieren',codeCopied:'✓ Code kopiert!',draftRestored:'Entwurf wiederhergestellt',draftDiscard:'Verwerfen',autoConfirmTitle:'Auto-Bestätigung',peopleSaid:'Personen sagten Ja für',autoConfirmQ:'Dieses Datum automatisch bestätigen?',notYet:'Noch nicht',editPlan:'Plan bearbeiten',saveLbl:'Speichern',addToCalendar:'Zum Kalender hinzufügen',
     personalisedLinkDesc:'Erstelle einen Link mit dem Namen des Gastes vorausgefüllt.',createError:'Fehler beim Erstellen des Plans. Überprüfe deine Verbindung.',someone:'Jemand',noResponsesYet:'Noch hat niemand geantwortet',personResponded:n=>n===1?'Person hat geantwortet':`Personen haben geantwortet`,
+    personalInfo:'Persönliche Infos',genderLbl:'Geschlecht',genderFemale:'Frau',genderMale:'Mann',genderOther:'Andere',genderCustomPh:'Wie identifizierst du dich?',birthdateLbl:'Geburtsdatum',locationLbl:'Standort',yearsOld:'Jahre',
+    completeProfile:'Vervollständige dein Profil für bessere Discover-Empfehlungen',completeProfileDiscover:'Vervollständige dein Profil um passende Pläne zu sehen',
+    filterGender:'Wer kann beitreten?',filterAny:'Alle',filterAgeMin:'Mindestalter',filterAgeMax:'Höchstalter',filterRadius:'Max. Entfernung',filterNoLimit:'Unbegrenzt',publishBtn:'Veröffentlichen',
   },
   it:{
     tagline:`Piani senza caos.`,sub:`Date, orari, percorso, outfit, meteo e pagamenti in un codice.`,
@@ -1853,6 +1868,9 @@ const T ={
     estPer:`Stimato a persona`,
     shareLangLbl:`Lingua del messaggio`,copyCode:`Copia codice`,codeCopied:`✓ Codice copiato!`,draftRestored:`Bozza ripristinata`,draftDiscard:`Scarta`,autoConfirmTitle:`Conferma automatica`,peopleSaid:`persone hanno detto sì per`,autoConfirmQ:`Confermare questa data automaticamente?`,notYet:`Non ancora`,editPlan:`Modifica piano`,saveLbl:`Salva`,addToCalendar:`Aggiungi al calendario`,
     personalisedLinkDesc:`Genera un link con il nome dell'invitato già compilato.`,createError:`Errore nella creazione del piano. Controlla la tua connessione.`,someone:`Qualcuno`,noResponsesYet:`Nessuno ha ancora risposto`,personResponded:n=>n===1?`persona ha risposto`:`persone hanno risposto`,
+    personalInfo:`Info personali`,genderLbl:`Genere`,genderFemale:`Donna`,genderMale:`Uomo`,genderOther:`Altro`,genderCustomPh:`Come ti identifichi?`,birthdateLbl:`Data di nascita`,locationLbl:`Posizione`,yearsOld:`anni`,
+    completeProfile:`Completa il tuo profilo per migliori raccomandazioni su Discover`,completeProfileDiscover:`Completa il tuo profilo per vedere piani su misura per te`,
+    filterGender:`Chi può unirsi?`,filterAny:`Chiunque`,filterAgeMin:`Età min.`,filterAgeMax:`Età max.`,filterRadius:`Distanza massima`,filterNoLimit:`Senza limite`,publishBtn:`Pubblica`,
   },
 };
 

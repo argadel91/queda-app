@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import T from '../constants/translations.js'
 import { getMC, MC_DARK } from '../constants/theme.js'
+import CityInput from '../components/CityInput.jsx'
 import { ls, getMyPlans } from '../lib/storage.js'
 import { loadPlan, db } from '../lib/supabase.js'
 import { daysUntil, fmtDate, fmtShort, dayStart } from '../lib/utils.js'
@@ -13,6 +14,13 @@ export default function Profile({onBack,onOpen,c,lang,authUser,profile,onUpdateP
   const[editingName,setEditingName]=useState(false);
   const[newName,setNewName]=useState(profile?.name||'');
   const[newUsername,setNewUsername]=useState(profile?.username||'');
+  const[editingProfile,setEditingProfile]=useState(false);
+  const[gender,setGender]=useState(profile?.gender||'');
+  const[genderCustom,setGenderCustom]=useState(profile?.genderCustom||'');
+  const[birthdate,setBirthdate]=useState(profile?.birthdate||'');
+  const[userCity,setUserCity]=useState(profile?.city||'');
+  const[userLat,setUserLat]=useState(profile?.lat||null);
+  const[userLon,setUserLon]=useState(profile?.lon||null);
   const saveName=async()=>{if(!newName.trim())return;await onUpdateProfile({name:newName.trim(),username:newUsername.trim()||null});setEditingName(false);};
   const[tab,setTab]=useState('upcoming');
   const[dates,setDates]=useState({});const[modes,setModes]=useState({});
@@ -67,6 +75,39 @@ export default function Profile({onBack,onOpen,c,lang,authUser,profile,onUpdateP
         {t.signOut}
       </button>
     </div>}
+    {/* Personal info */}
+    <div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'14px',padding:'16px',marginBottom:'16px'}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'12px'}}>
+        <Lbl c={c}>{t.personalInfo||'Personal info'}</Lbl>
+        <button onClick={()=>setEditingProfile(p=>!p)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'6px 10px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px'}}>{editingProfile?'✕':'✏️'}</button>
+      </div>
+      {!editingProfile?<div style={{display:'flex',flexWrap:'wrap',gap:'8px'}}>
+        {gender&&<span style={{fontSize:'13px',padding:'4px 12px',background:`${c.A}15`,border:`1px solid ${c.A}30`,borderRadius:'20px',color:c.A}}>{gender==='other'?genderCustom||t.genderOther:gender==='male'?t.genderMale:t.genderFemale}</span>}
+        {birthdate&&<span style={{fontSize:'13px',padding:'4px 12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'20px',color:c.T}}>{Math.floor((Date.now()-new Date(birthdate).getTime())/31557600000)} {t.yearsOld||'years'}</span>}
+        {userCity&&<span style={{fontSize:'13px',padding:'4px 12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'20px',color:c.T}}>📍 {userCity}</span>}
+        {!gender&&!birthdate&&!userCity&&<span style={{fontSize:'13px',color:c.M2}}>{t.completeProfile||'Complete your profile for better Discover recommendations'}</span>}
+      </div>
+      :<div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
+        <div>
+          <div style={{fontSize:'13px',color:c.M,marginBottom:'6px'}}>{t.genderLbl||'Gender'}</div>
+          <div style={{display:'flex',gap:'6px'}}>
+            {[{v:'female',l:t.genderFemale||'Woman'},{v:'male',l:t.genderMale||'Man'},{v:'other',l:t.genderOther||'Other'}].map(o=>
+              <button key={o.v} onClick={()=>setGender(gender===o.v?'':o.v)} style={{flex:1,padding:'10px 8px',borderRadius:'10px',border:`1px solid ${gender===o.v?c.A+'60':c.BD}`,background:gender===o.v?`${c.A}15`:c.CARD,color:gender===o.v?c.A:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:gender===o.v?'700':'400'}}>{o.l}</button>
+            )}
+          </div>
+          {gender==='other'&&<input value={genderCustom} onChange={e=>setGenderCustom(e.target.value)} placeholder={t.genderCustomPh||'How do you identify?'} style={{marginTop:'6px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
+        </div>
+        <div>
+          <div style={{fontSize:'13px',color:c.M,marginBottom:'6px'}}>{t.birthdateLbl||'Date of birth'}</div>
+          <input type="date" value={birthdate} onChange={e=>setBirthdate(e.target.value)} max={new Date().toISOString().split('T')[0]} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
+        </div>
+        <div>
+          <div style={{fontSize:'13px',color:c.M,marginBottom:'6px'}}>{t.locationLbl||'Location'}</div>
+          <CityInput value={userCity} onChange={setUserCity} onSelect={d=>{setUserCity(d.city||d.label);setUserLat(d.lat);setUserLon(d.lon);}} placeholder={t.cityPh||'Your city...'} c={c}/>
+        </div>
+        <Btn onClick={async()=>{await onUpdateProfile({gender,genderCustom:gender==='other'?genderCustom:'',birthdate,city:userCity,lat:userLat,lon:userLon});setEditingProfile(false);}} full sm c={c}>{t.saveLbl||'Save'}</Btn>
+      </div>}
+    </div>
     {/* Quick stats */}
     {plans.length>0&&(()=>{
       const org=plans.filter(p=>p.role==='organizer').length;

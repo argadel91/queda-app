@@ -164,7 +164,7 @@ export default function App(){
     {screen==='home'&&<Home onCreate={()=>nav('select-mode')} onJoin={handleJoin} onProfile={()=>nav('profile')} onDiscover={()=>nav('discover')} c={c} lang={lang}/>}
     {screen==='select-mode'&&<ModeSelect onSelect={m=>{setPendingMode(m);nav('create');}} onBack={()=>nav('home')} c={c} lang={lang}/>}
     {screen==='profile'&&<Profile onBack={()=>nav('home')} onOpen={handleFromProfile} c={c} lang={lang} authUser={authUser} profile={profile} onUpdateProfile={updateProfile} onSignOut={handleSignOut}/>}
-    {screen==='discover'&&<Discover onBack={()=>nav('home')} onJoin={handleDiscoverJoin} c={c} lang={lang}/>}
+    {screen==='discover'&&<Discover onBack={()=>nav('home')} onJoin={handleDiscoverJoin} c={c} lang={lang} profile={profile}/>}
     {screen==='create'&&<Create onBack={()=>nav('select-mode')} onCreated={p=>nav('share',p,true)} c={c} lang={lang} mode={pendingMode||'social'} authUser={authUser} profile={profile}/>}
     {screen==='share'&&plan&&<Share plan={plan} onViewResults={()=>nav('results',plan,isOrg)} onBack={()=>nav('home')} c={c} lang={lang}/>}
     {screen==='preview'&&plan&&<PlanPreview plan={plan} onRespond={()=>nav('respond',plan,false)} onBack={()=>nav('home')} c={c} lang={lang}/>}
