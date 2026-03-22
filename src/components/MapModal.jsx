@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import T from '../constants/translations.js'
 
-const waitForGoogle = () => {
+const loadGM = () => {
   if (window.__loadGoogleMaps) window.__loadGoogleMaps()
   return new Promise(resolve => {
     if (window.google?.maps) return resolve()
@@ -12,130 +12,194 @@ const waitForGoogle = () => {
   })
 }
 
-export default function MapModal({visible,onSelect,onClose,c,lang,init}){
-  const t=T[lang];
-  const mapRef=useRef(null);
-  const mapObjRef=useRef(null);
-  const markerRef=useRef(null);
-  const inputRef=useRef(null);
-  const[selected,setSelected]=useState(null);
-  const[results,setResults]=useState([]);
-  const[ready,setReady]=useState(false);
+// Persistent map container outside React
+let _overlay = null
+let _mapDiv = null
+let _map = null
+let _marker = null
+let _onSelectCb = null
+let _onCloseCb = null
 
-  // Init map on first open, never destroy
-  useEffect(()=>{
-    if(!visible)return;
-    let cancelled=false;
-    waitForGoogle().then(async()=>{
-      if(cancelled||!mapRef.current||mapObjRef.current)return;
-      await google.maps.importLibrary('maps');
-      await google.maps.importLibrary('places');
-      const map=new google.maps.Map(mapRef.current,{
-        center:{lat:40.4168,lng:-3.7038},
-        zoom:5,
-        disableDefaultUI:true,
-        zoomControl:true,
-        gestureHandling:'greedy'
-      });
-      mapObjRef.current=map;
-      setReady(true);
+const initOverlay = async () => {
+  if (_overlay) return
+  _overlay = document.createElement('div')
+  _overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:none;flex-direction:column;'
+  _overlay.id = 'gmap-overlay'
+  document.body.appendChild(_overlay)
 
-      map.addListener('click',(e)=>{
-        const lat=e.latLng.lat();const lng=e.latLng.lng();
-        const geocoder=new google.maps.Geocoder();
-        geocoder.geocode({location:{lat,lng}},(res,status)=>{
-          if(status==='OK'&&res[0]){
-            const r=res[0];
-            const sel={name:r.address_components?.[0]?.long_name||'',address:r.formatted_address||'',lat,lng};
-            setSelected(sel);setResults([]);
-            if(inputRef.current)inputRef.current.value=r.formatted_address||'';
-            if(markerRef.current)markerRef.current.setMap(null);
-            markerRef.current=new google.maps.Marker({position:{lat,lng},map});
-            map.panTo({lat,lng});
+  // Header
+  const header = document.createElement('div')
+  header.style.cssText = 'padding:12px 16px;display:flex;align-items:center;gap:8px;background:#141414;border-bottom:1px solid #2A2A2A;'
+  _overlay.appendChild(header)
+
+  const inputWrap = document.createElement('div')
+  inputWrap.style.cssText = 'flex:1;position:relative;'
+  header.appendChild(inputWrap)
+
+  const input = document.createElement('input')
+  input.id = 'gmap-input'
+  input.placeholder = 'Search for a place... (press Enter)'
+  input.style.cssText = 'width:100%;background:#1C1C1C;border:1px solid #2A2A2A;border-radius:10px;padding:10px 36px 10px 14px;color:#F0EBE1;font-size:14px;font-family:inherit;outline:none;box-sizing:border-box;'
+  inputWrap.appendChild(input)
+
+  const searchBtn = document.createElement('button')
+  searchBtn.textContent = '🔍'
+  searchBtn.style.cssText = 'background:#CDFF6C;border:none;border-radius:10px;padding:8px 14px;color:#0A0A0A;cursor:pointer;font-size:14px;font-weight:700;'
+  header.appendChild(searchBtn)
+
+  const closeBtn = document.createElement('button')
+  closeBtn.textContent = '✕'
+  closeBtn.style.cssText = 'background:none;border:1px solid #2A2A2A;border-radius:10px;padding:8px 14px;color:#888;cursor:pointer;font-size:13px;font-weight:600;'
+  closeBtn.onclick = () => { hideOverlay(); if (_onCloseCb) _onCloseCb() }
+  header.appendChild(closeBtn)
+
+  // Results
+  const resultsList = document.createElement('div')
+  resultsList.id = 'gmap-results'
+  resultsList.style.cssText = 'background:#141414;border-bottom:1px solid #2A2A2A;max-height:240px;overflow-y:auto;display:none;'
+  _overlay.appendChild(resultsList)
+
+  // Map
+  _mapDiv = document.createElement('div')
+  _mapDiv.style.cssText = 'flex:1;'
+  _overlay.appendChild(_mapDiv)
+
+  // Selected bar
+  const selBar = document.createElement('div')
+  selBar.id = 'gmap-selbar'
+  selBar.style.cssText = 'padding:14px 16px;background:#141414;border-top:1px solid #2A2A2A;display:none;align-items:center;gap:10px;'
+  _overlay.appendChild(selBar)
+
+  await loadGM()
+  await google.maps.importLibrary('maps')
+  await google.maps.importLibrary('places')
+
+  _map = new google.maps.Map(_mapDiv, {
+    center: { lat: 40.4168, lng: -3.7038 },
+    zoom: 5,
+    disableDefaultUI: true,
+    zoomControl: true,
+    gestureHandling: 'greedy'
+  })
+
+  // Click on map
+  _map.addListener('click', (e) => {
+    const lat = e.latLng.lat(), lng = e.latLng.lng()
+    const geocoder = new google.maps.Geocoder()
+    geocoder.geocode({ location: { lat, lng } }, (res, status) => {
+      if (status === 'OK' && res[0]) {
+        const r = res[0]
+        selectPlace({ name: r.address_components?.[0]?.long_name || '', address: r.formatted_address || '', lat, lng })
+        input.value = r.formatted_address || ''
+      }
+    })
+  })
+
+  // Search
+  const doSearch = async () => {
+    const q = input.value?.trim()
+    if (!q) return
+    try {
+      const { Place } = await google.maps.importLibrary('places')
+      const { places } = await Place.searchByText({ textQuery: q, fields: ['displayName', 'formattedAddress', 'location'], maxResultCount: 6 })
+      showResults(places?.map(p => ({ name: p.displayName || '', address: p.formattedAddress || '', lat: p.location?.lat(), lng: p.location?.lng() })) || [])
+    } catch {
+      try {
+        const service = new google.maps.places.PlacesService(_map)
+        service.textSearch({ query: q, bounds: _map.getBounds() }, (res, status) => {
+          if (status === 'OK' && res) {
+            showResults(res.slice(0, 6).map(r => ({ name: r.name || '', address: r.formatted_address || '', lat: r.geometry.location.lat(), lng: r.geometry.location.lng() })))
           }
-        });
-      });
-    });
-    return()=>{cancelled=true;};
-  },[visible]);
+        })
+      } catch {}
+    }
+  }
 
-  // When opened, recenter if init changed
-  useEffect(()=>{
-    if(!visible||!mapObjRef.current)return;
-    setSelected(null);setResults([]);
-    if(inputRef.current)inputRef.current.value=init||'';
-    const map=mapObjRef.current;
-    setTimeout(()=>google.maps.event.trigger(map,'resize'),100);
-    if(init){
-      const geocoder=new google.maps.Geocoder();
-      geocoder.geocode({address:init},(res,status)=>{
-        if(status==='OK'&&res[0]){
-          const loc=res[0].geometry.location;
-          map.setCenter(loc);map.setZoom(13);
+  input.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); doSearch() } }
+  searchBtn.onclick = doSearch
+}
+
+const showResults = (items) => {
+  const el = document.getElementById('gmap-results')
+  if (!el) return
+  el.innerHTML = ''
+  if (items.length === 0) { el.style.display = 'none'; return }
+  el.style.display = 'block'
+  items.forEach(r => {
+    const row = document.createElement('div')
+    row.style.cssText = 'padding:12px 16px;cursor:pointer;border-bottom:1px solid #2A2A2A;'
+    row.onmouseenter = () => { row.style.background = '#1C1C1C' }
+    row.onmouseleave = () => { row.style.background = 'transparent' }
+    row.innerHTML = `<div style="font-size:14px;color:#F0EBE1;font-weight:500">${r.name}</div><div style="font-size:12px;color:#888">${r.address}</div>`
+    row.onclick = () => { selectPlace(r); document.getElementById('gmap-input').value = r.name; document.getElementById('gmap-results').style.display = 'none' }
+    el.appendChild(row)
+  })
+}
+
+const selectPlace = (sel) => {
+  if (_marker) _marker.setMap(null)
+  _marker = new google.maps.Marker({ position: { lat: sel.lat, lng: sel.lng }, map: _map })
+  _map.setCenter({ lat: sel.lat, lng: sel.lng })
+  _map.setZoom(16)
+  const bar = document.getElementById('gmap-selbar')
+  if (bar) {
+    bar.style.display = 'flex'
+    bar.innerHTML = `<div style="flex:1;min-width:0"><div style="font-size:14px;color:#F0EBE1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sel.name}</div><div style="font-size:12px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sel.address}</div></div>`
+    const btn = document.createElement('button')
+    btn.textContent = 'Select'
+    btn.style.cssText = 'padding:10px 18px;background:#CDFF6C;color:#0A0A0A;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;flex-shrink:0;'
+    btn.onclick = () => { hideOverlay(); if (_onSelectCb) _onSelectCb(sel) }
+    bar.appendChild(btn)
+  }
+}
+
+const showOverlay = (initQuery) => {
+  if (!_overlay) return
+  _overlay.style.display = 'flex'
+  const input = document.getElementById('gmap-input')
+  if (input) { input.value = initQuery || ''; input.focus() }
+  const results = document.getElementById('gmap-results')
+  if (results) { results.style.display = 'none'; results.innerHTML = '' }
+  const bar = document.getElementById('gmap-selbar')
+  if (bar) { bar.style.display = 'none' }
+  if (_marker) { _marker.setMap(null); _marker = null }
+  if (_map) {
+    google.maps.event.trigger(_map, 'resize')
+    if (initQuery) {
+      const geocoder = new google.maps.Geocoder()
+      geocoder.geocode({ address: initQuery }, (res, status) => {
+        if (status === 'OK' && res[0]) {
+          const loc = res[0].geometry.location
+          _map.setCenter(loc); _map.setZoom(13)
         }
-      });
+      })
     }
-  },[visible,init]);
+  }
+}
 
-  const searchPlaces=async(query)=>{
-    if(!query?.trim())return;
-    try{
-      const{Place}=await google.maps.importLibrary('places');
-      const{places}=await Place.searchByText({textQuery:query,fields:['displayName','formattedAddress','location'],maxResultCount:6});
-      if(places?.length){
-        setResults(places.map(p=>({name:p.displayName||'',address:p.formattedAddress||'',lat:p.location?.lat(),lng:p.location?.lng()})));
-      }else{setResults([]);}
-    }catch{
-      try{
-        const map=mapObjRef.current;
-        if(!map)return;
-        const service=new google.maps.places.PlacesService(map);
-        service.textSearch({query,bounds:map.getBounds()},(res,status)=>{
-          if(status==='OK'&&res){
-            setResults(res.slice(0,6).map(r=>({name:r.name||'',address:r.formatted_address||'',lat:r.geometry.location.lat(),lng:r.geometry.location.lng()})));
-          }else{setResults([]);}
-        });
-      }catch{setResults([]);}
+const hideOverlay = () => {
+  if (_overlay) _overlay.style.display = 'none'
+}
+
+export default function MapModal({ visible, onSelect, onClose, c, lang, init }) {
+  const initialized = useRef(false)
+
+  useEffect(() => {
+    if (!visible) return
+    _onSelectCb = onSelect
+    _onCloseCb = onClose
+    if (!initialized.current) {
+      initialized.current = true
+      initOverlay().then(() => showOverlay(init))
+    } else {
+      showOverlay(init)
     }
-  };
+  }, [visible, init])
 
-  const handleKeyDown=(e)=>{
-    if(e.key==='Enter'){e.preventDefault();searchPlaces(inputRef.current?.value);}
-  };
+  useEffect(() => {
+    if (!visible) hideOverlay()
+  }, [visible])
 
-  const pickResult=(r)=>{
-    const map=mapObjRef.current;
-    setSelected(r);setResults([]);
-    if(inputRef.current)inputRef.current.value=r.name;
-    if(map){
-      map.setCenter({lat:r.lat,lng:r.lng});map.setZoom(16);
-      if(markerRef.current)markerRef.current.setMap(null);
-      markerRef.current=new google.maps.Marker({position:{lat:r.lat,lng:r.lng},map});
-    }
-  };
-
-  return(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.85)',zIndex:200,display:visible?'flex':'none',flexDirection:'column'}}>
-    <div style={{padding:'12px 16px',display:'flex',alignItems:'center',gap:'8px',background:c.CARD,borderBottom:`1px solid ${c.BD}`}}>
-      <div style={{flex:1,position:'relative'}}>
-        <input ref={inputRef} defaultValue={init||''} onKeyDown={handleKeyDown} placeholder={t.searchPlacePh||'Search for a place... (press Enter)'} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 36px 10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
-        <button onClick={()=>{if(inputRef.current){inputRef.current.value='';setSelected(null);setResults([]);inputRef.current.focus();}}} style={{position:'absolute',right:'10px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'16px',padding:'8px'}}>×</button>
-      </div>
-      <button onClick={()=>searchPlaces(inputRef.current?.value)} style={{background:c.A||'#CDFF6C',border:'none',borderRadius:'10px',padding:'8px 14px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:'700'}}>🔍</button>
-      <button onClick={onClose} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'8px 14px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'600'}}>✕</button>
-    </div>
-    {results.length>0&&<div style={{background:c.CARD,borderBottom:`1px solid ${c.BD}`,maxHeight:'240px',overflowY:'auto'}}>
-      {results.map((r,i)=><div key={i} onClick={()=>pickResult(r)} style={{padding:'12px 16px',cursor:'pointer',borderBottom:i<results.length-1?`1px solid ${c.BD}`:'none'}} onMouseEnter={e=>e.currentTarget.style.background=c.CARD2} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
-        <div style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>{r.name}</div>
-        <div style={{fontSize:'12px',color:c.M2}}>{r.address}</div>
-      </div>)}
-    </div>}
-    <div ref={mapRef} style={{flex:1}}>{!ready&&<div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',color:c.M}}>...</div>}</div>
-    {selected&&<div style={{padding:'14px 16px',background:c.CARD,borderTop:`1px solid ${c.BD}`,display:'flex',alignItems:'center',gap:'10px'}}>
-      <div style={{flex:1,minWidth:0}}>
-        <div style={{fontSize:'14px',color:c.T,fontWeight:'600',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{selected.name}</div>
-        <div style={{fontSize:'12px',color:c.M2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{selected.address}</div>
-      </div>
-      <button onClick={()=>onSelect(selected)} style={{padding:'10px 18px',background:c.A||'#CDFF6C',color:'#0A0A0A',border:'none',borderRadius:'10px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',fontSize:'14px',flexShrink:0}}>{t.selectPlace||'Select'}</button>
-    </div>}
-  </div>);
+  // This component renders NOTHING — the map lives entirely outside React
+  return null
 }
