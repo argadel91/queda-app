@@ -56,12 +56,16 @@ export default function RouteMap({stops,c}){
           const directionsService=new google.maps.DirectionsService();
           const directionsRenderer=new google.maps.DirectionsRenderer({map,suppressMarkers:true,polylineOptions:{strokeColor:'#CDFF6C',strokeOpacity:0.8,strokeWeight:3}});
           dirRendererRef.current=directionsRenderer;
-          const waypoints=valid.slice(1,-1).map(s=>({location:{lat:s.lat,lng:s.lng},stopover:true}));
+          const toLoc=s=>s.placeId?{placeId:s.placeId}:s.address?s.address:{lat:s.lat,lng:s.lng};
+          const waypoints=valid.slice(1,-1).map(s=>({location:toLoc(s),stopover:true}));
+          // Use WALKING for short distances (more precise routes to doors), DRIVING for long
+          const dist=Math.sqrt(Math.pow(valid[0].lat-valid[valid.length-1].lat,2)+Math.pow(valid[0].lng-valid[valid.length-1].lng,2));
+          const mode=dist>0.05?google.maps.TravelMode.DRIVING:google.maps.TravelMode.WALKING;
           directionsService.route({
-            origin:{lat:valid[0].lat,lng:valid[0].lng},
-            destination:{lat:valid[valid.length-1].lat,lng:valid[valid.length-1].lng},
+            origin:toLoc(valid[0]),
+            destination:toLoc(valid[valid.length-1]),
             waypoints,
-            travelMode:google.maps.TravelMode.DRIVING
+            travelMode:mode
           },(result,status)=>{
             if(status==='OK')directionsRenderer.setDirections(result);
             else{
