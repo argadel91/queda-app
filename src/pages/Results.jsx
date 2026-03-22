@@ -572,7 +572,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
           </div>
           <div style={{fontSize:'12px',color:c.M2,textAlign:'center',marginTop:'8px'}}>{t.hintScreenshot}</div>
         </Card>}
-        {plan.city&&<AfterPlanSuggestions plan={plan} c={c} lang={lang}/>}
+        {(city||plan.stops?.length>0)&&<AfterPlanSuggestions plan={plan} c={c} lang={lang}/>}
         {/* Suggested dates from guests */}
         {isOrgRef.current&&rs.some(r=>r.altDate)&&<Card c={c} style={{border:'1px solid #f59e0b30',background:'#f59e0b06'}}>
           <Lbl c={c}>📅 {t.datesSuggestedLbl}</Lbl>
