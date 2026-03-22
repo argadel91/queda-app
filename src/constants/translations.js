@@ -320,6 +320,7 @@ const T ={
     tplTitle:'Inicio rápido',tplSub:'Elige una plantilla o empieza de cero.',tplScratch:'Empezar de cero',
     tpls:{dinner:{n:'🍕 Cena',d:'1 parada en restaurante, look casual'},party:{n:'🎉 Fiesta',d:'Dress code fiesta, lleva bebidas'},sport:{n:'⚽ Deporte',d:'Look deportivo'},trip:{n:'🏖️ Viaje',d:'2 paradas, lleva protector solar'},date:{n:'🍷 Cita',d:'1 parada en restaurante'},home:{n:'🏠 Casa',d:'Sin paradas, plan casero'},getaway:{n:'🌄 Escapada',d:'2 paradas románticas'},meeting:{n:'📋 Reunión',d:'Roles: Organizador, Asistente'},training:{n:'🎓 Formación',d:'Roles: Profesor, Alumno'},event:{n:'🤝 Evento',d:'Roles: Organizador, Ponente, Asistente'}},
     duplicatePlan:'Duplicar plan',planDuplicated:'¡Plan duplicado! Código:',installApp:'Instalar queda.',installHint:'Añade a la pantalla de inicio para acceso rápido',installBtn:'Instalar',
+    whoCame:'¿Quién vino?',markAllCame:'Marcar todos',saveAttendance:'Guardar asistencia',attendanceSaved:'Asistencia guardada',howWasPlan:'¿Qué tal el plan?',ratePlan:'Valorar',thanksFeedback:'¡Gracias por tu valoración!',tiedDates:'Empate entre estas fechas',decideTie:'Decide tú',secondRound:'Segunda ronda',deadlinePassed:'Plazo vencido',deadlineIn:'Plazo en',hours:'horas',
   },
   en:{
     tagline:'Plans without chaos.',sub:'Dates, times, route, outfit, weather and payments in one code.',
@@ -641,6 +642,7 @@ const T ={
     tplTitle:'Quick start',tplSub:'Choose a template or start from scratch.',tplScratch:'Start from scratch',
     tpls:{dinner:{n:'🍕 Dinner',d:'1 restaurant stop, casual dress'},party:{n:'🎉 Party',d:'Party dress code, bring drinks'},sport:{n:'⚽ Sport',d:'Sporty dress code'},trip:{n:'🏖️ Trip',d:'2 stops, bring sunscreen'},date:{n:'🍷 Date',d:'1 restaurant stop'},home:{n:'🏠 Home',d:'No stops, stay in'},getaway:{n:'🌄 Getaway',d:'2 romantic stops'},meeting:{n:'📋 Meeting',d:'Roles: Organizer, Attendee'},training:{n:'🎓 Training',d:'Roles: Teacher, Student'},event:{n:'🤝 Event',d:'Roles: Organizer, Speaker, Attendee'}},
     duplicatePlan:'Duplicate plan',planDuplicated:'Plan duplicated! Code:',installApp:'Install queda.',installHint:'Add to home screen for quick access',installBtn:'Install',
+    whoCame:'Who came?',markAllCame:'Mark all',saveAttendance:'Save attendance',attendanceSaved:'Attendance saved',howWasPlan:'How was the plan?',ratePlan:'Rate',thanksFeedback:'Thanks for your feedback!',tiedDates:'Tied dates',decideTie:'You decide',secondRound:'Second round',deadlinePassed:'Deadline passed',deadlineIn:'Deadline in',hours:'hours',
   },
   pt:{
     tagline:'Planos sem caos.',sub:'Datas, horários, rota, look, tempo e pagamentos num só código.',
@@ -957,6 +959,7 @@ const T ={
     tplTitle:'Início rápido',tplSub:'Escolhe um modelo ou começa do zero.',tplScratch:'Começar do zero',
     tpls:{dinner:{n:'🍕 Jantar',d:'1 paragem em restaurante, look casual'},party:{n:'🎉 Festa',d:'Dress code festa, leva bebidas'},sport:{n:'⚽ Desporto',d:'Look desportivo'},trip:{n:'🏖️ Viagem',d:'2 paragens, leva protetor solar'},date:{n:'🍷 Encontro',d:'1 paragem em restaurante'},home:{n:'🏠 Casa',d:'Sem paragens, plano caseiro'},getaway:{n:'🌄 Escapadela',d:'2 paragens românticas'},meeting:{n:'📋 Reunião',d:'Papéis: Organizador, Participante'},training:{n:'🎓 Formação',d:'Papéis: Professor, Aluno'},event:{n:'🤝 Evento',d:'Papéis: Organizador, Orador, Participante'}},
     duplicatePlan:'Duplicar plano',planDuplicated:'Plano duplicado! Código:',installApp:'Instalar queda.',installHint:'Adiciona ao ecrã inicial para acesso rápido',installBtn:'Instalar',
+    whoCame:'Quem veio?',markAllCame:'Marcar todos',saveAttendance:'Guardar presença',attendanceSaved:'Presença guardada',howWasPlan:'Como foi o plano?',ratePlan:'Avaliar',thanksFeedback:'Obrigado pela tua avaliação!',tiedDates:'Empate entre estas datas',decideTie:'Tu decides',secondRound:'Segunda ronda',deadlinePassed:'Prazo expirado',deadlineIn:'Prazo em',hours:'horas',
   },
   fr:{
     tagline:`Des plans sans chaos.`,sub:`Dates, horaires, itinéraire, tenue, météo et paiements en un code.`,
@@ -1283,6 +1286,7 @@ const T ={
     tplTitle:`Démarrage rapide`,tplSub:`Choisis un modèle ou commence de zéro.`,tplScratch:`Commencer de zéro`,
     tpls:{dinner:{n:'🍕 Dîner',d:'1 étape restaurant, tenue casual'},party:{n:'🎉 Soirée',d:'Dress code soirée, apporte des boissons'},sport:{n:'⚽ Sport',d:'Tenue sportive'},trip:{n:'🏖️ Voyage',d:'2 étapes, apporte de la crème solaire'},date:{n:'🍷 Rendez-vous',d:'1 étape restaurant'},home:{n:'🏠 Maison',d:'Sans étapes, soirée chez soi'},getaway:{n:'🌄 Escapade',d:'2 étapes romantiques'},meeting:{n:'📋 Réunion',d:'Rôles : Organisateur, Participant'},training:{n:'🎓 Formation',d:'Rôles : Professeur, Élève'},event:{n:'🤝 Événement',d:'Rôles : Organisateur, Intervenant, Participant'}},
     duplicatePlan:'Dupliquer le plan',planDuplicated:'Plan dupliqué ! Code :',installApp:'Installer queda.',installHint:`Ajoute à l'écran d'accueil pour un accès rapide`,installBtn:'Installer',
+    whoCame:'Qui est venu ?',markAllCame:'Tout marquer',saveAttendance:`Enregistrer la présence`,attendanceSaved:'Présence enregistrée',howWasPlan:'Comment était le plan ?',ratePlan:'Noter',thanksFeedback:'Merci pour ton avis !',tiedDates:'Égalité entre ces dates',decideTie:'Tu décides',secondRound:'Deuxième tour',deadlinePassed:'Délai dépassé',deadlineIn:'Délai dans',hours:'heures',
   },
   de:{
     tagline:'Pläne ohne Chaos.',sub:'Termine, Zeiten, Route, Outfit, Wetter und Zahlungen in einem Code.',
@@ -1599,6 +1603,7 @@ const T ={
     tplTitle:'Schnellstart',tplSub:'Wähle eine Vorlage oder starte von Null.',tplScratch:'Von Null starten',
     tpls:{dinner:{n:'🍕 Abendessen',d:'1 Restaurant-Station, lässiger Look'},party:{n:'🎉 Party',d:'Party-Dresscode, bringe Getränke mit'},sport:{n:'⚽ Sport',d:'Sportlicher Look'},trip:{n:'🏖️ Reise',d:'2 Stationen, bringe Sonnencreme mit'},date:{n:'🍷 Date',d:'1 Restaurant-Station'},home:{n:'🏠 Zuhause',d:'Keine Stationen, Plan zu Hause'},getaway:{n:'🌄 Ausflug',d:'2 romantische Stationen'},meeting:{n:'📋 Meeting',d:'Rollen: Organisator, Teilnehmer'},training:{n:'🎓 Schulung',d:'Rollen: Lehrer, Schüler'},event:{n:'🤝 Event',d:'Rollen: Organisator, Redner, Teilnehmer'}},
     duplicatePlan:'Plan duplizieren',planDuplicated:'Plan dupliziert! Code:',installApp:'queda. installieren',installHint:'Zum Startbildschirm hinzufügen für schnellen Zugriff',installBtn:'Installieren',
+    whoCame:'Wer war da?',markAllCame:'Alle markieren',saveAttendance:'Anwesenheit speichern',attendanceSaved:'Anwesenheit gespeichert',howWasPlan:'Wie war der Plan?',ratePlan:'Bewerten',thanksFeedback:'Danke für deine Bewertung!',tiedDates:'Gleichstand zwischen diesen Daten',decideTie:'Du entscheidest',secondRound:'Zweite Runde',deadlinePassed:'Frist abgelaufen',deadlineIn:'Frist in',hours:'Stunden',
   },
   it:{
     tagline:`Piani senza caos.`,sub:`Date, orari, percorso, outfit, meteo e pagamenti in un codice.`,
@@ -1925,6 +1930,7 @@ const T ={
     tplTitle:`Avvio rapido`,tplSub:`Scegli un modello o inizia da zero.`,tplScratch:`Inizia da zero`,
     tpls:{dinner:{n:'🍕 Cena',d:'1 tappa ristorante, look casual'},party:{n:'🎉 Festa',d:'Dress code festa, porta bevande'},sport:{n:'⚽ Sport',d:'Look sportivo'},trip:{n:'🏖️ Viaggio',d:'2 tappe, porta crema solare'},date:{n:'🍷 Appuntamento',d:'1 tappa ristorante'},home:{n:'🏠 Casa',d:'Senza tappe, piano casalingo'},getaway:{n:'🌄 Fuga',d:'2 tappe romantiche'},meeting:{n:'📋 Riunione',d:'Ruoli: Organizzatore, Partecipante'},training:{n:'🎓 Formazione',d:'Ruoli: Insegnante, Studente'},event:{n:'🤝 Evento',d:'Ruoli: Organizzatore, Relatore, Partecipante'}},
     duplicatePlan:'Duplica piano',planDuplicated:'Piano duplicato! Codice:',installApp:'Installa queda.',installHint:'Aggiungi alla schermata iniziale per un accesso rapido',installBtn:'Installa',
+    whoCame:'Chi è venuto?',markAllCame:'Segna tutti',saveAttendance:'Salva presenze',attendanceSaved:'Presenze salvate',howWasPlan:'Com\'è andato il piano?',ratePlan:'Valuta',thanksFeedback:'Grazie per la tua valutazione!',tiedDates:'Parità tra queste date',decideTie:'Decidi tu',secondRound:'Secondo turno',deadlinePassed:'Scadenza passata',deadlineIn:'Scadenza tra',hours:'ore',
   },
 };
 

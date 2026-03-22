@@ -30,6 +30,10 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
   const[duplicating,setDuplicating]=useState(false);
   const[editName,setEditName]=useState(ip.name);
   const[editDesc,setEditDesc]=useState(ip.desc||'');
+  const[attendance,setAttendance]=useState(ip.attendance||{});
+  const[attStars,setAttStars]=useState({});
+  const[planRating,setPlanRating]=useState(0);
+  const[ratingDone,setRatingDone]=useState(false);
   const isOrgRef=useRef(isOrg);
   const prevCountRef=useRef(null);
   const refresh=useCallback(async(silent=false)=>{
@@ -65,6 +69,17 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
       .subscribe();
     return()=>{db.removeChannel(channel);};
   },[plan.id]);
+  // Deadline auto-confirmation
+  useEffect(()=>{
+    if(plan.deadline&&!plan.confirmedDate&&new Date(plan.deadline)<new Date()){
+      const cntYFn=d=>rs.filter(r=>r.avail?.[d]==='yes').length;
+      const scoreFn=d=>cntYFn(d)*1000+(rs.filter(r=>r.avail?.[d]==='maybe').length);
+      const bestD=rs.length>0?(plan.dates||[]).reduce((b,d)=>scoreFn(d)>scoreFn(b)?d:b,plan.dates?.[0]):null;
+      if(bestD&&cntYFn(bestD)>0&&isOrgRef.current){
+        confirmDate(bestD);
+      }
+    }
+  },[rs]);
   const total=rs.length;
   const cntY=d=>rs.filter(r=>r.avail?.[d]==='yes').length;
   const cntM=d=>rs.filter(r=>r.avail?.[d]==='maybe').length;
@@ -153,6 +168,51 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
           <Btn onClick={()=>confirmDate(topDate)} disabled={conf} sm c={c} accent={mc} style={{flexShrink:0,fontSize:'12px',padding:'8px 12px'}}>{conf?'...':t.confirmBtn2}</Btn>
         </div>);
       })()}
+      {/* Deadline banner */}
+      {plan.deadline&&!plan.confirmedDate&&(()=>{
+        const dl=new Date(plan.deadline);
+        const hoursLeft=(dl-Date.now())/3600000;
+        if(hoursLeft<=0)return<div style={{background:'#ef444415',border:'1px solid #ef444440',borderRadius:'12px',padding:'12px 16px',marginBottom:'14px',fontSize:'13px',color:'#ef4444',fontWeight:'600'}}>{t.deadlinePassed}...</div>;
+        if(hoursLeft<=24)return<div style={{background:'#f59e0b15',border:'1px solid #f59e0b40',borderRadius:'12px',padding:'12px 16px',marginBottom:'14px',fontSize:'13px',color:'#f59e0b',fontWeight:'600'}}>⏰ {t.deadlineIn} {Math.ceil(hoursLeft)} {t.hours}</div>;
+        return null;
+      })()}
+      {/* Post-event: organizer attendance tracking */}
+      {isOrgRef.current&&plan.confirmedDate&&daysUntil(plan.confirmedDate)<0&&!plan.attendanceMarked&&(
+        <Card c={c} style={{marginBottom:'14px'}}>
+          <Lbl c={c}>📋 {t.whoCame}</Lbl>
+          {rs.filter(r=>r.avail?.[plan.confirmedDate]==='yes').map((r,i)=>(
+            <div key={i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 0',borderBottom:`1px solid ${c.BD}`}}>
+              <label style={{display:'flex',alignItems:'center',gap:'8px',cursor:'pointer'}}>
+                <input type="checkbox" checked={!!attendance[r.name]?.came} onChange={e=>{const a={...attendance};a[r.name]={...a[r.name],came:e.target.checked};setAttendance(a);}}/>
+                <span style={{fontSize:'14px',color:c.T}}>{r.name}</span>
+              </label>
+              <div style={{display:'flex',gap:'2px'}}>
+                {[1,2,3,4,5].map(s=><button key={s} onClick={()=>{const a={...attendance};a[r.name]={...a[r.name],stars:s};setAttendance(a);}} style={{background:'none',border:'none',cursor:'pointer',fontSize:'16px',color:(attendance[r.name]?.stars||0)>=s?'#f59e0b':'#555',padding:'2px'}}>{(attendance[r.name]?.stars||0)>=s?'★':'☆'}</button>)}
+              </div>
+            </div>
+          ))}
+          <div style={{display:'flex',gap:'8px',marginTop:'12px'}}>
+            <button onClick={()=>{const a={...attendance};rs.filter(r=>r.avail?.[plan.confirmedDate]==='yes').forEach(r=>{a[r.name]={...a[r.name],came:true};});setAttendance(a);}} style={{padding:'8px 14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.M2,fontSize:'12px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>{t.markAllCame}</button>
+            <Btn onClick={async()=>{const up={...plan,attendance,attendanceMarked:true};await updatePlan(up);setPlan(up);}} sm c={c} accent={mc}>{t.saveAttendance}</Btn>
+          </div>
+        </Card>
+      )}
+      {plan.attendanceMarked&&plan.confirmedDate&&daysUntil(plan.confirmedDate)<0&&isOrgRef.current&&(
+        <div style={{background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'12px',padding:'10px 16px',marginBottom:'14px',fontSize:'13px',color:mc,fontWeight:'600'}}>✅ {t.attendanceSaved}</div>
+      )}
+      {/* Post-event: plan rating for everyone */}
+      {plan.confirmedDate&&daysUntil(plan.confirmedDate)<0&&!ratingDone&&(
+        <Card c={c} style={{marginBottom:'14px'}}>
+          <Lbl c={c}>⭐ {t.howWasPlan}</Lbl>
+          <div style={{display:'flex',gap:'4px',marginBottom:'12px',justifyContent:'center'}}>
+            {[1,2,3,4,5].map(s=><button key={s} onClick={()=>setPlanRating(s)} style={{background:'none',border:'none',cursor:'pointer',fontSize:'28px',color:planRating>=s?'#f59e0b':'#555',padding:'4px'}}>{planRating>=s?'★':'☆'}</button>)}
+          </div>
+          {planRating>0&&<Btn onClick={async()=>{const me=rs.find(r=>r.name===ls('name'));if(me){await saveResp({...me,planRating});} setRatingDone(true);}} full sm c={c} accent={mc}>{t.ratePlan}</Btn>}
+        </Card>
+      )}
+      {ratingDone&&plan.confirmedDate&&daysUntil(plan.confirmedDate)<0&&(
+        <div style={{background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'12px',padding:'10px 16px',marginBottom:'14px',fontSize:'13px',color:mc,fontWeight:'600',textAlign:'center'}}>✅ {t.thanksFeedback}</div>
+      )}
       {/* TABS */}
       <div style={{display:'flex',gap:'5px',overflowX:'auto',paddingBottom:'4px',marginBottom:'20px'}}>
         {TABS.map(tb=><button key={tb} onClick={()=>setTab(tb)} style={{padding:'7px 11px',borderRadius:'20px',border:`1px solid ${tab===tb?mc+'60':c.BD}`,background:tab===tb?`${mc}15`:c.CARD,color:tab===tb?mc:c.M2,fontSize:'12px',fontWeight:tab===tb?'700':'400',cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap',flexShrink:0}}>{tlbl(tb)}</button>)}
@@ -175,6 +235,22 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
             {isOrgRef.current&&!plan.confirmedDate&&<Btn onClick={()=>confirmDate(best)} disabled={conf} full sm c={c} accent={mc}>{conf?t.confirming:t.confirmThis}</Btn>}
             {best&&<button onClick={()=>generateICS({...plan,confirmedDate:best},lang)} style={{width:'100%',padding:'8px',background:'none',border:`1px dashed ${c.BD}`,borderRadius:'8px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',marginTop:'6px'}}>{t.addToCalendar} 📅</button>}
           </div>}
+          {/* Tie detection */}
+          {(()=>{
+            const tiedDates=(plan.dates||[]).filter(d=>cntY(d)===cntY(best)&&cntY(d)>0);
+            const hasTie=tiedDates.length>1&&!plan.confirmedDate;
+            if(!hasTie||!isOrgRef.current)return null;
+            return(<div style={{background:'#f59e0b10',border:'1px solid #f59e0b40',borderRadius:'14px',padding:'16px',marginBottom:'18px'}}>
+              <div style={{fontSize:'14px',color:'#f59e0b',fontWeight:'700',marginBottom:'8px'}}>⚖️ {t.tiedDates}</div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'12px'}}>
+                {tiedDates.map(d=><span key={d} style={{fontSize:'13px',padding:'4px 12px',borderRadius:'20px',background:'#f59e0b20',color:'#f59e0b',border:'1px solid #f59e0b30',textTransform:'capitalize'}}>{fmtShort(d,lang)}</span>)}
+              </div>
+              <div style={{display:'flex',gap:'8px'}}>
+                <button onClick={()=>confirmDate(tiedDates[0])} style={{flex:1,padding:'10px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'13px'}}>{t.decideTie}</button>
+                <button onClick={async()=>{const up={...plan,tiebreaker:tiedDates};await updatePlan(up);setPlan(up);}} style={{flex:1,padding:'10px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontWeight:'600',fontSize:'13px'}}>{t.secondRound}</button>
+              </div>
+            </div>);
+          })()}
           {(plan.dates||[]).map(d=>{const ny=cntY(d);const nm=cntM(d);const pct=(ny/mx)*100;const isBest=d===best&&ny>0;const isConf=d===plan.confirmedDate;return(
             <div key={d} style={{marginBottom:'12px'}}>
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'5px'}}>
