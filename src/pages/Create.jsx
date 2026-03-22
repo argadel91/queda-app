@@ -54,7 +54,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
   const[startTimes,setStartTimes]=useState(['']);
   const[stops,setStops]=useState([emptyStop(1,'')]);
   const[mapTarget,setMapTarget]=useState(null); // {stopId, optionId}
-  const[dressCode,setDressCode]=useState(null);const[dressNote,setDressNote]=useState('');
+  const[dressCode,setDressCode]=useState([]);const[dressNote,setDressNote]=useState('');
   const[autoConfirm,setAutoConfirm]=useState(false);const[autoConfirmN,setAutoConfirmN]=useState(3);
   const[surpriseMode,setSurprise]=useState(false);
   const[poll,setPoll]=useState({q:'',opts:['','']});
@@ -92,7 +92,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
     if(d.deadline)setDeadline(d.deadline);if(d.hasDeadline!==undefined)setHasDeadline(d.hasDeadline);
     if(d.selDates)setSelDates(d.selDates);
     if(d.startTimes)setStartTimes(d.startTimes);
-    if(d.stops)setStops(d.stops);if(d.dressCode!==undefined)setDressCode(d.dressCode);if(d.dressNote)setDressNote(d.dressNote);
+    if(d.stops)setStops(d.stops);if(d.dressCode!==undefined)setDressCode(Array.isArray(d.dressCode)?d.dressCode:d.dressCode?[d.dressCode]:[]);if(d.dressNote)setDressNote(d.dressNote);
     if(d.autoConfirm!==undefined)setAutoConfirm(d.autoConfirm);if(d.autoConfirmN!==undefined)setAutoConfirmN(d.autoConfirmN);
     if(d.surpriseMode!==undefined)setSurprise(d.surpriseMode);
     if(d.poll)setPoll(d.poll);
@@ -418,11 +418,11 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
         return<>
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'20px'}}>{t.extrasTitle}</h2>
         {/* DRESS CODE */}
-        <Sec id="dress" icon="👔" label={t.dcLbl} hasData={dressCode!==null}>
+        <Sec id="dress" icon="👔" label={t.dcLbl} hasData={dressCode.length>0}>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'6px',marginBottom:'8px'}}>
-            {t.dressCodes.map(opt=><div key={opt.k} onClick={()=>setDressCode(dressCode===opt.k?null:opt.k)} style={{padding:'10px 12px',borderRadius:'10px',border:`1px solid ${dressCode===opt.k?mc+'50':c.BD}`,background:dressCode===opt.k?`${mc}12`:c.CARD,cursor:'pointer',fontSize:'13px',color:dressCode===opt.k?mc:c.T,fontWeight:dressCode===opt.k?'600':'400'}}>{opt.l}</div>)}
+            {t.dressCodes.map(opt=><div key={opt.k} onClick={()=>setDressCode(prev=>prev.includes(opt.k)?prev.filter(x=>x!==opt.k):[...prev,opt.k])} style={{padding:'10px 12px',borderRadius:'10px',border:`1px solid ${dressCode.includes(opt.k)?mc+'50':c.BD}`,background:dressCode.includes(opt.k)?`${mc}12`:c.CARD,cursor:'pointer',fontSize:'13px',color:dressCode.includes(opt.k)?mc:c.T,fontWeight:dressCode.includes(opt.k)?'600':'400'}}>{opt.l}</div>)}
           </div>
-          {dressCode&&<input value={dressNote} onChange={e=>setDressNote(e.target.value)} placeholder={dressCode==='custom'?t.dcCustomPh:t.dcNote} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'11px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
+          {dressCode.length>0&&<input value={dressNote} onChange={e=>setDressNote(e.target.value)} placeholder={dressCode.includes('custom')?t.dcCustomPh:t.dcNote} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'11px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
         </Sec>
         {/* AUTO-CONFIRM MODE */}
         <Sec id="auto" icon="⚡" label={t.firstAvailable} hasData={autoConfirm}>

@@ -16,6 +16,7 @@ export default function RouteMap({stops,c}){
   const mapRef=useRef(null);
   const markersRef=useRef([]);
   const polyRef=useRef(null);
+  const dirRendererRef=useRef(null);
   const valid=stops.filter(s=>s.lat&&s.lng);
 
   useEffect(()=>{
@@ -51,11 +52,35 @@ export default function RouteMap({stops,c}){
       });
 
       if(valid.length>1){
-        polyRef.current=new google.maps.Polyline({
-          path:valid.map(s=>({lat:s.lat,lng:s.lng})),map,
-          strokeColor:'#CDFF6C',strokeOpacity:0.6,strokeWeight:2,geodesic:true,
-          icons:[{icon:{path:'M 0,-1 0,1',strokeOpacity:1,scale:3},offset:'0',repeat:'16px'}]
-        });
+        try{
+          const directionsService=new google.maps.DirectionsService();
+          const directionsRenderer=new google.maps.DirectionsRenderer({map,suppressMarkers:true,polylineOptions:{strokeColor:'#CDFF6C',strokeOpacity:0.8,strokeWeight:3}});
+          dirRendererRef.current=directionsRenderer;
+          const waypoints=valid.slice(1,-1).map(s=>({location:{lat:s.lat,lng:s.lng},stopover:true}));
+          directionsService.route({
+            origin:{lat:valid[0].lat,lng:valid[0].lng},
+            destination:{lat:valid[valid.length-1].lat,lng:valid[valid.length-1].lng},
+            waypoints,
+            travelMode:google.maps.TravelMode.DRIVING
+          },(result,status)=>{
+            if(status==='OK')directionsRenderer.setDirections(result);
+            else{
+              // Fallback to straight line
+              polyRef.current=new google.maps.Polyline({
+                path:valid.map(s=>({lat:s.lat,lng:s.lng})),map,
+                strokeColor:'#CDFF6C',strokeOpacity:0.6,strokeWeight:2,geodesic:true,
+                icons:[{icon:{path:'M 0,-1 0,1',strokeOpacity:1,scale:3},offset:'0',repeat:'16px'}]
+              });
+            }
+          });
+        }catch(e){
+          // Fallback to straight line
+          polyRef.current=new google.maps.Polyline({
+            path:valid.map(s=>({lat:s.lat,lng:s.lng})),map,
+            strokeColor:'#CDFF6C',strokeOpacity:0.6,strokeWeight:2,geodesic:true,
+            icons:[{icon:{path:'M 0,-1 0,1',strokeOpacity:1,scale:3},offset:'0',repeat:'16px'}]
+          });
+        }
       }
       map.fitBounds(bounds,{top:30,right:30,bottom:30,left:30});
       if(valid.length===1)setTimeout(()=>map.setZoom(15),200);
@@ -66,6 +91,7 @@ export default function RouteMap({stops,c}){
       markersRef.current.forEach(m=>{if(m.map)m.map=null;});
       markersRef.current=[];
       if(polyRef.current){polyRef.current.setMap(null);polyRef.current=null;}
+      if(dirRendererRef.current){dirRendererRef.current.setMap(null);dirRendererRef.current=null;}
       if(mapDiv.parentNode)mapDiv.parentNode.removeChild(mapDiv);
     };
   },[stops]);

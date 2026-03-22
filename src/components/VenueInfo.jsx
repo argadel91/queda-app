@@ -19,7 +19,7 @@ export default function VenueInfo({ stop, c, lang }) {
   if (!stop?.lat || !stop?.lng) return null;
 
   const gmUrl = stop.googleMapsURI || `https://www.google.com/maps/search/${encodeURIComponent(stop.name || '')}/@${stop.lat},${stop.lng},17z`;
-  const hasDetails = stop.rating || stop.website || stop.phone || stop.hours || stop.photo;
+  const hasExpandable = stop.website || stop.phone || stop.hours?.length;
   const typeLabel = getTypeLabel(stop.types);
 
   // Tags: always visible
@@ -60,7 +60,7 @@ export default function VenueInfo({ stop, c, lang }) {
     </div>}
 
     {/* Expandable details */}
-    {hasDetails && !expanded && <button onClick={() => setExpanded(true)} style={{ background: 'none', border: 'none', color: c.A, cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit', padding: '4px 0', fontWeight: '600' }}>{t.venueMoreInfo || 'More info'} ▾</button>}
+    {hasExpandable && !expanded && <button onClick={() => setExpanded(true)} style={{ background: 'none', border: 'none', color: c.A, cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit', padding: '4px 0', fontWeight: '600' }}>{t.venueMoreInfo || 'More info'} ▾</button>}
 
     {expanded && <>
       {/* Hours */}

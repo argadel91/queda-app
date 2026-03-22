@@ -111,6 +111,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
   const waRem=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`⏰ ${t.reminderMsg.replace('{name}',plan.name)}\n${url}`),'_blank');setRem(true);};
   const togglePub=async()=>{const up={...plan,isPublic:!plan.isPublic};await updatePlan(up);setPlan(up);};
   const howL=v=>({car:t.car,moto:t.moto,transit:t.transit,taxi:t.taxi,walk:t.walk,bike:t.bike}[v]||v);
+  const haversine=(lat1,lon1,lat2,lon2)=>{const R=6371;const dLat=(lat2-lat1)*Math.PI/180;const dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));};
   const TABS=['who','plan','dia','ir','extras'];
   const tlbl=k=>t.tabs[k]||k;
   return(<>
@@ -451,13 +452,51 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
       </div>}
 
       {/* IR tab = Transport */}
-      {!ldg&&tab==='ir'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><>
-        {fs?<>{(()=>{const fso=fs.options?.[0]||fs;return<>
-          <Card c={c} style={{marginBottom:'12px'}}><Lbl c={c}>{t.dest}</Lbl><div style={{fontSize:'15px',color:c.T,fontWeight:'600'}}>{fso.name}</div>{fso.address&&<div style={{fontSize:'13px',color:c.M2}}>{fso.address}</div>}</Card>
-          <TransportPanel to={{...fso,lat:fso.lat||fs.lat,lng:fso.lng||fs.lng}} planCity={city} c={c} lang={lang}/></>})()}
-          {rs.filter(r=>r.how).length>0&&<><HR c={c}/><Lbl c={c}>{t.howEach}</Lbl>{rs.filter(r=>r.how).map((r,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:`1px solid ${c.BD}`,fontSize:'14px'}}><span style={{color:c.T}}>{r.name}</span><span style={{color:c.M2}}>{howL(r.how)}</span></div>)}</>}
-        </>:<Card c={c} style={{textAlign:'center',padding:'28px'}}><div style={{fontSize:'32px',marginBottom:'8px'}}>📍</div><div style={{color:c.M2,fontSize:'14px'}}>{t.noStops}</div></Card>}
-      </></React.Suspense>}
+      {!ldg&&tab==='ir'&&<>
+        {plan.stops?.length>0?(()=>{
+          const stopsWithCoords=(plan.stops||[]).map((s,i)=>{
+            const opt=s.options?.[0]||s;
+            return{...s,idx:i,name:opt.name||`Stop ${i+1}`,address:opt.address||'',lat:opt.lat||s.lat,lng:opt.lng||s.lng};
+          }).filter(s=>s.lat&&s.lng);
+
+          if(stopsWithCoords.length===0)return<Card c={c} style={{textAlign:'center',padding:'28px'}}><div style={{fontSize:'32px',marginBottom:'8px'}}>📍</div><div style={{color:c.M2,fontSize:'14px'}}>{t.noStops}</div></Card>;
+
+          return<>
+            {/* First leg: your location → stop 1 */}
+            <Card c={c} style={{marginBottom:'12px'}}>
+              <Lbl c={c}>📍 {t.howToGet||'How to get there'}</Lbl>
+              <div style={{fontSize:'15px',color:c.T,fontWeight:'600'}}>{stopsWithCoords[0].name}</div>
+              {stopsWithCoords[0].address&&<div style={{fontSize:'13px',color:c.M2}}>{stopsWithCoords[0].address}</div>}
+            </Card>
+            <React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}>
+              <TransportPanel to={stopsWithCoords[0]} planCity={city} c={c} lang={lang}/>
+            </React.Suspense>
+
+            {/* Between stops */}
+            {stopsWithCoords.length>1&&stopsWithCoords.slice(1).map((s,i)=>{
+              const prev=stopsWithCoords[i];
+              const dist=haversine(prev.lat,prev.lng,s.lat,s.lng);
+              const suggestion=dist<0.5?'🚶 Walk':dist<3?'🚶 Walk / 🚲 Bike':dist<15?'🚗 Car / 🚕 Taxi':'🚗 Car / 🚕 Taxi';
+              const mapsUrl=`https://www.google.com/maps/dir/${prev.lat},${prev.lng}/${s.lat},${s.lng}/`;
+              return<div key={s.idx}>
+                <HR c={c}/>
+                <div style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px'}}>
+                  <div style={{fontSize:'20px'}}>↓</div>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:'13px',color:mc,fontWeight:'600'}}>{prev.name} → {s.name}</div>
+                    <div style={{fontSize:'12px',color:c.M2}}>{dist<1?`${Math.round(dist*1000)}m`:`${dist.toFixed(1)} km`} · {suggestion}</div>
+                  </div>
+                  <a href={mapsUrl} target="_blank" rel="noreferrer" style={{padding:'6px 12px',background:'#4285F415',border:'1px solid #4285F440',borderRadius:'8px',textDecoration:'none',fontSize:'12px',color:'#4285F4',fontWeight:'600'}}>🗺️ Route</a>
+                </div>
+              </div>;
+            })}
+
+            {/* Per-person transport */}
+            {rs.filter(r=>r.how).length>0&&<><HR c={c}/><Lbl c={c}>{t.howEach}</Lbl>{rs.filter(r=>r.how).map((r,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:`1px solid ${c.BD}`,fontSize:'14px'}}><span style={{color:c.T}}>{r.name}</span><span style={{color:c.M2}}>{howL(r.how)}</span></div>)}</>}
+          </>;
+        })()
+        :<Card c={c} style={{textAlign:'center',padding:'28px'}}><div style={{fontSize:'32px',marginBottom:'8px'}}>📍</div><div style={{color:c.M2,fontSize:'14px'}}>{t.noStops}</div></Card>}
+      </>}
 
       {/* EXTRAS tab = Gift + Expenses + Pay + Plan card */}
       {!ldg&&tab==='extras'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
