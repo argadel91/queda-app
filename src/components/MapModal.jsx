@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import ReactDOM from 'react-dom'
 import T from '../constants/translations.js'
 
 const getGoogleLibs = async () => {
@@ -115,7 +116,18 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
     }
   };
 
-  return(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.85)',zIndex:200,display:'flex',flexDirection:'column'}}>
+  // Render in a portal outside React's tree to avoid DOM conflicts with Google Maps
+  const portalRoot=useRef(null);
+  useEffect(()=>{
+    const div=document.createElement('div');
+    div.id='map-modal-portal';
+    document.body.appendChild(div);
+    portalRoot.current=div;
+    return()=>{div.remove();};
+  },[]);
+
+  if(!portalRoot.current)return null;
+  return ReactDOM.createPortal(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.85)',zIndex:200,display:'flex',flexDirection:'column'}}>
     <div style={{padding:'12px 16px',display:'flex',alignItems:'center',gap:'8px',background:c.CARD,borderBottom:`1px solid ${c.BD}`}}>
       <div style={{flex:1,position:'relative'}}>
         <input ref={inputRef} defaultValue={init||''} onKeyDown={handleKeyDown} placeholder={t.searchPlacePh||'Search for a place... (press Enter)'} autoFocus style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 36px 10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
@@ -138,5 +150,5 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
       </div>
       <button onClick={()=>onSelect(selected)} style={{padding:'10px 18px',background:c.A||'#CDFF6C',color:'#0A0A0A',border:'none',borderRadius:'10px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',fontSize:'14px',flexShrink:0}}>{t.selectPlace||'Select'}</button>
     </div>}
-  </div>);
+  </div>,portalRoot.current);
 }
