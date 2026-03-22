@@ -16,7 +16,6 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
   const inputRef=useRef(null);
   const mapObjRef=useRef(null);
   const[selected,setSelected]=useState(null);
-  const[q,setQ]=useState(init||'');
   const[loading,setLoading]=useState(true);
   const[results,setResults]=useState([]);
 
@@ -28,7 +27,7 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
 
   const searchPlaces=(query)=>{
     const map=mapObjRef.current;
-    if(!map||!query.trim())return;
+    if(!map||!query?.trim())return;
     const service=new google.maps.places.PlacesService(map);
     service.textSearch({query,bounds:map.getBounds()},(res,status)=>{
       if(status==='OK'&&res){
@@ -38,9 +37,7 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
           lat:r.geometry.location.lat(),
           lng:r.geometry.location.lng()
         })));
-      }else{
-        setResults([]);
-      }
+      }else{setResults([]);}
     });
   };
 
@@ -58,25 +55,6 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
       });
       mapObjRef.current=map;
 
-      // Try Autocomplete (may not be available for new accounts)
-      try{
-        if(inputRef.current&&google.maps.places.Autocomplete){
-          const autocomplete=new google.maps.places.Autocomplete(inputRef.current,{
-            fields:['name','formatted_address','geometry','place_id'],
-          });
-          autocomplete.bindTo('bounds',map);
-          autocomplete.addListener('place_changed',()=>{
-            const place=autocomplete.getPlace();
-            if(!place.geometry)return;
-            const loc=place.geometry.location;
-            map.setCenter(loc);map.setZoom(16);
-            const sel={name:place.name||'',address:place.formatted_address||'',lat:loc.lat(),lng:loc.lng()};
-            setSelected(sel);setResults([]);
-            placeMarker(map,loc.lat(),loc.lng());
-          });
-        }
-      }catch(e){}
-
       // Click to select
       map.addListener('click',(e)=>{
         const lat=e.latLng.lat();const lng=e.latLng.lng();
@@ -85,12 +63,14 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
           if(status==='OK'&&res[0]){
             const r=res[0];
             const sel={name:r.address_components?.[0]?.long_name||'',address:r.formatted_address||'',lat,lng};
-            setSelected(sel);setQ(r.formatted_address||'');setResults([]);
+            setSelected(sel);setResults([]);
+            if(inputRef.current)inputRef.current.value=r.formatted_address||'';
             placeMarker(map,lat,lng);
           }
         });
       });
 
+      // Initial geocode
       if(init){
         const geocoder=new google.maps.Geocoder();
         geocoder.geocode({address:init},(res,status)=>{
@@ -104,23 +84,30 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
     return()=>{cancelled=true;if(markerRef.current)markerRef.current.setMap(null);};
   },[]);
 
-  const handleSearch=(e)=>{
-    if(e.key==='Enter'){e.preventDefault();searchPlaces(q);}
+  const handleKeyDown=(e)=>{
+    if(e.key==='Enter'){e.preventDefault();searchPlaces(inputRef.current?.value);}
   };
 
   const pickResult=(r)=>{
     const map=mapObjRef.current;
-    setSelected(r);setResults([]);setQ(r.name);
+    setSelected(r);setResults([]);
+    if(inputRef.current)inputRef.current.value=r.name;
     if(map){map.setCenter({lat:r.lat,lng:r.lng});map.setZoom(16);placeMarker(map,r.lat,r.lng);}
+  };
+
+  const clearInput=()=>{
+    if(inputRef.current)inputRef.current.value='';
+    setSelected(null);setResults([]);
+    inputRef.current?.focus();
   };
 
   return(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.85)',zIndex:200,display:'flex',flexDirection:'column'}}>
     <div style={{padding:'12px 16px',display:'flex',alignItems:'center',gap:'8px',background:c.CARD,borderBottom:`1px solid ${c.BD}`}}>
       <div style={{flex:1,position:'relative'}}>
-        <input ref={inputRef} value={q} onChange={e=>{setQ(e.target.value);if(!e.target.value)setResults([]);}} onKeyDown={handleSearch} placeholder={t.searchPlacePh||'Search for a place...'} autoFocus style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 36px 10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
-        {q?<button onClick={()=>{setQ('');setSelected(null);setResults([]);if(inputRef.current){inputRef.current.value='';inputRef.current.focus();}}} style={{position:'absolute',right:'10px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'16px',padding:'8px'}}>×</button>
-        :<button onClick={()=>searchPlaces(q)} style={{position:'absolute',right:'10px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'14px',padding:'8px'}}>🔍</button>}
+        <input ref={inputRef} defaultValue={init||''} onKeyDown={handleKeyDown} placeholder={t.searchPlacePh||'Search for a place... (press Enter)'} autoFocus style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 36px 10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+        <button onClick={clearInput} style={{position:'absolute',right:'10px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'16px',padding:'8px'}}>×</button>
       </div>
+      <button onClick={()=>searchPlaces(inputRef.current?.value)} style={{background:c.A||'#CDFF6C',border:'none',borderRadius:'10px',padding:'8px 14px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:'700'}}>🔍</button>
       <button onClick={onClose} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'8px 14px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'600'}}>✕</button>
     </div>
     {results.length>0&&<div style={{background:c.CARD,borderBottom:`1px solid ${c.BD}`,maxHeight:'240px',overflowY:'auto'}}>
