@@ -73,10 +73,10 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
   const draftKey=`q_draft_${mode}`;
 
   // Auto-deduce city from first stop with coordinates
-  const autoCity = useMemo(() => stops.flatMap(s=>s.options).find(o=>o.address)?.address?.split(',').slice(-3,-1).join(',').trim() || '', [stops]);
+  const autoCity = useMemo(() => stops.flatMap(s=>s.options||[]).find(o=>o?.address)?.address?.split(',').slice(-3,-1).join(',').trim() || '', [stops]);
   const autoCityShort = autoCity.split(',')[0]?.trim() || '';
   const firstCoords = useMemo(() => {
-    const o = stops.flatMap(s=>s.options).find(o=>o.lat && o.lng);
+    const o = stops.flatMap(s=>s.options||[]).find(o=>o?.lat && o?.lng);
     return o ? {lat:o.lat, lng:o.lng} : null;
   }, [stops]);
   const planTz = getCityTz(autoCity);
