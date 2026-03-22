@@ -17,7 +17,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
   const[step,setStep]=useState(0);
   const[name,setName]=useState('');const[desc,setDesc]=useState('');
   const[org,setOrg]=useState(profile?.name||ls.get('q_myname',''));const[orgEmail,setOrgEmail]=useState('');
-  const[orgRole,setOrgRole]=useState(t.roles[0]);const[isPublic,setIsPublic]=useState(false);
+  const[customRoles,setCustomRoles]=useState([]);const[roleInput,setRoleInput]=useState('');
   const[city,setCity]=useState('');const[cityData,setCityData]=useState(null);
   const[selDates,setSelDates]=useState([]);const[selTimes,setSelTimes]=useState({});
   const[stops,setStops]=useState([{id:1,name:'',cat:t.cat[0],address:'',cost:'',link:'',lat:null,lng:null}]);
@@ -48,11 +48,11 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
     if(d.surpriseMode!==undefined)setSurprise(d.surpriseMode);if(d.maxGuests)setMaxGuests(d.maxGuests);
     if(d.orgAttends!==undefined)setOrgAttends(d.orgAttends);if(d.poll)setPoll(d.poll);
     if(d.giftOn!==undefined)setGiftOn(d.giftOn);if(d.gift)setGift(d.gift);if(d.bring)setBring(d.bring);
-    if(d.payment)setPayment(d.payment);if(d.isPublic!==undefined)setIsPublic(d.isPublic);if(d.step)setStep(d.step);
+    if(d.payment)setPayment(d.payment);if(d.customRoles)setCustomRoles(d.customRoles);if(d.roleInput)setRoleInput(d.roleInput);if(d.step)setStep(d.step);
     setDraftRestored(true);
   },[]);// eslint-disable-line react-hooks/exhaustive-deps
   // Save draft helper
-  const saveDraft=(s)=>ls.set(draftKey,{name,desc,org,orgEmail,city,cityData,selDates,selTimes,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,maxGuests,orgAttends,poll,giftOn,gift,bring,payment,isPublic,step:s!==undefined?s:step});
+  const saveDraft=(s)=>ls.set(draftKey,{name,desc,org,orgEmail,city,cityData,selDates,selTimes,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,maxGuests,orgAttends,poll,giftOn,gift,bring,payment,customRoles,roleInput,step:s!==undefined?s:step});
   // Auto-save every 30s
   useEffect(()=>{const id=setInterval(()=>saveDraft(),30000);return()=>clearInterval(id);});
   const clearDraft=()=>{try{localStorage.removeItem(draftKey)}catch{}};
@@ -67,7 +67,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
   const create=async()=>{
     setSaving(true);
     try{
-      const plan={id:genId(),name:name.trim(),desc:desc.trim(),organizer:org.trim(),organizerEmail:orgEmail.trim(),organizerRole:orgRole,mode,dates:[...selDates].sort(),times:selTimes,timezone:planTz,city:city.split(',')[0].trim(),cityFull:city,cityLat:cityData?.lat,cityLon:cityData?.lon,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,maxGuests:maxGuests?parseInt(maxGuests):null,orgAttends,poll:poll.q.trim()?poll:null,gift:giftOn?gift:null,bring:bring.filter(b=>b.text.trim()),payment,confirmedDate:null,isPublic:mode!=='intimate'?isPublic:false,lang,createdAt:new Date().toISOString()};
+      const plan={id:genId(),name:name.trim(),desc:desc.trim(),organizer:org.trim(),organizerEmail:orgEmail.trim(),customRoles,mode,dates:[...selDates].sort(),times:selTimes,timezone:planTz,city:city.split(',')[0].trim(),cityFull:city,cityLat:cityData?.lat,cityLon:cityData?.lon,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,maxGuests:maxGuests?parseInt(maxGuests):null,orgAttends,poll:poll.q.trim()?poll:null,gift:giftOn?gift:null,bring:bring.filter(b=>b.text.trim()),payment,confirmedDate:null,isPublic:false,lang,createdAt:new Date().toISOString()};
       if(authUser)await savePlanWithUser(plan,authUser.id);else await savePlan(plan);
       addMyPlan(plan.id,plan.name,'organizer',mode);
       ls.set('q_state',{screen:'share',planId:plan.id,isOrg:true});clearDraft();onCreated(plan);
@@ -104,12 +104,18 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
             </div>
           </div>
         </div>
-        {mode==='professional'&&<div style={{marginBottom:'14px'}}><Lbl c={c}>{t.yourRole}</Lbl><select value={orgRole} onChange={e=>setOrgRole(e.target.value)} style={{background:c.CARD,border:`1px solid ${c.BD}`,color:c.T,fontSize:'14px',padding:'12px 14px',borderRadius:'10px',width:'100%',fontFamily:'inherit'}}>{t.roles.map(r=><option key={r} value={r}>{r}</option>)}</select></div>}
-        {mode!=='intimate'&&<div onClick={()=>setIsPublic(p=>!p)} style={{display:'flex',alignItems:'center',gap:'12px',padding:'14px 16px',background:c.CARD,border:`1px solid ${isPublic?mc+'50':c.BD}`,borderRadius:'12px',cursor:'pointer',marginBottom:'24px'}}>
-          <div style={{width:'22px',height:'22px',borderRadius:'50%',border:`2px solid ${isPublic?mc:c.BD}`,background:isPublic?mc:'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',color:'#0A0A0A',fontWeight:'800',flexShrink:0}}>{isPublic?'✓':''}</div>
-          <div><div style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>🌍 {isPublic?t.isPublicLbl:(t.privatePlan)}</div><div style={{fontSize:'12px',color:c.M2}}>{isPublic?(t.appearsInDiscover):(t.codeOnly)}</div></div>
+        {mode==='professional'&&<div style={{marginBottom:'14px'}}>
+          <Lbl c={c}>{t.suggestedRoles||'Suggested roles'}</Lbl>
+          <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'8px'}}>
+            {customRoles.map((r,i)=><span key={i} style={{display:'inline-flex',alignItems:'center',gap:'4px',padding:'6px 12px',background:`${mc}15`,border:`1px solid ${mc}40`,borderRadius:'20px',fontSize:'13px',color:mc,fontWeight:'600'}}>{r}<button onClick={()=>setCustomRoles(p=>p.filter((_,j)=>j!==i))} style={{background:'none',border:'none',color:mc,cursor:'pointer',fontSize:'14px',padding:'0 0 0 4px',lineHeight:1}}>×</button></span>)}
+          </div>
+          <div style={{display:'flex',gap:'6px'}}>
+            <input value={roleInput} onChange={e=>setRoleInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&roleInput.trim()){e.preventDefault();setCustomRoles(p=>[...p,roleInput.trim()]);setRoleInput('');}}} placeholder={t.addRolePh||'Add a role...'} style={{flex:1,background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none'}}/>
+            {roleInput.trim()&&<button onClick={()=>{setCustomRoles(p=>[...p,roleInput.trim()]);setRoleInput('');}} style={{padding:'10px 14px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>+</button>}
+          </div>
+          <div style={{fontSize:'12px',color:c.M2,marginTop:'6px'}}>{t.rolesHint||'Optional. Guests will choose from these or type their own.'}</div>
         </div>}
-        {mode==='intimate'&&<div style={{height:'24px'}}/>}
+        <div style={{height:mode==='intimate'?'24px':'14px'}}/>
         <Btn onClick={()=>changeStep(1)} disabled={!name.trim()||!org.trim()} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn>
       </>}
 

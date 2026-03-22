@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import T from '../constants/translations.js'
 import { getMC } from '../constants/theme.js'
 import { ls, getMyPlans } from '../lib/storage.js'
-import { db, loadResps } from '../lib/supabase.js'
+import { db, loadResps, updatePlan } from '../lib/supabase.js'
 import { Btn, Card, Lbl, Back, ModeBadge, HR } from '../components/ui.jsx'
 import PersonalisedLink from '../components/PersonalisedLink.jsx'
 import SavedGroups from '../components/SavedGroups.jsx'
@@ -38,7 +38,7 @@ const waMsgs={
 };
 
 export default function Share({plan,onViewResults,onBack,c,lang}){
-  const t=T[lang];const mc=getMC(plan.mode,c);
+  const t=T[lang];const mc=getMC(plan.mode,c);const[planState,setPlanState]=useState(plan);
   const[copied,setCopied]=useState(false);const[codeCopied,setCodeCopied]=useState(false);const[count,setCount]=useState(null);const[shareLang,setShareLang]=useState(lang);
   const url=location.href.split('?')[0]+'?code='+plan.id;
   const copy=()=>{navigator.clipboard?.writeText(url).catch(()=>{});setCopied(true);setTimeout(()=>setCopied(false),2000);};
@@ -86,6 +86,16 @@ export default function Share({plan,onViewResults,onBack,c,lang}){
     <PersonalisedLink plan={plan} c={c} lang={lang}/>
     <HR c={c}/>
     <SavedGroups plan={plan} c={c} lang={lang}/>
+    <HR c={c}/>
+{!planState.isPublic?<div style={{textAlign:'center',padding:'16px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'14px',marginBottom:'10px'}}>
+  <div style={{fontSize:'13px',color:c.M2,marginBottom:'10px'}}>{t.noOneToShare||"Don't have anyone to share with?"}</div>
+  <Btn onClick={async()=>{const up={...planState,isPublic:true};await updatePlan(up);setPlanState(up);}} full sm c={c}>{t.makePublicBtn||'Make it public on Discover'}</Btn>
+  <div style={{fontSize:'11px',color:c.M,marginTop:'6px'}}>{t.makePublicHint||'Anyone on queda. can find and join your plan'}</div>
+</div>
+:<div style={{textAlign:'center',padding:'12px',background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'14px',marginBottom:'10px'}}>
+  <div style={{fontSize:'13px',color:mc,fontWeight:'600'}}>🌍 {t.planIsPublic||'Plan is public on Discover'}</div>
+  <button onClick={async()=>{const up={...planState,isPublic:false};await updatePlan(up);setPlanState(up);}} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',marginTop:'4px',textDecoration:'underline'}}>{t.makePrivateBtn||'Make private'}</button>
+</div>}
     <div style={{height:'12px'}}/>
     <Btn onClick={onViewResults} v="secondary" full style={{padding:'14px'}} c={c}>{t.viewRes}</Btn>
   </div>);

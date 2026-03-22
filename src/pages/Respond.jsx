@@ -17,7 +17,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
   const[timePref,setTimePref]=useState(prev?.timePref||{});
   const[how,setHow]=useState(prev?.how||'');const[howOther,setHowOther]=useState(prev?.howOther||'');
   const[comment,setComment]=useState(prev?.comment||'');
-  const[guestRole,setGuestRole]=useState(prev?.role||t.roles[1]||'');
+  const[guestRole,setGuestRole]=useState(prev?.role||'');
   const[saving,setSaving]=useState(false);const[done,setDone]=useState(false);const[err,setErr]=useState('');
   const[altDate,setAltDate]=useState('');const[altNote,setAltNote]=useState('');
   const[pollVote,setPollVote]=useState(prev?.pollVote||null);
@@ -68,7 +68,15 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
     {budget>0&&<div style={{background:`${mc}0D`,border:`1px solid ${mc}30`,borderRadius:'10px',padding:'12px 16px',marginBottom:'16px',display:'flex',justifyContent:'space-between'}}><span style={{color:c.M2,fontSize:'13px'}}>{t.estPer||'Estimado'}</span><span style={{color:mc,fontWeight:'700'}}>{budget.toFixed(0)}€</span></div>}
     <HR c={c}/>
     <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.yourName}</Lbl><Inp value={name} onChange={v=>{setName(v);ls.set('q_myname',v);}} placeholder={t.yourNamePh} c={c}/></div>
-    {plan.mode==='professional'&&<div style={{marginBottom:'14px'}}><Lbl c={c}>{t.guestRole}</Lbl><select value={guestRole} onChange={e=>setGuestRole(e.target.value)} style={{background:c.CARD,border:`1px solid ${c.BD}`,color:c.T,fontSize:'14px',padding:'12px 14px',borderRadius:'10px',width:'100%',fontFamily:'inherit'}}>{t.roles.map(r=><option key={r} value={r}>{r}</option>)}</select></div>}
+    {plan.mode==='professional'&&<div style={{marginBottom:'14px'}}>
+      <Lbl c={c}>{t.yourRoleLbl||'Your role'} <span style={{fontWeight:'400',textTransform:'none',fontSize:'11px'}}>({t.optionalLbl||'optional'})</span></Lbl>
+      {plan.customRoles?.length>0?<>
+        <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'8px'}}>
+          {plan.customRoles.map((r,i)=><button key={i} onClick={()=>setGuestRole(guestRole===r?'':r)} style={{padding:'8px 14px',borderRadius:'20px',border:`1px solid ${guestRole===r?mc+'60':c.BD}`,background:guestRole===r?`${mc}15`:c.CARD,color:guestRole===r?mc:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:guestRole===r?'700':'400'}}>{r}</button>)}
+        </div>
+        <input value={plan.customRoles.includes(guestRole)?'':guestRole} onChange={e=>{setGuestRole(e.target.value);}} placeholder={t.otherRolePh||'Or type your own...'} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
+      </>:<input value={guestRole} onChange={e=>setGuestRole(e.target.value)} placeholder={t.yourRolePh||'e.g. Manager, Student, Client...'} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
+    </div>}
 
         {/* DATE + TIME + YES/MAYBE/NO — each slot independent */}
     <div style={{marginBottom:'20px'}}>
