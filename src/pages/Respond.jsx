@@ -164,7 +164,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
       {multiStops.map((stop,si)=>{
         const stopId=stop.id||`stop_${si}`;
         return(<div key={stopId} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px',overflow:'hidden',marginBottom:'10px'}}>
-          <div style={{padding:'10px 14px',background:c.CARD,borderBottom:`1px solid ${c.BD}`,fontSize:'13px',color:c.T,fontWeight:'600'}}>{stop.name||stop.place||`Parada ${si+1}`}</div>
+          <div style={{padding:'10px 14px',background:c.CARD,borderBottom:`1px solid ${c.BD}`,fontSize:'13px',color:c.T,fontWeight:'600'}}>{stop.name||stop.place||`${t.stop||'Stop'} ${si+1}`}</div>
           <div style={{display:'flex',flexDirection:'column',gap:'1px',background:c.BD}}>
             {stop.options.map((opt,oi)=>{
               const optId=opt.id||`opt_${oi}`;

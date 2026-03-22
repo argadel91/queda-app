@@ -54,13 +54,13 @@ export default function Discover({onBack,onJoin,c,lang,profile}){
     {ldg&&<div style={{textAlign:'center',color:c.M,padding:'48px'}}>...</div>}
     {!ldg&&filtered.length===0&&<Card c={c} style={{textAlign:'center',padding:'32px'}}><div style={{fontSize:'36px',marginBottom:'10px'}}>🔍</div><div style={{color:c.M2,fontSize:'14px'}}>{t.noPublic}</div></Card>}
     {!ldg&&sorted.map(p=>{
-      const firstDate=p.confirmedDate||p.dates?.[0]?.date||null;
+      const firstDate=p.confirmedDate||p.dates?.[0]||null;
       const attendees=p.respondents?.length||p.attendeeCount||0;
       const f=p.pubFilter;
       const badges=[];
       if(p._dist!=null)badges.push({icon:'📍',text:fmtDist(p._dist)});
       if(firstDate)badges.push({icon:'📅',text:fmtDate(firstDate,lang)});
-      if(attendees>0)badges.push({icon:'👥',text:`${attendees}`});
+      if(attendees)badges.push({icon:'👥',text:`${attendees}`});
       if(f?.gender&&f.gender!=='any')badges.push({icon:'🔒',text:f.gender==='male'?(t.male||'M'):f.gender==='female'?(t.female||'F'):f.gender});
       if(f?.ageMin||f?.ageMax)badges.push({icon:'🎂',text:`${f.ageMin||'?'}–${f.ageMax||'?'}`});
       return <Card key={p.id} c={c} style={{cursor:'pointer'}} onClick={()=>onJoin(p.id)}>

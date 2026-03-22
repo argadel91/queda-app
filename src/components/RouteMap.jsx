@@ -76,7 +76,6 @@ export default function RouteMap({stops,c}){
                 polyRef.current=new google.maps.Polyline({path,map,strokeColor:'#CDFF6C',strokeOpacity:0.9,strokeWeight:4});
               }
             }else{
-              console.log('Directions failed:',status);
               polyRef.current=new google.maps.Polyline({
                 path:valid.map(s=>({lat:s.lat,lng:s.lng})),map,
                 strokeColor:'#CDFF6C',strokeOpacity:0.5,strokeWeight:2,geodesic:true
@@ -104,6 +103,6 @@ export default function RouteMap({stops,c}){
     };
   },[stops]);
 
-  if(valid.length===0)return<div style={{textAlign:'center',padding:'20px',color:c?.M2,fontSize:'13px'}}>No map locations set</div>;
+  if(valid.length===0)return<div style={{textAlign:'center',padding:'20px',color:c?.M2,fontSize:'13px'}}>📍</div>;
   return<div ref={containerRef} style={{border:`1px solid ${c?.BD}`,borderRadius:'12px',overflow:'hidden'}}/>;
 }
