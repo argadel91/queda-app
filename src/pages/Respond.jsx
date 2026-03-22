@@ -21,6 +21,10 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
   const[saving,setSaving]=useState(false);const[done,setDone]=useState(false);const[err,setErr]=useState('');
   const[altDate,setAltDate]=useState('');const[altNote,setAltNote]=useState('');
   const[pollVote,setPollVote]=useState(prev?.pollVote||null);
+  const[isFull,setIsFull]=useState(false);
+  const[stopPrefs,setStopPrefs]=useState(prev?.stopPrefs||{});
+  useEffect(()=>{if(plan.maxGuests){loadResps(plan.id).then(resps=>{const yesCount=resps.filter(r=>r&&Object.values(r.avail||{}).some(v=>v==='yes')).length;setIsFull(yesCount>=plan.maxGuests);});}},[plan.id,plan.maxGuests]);
+  const multiStops=(plan.stops||[]).filter(s=>s.options&&s.options.length>1);
   useEffect(()=>{if(name.trim())ls.set('q_myname',name.trim());},[name]);
   const setDA=(d,val)=>{setErr('');setAvail(p=>({...p,[d]:p[d]===val?undefined:val}));};
   const togT=(d,h)=>setTimePref(p=>({...p,[d]:(p[d]||[]).includes(h)?(p[d]||[]).filter(x=>x!==h):[...(p[d]||[]),h]}));
@@ -33,7 +37,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
     setSaving(true);
     const changeLog=[...(prev?.changeLog||[])];
     if(prev)changeLog.unshift({at:new Date().toISOString(),desc:t.respUpdated});
-    const resp={name:name.trim(),avail,timePref,how:how==='other'?howOther:how,howOther,comment,role:guestRole,altDate:altDate||null,altNote:altNote||null,pollVote:pollVote||null,changeLog,at:new Date().toISOString()};
+    const resp={name:name.trim(),avail,timePref,how:how==='other'?howOther:how,howOther,comment,role:guestRole,altDate:altDate||null,altNote:altNote||null,pollVote:pollVote||null,stopPrefs:Object.keys(stopPrefs).length>0?stopPrefs:null,changeLog,at:new Date().toISOString()};
     await saveResp(plan.id,name.trim(),resp);
     if(authUser)try{await db.from('responses').update({user_id:authUser.id}).eq('plan_id',plan.id).eq('name',name.trim());}catch{}
     addMyPlan(plan.id,plan.name,'invited',plan.mode);
@@ -78,9 +82,21 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
       </>:<input value={guestRole} onChange={e=>setGuestRole(e.target.value)} placeholder={t.yourRolePh||'e.g. Manager, Student, Client...'} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
     </div>}
 
+    {/* CAPACITY CHECK */}
+    {isFull&&!prev&&<div style={{background:'#ef444415',border:'1px solid #ef444440',borderRadius:'12px',padding:'16px',marginBottom:'16px',textAlign:'center'}}>
+      <div style={{fontSize:'24px',marginBottom:'8px'}}>🚫</div>
+      <div style={{fontSize:'14px',color:'#ef4444',fontWeight:'600',lineHeight:1.5}}>{t.planFull}</div>
+    </div>}
+
         {/* DATE + TIME + YES/MAYBE/NO — each slot independent */}
     <div style={{marginBottom:'20px'}}>
       <Lbl c={c}>{plan.mode==='intimate'?(t.intimateAvail):plan.mode==='professional'?(t.proAvail):t.yourAvail}</Lbl>
+      {/* Voting explanation */}
+      <div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',marginBottom:'12px',fontSize:'12px',lineHeight:1.7,color:c.M2}}>
+        <div>✅ <b style={{color:'#22c55e'}}>{t.avYes?.replace(/[✅]\s?/,'')}</b> — {t.votingExplainYes}</div>
+        <div>❌ <b style={{color:'#ef4444'}}>{t.avNo?.replace(/[❌]\s?/,'')}</b> — {t.votingExplainNo}</div>
+        <div>🤔 <b style={{color:'#f59e0b'}}>{t.avMaybe?.replace(/[🤔]\s?/,'')}</b> — {t.votingExplainMaybe}</div>
+      </div>
       <div style={{fontSize:'12px',color:c.M2,marginBottom:'12px',lineHeight:1.5}}>{t.markIndividually}</div>
       {(plan.dates||[]).map(d=>{
         const ts=plan.times?.[d]||[];
@@ -112,6 +128,29 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
       <input type="date" value={altDate||''} onChange={e=>setAltDate(e.target.value)} min={new Date().toISOString().split('T')[0]} style={{background:c.CARD,border:'1px solid #f59e0b50',borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box',marginBottom:'6px'}}/>
       {altDate&&<input value={altNote||''} onChange={e=>setAltNote(e.target.value)} placeholder={t.optionalNote} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'12px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
     </div>}
+    {/* STOP OPTION VOTING */}
+    {multiStops.length>0&&<div style={{marginBottom:'16px'}}>
+      <Lbl c={c}>🗺️ {t.chooseOption}</Lbl>
+      {multiStops.map((stop,si)=>{
+        const stopId=stop.id||`stop_${si}`;
+        return(<div key={stopId} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px',overflow:'hidden',marginBottom:'10px'}}>
+          <div style={{padding:'10px 14px',background:c.CARD,borderBottom:`1px solid ${c.BD}`,fontSize:'13px',color:c.T,fontWeight:'600'}}>{stop.name||stop.place||`Parada ${si+1}`}</div>
+          <div style={{display:'flex',flexDirection:'column',gap:'1px',background:c.BD}}>
+            {stop.options.map((opt,oi)=>{
+              const optId=opt.id||`opt_${oi}`;
+              const selected=stopPrefs[stopId]===optId;
+              const letter=String.fromCharCode(65+oi);
+              return(<button key={optId} onClick={()=>setStopPrefs(p=>({...p,[stopId]:selected?undefined:optId}))} style={{padding:'12px 14px',background:selected?`${mc}20`:c.CARD,color:selected?mc:c.T,cursor:'pointer',border:'none',fontFamily:'inherit',fontSize:'13px',fontWeight:selected?'700':'400',textAlign:'left',display:'flex',alignItems:'center',gap:'10px',transition:'all .1s'}}>
+                <span style={{width:'24px',height:'24px',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',fontWeight:'700',background:selected?mc:'transparent',color:selected?'#0A0A0A':c.M2,border:`2px solid ${selected?mc:c.BD}`}}>{letter}</span>
+                <span>{opt.name||opt.label||`${letter}`}</span>
+                {opt.cost&&<span style={{marginLeft:'auto',fontSize:'12px',color:c.M2}}>{opt.cost}€</span>}
+              </button>);
+            })}
+          </div>
+        </div>);
+      })}
+    </div>}
+
     {plan.mode!=='professional'&&<div style={{marginBottom:'14px'}}>
       <Lbl c={c}>{t.howGet} <span style={{fontWeight:'400',textTransform:'none',fontSize:'11px'}}>{t.howOpt}</span></Lbl>
       <select value={how} onChange={e=>setHow(e.target.value)} style={{background:c.CARD,border:`1px solid ${c.BD}`,color:how?c.T:c.M,fontSize:'14px',padding:'12px 14px',borderRadius:'10px',width:'100%',fontFamily:'inherit',marginBottom:how==='other'?'8px':'0'}}>
@@ -138,7 +177,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
     </div>
 
     {err&&<div style={{color:'#ef4444',fontSize:'13px',padding:'8px 12px',background:'#ef444410',borderRadius:'8px',border:'1px solid #ef444430',marginBottom:'10px'}}>{err}</div>}
-    <Btn onClick={submit} disabled={!name.trim()||saving} full style={{padding:'15px',fontSize:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?t.saving:plan.mode==='professional'?(t.confirmAttendance):plan.mode==='intimate'?(t.confirmBtn):t.saveAvail}</Btn>
+    <Btn onClick={submit} disabled={!name.trim()||saving||(isFull&&!prev)} full style={{padding:'15px',fontSize:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?t.saving:plan.mode==='professional'?(t.confirmAttendance):plan.mode==='intimate'?(t.confirmBtn):t.saveAvail}</Btn>
   </div>);
 }
 

@@ -41,8 +41,13 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
   const t=T[lang];const mc=getMC(mode,c);const isEs=lang==='es';
   const[step,setStep]=useState(0);
   const[name,setName]=useState('');const[desc,setDesc]=useState('');
-  const[org,setOrg]=useState(profile?.name||ls.get('q_myname',''));const[orgEmail,setOrgEmail]=useState('');
-  const[customRoles,setCustomRoles]=useState([]);const[roleInput,setRoleInput]=useState('');
+  const[org,setOrg]=useState(profile?.name||ls.get('q_myname',''));
+  const[orgRole,setOrgRole]=useState('');
+  const[isPublic,setIsPublic]=useState(false);
+  const[pubFilter,setPubFilter]=useState({gender:'any',ageMin:'',ageMax:'',radius:''});
+  const[deadline,setDeadline]=useState('');
+  const[hasDeadline,setHasDeadline]=useState(false);
+  const[editingOrg,setEditingOrg]=useState(false);
   const[selDates,setSelDates]=useState([]);
   const[stops,setStops]=useState([emptyStop(1,'')]);
   const[mapTarget,setMapTarget]=useState(null); // {stopId, optionId}
@@ -69,26 +74,27 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
   }, [stops]);
   const planTz = getCityTz(autoCity);
 
-  const orgReadOnly = !!profile?.name;
-
   useEffect(()=>{if(org.trim())ls.set('q_myname',org.trim());},[org]);
 
   // Restore draft on mount
   useEffect(()=>{
     const d=ls.get(draftKey,null);if(!d)return;
-    if(d.name)setName(d.name);if(d.desc)setDesc(d.desc);if(d.org)setOrg(d.org);if(d.orgEmail)setOrgEmail(d.orgEmail);
+    if(d.name)setName(d.name);if(d.desc)setDesc(d.desc);if(d.org)setOrg(d.org);
+    if(d.orgRole)setOrgRole(d.orgRole);
+    if(d.isPublic!==undefined)setIsPublic(d.isPublic);if(d.pubFilter)setPubFilter(d.pubFilter);
+    if(d.deadline)setDeadline(d.deadline);if(d.hasDeadline!==undefined)setHasDeadline(d.hasDeadline);
     if(d.selDates)setSelDates(d.selDates);
     if(d.stops)setStops(d.stops);if(d.dressCode!==undefined)setDressCode(d.dressCode);if(d.dressNote)setDressNote(d.dressNote);
     if(d.autoConfirm!==undefined)setAutoConfirm(d.autoConfirm);if(d.autoConfirmN!==undefined)setAutoConfirmN(d.autoConfirmN);
     if(d.surpriseMode!==undefined)setSurprise(d.surpriseMode);if(d.maxGuests)setMaxGuests(d.maxGuests);
     if(d.orgAttends!==undefined)setOrgAttends(d.orgAttends);if(d.poll)setPoll(d.poll);
     if(d.giftOn!==undefined)setGiftOn(d.giftOn);if(d.gift)setGift(d.gift);if(d.bring)setBring(d.bring);
-    if(d.payment)setPayment(d.payment);if(d.customRoles)setCustomRoles(d.customRoles);if(d.roleInput)setRoleInput(d.roleInput);if(d.step)setStep(d.step);
+    if(d.payment)setPayment(d.payment);if(d.step)setStep(d.step);
     setDraftRestored(true);
   },[]);// eslint-disable-line react-hooks/exhaustive-deps
 
   // Save draft helper
-  const saveDraft=(s)=>ls.set(draftKey,{name,desc,org,orgEmail,selDates,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,maxGuests,orgAttends,poll,giftOn,gift,bring,payment,customRoles,roleInput,step:s!==undefined?s:step});
+  const saveDraft=(s)=>ls.set(draftKey,{name,desc,org,orgRole,isPublic,pubFilter,deadline,hasDeadline,selDates,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,maxGuests,orgAttends,poll,giftOn,gift,bring,payment,step:s!==undefined?s:step});
   // Auto-save every 30s
   useEffect(()=>{const id=setInterval(()=>saveDraft(),30000);return()=>clearInterval(id);});
   const clearDraft=()=>{try{localStorage.removeItem(draftKey)}catch{}};
@@ -121,7 +127,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
   const create=async()=>{
     setSaving(true);
     try{
-      const plan={id:genId(),name:name.trim(),desc:desc.trim(),organizer:org.trim(),organizerEmail:orgEmail.trim(),customRoles,mode,dates:[...selDates].sort(),timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,maxGuests:maxGuests?parseInt(maxGuests):null,orgAttends,poll:poll.q.trim()?poll:null,gift:giftOn?gift:null,bring:bring.filter(b=>b.text.trim()),payment,confirmedDate:null,isPublic:false,lang,createdAt:new Date().toISOString()};
+      const plan={id:genId(),name:name.trim(),desc:desc.trim(),organizer:org.trim(),orgRole:orgRole.trim()||null,mode,dates:[...selDates].sort(),timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,maxGuests:maxGuests?parseInt(maxGuests):null,orgAttends,poll:poll.q.trim()?poll:null,gift:giftOn?gift:null,bring:bring.filter(b=>b.text.trim()),payment,confirmedDate:null,isPublic,pubFilter:isPublic?pubFilter:null,deadline:hasDeadline&&deadline?deadline:null,lang,createdAt:new Date().toISOString()};
       if(authUser)await savePlanWithUser(plan,authUser.id);else await savePlan(plan);
       addMyPlan(plan.id,plan.name,'organizer',mode);
       ls.set('q_state',{screen:'share',planId:plan.id,isOrg:true});clearDraft();onCreated(plan);
@@ -192,32 +198,93 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
         {mode==='intimate'&&<div style={{background:'#F472B620',border:'1px solid #F472B650',borderRadius:'12px',padding:'12px 14px',marginBottom:'16px',fontSize:'13px',color:'#F472B6',lineHeight:1.6}}>{t.privateNote}</div>}
         <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.planName}</Lbl><Inp value={name} onChange={setName} placeholder={t.modes[mode].ex[0]} c={c}/></div>
         <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.desc}</Lbl><Txa value={desc} onChange={setDesc} placeholder={t.descPh} c={c}/></div>
+
+        {/* Organizer name */}
         <div style={{marginBottom:'14px'}}>
-          <Lbl c={c}>{t.yourName}</Lbl>
-          {orgReadOnly
-            ? <div style={{padding:'12px 14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',fontSize:'14px',color:c.T}}>{org}</div>
-            : <Inp value={org} onChange={setOrg} placeholder={t.yourNamePh} c={c}/>}
+          <Lbl c={c}>{isEs?'Organizador':'Organizer'}</Lbl>
+          {!editingOrg
+            ? <div style={{display:'flex',alignItems:'center',gap:'8px',padding:'12px 14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px'}}>
+                <span style={{fontSize:'14px',color:c.T,flex:1}}>{isEs?'Organizado por:':'Organized by:'} <strong>{org||'—'}</strong></span>
+                <button onClick={()=>setEditingOrg(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'4px 10px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px'}}>{isEs?'Editar':'Edit'}</button>
+              </div>
+            : <div style={{display:'flex',gap:'6px'}}>
+                <Inp value={org} onChange={setOrg} placeholder={t.yourNamePh} c={c}/>
+                <button onClick={()=>setEditingOrg(false)} style={{padding:'10px 14px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'13px',whiteSpace:'nowrap'}}>OK</button>
+              </div>}
         </div>
+
+        {/* Organizer role */}
+        <div style={{marginBottom:'14px'}}>
+          <Lbl c={c}>{isEs?'Tu rol (opcional)':'Your role (optional)'}</Lbl>
+          <Inp value={orgRole} onChange={setOrgRole} placeholder={isEs?'Ej. Profesor, Manager, Cumpleanero...':'e.g. Professor, Manager, Birthday person...'} c={c}/>
+        </div>
+
+        {/* Attend + Max guests */}
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'14px'}}>
-          <div><Lbl c={c}>{t.maxGuests}</Lbl><input type="number" min="1" max="999" value={maxGuests} onChange={e=>setMaxGuests(e.target.value)} placeholder={t.noLimit} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/></div>
           <div><Lbl c={c}>{t.willAttend}</Lbl>
             <div style={{display:'flex',gap:'6px'}}>
               {[{v:true,l:t.yesLbl},{v:false,l:'No'}].map(o=><button key={String(o.v)} onClick={()=>setOrgAttends(o.v)} style={{flex:1,padding:'12px 6px',borderRadius:'10px',border:`1px solid ${orgAttends===o.v?mc+'50':c.BD}`,background:orgAttends===o.v?`${mc}15`:c.CARD,color:orgAttends===o.v?mc:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:orgAttends===o.v?'700':'400'}}>{o.l}</button>)}
             </div>
           </div>
+          <div><Lbl c={c}>{t.maxGuests}</Lbl>
+            <input type="number" min="1" max="999" value={maxGuests} onChange={e=>setMaxGuests(e.target.value)} placeholder={t.noLimit} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
+            <div style={{fontSize:'12px',color:c.M2,marginTop:'4px'}}>{maxGuests?`${orgAttends?1:0} / ${maxGuests}`:(isEs?'Sin limite':'No limit')}</div>
+          </div>
         </div>
-        {mode==='professional'&&<div style={{marginBottom:'14px'}}>
-          <Lbl c={c}>{t.suggestedRoles||'Suggested roles'}</Lbl>
-          <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'8px'}}>
-            {customRoles.map((r,i)=><span key={i} style={{display:'inline-flex',alignItems:'center',gap:'4px',padding:'6px 12px',background:`${mc}15`,border:`1px solid ${mc}40`,borderRadius:'20px',fontSize:'13px',color:mc,fontWeight:'600'}}>{r}<button onClick={()=>setCustomRoles(p=>p.filter((_,j)=>j!==i))} style={{background:'none',border:'none',color:mc,cursor:'pointer',fontSize:'14px',padding:'0 0 0 4px',lineHeight:1}}>×</button></span>)}
+
+        {/* Public / Private toggle */}
+        <div style={{marginBottom:'14px'}}>
+          <Lbl c={c}>{isEs?'Visibilidad':'Visibility'}</Lbl>
+          <div style={{display:'flex',gap:'6px',marginBottom:'8px'}}>
+            {[{v:false,l:isEs?'Privado':'Private',sub:isEs?'Solo por codigo':'Invite code only'},{v:true,l:isEs?'Publico':'Public',sub:isEs?'Aparece en Discover':'Appears in Discover'}].map(o=>
+              <button key={String(o.v)} onClick={()=>setIsPublic(o.v)} style={{flex:1,padding:'10px 8px',borderRadius:'10px',border:`1px solid ${isPublic===o.v?mc+'50':c.BD}`,background:isPublic===o.v?`${mc}15`:c.CARD,cursor:'pointer',textAlign:'center'}}>
+                <div style={{fontSize:'13px',color:isPublic===o.v?mc:c.T,fontWeight:isPublic===o.v?'700':'400'}}>{o.l}</div>
+                <div style={{fontSize:'11px',color:c.M2,marginTop:'2px'}}>{o.sub}</div>
+              </button>)}
           </div>
-          <div style={{display:'flex',gap:'6px'}}>
-            <input value={roleInput} onChange={e=>setRoleInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&roleInput.trim()){e.preventDefault();setCustomRoles(p=>[...p,roleInput.trim()]);setRoleInput('');}}} placeholder={t.addRolePh||'Add a role...'} style={{flex:1,background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none'}}/>
-            {roleInput.trim()&&<button onClick={()=>{setCustomRoles(p=>[...p,roleInput.trim()]);setRoleInput('');}} style={{padding:'10px 14px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>+</button>}
+          {isPublic&&<div style={{display:'flex',flexDirection:'column',gap:'10px',padding:'14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px'}}>
+            <div>
+              <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterGender||'Who can join?'}</div>
+              <div style={{display:'flex',gap:'4px',flexWrap:'wrap'}}>
+                {[{v:'any',l:t.filterAny||'Anyone'},{v:'female',l:t.genderFemale||'Women only'},{v:'male',l:t.genderMale||'Men only'},{v:'other',l:t.genderOther||'Other only'}].map(o=>
+                  <button key={o.v} onClick={()=>setPubFilter(f=>({...f,gender:o.v}))} style={{padding:'6px 12px',borderRadius:'20px',border:`1px solid ${pubFilter.gender===o.v?mc+'60':c.BD}`,background:pubFilter.gender===o.v?`${mc}15`:c.CARD2,color:pubFilter.gender===o.v?mc:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:pubFilter.gender===o.v?'600':'400'}}>{o.l}</button>
+                )}
+              </div>
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px'}}>
+              <div>
+                <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterAgeMin||'Min age'}</div>
+                <input type="number" min="13" max="99" value={pubFilter.ageMin} onChange={e=>setPubFilter(f=>({...f,ageMin:e.target.value}))} placeholder="--" style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
+              </div>
+              <div>
+                <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterAgeMax||'Max age'}</div>
+                <input type="number" min="13" max="99" value={pubFilter.ageMax} onChange={e=>setPubFilter(f=>({...f,ageMax:e.target.value}))} placeholder="--" style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
+              </div>
+            </div>
+            <div>
+              <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterRadius||'Max distance'}</div>
+              <div style={{display:'flex',gap:'4px',flexWrap:'wrap'}}>
+                {[{v:'',l:t.filterNoLimit||'No limit'},{v:'5',l:'5 km'},{v:'10',l:'10 km'},{v:'25',l:'25 km'},{v:'50',l:'50 km'},{v:'100',l:'100 km'}].map(o=>
+                  <button key={o.v} onClick={()=>setPubFilter(f=>({...f,radius:o.v}))} style={{padding:'6px 10px',borderRadius:'20px',border:`1px solid ${pubFilter.radius===o.v?mc+'60':c.BD}`,background:pubFilter.radius===o.v?`${mc}15`:c.CARD2,color:pubFilter.radius===o.v?mc:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:pubFilter.radius===o.v?'600':'400'}}>{o.l}</button>
+                )}
+              </div>
+            </div>
+          </div>}
+        </div>
+
+        {/* Deadline */}
+        <div style={{marginBottom:'14px'}}>
+          <div onClick={()=>{setHasDeadline(h=>!h);if(hasDeadline)setDeadline('');}} style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px 14px',background:c.CARD,border:`1px solid ${hasDeadline?mc+'50':c.BD}`,borderRadius:hasDeadline?'10px 10px 0 0':'10px',cursor:'pointer'}}>
+            <div style={{width:'20px',height:'20px',borderRadius:'50%',border:`2px solid ${hasDeadline?mc:c.BD}`,background:hasDeadline?mc:'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',color:'#0A0A0A',fontWeight:'800',flexShrink:0}}>{hasDeadline?'\u2713':''}</div>
+            <span style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>{isEs?'\u00bfPoner deadline?':'Set a deadline?'}</span>
           </div>
-          <div style={{fontSize:'12px',color:c.M2,marginTop:'6px'}}>{t.rolesHint||'Optional. Guests will choose from these or type their own.'}</div>
-        </div>}
-        <div style={{height:mode==='intimate'?'24px':'14px'}}/>
+          {hasDeadline&&<div style={{padding:'12px 14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderTop:'none',borderRadius:'0 0 10px 10px'}}>
+            <input type="datetime-local" value={deadline} onChange={e=>setDeadline(e.target.value)} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
+            <div style={{fontSize:'12px',color:c.M2,marginTop:'6px'}}>{isEs?'Despues de esta fecha se confirmara la opcion mas votada':'After this date the most voted option will be confirmed'}</div>
+          </div>}
+        </div>
+
+        <div style={{height:'14px'}}/>
         <Btn onClick={()=>changeStep(1)} disabled={!name.trim()||!org.trim()} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn>
       </>}
 
