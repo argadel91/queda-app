@@ -13,6 +13,9 @@ const loadGM = () => {
 }
 
 const extractPlace = (p) => {
+  console.log('PLACE RAW:', JSON.stringify(p, (k,v) => typeof v === 'function' ? '[fn]' : v, 2))
+  console.log('PLACE KEYS:', Object.keys(p))
+  console.log('RATING:', p.rating, 'PRICE:', p.priceLevel, 'PHOTOS:', p.photos?.length)
   const photoUrl = p.photos?.[0] ? p.photos[0].getURI?.({ maxWidth: 400 }) || null : null
   const hours = p.regularOpeningHours?.weekdayDescriptions || null
   const isOpen = p.regularOpeningHours?.isOpen?.() ?? null
