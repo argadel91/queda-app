@@ -144,7 +144,7 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
             <div style={{fontSize:'11px',color:c.M,fontWeight:'600',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'5px'}}>{t.authAliasLabel}</div>
             <div style={{position:'relative'}}>
               <span style={{position:'absolute',left:'14px',top:'50%',transform:'translateY(-50%)',color:c.M,fontSize:'15px',fontWeight:'600'}}>@</span>
-              <input id="username" name="username" autoComplete="username" value={username} onChange={e=>setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g,'').slice(0,20))} placeholder="tu_alias" style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px 12px 30px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+              <input id="username" name="username" autoComplete="username" value={username} onChange={e=>setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g,'').slice(0,20))} placeholder={t.authAliasPlaceholder} style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px 12px 30px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
             </div>
           </div>
         </>}
