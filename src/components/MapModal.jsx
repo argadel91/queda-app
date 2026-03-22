@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import ReactDOM from 'react-dom'
+import { createPortal } from 'react-dom'
 import T from '../constants/translations.js'
 
 const getGoogleLibs = async () => {
@@ -127,7 +127,7 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
   },[]);
 
   if(!portalEl)return null;
-  return ReactDOM.createPortal(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.85)',zIndex:200,display:'flex',flexDirection:'column'}}>
+  return createPortal(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.85)',zIndex:200,display:'flex',flexDirection:'column'}}>
     <div style={{padding:'12px 16px',display:'flex',alignItems:'center',gap:'8px',background:c.CARD,borderBottom:`1px solid ${c.BD}`}}>
       <div style={{flex:1,position:'relative'}}>
         <input ref={inputRef} defaultValue={init||''} onKeyDown={handleKeyDown} placeholder={t.searchPlacePh||'Search for a place... (press Enter)'} autoFocus style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 36px 10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
