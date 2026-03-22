@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import T from '../constants/translations.js'
 import { getMC } from '../constants/theme.js'
-import { db, updatePlan, loadResps, saveResp } from '../lib/supabase.js'
+import { db, updatePlan, loadResps, saveResp, savePlan } from '../lib/supabase.js'
 import { ls } from '../lib/storage.js'
-import { daysUntil, fmtDate, fmtShort } from '../lib/utils.js'
+import { daysUntil, fmtDate, fmtShort, genId } from '../lib/utils.js'
 import { Btn, Card, Lbl, ModeBadge, Badge, Back, HR, Inp, Txa } from '../components/ui.jsx'
 import WeatherWidget from '../components/WeatherWidget.jsx'
 const TransportPanel = React.lazy(() => import('../components/TransportPanel.jsx'))
@@ -27,6 +27,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
   const[newRespAlert,setAlert]=useState(null);
   const[autoConfirmPending,setAutoConfirmPending]=useState(null);
   const[editMode,setEditMode]=useState(false);
+  const[duplicating,setDuplicating]=useState(false);
   const[editName,setEditName]=useState(ip.name);
   const[editDesc,setEditDesc]=useState(ip.desc||'');
   const isOrgRef=useRef(isOrg);
@@ -118,7 +119,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
         <div style={{fontSize:'12px',color:c.M2,textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,lang)}</div></div>
       </div>}
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'6px'}}>
-        <div><div style={{display:'flex',alignItems:'center'}}><h2 style={{fontFamily:"'Syne',serif",fontSize:'24px',fontWeight:'800',color:c.T,margin:'0 0 4px'}}>{plan.name}</h2>{isOrgRef.current&&<button onClick={()=>setEditMode(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',marginLeft:'8px'}}>✏️</button>}</div><ModeBadge mode={plan.mode||'social'} lang={lang} c={c}/></div>
+        <div><div style={{display:'flex',alignItems:'center'}}><h2 style={{fontFamily:"'Syne',serif",fontSize:'24px',fontWeight:'800',color:c.T,margin:'0 0 4px'}}>{plan.name}</h2>{isOrgRef.current&&<button onClick={()=>setEditMode(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',marginLeft:'8px'}}>✏️</button>}{isOrgRef.current&&<button onClick={async()=>{if(duplicating)return;setDuplicating(true);const newId=genId();const dup={...plan,id:newId,dates:[],confirmedDate:null,isPublic:false,pubFilter:null,createdAt:new Date().toISOString()};try{await savePlan(dup);navigator.clipboard?.writeText(newId);alert((t.planDuplicated||'Plan duplicated!')+' '+newId);}catch(e){console.error(e);}setDuplicating(false);}} title={t.duplicatePlan||'Duplicate plan'} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',marginLeft:'4px',opacity:duplicating?.5:1}}>📋</button>}</div><ModeBadge mode={plan.mode||'social'} lang={lang} c={c}/></div>
         <div style={{display:'flex',gap:'5px'}}>
           <button onClick={()=>{const url=location.href.split('?')[0]+'?code='+plan.id;const txt=`${t.respondToPlan.replace('{name}',plan.name)}\n${url}`;window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}} title={t.shareWATitle} style={{background:'#25D36618',border:'1px solid #25D36640',borderRadius:'8px',padding:'6px 10px',color:'#25D366',cursor:'pointer',fontSize:'13px'}}>💬</button>
           <button onClick={()=>{const url=location.href.split('?')[0]+'?code='+plan.id;navigator.clipboard?.writeText(url);}} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}} title={t.copyLinkTitle}>🔗</button>

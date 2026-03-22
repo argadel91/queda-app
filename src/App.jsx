@@ -32,9 +32,12 @@ export default function App(){
   const[plan,setPlan]=useState(null);
   const[isOrg,setIsOrg]=useState(false);
   const[pendingMode,setPendingMode]=useState(null);
+  const[pendingTemplate,setPendingTemplate]=useState(null);
   const[toast,setToast]=useState(null);
   const[langOpen,setLangOpen]=useState(false);
   const[avatarOpen,setAvatarOpen]=useState(false);
+  const[installPrompt,setInstallPrompt]=useState(null);
+  const[showInstall,setShowInstall]=useState(false);
   const[authUser,setAuthUser]=useState(null);   // supabase user object
   const[profile,setProfile]=useState(null);     // {name, email, contacts}
   const[authLoading,setAuthLoading]=useState(true); // checking session
@@ -42,6 +45,7 @@ export default function App(){
   const c=useMemo(()=>C(theme),[theme]);
   useEffect(()=>{applyTheme(theme);},[theme]);
   useEffect(()=>{setToastFn((msg,type='error')=>{setToast({msg,type});setTimeout(()=>setToast(null),4000);});},[]);
+  useEffect(()=>{const handler=e=>{e.preventDefault();setInstallPrompt(e);if(!ls.get('q_install_dismissed',false))setShowInstall(true);};window.addEventListener('beforeinstallprompt',handler);return()=>window.removeEventListener('beforeinstallprompt',handler);},[]);
   const tgTheme=()=>setTheme(t=>{const n=t==='dark'?'light':'dark';applyTheme(n);ls.set('q_theme',n);return n;});
   const LANGS=['es','en','pt','fr','de','it'];
   const LANG_FLAGS={es:'🇪🇸',en:'🇬🇧',pt:'🇵🇹',fr:'🇫🇷',de:'🇩🇪',it:'🇮🇹'};
@@ -162,13 +166,21 @@ export default function App(){
       </div>
     </div>
     {screen==='home'&&<Home onCreate={()=>nav('select-mode')} onJoin={handleJoin} onProfile={()=>nav('profile')} onDiscover={()=>nav('discover')} c={c} lang={lang}/>}
-    {screen==='select-mode'&&<ModeSelect onSelect={m=>{setPendingMode(m);nav('create');}} onBack={()=>nav('home')} c={c} lang={lang}/>}
+    {screen==='select-mode'&&<ModeSelect onSelect={(m,tpl)=>{setPendingMode(m);setPendingTemplate(tpl||null);nav('create');}} onBack={()=>nav('home')} c={c} lang={lang}/>}
     {screen==='profile'&&<Profile onBack={()=>nav('home')} onOpen={handleFromProfile} c={c} lang={lang} authUser={authUser} profile={profile} onUpdateProfile={updateProfile} onSignOut={handleSignOut}/>}
     {screen==='discover'&&<Discover onBack={()=>nav('home')} onJoin={handleDiscoverJoin} c={c} lang={lang} profile={profile}/>}
-    {screen==='create'&&<Create onBack={()=>nav('select-mode')} onCreated={p=>nav('share',p,true)} c={c} lang={lang} mode={pendingMode||'social'} authUser={authUser} profile={profile}/>}
+    {screen==='create'&&<Create onBack={()=>nav('select-mode')} onCreated={p=>nav('share',p,true)} c={c} lang={lang} mode={pendingMode||'social'} authUser={authUser} profile={profile} template={pendingTemplate}/>}
     {screen==='share'&&plan&&<Share plan={plan} onViewResults={()=>nav('results',plan,isOrg)} onBack={()=>nav('home')} c={c} lang={lang}/>}
     {screen==='preview'&&plan&&<PlanPreview plan={plan} onRespond={()=>nav('respond',plan,false)} onBack={()=>nav('home')} c={c} lang={lang}/>}
     {screen==='respond'&&plan&&<Respond plan={plan} onBack={()=>nav('preview',plan,false)} onDone={()=>nav('results',plan,false)} onCreateOwn={()=>nav('select-mode')} c={c} lang={lang} authUser={authUser} profile={profile}/>}
     {screen==='results'&&plan&&<Results plan={plan} onBack={()=>nav('home')} isOrg={isOrg} c={c} lang={lang}/>}
+    {showInstall&&<div style={{position:'fixed',bottom:'0',left:'0',right:'0',background:c.CARD,borderTop:`1px solid ${c.BD}`,padding:'14px 20px',display:'flex',alignItems:'center',gap:'12px',zIndex:50}}>
+      <div style={{flex:1}}>
+        <div style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>{T[lang]?.installApp||'Install queda.'}</div>
+        <div style={{fontSize:'12px',color:c.M2}}>{T[lang]?.installHint||'Add to home screen for quick access'}</div>
+      </div>
+      <button onClick={async()=>{if(installPrompt){await installPrompt.prompt();setShowInstall(false);}}} style={{padding:'8px 16px',background:c.A,border:'none',borderRadius:'8px',color:'#0A0A0A',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',fontSize:'13px'}}>{T[lang]?.installBtn||'Install'}</button>
+      <button onClick={()=>{setShowInstall(false);ls.set('q_install_dismissed',true);}} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'18px',padding:'4px'}}>×</button>
+    </div>}
   </div>);
 }

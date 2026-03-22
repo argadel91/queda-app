@@ -12,7 +12,7 @@ import MapModal from '../components/MapModal.jsx'
 import { getCityTz, getTzLabel, getGMTOffset, getUserTz } from '../constants/weather.js'
 import WeatherWidget from '../components/WeatherWidget.jsx'
 
-export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
+export default function Create({onBack,onCreated,c,lang,mode,authUser,profile,template}){
   const t=T[lang];const mc=getMC(mode,c);const isEs=lang==='es';
   const[step,setStep]=useState(0);
   const[name,setName]=useState('');const[desc,setDesc]=useState('');
@@ -50,6 +50,14 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
     if(d.giftOn!==undefined)setGiftOn(d.giftOn);if(d.gift)setGift(d.gift);if(d.bring)setBring(d.bring);
     if(d.payment)setPayment(d.payment);if(d.customRoles)setCustomRoles(d.customRoles);if(d.roleInput)setRoleInput(d.roleInput);if(d.step)setStep(d.step);
     setDraftRestored(true);
+  },[]);// eslint-disable-line react-hooks/exhaustive-deps
+  // Apply template on mount (only if no draft was restored)
+  useEffect(()=>{
+    if(!template||draftRestored)return;const tp=template;
+    if(tp.stops){const cats=T[lang].cat;setStops(tp.stops.map((s,i)=>({...s,id:i+1,cat:typeof s.cat==='number'?cats[s.cat]||cats[0]:s.cat||cats[0]})));}
+    if(tp.dressCode!==undefined)setDressCode(tp.dressCode);
+    if(tp.bring)setBring(tp.bring);
+    if(tp.customRoles)setCustomRoles(tp.customRoles);
   },[]);// eslint-disable-line react-hooks/exhaustive-deps
   // Save draft helper
   const saveDraft=(s)=>ls.set(draftKey,{name,desc,org,orgEmail,city,cityData,selDates,selTimes,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,maxGuests,orgAttends,poll,giftOn,gift,bring,payment,customRoles,roleInput,step:s!==undefined?s:step});

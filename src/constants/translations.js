@@ -312,6 +312,9 @@ const T ={
     personalInfo:'Información personal',genderLbl:'Género',genderFemale:'Mujer',genderMale:'Hombre',genderOther:'Otro',genderCustomPh:'¿Cómo te identificas?',birthdateLbl:'Fecha de nacimiento',locationLbl:'Ubicación',yearsOld:'años',
     completeProfile:'Completa tu perfil para mejores recomendaciones en Discover',completeProfileDiscover:'Completa tu perfil para ver planes hechos para ti',
     filterGender:'¿Quién puede unirse?',filterAny:'Cualquiera',filterAgeMin:'Edad mín.',filterAgeMax:'Edad máx.',filterRadius:'Distancia máxima',filterNoLimit:'Sin límite',publishBtn:'Publicar',
+    tplTitle:'Inicio rápido',tplSub:'Elige una plantilla o empieza de cero.',tplScratch:'Empezar de cero',
+    tpls:{dinner:{n:'🍕 Cena',d:'1 parada en restaurante, look casual'},party:{n:'🎉 Fiesta',d:'Dress code fiesta, lleva bebidas'},sport:{n:'⚽ Deporte',d:'Look deportivo'},trip:{n:'🏖️ Viaje',d:'2 paradas, lleva protector solar'},date:{n:'🍷 Cita',d:'1 parada en restaurante'},home:{n:'🏠 Casa',d:'Sin paradas, plan casero'},getaway:{n:'🌄 Escapada',d:'2 paradas románticas'},meeting:{n:'📋 Reunión',d:'Roles: Organizador, Asistente'},training:{n:'🎓 Formación',d:'Roles: Profesor, Alumno'},event:{n:'🤝 Evento',d:'Roles: Organizador, Ponente, Asistente'}},
+    duplicatePlan:'Duplicar plan',planDuplicated:'¡Plan duplicado! Código:',installApp:'Instalar queda.',installHint:'Añade a la pantalla de inicio para acceso rápido',installBtn:'Instalar',
   },
   en:{
     tagline:'Plans without chaos.',sub:'Dates, times, route, outfit, weather and payments in one code.',
@@ -625,6 +628,9 @@ const T ={
     personalInfo:'Personal info',genderLbl:'Gender',genderFemale:'Woman',genderMale:'Man',genderOther:'Other',genderCustomPh:'How do you identify?',birthdateLbl:'Date of birth',locationLbl:'Location',yearsOld:'years',
     completeProfile:'Complete your profile for better Discover recommendations',completeProfileDiscover:'Complete your profile to see plans tailored to you',
     filterGender:'Who can join?',filterAny:'Anyone',filterAgeMin:'Min age',filterAgeMax:'Max age',filterRadius:'Max distance',filterNoLimit:'No limit',publishBtn:'Publish',
+    tplTitle:'Quick start',tplSub:'Choose a template or start from scratch.',tplScratch:'Start from scratch',
+    tpls:{dinner:{n:'🍕 Dinner',d:'1 restaurant stop, casual dress'},party:{n:'🎉 Party',d:'Party dress code, bring drinks'},sport:{n:'⚽ Sport',d:'Sporty dress code'},trip:{n:'🏖️ Trip',d:'2 stops, bring sunscreen'},date:{n:'🍷 Date',d:'1 restaurant stop'},home:{n:'🏠 Home',d:'No stops, stay in'},getaway:{n:'🌄 Getaway',d:'2 romantic stops'},meeting:{n:'📋 Meeting',d:'Roles: Organizer, Attendee'},training:{n:'🎓 Training',d:'Roles: Teacher, Student'},event:{n:'🤝 Event',d:'Roles: Organizer, Speaker, Attendee'}},
+    duplicatePlan:'Duplicate plan',planDuplicated:'Plan duplicated! Code:',installApp:'Install queda.',installHint:'Add to home screen for quick access',installBtn:'Install',
   },
   pt:{
     tagline:'Planos sem caos.',sub:'Datas, horários, rota, look, tempo e pagamentos num só código.',
@@ -933,6 +939,9 @@ const T ={
     personalInfo:'Informação pessoal',genderLbl:'Género',genderFemale:'Mulher',genderMale:'Homem',genderOther:'Outro',genderCustomPh:'Como te identificas?',birthdateLbl:'Data de nascimento',locationLbl:'Localização',yearsOld:'anos',
     completeProfile:'Completa o teu perfil para melhores recomendações no Discover',completeProfileDiscover:'Completa o teu perfil para ver planos feitos para ti',
     filterGender:'Quem pode juntar-se?',filterAny:'Qualquer',filterAgeMin:'Idade mín.',filterAgeMax:'Idade máx.',filterRadius:'Distância máxima',filterNoLimit:'Sem limite',publishBtn:'Publicar',
+    tplTitle:'Início rápido',tplSub:'Escolhe um modelo ou começa do zero.',tplScratch:'Começar do zero',
+    tpls:{dinner:{n:'🍕 Jantar',d:'1 paragem em restaurante, look casual'},party:{n:'🎉 Festa',d:'Dress code festa, leva bebidas'},sport:{n:'⚽ Desporto',d:'Look desportivo'},trip:{n:'🏖️ Viagem',d:'2 paragens, leva protetor solar'},date:{n:'🍷 Encontro',d:'1 paragem em restaurante'},home:{n:'🏠 Casa',d:'Sem paragens, plano caseiro'},getaway:{n:'🌄 Escapadela',d:'2 paragens românticas'},meeting:{n:'📋 Reunião',d:'Papéis: Organizador, Participante'},training:{n:'🎓 Formação',d:'Papéis: Professor, Aluno'},event:{n:'🤝 Evento',d:'Papéis: Organizador, Orador, Participante'}},
+    duplicatePlan:'Duplicar plano',planDuplicated:'Plano duplicado! Código:',installApp:'Instalar queda.',installHint:'Adiciona ao ecrã inicial para acesso rápido',installBtn:'Instalar',
   },
   fr:{
     tagline:`Des plans sans chaos.`,sub:`Dates, horaires, itinéraire, tenue, météo et paiements en un code.`,
@@ -1251,6 +1260,9 @@ const T ={
     personalInfo:`Infos personnelles`,genderLbl:`Genre`,genderFemale:`Femme`,genderMale:`Homme`,genderOther:`Autre`,genderCustomPh:`Comment tu t'identifies ?`,birthdateLbl:`Date de naissance`,locationLbl:`Localisation`,yearsOld:`ans`,
     completeProfile:`Complète ton profil pour de meilleures recommandations sur Discover`,completeProfileDiscover:`Complète ton profil pour voir des plans faits pour toi`,
     filterGender:`Qui peut rejoindre ?`,filterAny:`Tout le monde`,filterAgeMin:`Âge min.`,filterAgeMax:`Âge max.`,filterRadius:`Distance max`,filterNoLimit:`Sans limite`,publishBtn:`Publier`,
+    tplTitle:`Démarrage rapide`,tplSub:`Choisis un modèle ou commence de zéro.`,tplScratch:`Commencer de zéro`,
+    tpls:{dinner:{n:'🍕 Dîner',d:'1 étape restaurant, tenue casual'},party:{n:'🎉 Soirée',d:'Dress code soirée, apporte des boissons'},sport:{n:'⚽ Sport',d:'Tenue sportive'},trip:{n:'🏖️ Voyage',d:'2 étapes, apporte de la crème solaire'},date:{n:'🍷 Rendez-vous',d:'1 étape restaurant'},home:{n:'🏠 Maison',d:'Sans étapes, soirée chez soi'},getaway:{n:'🌄 Escapade',d:'2 étapes romantiques'},meeting:{n:'📋 Réunion',d:'Rôles : Organisateur, Participant'},training:{n:'🎓 Formation',d:'Rôles : Professeur, Élève'},event:{n:'🤝 Événement',d:'Rôles : Organisateur, Intervenant, Participant'}},
+    duplicatePlan:'Dupliquer le plan',planDuplicated:'Plan dupliqué ! Code :',installApp:'Installer queda.',installHint:`Ajoute à l'écran d'accueil pour un accès rapide`,installBtn:'Installer',
   },
   de:{
     tagline:'Pläne ohne Chaos.',sub:'Termine, Zeiten, Route, Outfit, Wetter und Zahlungen in einem Code.',
@@ -1559,6 +1571,9 @@ const T ={
     personalInfo:'Persönliche Infos',genderLbl:'Geschlecht',genderFemale:'Frau',genderMale:'Mann',genderOther:'Andere',genderCustomPh:'Wie identifizierst du dich?',birthdateLbl:'Geburtsdatum',locationLbl:'Standort',yearsOld:'Jahre',
     completeProfile:'Vervollständige dein Profil für bessere Discover-Empfehlungen',completeProfileDiscover:'Vervollständige dein Profil um passende Pläne zu sehen',
     filterGender:'Wer kann beitreten?',filterAny:'Alle',filterAgeMin:'Mindestalter',filterAgeMax:'Höchstalter',filterRadius:'Max. Entfernung',filterNoLimit:'Unbegrenzt',publishBtn:'Veröffentlichen',
+    tplTitle:'Schnellstart',tplSub:'Wähle eine Vorlage oder starte von Null.',tplScratch:'Von Null starten',
+    tpls:{dinner:{n:'🍕 Abendessen',d:'1 Restaurant-Station, lässiger Look'},party:{n:'🎉 Party',d:'Party-Dresscode, bringe Getränke mit'},sport:{n:'⚽ Sport',d:'Sportlicher Look'},trip:{n:'🏖️ Reise',d:'2 Stationen, bringe Sonnencreme mit'},date:{n:'🍷 Date',d:'1 Restaurant-Station'},home:{n:'🏠 Zuhause',d:'Keine Stationen, Plan zu Hause'},getaway:{n:'🌄 Ausflug',d:'2 romantische Stationen'},meeting:{n:'📋 Meeting',d:'Rollen: Organisator, Teilnehmer'},training:{n:'🎓 Schulung',d:'Rollen: Lehrer, Schüler'},event:{n:'🤝 Event',d:'Rollen: Organisator, Redner, Teilnehmer'}},
+    duplicatePlan:'Plan duplizieren',planDuplicated:'Plan dupliziert! Code:',installApp:'queda. installieren',installHint:'Zum Startbildschirm hinzufügen für schnellen Zugriff',installBtn:'Installieren',
   },
   it:{
     tagline:`Piani senza caos.`,sub:`Date, orari, percorso, outfit, meteo e pagamenti in un codice.`,
@@ -1877,6 +1892,9 @@ const T ={
     personalInfo:`Info personali`,genderLbl:`Genere`,genderFemale:`Donna`,genderMale:`Uomo`,genderOther:`Altro`,genderCustomPh:`Come ti identifichi?`,birthdateLbl:`Data di nascita`,locationLbl:`Posizione`,yearsOld:`anni`,
     completeProfile:`Completa il tuo profilo per migliori raccomandazioni su Discover`,completeProfileDiscover:`Completa il tuo profilo per vedere piani su misura per te`,
     filterGender:`Chi può unirsi?`,filterAny:`Chiunque`,filterAgeMin:`Età min.`,filterAgeMax:`Età max.`,filterRadius:`Distanza massima`,filterNoLimit:`Senza limite`,publishBtn:`Pubblica`,
+    tplTitle:`Avvio rapido`,tplSub:`Scegli un modello o inizia da zero.`,tplScratch:`Inizia da zero`,
+    tpls:{dinner:{n:'🍕 Cena',d:'1 tappa ristorante, look casual'},party:{n:'🎉 Festa',d:'Dress code festa, porta bevande'},sport:{n:'⚽ Sport',d:'Look sportivo'},trip:{n:'🏖️ Viaggio',d:'2 tappe, porta crema solare'},date:{n:'🍷 Appuntamento',d:'1 tappa ristorante'},home:{n:'🏠 Casa',d:'Senza tappe, piano casalingo'},getaway:{n:'🌄 Fuga',d:'2 tappe romantiche'},meeting:{n:'📋 Riunione',d:'Ruoli: Organizzatore, Partecipante'},training:{n:'🎓 Formazione',d:'Ruoli: Insegnante, Studente'},event:{n:'🤝 Evento',d:'Ruoli: Organizzatore, Relatore, Partecipante'}},
+    duplicatePlan:'Duplica piano',planDuplicated:'Piano duplicato! Codice:',installApp:'Installa queda.',installHint:'Aggiungi alla schermata iniziale per un accesso rapido',installBtn:'Installa',
   },
 };
 
