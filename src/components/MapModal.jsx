@@ -15,11 +15,9 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
     const map=new google.maps.Map(mapRef.current,{
       center:{lat:40.4168,lng:-3.7038},
       zoom:5,
-      mapId:'queda-map',
       disableDefaultUI:true,
       zoomControl:true,
-      gestureHandling:'greedy',
-      styles:[{featureType:'poi',stylers:[{visibility:'simplified'}]}]
+      gestureHandling:'greedy'
     });
     mapObj.current=map;
 
