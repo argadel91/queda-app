@@ -40,6 +40,7 @@ export default function App(){
   const[installPrompt,setInstallPrompt]=useState(null);
   const[showInstall,setShowInstall]=useState(false);
   const[showAuth,setShowAuth]=useState(false);
+  const[previewPlan,setPreviewPlan]=useState(null);
   const[authUser,setAuthUser]=useState(null);   // supabase user object
   const[profile,setProfile]=useState(null);     // {name, email, contacts}
   const[authLoading,setAuthLoading]=useState(true); // checking session
@@ -111,6 +112,12 @@ export default function App(){
     return()=>subscription.unsubscribe();
   },[]);
 
+  // Load plan preview for unauthenticated users with ?code=
+  useEffect(()=>{
+    const code=new URLSearchParams(location.search).get('code');
+    if(code&&!authUser&&!previewPlan){loadPlan(code).then(p=>{if(p)setPreviewPlan(p);});}
+  },[authUser]);
+
   const handleAuth=(user,prof)=>{setAuthUser(user);setProfile(prof);if(prof?.lang)setLang(prof.lang);};
   const handleSignOut=async()=>{try{await authSignOut();}catch{}ls.set('q_state',{});ls.set('q_plans',[]);window.location.reload();};
   const updateProfile=async(updates)=>{
@@ -173,13 +180,6 @@ export default function App(){
   if(authLoading)return(<div style={{minHeight:'100vh',background:c.BG,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'16px'}}><div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'28px',color:c.T}}>queda<span style={{color:c.A}}>.</span></div><div style={{width:'24px',height:'24px',border:`3px solid ${c.BD}`,borderTop:`3px solid ${c.A}`,borderRadius:'50%',animation:'spin 1s linear infinite'}}/></div>);
   if(resetMode)return<ResetPasswordScreen onDone={()=>{setResetMode(false);authSignOut();}} c={c} lang={lang}/>;
   const hasCode=new URLSearchParams(location.search).get('code');
-  const[previewPlan,setPreviewPlan]=useState(null);
-  useEffect(()=>{
-    const code=new URLSearchParams(location.search).get('code');
-    if(code&&!authUser&&!previewPlan){
-      loadPlan(code).then(p=>{if(p)setPreviewPlan(p);});
-    }
-  },[authUser]);
   if(!authUser){
     if(showAuth)return<AuthScreen onAuth={handleAuth} c={c} lang={lang} onLangChange={l=>{setLang(l);ls.set('q_lang',l);}}/>
     if(previewPlan)return<div style={{minHeight:'100vh',background:c.BG,color:c.T,fontFamily:"'DM Sans',system-ui,sans-serif"}}>
