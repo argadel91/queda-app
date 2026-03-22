@@ -54,8 +54,6 @@ export default function RouteMap({stops,c}){
       if(valid.length>1){
         try{
           const directionsService=new google.maps.DirectionsService();
-          const directionsRenderer=new google.maps.DirectionsRenderer({map,suppressMarkers:true,polylineOptions:{strokeColor:'#CDFF6C',strokeOpacity:0.8,strokeWeight:3}});
-          dirRendererRef.current=directionsRenderer;
           const waypoints=valid.slice(1,-1).map(s=>({location:new google.maps.LatLng(s.lat,s.lng),stopover:true}));
           directionsService.route({
             origin:new google.maps.LatLng(valid[0].lat,valid[0].lng),
@@ -63,22 +61,29 @@ export default function RouteMap({stops,c}){
             waypoints,
             travelMode:google.maps.TravelMode.DRIVING
           },(result,status)=>{
-            if(status==='OK'){directionsRenderer.setDirections(result);}
-            else{console.log('Directions failed:',status);
-              // Fallback to straight line
+            if(status==='OK'&&result.routes?.length){
+              // Extract all points from the route and draw as polyline
+              const path=[];
+              result.routes[0].legs.forEach(leg=>{
+                leg.steps.forEach(step=>{
+                  step.path?.forEach(p=>path.push(p));
+                });
+              });
+              if(path.length>0){
+                polyRef.current=new google.maps.Polyline({path,map,strokeColor:'#CDFF6C',strokeOpacity:0.9,strokeWeight:4});
+              }
+            }else{
+              console.log('Directions failed:',status);
               polyRef.current=new google.maps.Polyline({
                 path:valid.map(s=>({lat:s.lat,lng:s.lng})),map,
-                strokeColor:'#CDFF6C',strokeOpacity:0.6,strokeWeight:2,geodesic:true,
-                icons:[{icon:{path:'M 0,-1 0,1',strokeOpacity:1,scale:3},offset:'0',repeat:'16px'}]
+                strokeColor:'#CDFF6C',strokeOpacity:0.5,strokeWeight:2,geodesic:true
               });
             }
           });
         }catch(e){
-          // Fallback to straight line
           polyRef.current=new google.maps.Polyline({
             path:valid.map(s=>({lat:s.lat,lng:s.lng})),map,
-            strokeColor:'#CDFF6C',strokeOpacity:0.6,strokeWeight:2,geodesic:true,
-            icons:[{icon:{path:'M 0,-1 0,1',strokeOpacity:1,scale:3},offset:'0',repeat:'16px'}]
+            strokeColor:'#CDFF6C',strokeOpacity:0.5,strokeWeight:2,geodesic:true
           });
         }
       }
