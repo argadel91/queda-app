@@ -174,6 +174,20 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile,te
             </div>
           </div>
           {s.lat&&<div style={{fontSize:'11px',color:mc,marginBottom:'8px'}}>📍 {t.locationSet}</div>}
+          {s.rating&&<div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 12px',marginBottom:'8px'}}>
+            {s.photo&&<img src={s.photo} alt={s.name} style={{width:'100%',height:'100px',objectFit:'cover',borderRadius:'6px',marginBottom:'6px'}}/>}
+            <div style={{display:'flex',flexWrap:'wrap',gap:'4px',fontSize:'11px'}}>
+              <span style={{padding:'2px 8px',borderRadius:'12px',background:`${mc}15`,color:mc,fontWeight:'700'}}>⭐ {s.rating}{s.ratingCount?` (${s.ratingCount})`:''}</span>
+              {s.priceLevel&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>{'€'.repeat(s.priceLevel)}</span>}
+              {s.isOpen===true&&<span style={{padding:'2px 8px',borderRadius:'12px',background:'#22c55e20',color:'#22c55e'}}>Open</span>}
+              {s.isOpen===false&&<span style={{padding:'2px 8px',borderRadius:'12px',background:'#ef444420',color:'#ef4444'}}>Closed</span>}
+              {s.outdoorSeating&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>🌤️</span>}
+              {s.servesBeer&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>🍺</span>}
+              {s.servesWine&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>🍷</span>}
+              {s.wheelchair&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>♿</span>}
+            </div>
+            {s.summary&&<div style={{fontSize:'11px',color:c.M2,fontStyle:'italic',marginTop:'4px'}}>"{s.summary}"</div>}
+          </div>}
           <select value={s.cat} onChange={e=>upd(s.id,'cat',e.target.value)} style={{background:c.CARD,border:`1px solid ${c.BD}`,color:c.T,fontSize:'13px',padding:'9px 12px',borderRadius:'8px',width:'100%',fontFamily:'inherit',marginBottom:'8px'}}>{t.cat.map(cat=><option key={cat} value={cat}>{cat}</option>)}</select>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',marginBottom:'8px'}}>{is(s.name,t.place,'name',s.id)}{is(s.address,t.addr,'address',s.id)}</div>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',marginBottom:'8px'}}>{is(s.cost,t.cost,'cost',s.id)}{is(s.link,t.booking,'link',s.id)}</div>

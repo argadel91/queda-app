@@ -1,12 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react'
 
-const waitForGoogle = () => new Promise(resolve => {
-  if (window.google?.maps) return resolve()
-  const check = setInterval(() => {
-    if (window.google?.maps) { clearInterval(check); resolve() }
-  }, 100)
-  setTimeout(() => clearInterval(check), 10000)
-})
+const waitForGoogle = () => {
+  if (window.__loadGoogleMaps) window.__loadGoogleMaps()
+  return new Promise(resolve => {
+    if (window.google?.maps) return resolve()
+    const check = setInterval(() => {
+      if (window.google?.maps) { clearInterval(check); resolve() }
+    }, 100)
+    setTimeout(() => clearInterval(check), 10000)
+  })
+}
 
 export default function RouteMap({stops,c}){
   const mapRef=useRef(null);
