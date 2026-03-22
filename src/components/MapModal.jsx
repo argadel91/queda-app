@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { createPortal } from 'react-dom'
 import T from '../constants/translations.js'
 
 const getGoogleLibs = async () => {
@@ -11,16 +10,14 @@ const getGoogleLibs = async () => {
       setTimeout(() => clearInterval(check), 10000)
     })
   }
-  const [maps, places] = await Promise.all([
-    google.maps.importLibrary('maps'),
-    google.maps.importLibrary('places')
-  ])
-  return { maps, places }
+  await google.maps.importLibrary('maps')
+  await google.maps.importLibrary('places')
 }
 
 export default function MapModal({onSelect,onClose,c,lang,init}){
   const t=T[lang];
-  const mapRef=useRef(null);
+  const containerRef=useRef(null);
+  const mapDivRef=useRef(null);
   const markerRef=useRef(null);
   const inputRef=useRef(null);
   const mapObjRef=useRef(null);
@@ -28,20 +25,21 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
   const[loading,setLoading]=useState(true);
   const[results,setResults]=useState([]);
 
-  const placeMarker=(map,lat,lng,Marker)=>{
-    if(markerRef.current)markerRef.current.setMap(null);
-    markerRef.current=new Marker({position:{lat,lng},map});
-    map.panTo({lat,lng});
-  };
-
+  // Create map div outside React and init Google Maps
   useEffect(()=>{
     let cancelled=false;
-    getGoogleLibs().then(({maps,places})=>{
-      if(cancelled||!mapRef.current)return;
+    const mapDiv=document.createElement('div');
+    mapDiv.style.cssText='flex:1;width:100%;';
+    mapDivRef.current=mapDiv;
+
+    getGoogleLibs().then(()=>{
+      if(cancelled)return;
+      if(containerRef.current){
+        containerRef.current.innerHTML='';
+        containerRef.current.appendChild(mapDiv);
+      }
       setLoading(false);
-      const Map=maps.Map||google.maps.Map;
-      const Marker=google.maps.Marker;
-      const map=new Map(mapRef.current,{
+      const map=new google.maps.Map(mapDiv,{
         center:{lat:40.4168,lng:-3.7038},
         zoom:5,
         disableDefaultUI:true,
@@ -50,7 +48,6 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
       });
       mapObjRef.current=map;
 
-      // Click to reverse geocode
       map.addListener('click',(e)=>{
         const lat=e.latLng.lat();const lng=e.latLng.lng();
         const geocoder=new google.maps.Geocoder();
@@ -60,7 +57,9 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
             const sel={name:r.address_components?.[0]?.long_name||'',address:r.formatted_address||'',lat,lng};
             setSelected(sel);setResults([]);
             if(inputRef.current)inputRef.current.value=r.formatted_address||'';
-            placeMarker(map,lat,lng,Marker);
+            if(markerRef.current)markerRef.current.setMap(null);
+            markerRef.current=new google.maps.Marker({position:{lat,lng},map});
+            map.panTo({lat,lng});
           }
         });
       });
@@ -75,8 +74,12 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
         });
       }
     });
-    return()=>{cancelled=true;if(markerRef.current)markerRef.current.setMap(null);};
-  },[portalEl]);
+    return()=>{
+      cancelled=true;
+      if(markerRef.current)markerRef.current.setMap(null);
+      if(mapDiv.parentNode)mapDiv.parentNode.removeChild(mapDiv);
+    };
+  },[]);
 
   const searchPlaces=async(query)=>{
     if(!query?.trim())return;
@@ -87,7 +90,6 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
         setResults(places.map(p=>({name:p.displayName||'',address:p.formattedAddress||'',lat:p.location?.lat(),lng:p.location?.lng()})));
       }else{setResults([]);}
     }catch{
-      // Fallback to legacy PlacesService
       try{
         const map=mapObjRef.current;
         if(!map)return;
@@ -109,25 +111,14 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
     const map=mapObjRef.current;
     setSelected(r);setResults([]);
     if(inputRef.current)inputRef.current.value=r.name;
-    if(map){map.setCenter({lat:r.lat,lng:r.lng});map.setZoom(16);
+    if(map){
+      map.setCenter({lat:r.lat,lng:r.lng});map.setZoom(16);
       if(markerRef.current)markerRef.current.setMap(null);
       markerRef.current=new google.maps.Marker({position:{lat:r.lat,lng:r.lng},map});
-      map.panTo({lat:r.lat,lng:r.lng});
     }
   };
 
-  // Render in a portal outside React's tree to avoid DOM conflicts with Google Maps
-  const[portalEl,setPortalEl]=useState(null);
-  useEffect(()=>{
-    const div=document.createElement('div');
-    div.id='map-modal-portal';
-    document.body.appendChild(div);
-    setPortalEl(div);
-    return()=>{div.remove();};
-  },[]);
-
-  if(!portalEl)return null;
-  return createPortal(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.85)',zIndex:200,display:'flex',flexDirection:'column'}}>
+  return(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.85)',zIndex:200,display:'flex',flexDirection:'column'}}>
     <div style={{padding:'12px 16px',display:'flex',alignItems:'center',gap:'8px',background:c.CARD,borderBottom:`1px solid ${c.BD}`}}>
       <div style={{flex:1,position:'relative'}}>
         <input ref={inputRef} defaultValue={init||''} onKeyDown={handleKeyDown} placeholder={t.searchPlacePh||'Search for a place... (press Enter)'} autoFocus style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 36px 10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
@@ -142,7 +133,7 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
         <div style={{fontSize:'12px',color:c.M2}}>{r.address}</div>
       </div>)}
     </div>}
-    <div ref={mapRef} style={{flex:1}}>{loading&&<div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',color:c.M}}>...</div>}</div>
+    <div ref={containerRef} style={{flex:1,display:'flex'}}>{loading&&<div style={{display:'flex',alignItems:'center',justifyContent:'center',width:'100%',color:c.M}}>...</div>}</div>
     {selected&&<div style={{padding:'14px 16px',background:c.CARD,borderTop:`1px solid ${c.BD}`,display:'flex',alignItems:'center',gap:'10px'}}>
       <div style={{flex:1,minWidth:0}}>
         <div style={{fontSize:'14px',color:c.T,fontWeight:'600',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{selected.name}</div>
@@ -150,5 +141,5 @@ export default function MapModal({onSelect,onClose,c,lang,init}){
       </div>
       <button onClick={()=>onSelect(selected)} style={{padding:'10px 18px',background:c.A||'#CDFF6C',color:'#0A0A0A',border:'none',borderRadius:'10px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',fontSize:'14px',flexShrink:0}}>{t.selectPlace||'Select'}</button>
     </div>}
-  </div>,portalEl);
+  </div>);
 }
