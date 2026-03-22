@@ -6,22 +6,46 @@ import { ls, addMyPlan } from '../lib/storage.js'
 import { genId, fmtShort } from '../lib/utils.js'
 import { Btn, Card, Lbl, Inp, Txa, HR, Back, ModeBadge, Stepper, Badge } from '../components/ui.jsx'
 import CalendarPicker from '../components/CalendarPicker.jsx'
-import TimePicker from '../components/TimePicker.jsx'
-import CityInput from '../components/CityInput.jsx'
 import MapModal from '../components/MapModal.jsx'
 import { getCityTz, getTzLabel, getGMTOffset, getUserTz } from '../constants/weather.js'
 import WeatherWidget from '../components/WeatherWidget.jsx'
 
-export default function Create({onBack,onCreated,c,lang,mode,authUser,profile,template}){
+const DURATIONS = [
+  {v:'30min',l:'30min'},{v:'1h',l:'1h'},{v:'1h30',l:'1h30'},{v:'2h',l:'2h'},{v:'3h',l:'3h'},{v:'4h+',l:'4h+'}
+];
+const TOLERANCES = [
+  {v:'',l:'Exact'},{v:'±15min',l:'±15min'},{v:'±30min',l:'±30min'},{v:'±1h',l:'±1h'}
+];
+
+const calcEndTime = (start, duration) => {
+  if (!start || !duration) return '';
+  const [h, m] = start.split(':').map(Number);
+  const mins = duration === '30min' ? 30 : duration === '1h' ? 60 : duration === '1h30' ? 90 : duration === '2h' ? 120 : duration === '3h' ? 180 : duration === '4h+' ? 240 : 0;
+  const end = new Date(2000, 0, 1, h, m + mins);
+  return `${String(end.getHours()).padStart(2,'0')}:${String(end.getMinutes()).padStart(2,'0')}`;
+};
+
+const emptyOption = () => ({
+  id: Date.now(), name: '', address: '', lat: null, lng: null, rating: null, ratingCount: null,
+  priceLevel: null, photo: null, website: null, phone: null, hours: null, isOpen: null,
+  summary: null, googleMapsURI: null, types: [], servesBeer: null, servesWine: null,
+  outdoorSeating: null, wheelchair: null, goodForChildren: null, dineIn: null, takeout: null,
+  delivery: null, reservable: null
+});
+
+const emptyStop = (id, suggestedStart) => ({
+  id, options: [emptyOption()], startTime: suggestedStart || '', duration: '', tolerance: '', notes: ''
+});
+
+export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
   const t=T[lang];const mc=getMC(mode,c);const isEs=lang==='es';
   const[step,setStep]=useState(0);
   const[name,setName]=useState('');const[desc,setDesc]=useState('');
   const[org,setOrg]=useState(profile?.name||ls.get('q_myname',''));const[orgEmail,setOrgEmail]=useState('');
   const[customRoles,setCustomRoles]=useState([]);const[roleInput,setRoleInput]=useState('');
-  const[city,setCity]=useState('');const[cityData,setCityData]=useState(null);
-  const[selDates,setSelDates]=useState([]);const[selTimes,setSelTimes]=useState({});
-  const[stops,setStops]=useState([{id:1,name:'',cat:t.cat[0],address:'',cost:'',link:'',lat:null,lng:null}]);
-  const[mapStop,setMapStop]=useState(null);
+  const[selDates,setSelDates]=useState([]);
+  const[stops,setStops]=useState([emptyStop(1,'')]);
+  const[mapTarget,setMapTarget]=useState(null); // {stopId, optionId}
   const[dressCode,setDressCode]=useState(null);const[dressNote,setDressNote]=useState('');
   const[autoConfirm,setAutoConfirm]=useState(false);const[autoConfirmN,setAutoConfirmN]=useState(3);
   const[surpriseMode,setSurprise]=useState(false);
@@ -35,14 +59,25 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile,te
   const[openSections,setOpenSections]=useState({dress:true});
   const[draftRestored,setDraftRestored]=useState(false);
   const draftKey=`q_draft_${mode}`;
-  const planTz=cityData?.tz||getCityTz(city);
+
+  // Auto-deduce city from first stop with coordinates
+  const autoCity = useMemo(() => stops.flatMap(s=>s.options).find(o=>o.address)?.address?.split(',').slice(-3,-1).join(',').trim() || '', [stops]);
+  const autoCityShort = autoCity.split(',')[0]?.trim() || '';
+  const firstCoords = useMemo(() => {
+    const o = stops.flatMap(s=>s.options).find(o=>o.lat && o.lng);
+    return o ? {lat:o.lat, lng:o.lng} : null;
+  }, [stops]);
+  const planTz = getCityTz(autoCity);
+
+  const orgReadOnly = !!profile?.name;
+
   useEffect(()=>{if(org.trim())ls.set('q_myname',org.trim());},[org]);
+
   // Restore draft on mount
   useEffect(()=>{
     const d=ls.get(draftKey,null);if(!d)return;
     if(d.name)setName(d.name);if(d.desc)setDesc(d.desc);if(d.org)setOrg(d.org);if(d.orgEmail)setOrgEmail(d.orgEmail);
-    if(d.city)setCity(d.city);if(d.cityData)setCityData(d.cityData);
-    if(d.selDates)setSelDates(d.selDates);if(d.selTimes)setSelTimes(d.selTimes);
+    if(d.selDates)setSelDates(d.selDates);
     if(d.stops)setStops(d.stops);if(d.dressCode!==undefined)setDressCode(d.dressCode);if(d.dressNote)setDressNote(d.dressNote);
     if(d.autoConfirm!==undefined)setAutoConfirm(d.autoConfirm);if(d.autoConfirmN!==undefined)setAutoConfirmN(d.autoConfirmN);
     if(d.surpriseMode!==undefined)setSurprise(d.surpriseMode);if(d.maxGuests)setMaxGuests(d.maxGuests);
@@ -51,40 +86,94 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile,te
     if(d.payment)setPayment(d.payment);if(d.customRoles)setCustomRoles(d.customRoles);if(d.roleInput)setRoleInput(d.roleInput);if(d.step)setStep(d.step);
     setDraftRestored(true);
   },[]);// eslint-disable-line react-hooks/exhaustive-deps
-  // Apply template on mount (only if no draft was restored)
-  useEffect(()=>{
-    if(!template||draftRestored)return;const tp=template;
-    if(tp.stops){const cats=T[lang].cat;setStops(tp.stops.map((s,i)=>({...s,id:i+1,cat:typeof s.cat==='number'?cats[s.cat]||cats[0]:s.cat||cats[0]})));}
-    if(tp.dressCode!==undefined)setDressCode(tp.dressCode);
-    if(tp.bring)setBring(tp.bring);
-    if(tp.customRoles)setCustomRoles(tp.customRoles);
-  },[]);// eslint-disable-line react-hooks/exhaustive-deps
+
   // Save draft helper
-  const saveDraft=(s)=>ls.set(draftKey,{name,desc,org,orgEmail,city,cityData,selDates,selTimes,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,maxGuests,orgAttends,poll,giftOn,gift,bring,payment,customRoles,roleInput,step:s!==undefined?s:step});
+  const saveDraft=(s)=>ls.set(draftKey,{name,desc,org,orgEmail,selDates,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,maxGuests,orgAttends,poll,giftOn,gift,bring,payment,customRoles,roleInput,step:s!==undefined?s:step});
   // Auto-save every 30s
   useEffect(()=>{const id=setInterval(()=>saveDraft(),30000);return()=>clearInterval(id);});
   const clearDraft=()=>{try{localStorage.removeItem(draftKey)}catch{}};
   const discardDraft=()=>{clearDraft();setDraftRestored(false);window.location.reload();};
   // Save on step change
   const changeStep=(s)=>{saveDraft(s);setStep(s);};
-  const addStop=()=>setStops(p=>[...p,{id:Date.now(),name:'',cat:t.cat[0],address:'',cost:'',link:'',lat:null,lng:null}]);
-  const upd=(id,k,v)=>setStops(p=>p.map(s=>s.id===id?{...s,[k]:v}:s));
+
+  // Stop helpers
+  const addStop=()=>{
+    const last=stops[stops.length-1];
+    let suggested='';
+    if(last?.startTime && last?.duration){
+      const end=calcEndTime(last.startTime,last.duration);
+      if(end){
+        const [h,m]=end.split(':').map(Number);
+        const d=new Date(2000,0,1,h,m+30);
+        suggested=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      }
+    }
+    setStops(p=>[...p,emptyStop(Date.now(),suggested)]);
+  };
   const remStop=id=>setStops(p=>p.filter(s=>s.id!==id));
-  const budget=stops.reduce((s,x)=>s+(parseFloat(x.cost)||0),0);
-  const stepLabels=mode==='intimate'?[t.basics,t.datesStep,t.routeStep]:[t.basics,t.datesStep,t.routeStep,t.extrasStep];
+  const updStop=(id,k,v)=>setStops(p=>p.map(s=>s.id===id?{...s,[k]:v}:s));
+  const addOption=(stopId)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:[...s.options,emptyOption()]}:s));
+  const remOption=(stopId,optId)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.filter(o=>o.id!==optId)}:s));
+  const updOption=(stopId,optionId,key,value)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.map(o=>o.id===optionId?{...o,[key]:value}:o)}:s));
+
+  const stepLabels=mode==='intimate'?[t.basics,t.routeStep,t.datesStep]:[t.basics,t.routeStep,t.datesStep,t.extrasStep];
+
   const create=async()=>{
     setSaving(true);
     try{
-      const plan={id:genId(),name:name.trim(),desc:desc.trim(),organizer:org.trim(),organizerEmail:orgEmail.trim(),customRoles,mode,dates:[...selDates].sort(),times:selTimes,timezone:planTz,city:city.split(',')[0].trim(),cityFull:city,cityLat:cityData?.lat,cityLon:cityData?.lon,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,maxGuests:maxGuests?parseInt(maxGuests):null,orgAttends,poll:poll.q.trim()?poll:null,gift:giftOn?gift:null,bring:bring.filter(b=>b.text.trim()),payment,confirmedDate:null,isPublic:false,lang,createdAt:new Date().toISOString()};
+      const plan={id:genId(),name:name.trim(),desc:desc.trim(),organizer:org.trim(),organizerEmail:orgEmail.trim(),customRoles,mode,dates:[...selDates].sort(),timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,maxGuests:maxGuests?parseInt(maxGuests):null,orgAttends,poll:poll.q.trim()?poll:null,gift:giftOn?gift:null,bring:bring.filter(b=>b.text.trim()),payment,confirmedDate:null,isPublic:false,lang,createdAt:new Date().toISOString()};
       if(authUser)await savePlanWithUser(plan,authUser.id);else await savePlan(plan);
       addMyPlan(plan.id,plan.name,'organizer',mode);
       ls.set('q_state',{screen:'share',planId:plan.id,isOrg:true});clearDraft();onCreated(plan);
     }catch(e){showErr(t.createError);}
     setSaving(false);
   };
-  const is=(v,ph,k,sid)=><input value={v} onChange={e=>upd(sid,k,e.target.value)} placeholder={ph} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'9px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>;
+
+  // Map modal init string
+  const mapInit = useMemo(() => {
+    if(!mapTarget) return '';
+    const st = stops.find(s=>s.id===mapTarget.stopId);
+    const opt = st?.options.find(o=>o.id===mapTarget.optionId);
+    return opt?.name || autoCity || '';
+  }, [mapTarget, stops, autoCity]);
+
+  // Apply map selection to the targeted option
+  const handleMapSelect = (sel) => {
+    if(!mapTarget) return;
+    const {stopId, optionId} = mapTarget;
+    const fields = ['name','address','lat','lng','rating','ratingCount','priceLevel','website','phone','hours','isOpen','googleMapsURI','photo','summary','types','dineIn','takeout','delivery','reservable','servesBeer','servesWine','outdoorSeating','goodForChildren','wheelchair'];
+    fields.forEach(k => { if(sel[k] !== undefined && sel[k] !== null) updOption(stopId, optionId, k, sel[k]); });
+    setMapTarget(null);
+  };
+
+  const chipStyle = (active) => ({
+    padding:'7px 14px',borderRadius:'20px',border:`1px solid ${active?mc+'50':c.BD}`,
+    background:active?`${mc}15`:c.CARD,color:active?mc:c.T,cursor:'pointer',
+    fontFamily:'inherit',fontSize:'12px',fontWeight:active?'700':'400',whiteSpace:'nowrap'
+  });
+
+  // Venue card for an option
+  const VenueCard = ({opt}) => {
+    if(!opt.rating && !opt.photo) return null;
+    return <div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 12px',marginTop:'6px'}}>
+      {opt.photo&&<img src={opt.photo} alt={opt.name} style={{width:'100%',height:'100px',objectFit:'cover',borderRadius:'6px',marginBottom:'6px'}}/>}
+      <div style={{display:'flex',flexWrap:'wrap',gap:'4px',fontSize:'11px'}}>
+        {opt.rating&&<span style={{padding:'2px 8px',borderRadius:'12px',background:`${mc}15`,color:mc,fontWeight:'700'}}>⭐ {opt.rating}{opt.ratingCount?` (${opt.ratingCount})`:''}</span>}
+        {opt.priceLevel&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>{'€'.repeat(opt.priceLevel)}</span>}
+        {opt.isOpen===true&&<span style={{padding:'2px 8px',borderRadius:'12px',background:'#22c55e20',color:'#22c55e'}}>Open</span>}
+        {opt.isOpen===false&&<span style={{padding:'2px 8px',borderRadius:'12px',background:'#ef444420',color:'#ef4444'}}>Closed</span>}
+        {opt.outdoorSeating&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>🌤️</span>}
+        {opt.servesBeer&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>🍺</span>}
+        {opt.servesWine&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>🍷</span>}
+        {opt.wheelchair&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>♿</span>}
+        {opt.types?.length>0&&opt.types.slice(0,3).map(tp=><span key={tp} style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2,textTransform:'capitalize'}}>{tp.replace(/_/g,' ')}</span>)}
+      </div>
+      {opt.summary&&<div style={{fontSize:'11px',color:c.M2,fontStyle:'italic',marginTop:'4px'}}>"{opt.summary}"</div>}
+    </div>;
+  };
+
   return(<>
-    <MapModal visible={mapStop!==null} onSelect={sel=>{upd(mapStop,'name',sel.name);upd(mapStop,'address',sel.address);upd(mapStop,'lat',sel.lat);upd(mapStop,'lng',sel.lng);if(sel.rating)upd(mapStop,'rating',sel.rating);if(sel.ratingCount)upd(mapStop,'ratingCount',sel.ratingCount);if(sel.priceLevel)upd(mapStop,'priceLevel',sel.priceLevel);if(sel.website)upd(mapStop,'website',sel.website);if(sel.phone)upd(mapStop,'phone',sel.phone);if(sel.hours)upd(mapStop,'hours',sel.hours);if(sel.isOpen!==null)upd(mapStop,'isOpen',sel.isOpen);if(sel.googleMapsURI)upd(mapStop,'googleMapsURI',sel.googleMapsURI);if(sel.photo)upd(mapStop,'photo',sel.photo);if(sel.summary)upd(mapStop,'summary',sel.summary);if(sel.types?.length)upd(mapStop,'types',sel.types);if(sel.dineIn!==null)upd(mapStop,'dineIn',sel.dineIn);if(sel.takeout!==null)upd(mapStop,'takeout',sel.takeout);if(sel.delivery!==null)upd(mapStop,'delivery',sel.delivery);if(sel.reservable!==null)upd(mapStop,'reservable',sel.reservable);if(sel.servesBeer!==null)upd(mapStop,'servesBeer',sel.servesBeer);if(sel.servesWine!==null)upd(mapStop,'servesWine',sel.servesWine);if(sel.outdoorSeating!==null)upd(mapStop,'outdoorSeating',sel.outdoorSeating);if(sel.goodForChildren!==null)upd(mapStop,'goodForChildren',sel.goodForChildren);if(sel.wheelchair!==null)upd(mapStop,'wheelchair',sel.wheelchair);if(!city&&sel.address)setCity(sel.address.split(',').slice(-3,-1).join(',').trim()||'');setMapStop(null);}} onClose={()=>setMapStop(null)} c={c} lang={lang} init={mapStop!==null?(stops.find(s=>s.id===mapStop)?.name||city||''):''}/>
+    <MapModal visible={mapTarget!==null} onSelect={handleMapSelect} onClose={()=>setMapTarget(null)} c={c} lang={lang} init={mapInit}/>
     <div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
       {draftRestored&&<div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:'8px',padding:'10px 14px',marginBottom:'12px',background:mc+'18',border:`1px solid ${mc}40`,borderRadius:'10px',fontSize:'13px'}}>
         <span style={{color:mc,fontWeight:'600'}}>{t.draftRestored||'Draft restored'}</span>
@@ -97,13 +186,18 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile,te
       <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'20px'}}><ModeBadge mode={mode} lang={lang} c={c}/><div style={{flex:1,height:'1px',background:c.BD}}/></div>
       <Stepper cur={step} labels={stepLabels} c={c} accent={mc}/>
 
+      {/* ── STEP 0: BASICS ── */}
       {step===0&&<>
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'20px'}}>{t.basics}</h2>
         {mode==='intimate'&&<div style={{background:'#F472B620',border:'1px solid #F472B650',borderRadius:'12px',padding:'12px 14px',marginBottom:'16px',fontSize:'13px',color:'#F472B6',lineHeight:1.6}}>{t.privateNote}</div>}
         <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.planName}</Lbl><Inp value={name} onChange={setName} placeholder={t.modes[mode].ex[0]} c={c}/></div>
         <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.desc}</Lbl><Txa value={desc} onChange={setDesc} placeholder={t.descPh} c={c}/></div>
-        <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.yourName}</Lbl><Inp value={org} onChange={setOrg} placeholder={t.yourNamePh} c={c}/></div>
-        <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.emailLbl}</Lbl><Inp value={orgEmail} onChange={setOrgEmail} placeholder={t.emailPh} type="email" c={c}/></div>
+        <div style={{marginBottom:'14px'}}>
+          <Lbl c={c}>{t.yourName}</Lbl>
+          {orgReadOnly
+            ? <div style={{padding:'12px 14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',fontSize:'14px',color:c.T}}>{org}</div>
+            : <Inp value={org} onChange={setOrg} placeholder={t.yourNamePh} c={c}/>}
+        </div>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'14px'}}>
           <div><Lbl c={c}>{t.maxGuests}</Lbl><input type="number" min="1" max="999" value={maxGuests} onChange={e=>setMaxGuests(e.target.value)} placeholder={t.noLimit} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/></div>
           <div><Lbl c={c}>{t.willAttend}</Lbl>
@@ -127,76 +221,102 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile,te
         <Btn onClick={()=>changeStep(1)} disabled={!name.trim()||!org.trim()} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn>
       </>}
 
+      {/* ── STEP 1: STOPS / ROUTE ── */}
       {step===1&&<>
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{t.datesTitle}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{t.datesSub}</p>
-        <div style={{marginBottom:'16px'}}>
-          <Lbl c={c}>{t.cityLbl}</Lbl>
-          <CityInput value={city} onChange={setCity} onSelect={d=>{setCityData(d);setCity(d.label);}} placeholder={t.cityPh} c={c}/>
-          {city&&<div style={{fontSize:'12px',color:c.M2,marginTop:'6px',display:'flex',flexWrap:'wrap',gap:'8px',alignItems:'center'}}>
-  <span>🌍 <span style={{color:c.T,fontWeight:'500'}}>{getTzLabel(planTz)}</span> <span style={{color:c.M}}>({getGMTOffset(planTz)})</span></span>
-  {(()=>{const uTz=getUserTz();if(!uTz||uTz===planTz)return null;return<span style={{color:c.M}}>· {t.yourZone} <span style={{fontWeight:'500'}}>{getGMTOffset(uTz)}</span></span>;})()}
-</div>}
-        </div>
-        {city&&selDates.length>0&&<div style={{marginBottom:'16px'}}>
-          <Lbl c={c}>{t.weatherForecast}</Lbl>
-          {selDates.slice(0,2).map(d=><div key={d} style={{marginBottom:'8px'}}><div style={{fontSize:'12px',color:c.M2,marginBottom:'4px',textTransform:'capitalize'}}>{fmtShort(d,lang)}</div><WeatherWidget city={city.split(',')[0]} date={d} c={c} lang={lang}/></div>)}
-          {selDates.length>2&&<div style={{fontSize:'12px',color:c.M2,textAlign:'center',padding:'4px'}}>+{selDates.length-2} {t.moreDates}</div>}
-        </div>}
-        <Lbl c={c}>{t.selectDates}</Lbl>
-        <CalendarPicker selected={selDates} onChange={setSelDates} c={c} lang={lang}/>
-        {selDates.length>0&&<><HR c={c}/><Lbl c={c}>{t.times}</Lbl>
-          {selDates.sort().map(d=><div key={d} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'14px',marginBottom:'10px'}}>
-            <div style={{fontSize:'13px',color:mc,fontWeight:'600',marginBottom:'10px',textTransform:'capitalize'}}>{fmtShort(d,lang)}</div>
-            <TimePicker times={selTimes[d]||[]} onChange={times=>setSelTimes(p=>({...p,[d]:times}))} c={c} lang={lang} tz={planTz}/>
-          </div>)}
-        </>}
-        <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(2)} disabled={selDates.length<1} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
-      </>}
-
-      {step===2&&<>
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{t.routeTitle}</h2>
         <p style={{color:c.M2,fontSize:'13px',marginBottom:'14px'}}>{t.routeSub}</p>
-        {city&&<div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',marginBottom:'14px',display:'flex',alignItems:'center',gap:'8px',fontSize:'13px'}}>
-          <span>📍</span><span style={{color:c.T,fontWeight:'500'}}>{city}</span>
-          <span style={{color:c.M2,fontSize:'11px',marginLeft:'auto',cursor:'pointer'}} onClick={()=>changeStep(1)}>✏️</span>
+        {autoCity&&<div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',marginBottom:'14px',display:'flex',alignItems:'center',gap:'8px',fontSize:'13px'}}>
+          <span>📍</span><span style={{color:c.T,fontWeight:'500'}}>{autoCity}</span>
         </div>}
         <HR c={c}/>
-        {stops.map((s,i)=><div key={s.id} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'14px',padding:'16px',marginBottom:'10px'}}>
+        {stops.map((s,i)=>{
+          const endTime = calcEndTime(s.startTime, s.duration);
+          return <div key={s.id} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'14px',padding:'16px',marginBottom:'10px'}}>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'12px'}}>
             <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
               <div style={{width:'24px',height:'24px',borderRadius:'50%',background:`${mc}25`,border:`1px solid ${mc}50`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',fontWeight:'800',color:mc}}>{i+1}</div>
               <span style={{fontSize:'12px',color:c.M2,fontWeight:'600',textTransform:'uppercase',letterSpacing:'.05em'}}>{t.stop} {i+1}</span>
             </div>
-            <div style={{display:'flex',gap:'6px'}}>
-              <button onClick={()=>setMapStop(s.id)} title={t.searchOnMap} style={{background:'none',border:`1px solid ${c.BD}`,color:mc,cursor:'pointer',fontSize:'12px',padding:'4px 10px',borderRadius:'8px',fontFamily:'inherit',fontWeight:'600'}}>{t.searchMap}</button>
-              {stops.length>1&&<button onClick={()=>remStop(s.id)} title={t.removeStop} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'18px'}}>×</button>}
+            {stops.length>1&&<button onClick={()=>remStop(s.id)} title={t.removeStop} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'18px'}}>×</button>}
+          </div>
+
+          {/* Options (A, B, C...) */}
+          {s.options.map((opt,oi)=><div key={opt.id} style={{marginBottom:'10px',paddingLeft:s.options.length>1?'8px':'0',borderLeft:s.options.length>1?`2px solid ${mc}30`:'none'}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'6px'}}>
+              <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
+                {s.options.length>1&&<span style={{fontSize:'11px',fontWeight:'700',color:mc,background:`${mc}15`,padding:'2px 8px',borderRadius:'10px'}}>{String.fromCharCode(65+oi)}</span>}
+                {opt.name&&<span style={{fontSize:'13px',color:c.T,fontWeight:'500'}}>{opt.name}</span>}
+                {opt.lat&&<span style={{fontSize:'10px',color:mc}}>📍</span>}
+              </div>
+              <div style={{display:'flex',gap:'6px'}}>
+                <button onClick={()=>setMapTarget({stopId:s.id,optionId:opt.id})} style={{background:'none',border:`1px solid ${c.BD}`,color:mc,cursor:'pointer',fontSize:'12px',padding:'4px 10px',borderRadius:'8px',fontFamily:'inherit',fontWeight:'600'}}>{t.searchMap}</button>
+                {s.options.length>1&&<button onClick={()=>remOption(s.id,opt.id)} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'16px'}}>×</button>}
+              </div>
+            </div>
+            <VenueCard opt={opt}/>
+            {!opt.name&&!opt.lat&&<div style={{fontSize:'12px',color:c.M2,fontStyle:'italic',padding:'8px 0'}}>{t.searchOnMap||'Search and select on map'}</div>}
+          </div>)}
+          <button onClick={()=>addOption(s.id)} style={{background:'none',border:`1px dashed ${c.BD}`,borderRadius:'8px',padding:'6px 12px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',marginBottom:'12px',width:'100%'}}>+ {t.optionLbl||'Option'}</button>
+
+          {/* Start time */}
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'10px'}}>
+            <div>
+              <div style={{fontSize:'11px',color:c.M2,fontWeight:'600',marginBottom:'4px',textTransform:'uppercase',letterSpacing:'.04em'}}>{isEs?'Hora inicio':'Start time'}</div>
+              <input type="time" value={s.startTime} onChange={e=>updStop(s.id,'startTime',e.target.value)} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'9px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
+            </div>
+            <div>
+              <div style={{fontSize:'11px',color:c.M2,fontWeight:'600',marginBottom:'4px',textTransform:'uppercase',letterSpacing:'.04em'}}>{isEs?'Fin estimado':'Est. end'}</div>
+              <div style={{padding:'9px 12px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',fontSize:'13px',color:endTime?c.T:c.M2,minHeight:'18px'}}>{endTime||'--:--'}</div>
             </div>
           </div>
-          {s.lat&&<div style={{fontSize:'11px',color:mc,marginBottom:'8px'}}>📍 {t.locationSet}</div>}
-          {s.rating&&<div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 12px',marginBottom:'8px'}}>
-            {s.photo&&<img src={s.photo} alt={s.name} style={{width:'100%',height:'100px',objectFit:'cover',borderRadius:'6px',marginBottom:'6px'}}/>}
-            <div style={{display:'flex',flexWrap:'wrap',gap:'4px',fontSize:'11px'}}>
-              <span style={{padding:'2px 8px',borderRadius:'12px',background:`${mc}15`,color:mc,fontWeight:'700'}}>⭐ {s.rating}{s.ratingCount?` (${s.ratingCount})`:''}</span>
-              {s.priceLevel&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>{'€'.repeat(s.priceLevel)}</span>}
-              {s.isOpen===true&&<span style={{padding:'2px 8px',borderRadius:'12px',background:'#22c55e20',color:'#22c55e'}}>Open</span>}
-              {s.isOpen===false&&<span style={{padding:'2px 8px',borderRadius:'12px',background:'#ef444420',color:'#ef4444'}}>Closed</span>}
-              {s.outdoorSeating&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>🌤️</span>}
-              {s.servesBeer&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>🍺</span>}
-              {s.servesWine&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>🍷</span>}
-              {s.wheelchair&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>♿</span>}
+
+          {/* Duration chips */}
+          <div style={{marginBottom:'8px'}}>
+            <div style={{fontSize:'11px',color:c.M2,fontWeight:'600',marginBottom:'4px',textTransform:'uppercase',letterSpacing:'.04em'}}>{isEs?'Duración':'Duration'}</div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:'6px'}}>
+              {DURATIONS.map(d=><button key={d.v} onClick={()=>updStop(s.id,'duration',s.duration===d.v?'':d.v)} style={chipStyle(s.duration===d.v)}>{d.l}</button>)}
             </div>
-            {s.summary&&<div style={{fontSize:'11px',color:c.M2,fontStyle:'italic',marginTop:'4px'}}>"{s.summary}"</div>}
-          </div>}
-          <select value={s.cat} onChange={e=>upd(s.id,'cat',e.target.value)} style={{background:c.CARD,border:`1px solid ${c.BD}`,color:c.T,fontSize:'13px',padding:'9px 12px',borderRadius:'8px',width:'100%',fontFamily:'inherit',marginBottom:'8px'}}>{t.cat.map(cat=><option key={cat} value={cat}>{cat}</option>)}</select>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',marginBottom:'8px'}}>{is(s.name,t.place,'name',s.id)}{is(s.address,t.addr,'address',s.id)}</div>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',marginBottom:'8px'}}>{is(s.cost,t.cost,'cost',s.id)}{is(s.link,t.booking,'link',s.id)}</div>
-        </div>)}
+          </div>
+
+          {/* Tolerance chips */}
+          <div style={{marginBottom:'10px'}}>
+            <div style={{fontSize:'11px',color:c.M2,fontWeight:'600',marginBottom:'4px',textTransform:'uppercase',letterSpacing:'.04em'}}>{isEs?'Tolerancia':'Tolerance'}</div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:'6px'}}>
+              {TOLERANCES.map(tol=><button key={tol.v} onClick={()=>updStop(s.id,'tolerance',tol.v)} style={chipStyle(s.tolerance===tol.v)}>{tol.l}</button>)}
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div>
+            <div style={{fontSize:'11px',color:c.M2,fontWeight:'600',marginBottom:'4px',textTransform:'uppercase',letterSpacing:'.04em'}}>{isEs?'Notas':'Notes'}</div>
+            <textarea value={s.notes} onChange={e=>updStop(s.id,'notes',e.target.value)} placeholder={isEs?'Notas opcionales...':'Optional notes...'} rows={2} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'9px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box',resize:'vertical'}}/>
+          </div>
+        </div>})}
+
         <Btn onClick={addStop} v="secondary" full sm style={{marginBottom:'14px'}} c={c}>{t.addStop}</Btn>
-        {budget>0&&<div style={{background:`${mc}0D`,border:`1px solid ${mc}30`,borderRadius:'12px',padding:'14px 16px',marginBottom:'14px',display:'flex',justifyContent:'space-between'}}><span style={{color:c.M2}}>{t.estPer}</span><span style={{color:mc,fontSize:'22px',fontWeight:'800'}}>{budget.toFixed(0)}€</span></div>}
-        <Btn onClick={()=>stepLabels.length>3?changeStep(3):create()} disabled={saving} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{stepLabels.length>3?t.cont:(saving?t.saving:t.createBtn)}</Btn>
+        <div style={{marginTop:'10px'}}><Btn onClick={()=>changeStep(2)} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
       </>}
 
+      {/* ── STEP 2: DATES ── */}
+      {step===2&&<>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{t.datesTitle}</h2>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{t.datesSub}</p>
+        {autoCity&&<div style={{fontSize:'12px',color:c.M2,marginBottom:'12px',display:'flex',flexWrap:'wrap',gap:'8px',alignItems:'center'}}>
+          <span>📍 <span style={{color:c.T,fontWeight:'500'}}>{autoCity}</span></span>
+          {planTz&&<span>🌍 <span style={{color:c.T,fontWeight:'500'}}>{getTzLabel(planTz)}</span> <span style={{color:c.M}}>({getGMTOffset(planTz)})</span></span>}
+          {(()=>{const uTz=getUserTz();if(!uTz||uTz===planTz)return null;return<span style={{color:c.M}}>· {t.yourZone} <span style={{fontWeight:'500'}}>{getGMTOffset(uTz)}</span></span>;})()}
+        </div>}
+        {autoCityShort&&selDates.length>0&&<div style={{marginBottom:'16px'}}>
+          <Lbl c={c}>{t.weatherForecast}</Lbl>
+          {selDates.slice(0,2).map(d=><div key={d} style={{marginBottom:'8px'}}><div style={{fontSize:'12px',color:c.M2,marginBottom:'4px',textTransform:'capitalize'}}>{fmtShort(d,lang)}</div><WeatherWidget city={autoCityShort} date={d} c={c} lang={lang}/></div>)}
+          {selDates.length>2&&<div style={{fontSize:'12px',color:c.M2,textAlign:'center',padding:'4px'}}>+{selDates.length-2} {t.moreDates}</div>}
+        </div>}
+        <Lbl c={c}>{t.selectDates}</Lbl>
+        <CalendarPicker selected={selDates} onChange={setSelDates} c={c} lang={lang}/>
+        <div style={{marginTop:'20px'}}><Btn onClick={()=>stepLabels.length>3?changeStep(3):create()} disabled={selDates.length<1||saving} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{stepLabels.length>3?t.cont:(saving?t.saving:t.createBtn)}</Btn></div>
+      </>}
+
+      {/* ── STEP 3: EXTRAS ── */}
       {step===3&&stepLabels.length>3&&(()=>{
         const togSec=id=>setOpenSections(p=>({...p,[id]:!p[id]}));
         const Sec=({id,icon,label,hasData,children})=>{const open=!!openSections[id];return<div style={{marginBottom:'12px'}}>
