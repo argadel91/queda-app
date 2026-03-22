@@ -27,7 +27,7 @@ export default function Landing({onGetStarted, c, lang, onLangChange}){
       {/* Hero */}
       <div style={{textAlign:'center',marginBottom:'48px'}}>
         <h1 style={{fontFamily:"'Syne',serif",fontSize:'48px',fontWeight:'800',lineHeight:1.05,marginBottom:'14px',letterSpacing:'-.03em'}}>{t.landingHero1||'Group plans,'}<br/><span style={{color:c.A}}>{t.landingHero2||'zero chaos.'}</span></h1>
-        <p style={{fontSize:'16px',color:c.M2,lineHeight:1.7,marginBottom:'28px'}}>{t.landingSub||'Dates, venues, routes, weather, outfits & payments — all in one shareable code.'}</p>
+        <p style={{fontSize:'16px',color:c.M2,lineHeight:1.7,marginBottom:'28px'}}>{t.landingSub2||'Say goodbye to endless chats.'}</p>
         <button onClick={onGetStarted} style={{padding:'16px 40px',background:c.A,color:'#0A0A0A',border:'none',borderRadius:'14px',fontSize:'17px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>{t.landingCTA2||'Get started'}</button>
       </div>
 
