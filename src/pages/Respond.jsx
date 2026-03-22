@@ -37,11 +37,22 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
   const stopYesCount=(sid)=>(stopCounts[sid]||0);
   const multiStops=(plan.stops||[]).filter(s=>s.options&&s.options.length>1);
   useEffect(()=>{if(name.trim())ls.set('q_myname',name.trim());},[name]);
-  const setDA=(d,val)=>{setErr('');setAvail(p=>({...p,[d]:p[d]===val?undefined:val}));};
-  const togT=(d,h)=>setTimePref(p=>({...p,[d]:(p[d]||[]).includes(h)?(p[d]||[]).filter(x=>x!==h):[...(p[d]||[]),h]}));
   const AVCOL={yes:'#22c55e',maybe:'#f59e0b',no:'#ef4444'};
   const AVICON={yes:'✅',maybe:'🤔',no:'❌'};
   const AVLBL={yes:t.avYes,maybe:t.avMaybe,no:t.avNo};
+  const calcEnd=(start,dur)=>{
+    if(!start||!dur)return start||'';
+    const[h,m]=start.split(':').map(Number);
+    const mins=dur==='30min'?30:dur==='1h'?60:dur==='1h30'?90:dur==='2h'?120:dur==='3h'?180:dur==='4h+'?240:parseInt(dur)||0;
+    const d2=new Date(2000,0,1,h,m+mins);
+    return`${String(d2.getHours()).padStart(2,'0')}:${String(d2.getMinutes()).padStart(2,'0')}`;
+  };
+  const addMins=(time,mins)=>{
+    if(!time)return'';
+    const[h,m]=time.split(':').map(Number);
+    const d2=new Date(2000,0,1,h,m+mins);
+    return`${String(d2.getHours()).padStart(2,'0')}:${String(d2.getMinutes()).padStart(2,'0')}`;
+  };
   const submit=async()=>{
     if(!name.trim())return;
     if(Object.keys(avail).length===0){setErr(t.markAtLeastOne);return;}
@@ -93,39 +104,53 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
       </>:<input value={guestRole} onChange={e=>setGuestRole(e.target.value)} placeholder={t.yourRolePh||'e.g. Manager, Student, Client...'} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
     </div>}
 
-        {/* DATE + TIME + YES/MAYBE/NO — each slot independent */}
+        {/* DATE + START TIME VOTING */}
     <div style={{marginBottom:'20px'}}>
-      <Lbl c={c}>{plan.mode==='intimate'?(t.intimateAvail):plan.mode==='professional'?(t.proAvail):t.yourAvail}</Lbl>
-      {/* Voting explanation */}
-      <div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',marginBottom:'12px',fontSize:'12px',lineHeight:1.7,color:c.M2}}>
-        <div>✅ <b style={{color:'#22c55e'}}>{t.avYes?.replace(/[✅]\s?/,'')}</b> — {t.votingExplainYes}</div>
-        <div>❌ <b style={{color:'#ef4444'}}>{t.avNo?.replace(/[❌]\s?/,'')}</b> — {t.votingExplainNo}</div>
-        <div>🤔 <b style={{color:'#f59e0b'}}>{t.avMaybe?.replace(/[🤔]\s?/,'')}</b> — {t.votingExplainMaybe}</div>
+      <Lbl c={c}>{t.whenCanYou||'When can you?'}</Lbl>
+      {/* Explanation card */}
+      <div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',marginBottom:'12px',fontSize:'12px',lineHeight:1.8}}>
+        <div><span style={{fontWeight:'700'}}>✅ {t.avYes?.replace(/[✅]\s?/,'')}</span> — {t.votingExplainYes}</div>
+        <div><span style={{fontWeight:'700'}}>❌ {t.avNo?.replace(/[❌]\s?/,'')}</span> — {t.votingExplainNo}</div>
+        <div><span style={{fontWeight:'700'}}>🤔 {t.avMaybe?.replace(/[🤔]\s?/,'')}</span> — {t.votingExplainMaybe}</div>
       </div>
-      <div style={{fontSize:'12px',color:c.M2,marginBottom:'12px',lineHeight:1.5}}>{t.markIndividually}</div>
+      {/* Mini tutorial - first time */}
+      <div style={{background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'10px',padding:'10px 14px',marginBottom:'12px',fontSize:'12px',color:mc}}>
+        1️⃣ {t.tutStep1||'Pick which days + times work for you'}
+        <br/>2️⃣ {t.tutStep2||'Choose which stops you\'ll attend'}
+        <br/>3️⃣ {t.tutStep3||'Done — the app finds the best option'}
+      </div>
       {(plan.dates||[]).map(d=>{
-        const ts=plan.times?.[d]||[];
-        const slots=ts.length>0?ts.map(h=>({key:`${d}_${h}`,label:h})):[{key:d,label:null}];
-        return(<div key={d} style={{marginBottom:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'14px',overflow:'hidden'}}>
-          <div style={{padding:'10px 14px',background:c.CARD,borderBottom:`1px solid ${c.BD}`,fontSize:'13px',color:c.T,fontWeight:'600',textTransform:'capitalize',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-            <span>{fmtDate(d,pLang)}</span>
-            {slots.length>1&&<button onClick={()=>{const u={};slots.forEach(s=>{u[s.key]='no';});setErr('');setAvail(p=>({...p,...u}));}} title={t.markAllNoTitle} style={{background:'none',border:'none',color:'#ef4444',fontSize:'11px',cursor:'pointer',fontFamily:'inherit',opacity:0.7}}>❌ {t.allNoLbl}</button>}
-          </div>
-          {slots.map((slot,si)=>{
-            const val=avail[slot.key];
-            return(<div key={slot.key} style={{borderBottom:si<slots.length-1?`1px solid ${c.BD}`:'none'}}>
-              {slot.label&&<div style={{padding:'8px 14px 4px',fontSize:'12px',color:mc,fontWeight:'700'}}>🕐 {slot.label}</div>}
+        const hasStartTimes=plan.startTimes?.length>0&&plan.startTimes.some(st2=>st2);
+        const times=hasStartTimes?plan.startTimes.filter(st2=>st2):[''];
+        return<div key={d} style={{marginBottom:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'14px',overflow:'hidden'}}>
+          <div style={{padding:'10px 14px',background:c.CARD,borderBottom:`1px solid ${c.BD}`,fontSize:'13px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtDate(d,pLang)}</div>
+          {times.map(st=>{
+            const key=st?`${d}_${st}`:d;
+            const val=avail[key];
+            let timelineItems=[];
+            if(st&&plan.stops?.length){
+              let cur=st;
+              plan.stops.forEach((s,i)=>{
+                const sName=s.options?.[0]?.name||`Stop ${i+1}`;
+                const end=calcEnd(cur,s.duration);
+                timelineItems.push({name:sName,start:cur,end,dur:s.duration});
+                cur=addMins(end,30);
+              });
+            }
+            return<div key={key} style={{borderBottom:`1px solid ${c.BD}`}}>
+              {st&&<div style={{padding:'8px 14px',fontSize:'12px',color:mc,fontWeight:'700',background:`${mc}08`}}>
+                🕐 {t.startsAt||'Starts at'} {st}
+                {timelineItems.length>0&&<div style={{marginTop:'4px',fontSize:'11px',color:c.M2,fontWeight:'400'}}>
+                  {timelineItems.map((ti,i)=><span key={i}>{i>0?' → ':''}{ti.name} {ti.start}-{ti.end}</span>)}
+                </div>}
+              </div>}
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'1px',background:c.BD}}>
-                {(['yes','maybe','no']).map(v=><button key={v} onClick={()=>{setErr('');setAvail(p=>({...p,[slot.key]:p[slot.key]===v?undefined:v}));}} style={{padding:'10px 6px',background:val===v?AVCOL[v]+'25':c.CARD,color:val===v?AVCOL[v]:c.M2,cursor:'pointer',border:'none',fontFamily:'inherit',fontSize:'12px',fontWeight:val===v?'700':'400',transition:'all .1s'}}>
-                  {AVICON[v]}<br/><span style={{fontSize:'10px'}}>{AVLBL[v].replace(/[✅🤔❌]\s?/,'')}</span>
-                </button>)}
+                {['yes','maybe','no'].map(v=><button key={v} onClick={()=>{setErr('');setAvail(p=>({...p,[key]:p[key]===v?undefined:v}));}} style={{padding:'10px 6px',background:val===v?AVCOL[v]+'25':c.CARD,color:val===v?AVCOL[v]:c.M2,cursor:'pointer',border:'none',fontFamily:'inherit',fontSize:'12px',fontWeight:val===v?'700':'400'}}>{AVICON[v]}<br/><span style={{fontSize:'10px'}}>{AVLBL[v].replace(/[✅🤔❌]\s?/,'')}</span></button>)}
               </div>
-              {val==='maybe'&&<div style={{padding:'6px 12px',background:'#f59e0b10',fontSize:'11px',color:'#f59e0b'}}>{t.maybeNote}</div>}
-            </div>);
+            </div>;
           })}
-        </div>);
+        </div>;
       })}
-      <button onClick={()=>{const u={};(plan.dates||[]).forEach(d=>{const ts=plan.times?.[d]||[];const slots=ts.length>0?ts.map(h=>`${d}_${h}`):[d];slots.forEach(k=>{if(!avail[k])u[k]='yes';});});setErr('');setAvail(p=>({...p,...u}));}} title={t.markAllYesTitle} style={{width:'100%',padding:'8px',background:'none',border:`1px dashed ${c.BD}`,borderRadius:'10px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',marginTop:'4px'}}>✅ {t.allYesLbl}</button>
     </div>
     {/* Suggest alternative date */}
     {Object.keys(avail).length>0&&Object.values(avail).every(v=>v==='no')&&<div style={{background:'#f59e0b10',border:'1px solid #f59e0b30',borderRadius:'12px',padding:'14px',marginBottom:'14px'}}>

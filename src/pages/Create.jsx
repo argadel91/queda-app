@@ -25,6 +25,13 @@ const calcEndTime = (start, duration) => {
   return `${String(end.getHours()).padStart(2,'0')}:${String(end.getMinutes()).padStart(2,'0')}`;
 };
 
+const addMinutes=(time,mins)=>{
+  if(!time)return'';
+  const[h,m]=(time.split(':')).map(Number);
+  const d=new Date(2000,0,1,h,m+mins);
+  return`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+};
+
 const emptyOption = () => ({
   id: Date.now(), name: '', address: '', lat: null, lng: null, rating: null, ratingCount: null,
   priceLevel: null, photo: null, website: null, phone: null, hours: null, isOpen: null,
@@ -50,6 +57,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
   const[hasDeadline,setHasDeadline]=useState(false);
   const[editingOrg,setEditingOrg]=useState(false);
   const[selDates,setSelDates]=useState([]);
+  const[startTimes,setStartTimes]=useState(['']);
   const[stops,setStops]=useState([emptyStop(1,'')]);
   const[mapTarget,setMapTarget]=useState(null); // {stopId, optionId}
   const[dressCode,setDressCode]=useState(null);const[dressNote,setDressNote]=useState('');
@@ -83,6 +91,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
     if(d.isPublic!==undefined)setIsPublic(d.isPublic);if(d.pubFilter)setPubFilter(d.pubFilter);
     if(d.deadline)setDeadline(d.deadline);if(d.hasDeadline!==undefined)setHasDeadline(d.hasDeadline);
     if(d.selDates)setSelDates(d.selDates);
+    if(d.startTimes)setStartTimes(d.startTimes);
     if(d.stops)setStops(d.stops);if(d.dressCode!==undefined)setDressCode(d.dressCode);if(d.dressNote)setDressNote(d.dressNote);
     if(d.autoConfirm!==undefined)setAutoConfirm(d.autoConfirm);if(d.autoConfirmN!==undefined)setAutoConfirmN(d.autoConfirmN);
     if(d.surpriseMode!==undefined)setSurprise(d.surpriseMode);
@@ -93,7 +102,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
   },[]);// eslint-disable-line react-hooks/exhaustive-deps
 
   // Save draft helper
-  const saveDraft=(s)=>ls.set(draftKey,{name,desc,org,orgRole,isPublic,pubFilter,deadline,hasDeadline,selDates,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,poll,giftOn,gift,bring,payment,step:s!==undefined?s:step});
+  const saveDraft=(s)=>ls.set(draftKey,{name,desc,org,orgRole,isPublic,pubFilter,deadline,hasDeadline,selDates,startTimes,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,poll,giftOn,gift,bring,payment,step:s!==undefined?s:step});
   // Auto-save every 30s
   useEffect(()=>{const id=setInterval(()=>saveDraft(),30000);return()=>clearInterval(id);});
   const clearDraft=()=>{try{localStorage.removeItem(draftKey)}catch{}};
@@ -126,7 +135,7 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
   const create=async()=>{
     setSaving(true);
     try{
-      const plan={id:genId(),name:name.trim(),desc:desc.trim(),organizer:org.trim(),orgRole:orgRole.trim()||null,mode,dates:[...selDates].sort(),timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,poll:poll.q.trim()?poll:null,gift:giftOn?gift:null,bring:bring.filter(b=>b.text.trim()),payment,confirmedDate:null,isPublic,pubFilter:isPublic?pubFilter:null,deadline:hasDeadline&&deadline?deadline:null,lang,createdAt:new Date().toISOString()};
+      const plan={id:genId(),name:name.trim(),desc:desc.trim(),organizer:org.trim(),orgRole:orgRole.trim()||null,mode,dates:[...selDates].sort(),startTimes:startTimes.filter(t=>t),timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,poll:poll.q.trim()?poll:null,gift:giftOn?gift:null,bring:bring.filter(b=>b.text.trim()),payment,confirmedDate:null,isPublic,pubFilter:isPublic?pubFilter:null,deadline:hasDeadline&&deadline?deadline:null,lang,createdAt:new Date().toISOString()};
       if(authUser)await savePlanWithUser(plan,authUser.id);else await savePlan(plan);
       addMyPlan(plan.id,plan.name,'organizer',mode);
       ls.set('q_state',{screen:'share',planId:plan.id,isOrg:true});clearDraft();onCreated(plan);
@@ -379,6 +388,39 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
         </div>}
         <Lbl c={c}>{t.selectDates}</Lbl>
         <CalendarPicker selected={selDates} onChange={setSelDates} c={c} lang={lang}/>
+        {selDates.length>0&&<>
+          <HR c={c}/>
+          <Lbl c={c}>{t.startTimesLbl||'Possible start times'}</Lbl>
+          <div style={{fontSize:'12px',color:c.M2,marginBottom:'10px'}}>{t.startTimesHint||'When could the plan start? Invitees will vote on date + time combinations.'}</div>
+          {startTimes.map((st,i)=><div key={i} style={{display:'flex',gap:'8px',marginBottom:'8px',alignItems:'center'}}>
+            <input type="time" value={st} onChange={e=>{const n=[...startTimes];n[i]=e.target.value;setStartTimes(n);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',flex:1}}/>
+            {startTimes.length>1&&<button onClick={()=>setStartTimes(p=>p.filter((_,j)=>j!==i))} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M,cursor:'pointer',fontSize:'16px',borderRadius:'8px',width:'36px',height:'36px'}}>×</button>}
+          </div>)}
+          {startTimes.length<5&&<button onClick={()=>setStartTimes(p=>[...p,''])} style={{background:'none',border:`1px dashed ${c.BD}`,borderRadius:'8px',padding:'8px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',width:'100%'}}>+ {t.addStartTime||'Add another time option'}</button>}
+        </>}
+        {startTimes.filter(t=>t).length>0&&stops.some(s=>s.duration)&&<>
+          <HR c={c}/>
+          <Lbl c={c}>{t.timelinePreview||'Timeline preview'}</Lbl>
+          {startTimes.filter(t=>t).map((st,i)=>{
+            let current=st;
+            return<div key={i} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'12px 14px',marginBottom:'8px'}}>
+              <div style={{fontSize:'13px',color:mc,fontWeight:'700',marginBottom:'8px'}}>🕐 {t.startsAt||'Starts at'} {st}</div>
+              {stops.map((s,si)=>{
+                const startH=current;
+                const endH=calcEndTime(current,s.duration);
+                const opt=s.options?.[0];
+                const name=opt?.name||`${t.stop||'Stop'} ${si+1}`;
+                current=addMinutes(endH,30);
+                return<div key={s.id} style={{display:'flex',gap:'8px',alignItems:'center',marginBottom:'4px',fontSize:'13px'}}>
+                  <span style={{color:mc,fontWeight:'700',minWidth:'50px'}}>{startH}</span>
+                  <span style={{color:c.M2}}>→</span>
+                  <span style={{color:c.T}}>{name}</span>
+                  <span style={{color:c.M2,marginLeft:'auto'}}>{s.duration||'?'}</span>
+                </div>;
+              })}
+            </div>;
+          })}
+        </>}
         <div style={{marginTop:'20px'}}><Btn onClick={()=>stepLabels.length>3?changeStep(3):create()} disabled={selDates.length<1||saving} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{stepLabels.length>3?t.cont:(saving?t.saving:t.createBtn)}</Btn></div>
       </>}
 
