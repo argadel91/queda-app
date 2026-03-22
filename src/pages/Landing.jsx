@@ -58,6 +58,7 @@ export default function Landing({onGetStarted, c, lang, onLangChange}){
             {emoji:'🔔',label:t.landingF6||'Email reminders'},
             {emoji:'🌍',label:t.landingF7||'6 languages'},
             {emoji:'📱',label:t.landingF8||'Works on mobile'},
+            {emoji:'🤖',label:t.landingF9||'AI Assistant'},
           ].map((f,i)=><div key={i} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'14px',display:'flex',alignItems:'center',gap:'10px'}}>
             <span style={{fontSize:'20px'}}>{f.emoji}</span>
             <span style={{fontSize:'13px',fontWeight:'600'}}>{f.label}</span>
