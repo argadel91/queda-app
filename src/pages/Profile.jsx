@@ -111,10 +111,8 @@ export default function Profile({onBack,onOpen,c,lang,authUser,profile,onUpdateP
     {/* Quick stats */}
     {plans.length>0&&(()=>{
       const org=plans.filter(p=>p.role==='organizer').length;
-      const modes=plans.reduce((a,p)=>{a[p.mode||'social']=(a[p.mode||'social']||0)+1;return a;},{});
-      const topMode=Object.entries(modes).sort((a,b)=>b[1]-a[1])[0];
       return(<div style={{display:'flex',gap:'6px',marginBottom:'16px'}}>
-        {[{l:t.statTotal,v:plans.length},{l:t.statAsOrg,v:org},{l:t.statFavMode,v:topMode?T[lang].modes[topMode[0]]?.label||topMode[0]:'—'}].map((s,i)=><div key={i} style={{flex:1,background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 8px',textAlign:'center'}}>
+        {[{l:t.statTotal,v:plans.length},{l:t.statAsOrg,v:org}].map((s,i)=><div key={i} style={{flex:1,background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 8px',textAlign:'center'}}>
           <div style={{fontSize:'18px',fontWeight:'800',color:c.A}}>{s.v}</div>
           <div style={{fontSize:'11px',color:c.M2,marginTop:'2px'}}>{s.l}</div>
         </div>)}

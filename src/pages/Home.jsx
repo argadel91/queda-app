@@ -50,15 +50,6 @@ export default function Home({onCreate,onJoin,onProfile,onDiscover,c,lang}){
       <Btn onClick={go} v="secondary" disabled={code.length<4||ldg} style={{flexShrink:0}} c={c}>{ldg?'...':t.go}</Btn>
     </div>
     {err&&<div style={{color:'#ff6b6b',fontSize:'13px',marginTop:'10px'}}>{err}</div>}
-    <div style={{marginTop:'48px',padding:'20px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'16px'}}>
-      <div style={{fontSize:'11px',color:c.M,fontWeight:'700',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'14px'}}>{t.howWorks}</div>
-      {[t.s1,t.s2,t.s3,t.s4].map((tx,i)=><div key={i} style={{display:'flex',gap:'12px',marginBottom:'10px',fontSize:'14px'}}><span style={{color:c.A,fontWeight:'700',minWidth:'18px'}}>{i+1}.</span><span style={{color:c.T}}>{tx}</span></div>)}
-    </div>
-    {getMyPlans().length===0&&<div style={{marginTop:'20px',padding:'20px',background:`${c.A}08`,border:`1px solid ${c.A}25`,borderRadius:'16px',textAlign:'center'}}>
-      <div style={{fontSize:'32px',marginBottom:'10px'}}>🚀</div>
-      <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'6px'}}>{t.onboardingTitle||'Your first plan is free'}</div>
-      <div style={{fontSize:'13px',color:c.M2,lineHeight:1.6}}>{t.onboardingSub||'Create a plan in 2 minutes. Share the code. Done.'}</div>
-    </div>}
   </div>);
 }
 
