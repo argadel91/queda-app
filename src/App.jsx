@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import T from './constants/translations.js'
-import { C, getSysTheme, applyTheme, getMC } from './constants/theme.js'
+import { C, getSysTheme, applyTheme } from './constants/theme.js'
 import { db, setToastFn } from './lib/supabase.js'
 import { authSignOut, getSession, getOrCreateProfile } from './lib/auth.js'
 import { saveProfile, loadProfile, loadPlan } from './lib/supabase.js'
@@ -175,7 +175,7 @@ export default function App(){
   const handleJoin=async code=>{const p=await loadPlan(code);if(p){setPlan(p);setIsOrg(false);setScreen('preview');ls.set('q_state',{screen:'preview',planId:p.id,isOrg:false});return true;}return false;};
   const handleFromProfile=async id=>{const p=await loadPlan(id);if(p){const mine=getMyPlans().find(x=>x.id===id);nav('results',p,mine?.role==='organizer');}};
   const handleDiscoverJoin=async id=>{const p=await loadPlan(id);if(p){setPlan(p);setIsOrg(false);setScreen('preview');}};
-  const mc=plan?.mode?getMC(plan.mode,c):c.A;
+  const mc=c.A;
   const noNav=['home','create','profile','myplans','discover','preview'];
   if(authLoading)return(<div style={{minHeight:'100vh',background:c.BG,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'16px'}}><div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'28px',color:c.T}}>queda<span style={{color:c.A}}>.</span></div><div style={{width:'24px',height:'24px',border:`3px solid ${c.BD}`,borderTop:`3px solid ${c.A}`,borderRadius:'50%',animation:'spin 1s linear infinite'}}/></div>);
   const Fallback=()=><div style={{minHeight:'100vh',background:c.BG,display:'flex',alignItems:'center',justifyContent:'center'}}><div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'22px',color:c.T}}>queda<span style={{color:c.A}}>.</span></div></div>;

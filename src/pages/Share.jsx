@@ -40,7 +40,7 @@ export default function Share({plan,onViewResults,onBack,c,lang}){
   const url=location.href.split('?')[0]+'?code='+plan.id;
   const copy=()=>{navigator.clipboard?.writeText(url).catch(()=>{});setCopied(true);setTimeout(()=>setCopied(false),2000);};
   const copyCode=()=>{navigator.clipboard?.writeText(plan.id).catch(()=>{});setCodeCopied(true);setTimeout(()=>setCodeCopied(false),2000);};
-  const getMsg=()=>{const mode=plan.mode||'social';const msgs=waMsgs[mode]||waMsgs.social;const fn=msgs[shareLang]||msgs.en;return fn(plan.name,url,plan.id);};
+  const getMsg=()=>{const fn=waMsgs.social[shareLang]||waMsgs.social.en;return fn(plan.name||'queda.',url,plan.id);};
   const wa=()=>window.open('https://wa.me/?text='+encodeURIComponent(getMsg()),'_blank');
   // NOTE: Requires "Realtime" enabled on the "responses" table in Supabase dashboard
   useEffect(()=>{
