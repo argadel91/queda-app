@@ -68,9 +68,12 @@ export default function Profile({onBack,c,lang,authUser,profile,onUpdateProfile,
               <span style={{color:c.M,fontSize:'15px',fontWeight:'600'}}>@</span>
               <input value={newUsername} onChange={e=>setNewUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g,'').slice(0,20))} placeholder="username" style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none'}}/>
             </div>
+            <div style={{fontSize:'11px',color:c.M2,marginTop:'4px'}}>{isEs?'Para que otros puedan encontrarte.':'So others can find you.'}</div>
           </div>
+          <div style={{height:'1px',background:c.BD,margin:'4px 0'}}/>
+          <div style={{fontSize:'12px',color:c.M2,marginBottom:'-4px'}}>{isEs?'Opcional — útil para planes públicos en Discover':'Optional — useful for public plans on Discover'}</div>
           <div>
-            <div style={{fontSize:'13px',color:c.M,marginBottom:'4px'}}>{t.birthdateLbl||'Date of birth'} <span style={{color:c.M2,fontSize:'11px'}}>({isEs?'opcional':'optional'})</span></div>
+            <div style={{fontSize:'13px',color:c.M,marginBottom:'4px'}}>{t.birthdateLbl||'Date of birth'}</div>
             <input type="date" value={birthdate} onChange={e=>setBirthdate(e.target.value)} max={new Date().toISOString().split('T')[0]} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
           </div>
           <div>
