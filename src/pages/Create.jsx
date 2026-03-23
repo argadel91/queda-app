@@ -51,6 +51,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   const[deadline,setDeadline]=useState('');
   const[hasDeadline,setHasDeadline]=useState(false);
   const[editingOrg,setEditingOrg]=useState(false);
+  const[subStep,setSubStep]=useState(0);
   const[selDates,setSelDates]=useState([]);
   const[startTimes,setStartTimes]=useState(['']);
   const[stops,setStops]=useState([emptyStop(1,'')]);
@@ -202,48 +203,43 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
 
       {/* ── STEP 0: BASICS — conversational wizard ── */}
       {step===0&&(()=>{
-        // Sub-steps: each question appears after the previous is answered
-        const sub=[];
-        sub.push('name'); // always first
-        if(name.trim())sub.push('desc');
-        if(name.trim())sub.push('role');
-        if(name.trim())sub.push('visibility');
-        if(name.trim()&&isPublic)sub.push('filters');
-        if(name.trim())sub.push('deadline');
-        if(name.trim())sub.push('next');
-
-        const Q=({children,show})=>show?<div style={{marginBottom:'16px',animation:'fadeIn .3s ease'}}>{children}</div>:null;
+        const nextSub=()=>setSubStep(s=>s+1);
+        const Q=({children,n})=>subStep>=n?<div style={{marginBottom:'16px',animation:'fadeIn .3s ease'}}>{children}</div>:null;
+        const Nxt=({disabled,n})=>subStep===n?<button onClick={nextSub} disabled={disabled} style={{padding:'8px 20px',background:disabled?c.BD:mc,color:'#0A0A0A',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'700',cursor:disabled?'not-allowed':'pointer',fontFamily:'inherit',opacity:disabled?.4:1,marginTop:'6px'}}>→</button>:null;
 
         return<>
         <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}`}</style>
 
-        <Q show={true}>
+        <Q n={0}>
           <div style={{fontSize:'16px',color:c.T,fontWeight:'600',marginBottom:'8px'}}>{isEs?'¿Cómo se llama tu plan?':'What\'s your plan called?'}</div>
           <Inp value={name} onChange={setName} placeholder={t.planNamePh||'e.g. Dinner at Luigi\'s...'} c={c}/>
+          <Nxt disabled={!name.trim()} n={0}/>
         </Q>
 
-        <Q show={sub.includes('desc')}>
+        <Q n={1}>
           <div style={{fontSize:'16px',color:c.T,fontWeight:'600',marginBottom:'4px'}}>{isEs?'Descríbelo':'Describe it'} <span style={{fontSize:'13px',color:c.M2,fontWeight:'400'}}>({isEs?'opcional':'optional'})</span></div>
           <Txa value={desc} onChange={setDesc} placeholder={t.descPh} rows={2} c={c}/>
+          <Nxt n={1}/>
         </Q>
 
-        <Q show={sub.includes('role')}>
+        <Q n={2}>
           <div style={{fontSize:'16px',color:c.T,fontWeight:'600',marginBottom:'4px'}}>{isEs?'¿Cuál es tu rol?':'What\'s your role?'} <span style={{fontSize:'13px',color:c.M2,fontWeight:'400'}}>({isEs?'opcional':'optional'})</span></div>
           <Inp value={orgRole} onChange={setOrgRole} placeholder={isEs?'Ej: Profesor, Manager, Cumpleañero...':'e.g. Professor, Manager, Birthday person...'} c={c}/>
+          <Nxt n={2}/>
         </Q>
 
-        <Q show={sub.includes('visibility')}>
+        <Q n={3}>
           <div style={{fontSize:'16px',color:c.T,fontWeight:'600',marginBottom:'8px'}}>{isEs?'¿Público o privado?':'Public or private?'}</div>
           <div style={{display:'flex',gap:'6px'}}>
             {[{v:false,l:isEs?'🔒 Privado':'🔒 Private',sub:isEs?'Compártelo con quien elijas':'Share with whoever you choose'},{v:true,l:isEs?'🌍 Público':'🌍 Public',sub:isEs?'Compártelo con el mundo':'Share it with the world'}].map(o=>
-              <button key={String(o.v)} onClick={()=>setIsPublic(o.v)} style={{flex:1,padding:'10px 8px',borderRadius:'10px',border:`1px solid ${isPublic===o.v?mc+'50':c.BD}`,background:isPublic===o.v?`${mc}15`:c.CARD,cursor:'pointer',textAlign:'center'}}>
+              <button key={String(o.v)} onClick={()=>{setIsPublic(o.v);if(subStep===3)nextSub();}} style={{flex:1,padding:'10px 8px',borderRadius:'10px',border:`1px solid ${isPublic===o.v?mc+'50':c.BD}`,background:isPublic===o.v?`${mc}15`:c.CARD,cursor:'pointer',textAlign:'center'}}>
                 <div style={{fontSize:'13px',color:isPublic===o.v?mc:c.T,fontWeight:isPublic===o.v?'700':'400'}}>{o.l}</div>
                 <div style={{fontSize:'11px',color:c.M2,marginTop:'2px'}}>{o.sub}</div>
               </button>)}
           </div>
         </Q>
 
-        <Q show={sub.includes('filters')}>
+        {isPublic&&<Q n={4}>
           <div style={{display:'flex',flexDirection:'column',gap:'10px',padding:'14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px'}}>
             <div>
               <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterGender||'Who can join?'}</div>
@@ -278,9 +274,10 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
               </>}
             </div>
           </div>
-        </Q>
+          <Nxt n={4}/>
+        </Q>}
 
-        <Q show={sub.includes('deadline')}>
+        <Q n={isPublic?5:4}>
           <div onClick={()=>{setHasDeadline(h=>!h);if(hasDeadline)setDeadline('');}} style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px 14px',background:c.CARD,border:`1px solid ${hasDeadline?mc+'50':c.BD}`,borderRadius:hasDeadline?'10px 10px 0 0':'10px',cursor:'pointer'}}>
             <div style={{width:'20px',height:'20px',borderRadius:'50%',border:`2px solid ${hasDeadline?mc:c.BD}`,background:hasDeadline?mc:'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',color:'#0A0A0A',fontWeight:'800',flexShrink:0}}>{hasDeadline?'✓':''}</div>
             <span style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>{isEs?'¿Poner deadline?':'Set a deadline?'} <span style={{fontSize:'12px',color:c.M2,fontWeight:'400'}}>({isEs?'opcional':'optional'})</span></span>
@@ -289,10 +286,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
             <input type="datetime-local" value={deadline} onChange={e=>setDeadline(e.target.value)} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
             <div style={{fontSize:'12px',color:c.M2,marginTop:'6px'}}>{isEs?'Después de esta fecha se confirmará la opción más votada':'After this date the most voted option will be confirmed'}</div>
           </div>}
-        </Q>
-
-        <Q show={sub.includes('next')}>
-          <Btn onClick={()=>changeStep(1)} disabled={!name.trim()} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn>
+          <div style={{marginTop:'10px'}}><Btn onClick={()=>changeStep(1)} disabled={!name.trim()} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
         </Q>
       </>;})()}
 
