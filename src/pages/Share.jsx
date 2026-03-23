@@ -35,7 +35,7 @@ const waMsgs={
 };
 
 export default function Share({plan,onViewResults,onBack,c,lang}){
-  const t=T[lang];const mc=c.A;const[planState,setPlanState]=useState(plan);
+  const t=T[lang];const mc=c.A;
   const[copied,setCopied]=useState(false);const[codeCopied,setCodeCopied]=useState(false);const[count,setCount]=useState(null);const[shareLang,setShareLang]=useState(lang);const[isShareOpen,setShareOpen]=useState(false);
   const url=location.href.split('?')[0]+'?code='+plan.id;
   const copy=()=>{navigator.clipboard?.writeText(url).catch(()=>{});setCopied(true);setTimeout(()=>setCopied(false),2000);};
