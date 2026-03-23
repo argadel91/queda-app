@@ -310,56 +310,46 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
         </div>}
       </>}
 
-      {/* ── STEP 1: WHERE? ── */}
+      {/* ── STEP 1: WHERE? — inline map ── */}
       {step===1&&<>
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{isEs?'¿Dónde?':'Where?'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'14px'}}>{isEs?'Busca los sitios en el mapa':'Search for places on the map'}</p>
-        {stops.map((s,i)=>
-          <div key={s.id} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'14px',padding:'16px',marginBottom:'10px'}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'12px'}}>
-              <div style={{width:'24px',height:'24px',borderRadius:'50%',background:`${mc}25`,border:`1px solid ${mc}50`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',fontWeight:'800',color:mc}}>{i+1}</div>
-              {stops.length>1&&<button onClick={()=>remStop(s.id)} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'18px'}}>×</button>}
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'10px'}}>{isEs?'Elige un lugar. Podrás editar o añadir alternativas después.':'Pick a place. You can edit or add alternatives later.'}</p>
+
+        {/* Selected places */}
+        {stops.filter(s=>(s.options||[]).some(o=>o.name)).map((s,i)=>{
+          const opt=(s.options||[])[0]||{};
+          return<div key={s.id} style={{display:'flex',alignItems:'center',gap:'10px',padding:'10px 12px',background:c.CARD,border:`1px solid ${mc}30`,borderRadius:'12px',marginBottom:'8px'}}>
+            <div style={{width:'24px',height:'24px',borderRadius:'50%',background:`${mc}25`,border:`1px solid ${mc}50`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',fontWeight:'800',color:mc,flexShrink:0}}>{i+1}</div>
+            {opt.photo&&<img src={opt.photo} alt="" style={{width:'36px',height:'36px',borderRadius:'8px',objectFit:'cover',flexShrink:0}}/>}
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:'14px',color:c.T,fontWeight:'600',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{opt.name}</div>
+              {opt.rating&&<div style={{fontSize:'11px',color:c.M2}}>⭐{opt.rating}{opt.priceLevel?' · '+'€'.repeat(opt.priceLevel):''}</div>}
             </div>
-            {/* Options (A, B, C...) */}
-            {(s.options||[]).map((opt,oi)=><div key={opt.id} style={{marginBottom:'8px',paddingLeft:s.options.length>1?'8px':'0',borderLeft:s.options.length>1?`2px solid ${mc}30`:'none'}}>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'6px'}}>
-                <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
-                  {s.options.length>1&&<span style={{fontSize:'11px',fontWeight:'700',color:mc,background:`${mc}15`,padding:'2px 8px',borderRadius:'10px'}}>{String.fromCharCode(65+oi)}</span>}
-                  {opt.name&&<span style={{fontSize:'13px',color:c.T,fontWeight:'500'}}>{opt.name}</span>}
-                </div>
-                <div style={{display:'flex',gap:'6px'}}>
-                  <button onClick={()=>setMapTarget({stopId:s.id,optionId:opt.id})} style={{background:'none',border:`1px solid ${c.BD}`,color:mc,cursor:'pointer',fontSize:'12px',padding:'4px 10px',borderRadius:'8px',fontFamily:'inherit',fontWeight:'600'}}>{isEs?'📍 Mapa':'📍 Map'}</button>
-                  {s.options.length>1&&<button onClick={()=>remOption(s.id,opt.id)} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'16px'}}>×</button>}
-                </div>
-              </div>
-              <VenueCard opt={opt}/>
-              {!opt.name&&!opt.lat&&<div style={{fontSize:'12px',color:c.M2,fontStyle:'italic',padding:'4px 0'}}>{isEs?'Busca y selecciona en el mapa':'Search and select on map'}</div>}
-            </div>)}
-            <button onClick={()=>addOption(s.id)} style={{background:'none',border:`1px dashed ${c.BD}`,borderRadius:'8px',padding:'5px 10px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'11px',width:'100%',marginBottom:'8px'}}>+ {isEs?'Alternativa':'Alternative'}</button>
-            {/* Optional details — collapsible */}
-            <button onClick={()=>updStop(s.id,'showMore',!s.showMore)} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',padding:'4px 0'}}>
-              {s.showMore?(isEs?'▾ Menos opciones':'▾ Less options'):(isEs?'▸ Más opciones':'▸ More options')}
-            </button>
-            {s.showMore&&<div style={{marginTop:'8px',display:'flex',flexDirection:'column',gap:'8px'}}>
-              <div>
-                <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>{isEs?'Duración estimada':'Est. duration'}</div>
-                <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
-                  {DURATIONS.map(d=><button key={d.v} onClick={()=>updStop(s.id,'duration',s.duration===d.v?'':d.v)} style={chipStyle(s.duration===d.v)}>{d.l}</button>)}
-                </div>
-              </div>
-              <div>
-                <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>{isEs?'Aforo máximo':'Max capacity'}</div>
-                <input type="number" min="1" max="999" value={s.maxCapacity||''} onChange={e=>updStop(s.id,'maxCapacity',e.target.value)} placeholder="∞" style={{width:'80px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'6px 10px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',textAlign:'center'}}/>
-              </div>
-              <div>
-                <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>{isEs?'Notas':'Notes'}</div>
-                <textarea value={s.notes||''} onChange={e=>updStop(s.id,'notes',e.target.value)} placeholder={isEs?'Opcional...':'Optional...'} rows={2} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box',resize:'vertical'}}/>
-              </div>
-            </div>}
+            <button onClick={()=>remStop(s.id)} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'16px',flexShrink:0}}>×</button>
+          </div>;
+        })}
+
+        {/* Inline map + search */}
+        <div style={{marginBottom:'12px'}}>
+          <div style={{fontSize:'13px',color:mc,fontWeight:'600',marginBottom:'6px'}}>
+            {stops.filter(s=>(s.options||[]).some(o=>o.name)).length===0
+              ?(isEs?'📍 Elige el primer lugar':'📍 Pick the first place')
+              :(isEs?`📍 Lugar ${stops.filter(s=>(s.options||[]).some(o=>o.name)).length+1}`:`📍 Place ${stops.filter(s=>(s.options||[]).some(o=>o.name)).length+1}`)}
           </div>
-        )}
-        <Btn onClick={addStop} v="secondary" full sm style={{marginBottom:'14px'}} c={c}>{isEs?'+ Añadir parte':'+ Add part'}</Btn>
-        <div style={{marginTop:'10px'}}><Btn onClick={()=>changeStep(2)} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
+          <button onClick={()=>{
+            // Ensure there's an empty stop ready
+            const emptyS=stops.find(s=>!(s.options||[]).some(o=>o.name));
+            if(emptyS){setMapTarget({stopId:emptyS.id,optionId:emptyS.options[0].id});}
+            else{const ns=emptyStop(Date.now());setStops(p=>[...p,ns]);setTimeout(()=>setMapTarget({stopId:ns.id,optionId:ns.options[0].id}),50);}
+          }} style={{width:'100%',padding:'14px',background:c.CARD,border:`2px dashed ${mc}40`,borderRadius:'12px',cursor:'pointer',fontFamily:'inherit',fontSize:'14px',color:mc,fontWeight:'600',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}}>
+            🔍 {isEs?'Buscar en el mapa':'Search on map'}
+          </button>
+        </div>
+
+        {/* Continue or done */}
+        {stops.some(s=>(s.options||[]).some(o=>o.name))&&<>
+          <div style={{marginTop:'10px'}}><Btn onClick={()=>changeStep(2)} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
+        </>}
       </>}
 
       {/* ── STEP 2: NAME (optional) ── */}
