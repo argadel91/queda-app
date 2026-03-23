@@ -64,7 +64,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   const[saving,setSaving]=useState(false);
   const[openSections,setOpenSections]=useState({dress:true});
   const[draftRestored,setDraftRestored]=useState(false);
-  const draftKey=`q_draft_${mode}`;
+  const draftKey='q_draft';
 
   // Auto-deduce city from first stop with coordinates
   const autoCity = useMemo(() => {
@@ -202,8 +202,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       {/* ── STEP 0: BASICS ── */}
       {step===0&&<>
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'20px'}}>{t.basics}</h2>
-        {mode==='intimate'&&<div style={{background:'#F472B620',border:'1px solid #F472B650',borderRadius:'12px',padding:'12px 14px',marginBottom:'16px',fontSize:'13px',color:'#F472B6',lineHeight:1.6}}>{t.privateNote}</div>}
-        <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.planName}</Lbl><Inp value={name} onChange={setName} placeholder={t.modes?.[mode]?.ex?.[0]||''} c={c}/></div>
+        <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.planName}</Lbl><Inp value={name} onChange={setName} placeholder={t.planNamePh||'e.g. Dinner at Luigi\'s, Weekend trip...'} c={c}/></div>
         <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.desc}</Lbl><Txa value={desc} onChange={setDesc} placeholder={t.descPh} c={c}/></div>
 
         {/* Organizer name */}
