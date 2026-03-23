@@ -19,7 +19,6 @@ import Results from './pages/Results.jsx'
 import Profile from './pages/Profile.jsx'
 import Discover from './pages/Discover.jsx'
 import Landing from './pages/Landing.jsx'
-import ChatBot from './components/ChatBot.jsx'
 
 export default function App(){
   const[theme,setTheme]=useState(()=>ls.get('q_theme',null)||getSysTheme());
@@ -250,6 +249,5 @@ export default function App(){
       <button onClick={async()=>{if(installPrompt){await installPrompt.prompt();setShowInstall(false);}}} style={{padding:'8px 16px',background:c.A,border:'none',borderRadius:'8px',color:'#0A0A0A',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',fontSize:'13px'}}>{T[lang]?.installBtn||'Install'}</button>
       <button onClick={()=>{setShowInstall(false);ls.set('q_install_dismissed',true);}} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'18px',padding:'4px'}}>×</button>
     </div>}
-    <ChatBot c={c} lang={lang} plan={plan}/>
   </div>);
 }

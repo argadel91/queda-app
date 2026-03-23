@@ -4,8 +4,6 @@ import { getMC } from '../constants/theme.js'
 import { ls, getMyPlans } from '../lib/storage.js'
 import { db, loadResps, updatePlan } from '../lib/supabase.js'
 import { Btn, Card, Lbl, Back, ModeBadge, HR } from '../components/ui.jsx'
-import PersonalisedLink from '../components/PersonalisedLink.jsx'
-import SavedGroups from '../components/SavedGroups.jsx'
 
 const FLAGS={es:'\u{1F1EA}\u{1F1F8}',en:'\u{1F1EC}\u{1F1E7}',pt:'\u{1F1F5}\u{1F1F9}',fr:'\u{1F1EB}\u{1F1F7}',de:'\u{1F1E9}\u{1F1EA}',it:'\u{1F1EE}\u{1F1F9}'};
 const LANGS=['es','en','pt','fr','de','it'];
@@ -39,7 +37,7 @@ const waMsgs={
 
 export default function Share({plan,onViewResults,onBack,c,lang}){
   const t=T[lang];const mc=getMC(plan.mode,c);const[planState,setPlanState]=useState(plan);
-  const[copied,setCopied]=useState(false);const[codeCopied,setCodeCopied]=useState(false);const[count,setCount]=useState(null);const[shareLang,setShareLang]=useState(lang);
+  const[copied,setCopied]=useState(false);const[codeCopied,setCodeCopied]=useState(false);const[count,setCount]=useState(null);const[shareLang,setShareLang]=useState(lang);const[isShareOpen,setShareOpen]=useState(false);
   const[pubFilter,setPubFilter]=useState({gender:'any',ageMin:'',ageMax:'',radius:''});
   const[showFilters,setShowFilters]=useState(false);
   const url=location.href.split('?')[0]+'?code='+plan.id;
@@ -64,30 +62,33 @@ export default function Share({plan,onViewResults,onBack,c,lang}){
       <p style={{color:c.M2,fontSize:'14px'}}>{t.shareWith}</p>
     </div>
     <div style={{background:c.CARD,border:`1px solid ${mc}40`,borderRadius:'14px',padding:'20px',textAlign:'center',marginBottom:'14px'}}>
-      <ModeBadge mode={plan.mode||'social'} lang={lang} c={c}/>
       <div style={{fontFamily:'monospace',fontSize:'58px',fontWeight:'900',color:mc,letterSpacing:'.2em',lineHeight:1,margin:'16px 0 12px'}}>{plan.id}</div>
-      <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'4px'}}>{plan.name}</div>
+      {plan.name&&<div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'4px'}}>{plan.name}</div>}
       <div style={{fontSize:'13px',color:c.M2}}>@ {plan.organizer} · {plan.dates?.length||0} {lang==='es'?'fecha':'date'}{plan.dates?.length!==1?'s':''}</div>
     </div>
     {count!==null&&<div style={{textAlign:'center',padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',marginBottom:'14px',fontSize:'14px',color:c.T}}>
       {count===0?t.noResponsesYet:<><span style={{color:mc,fontWeight:'800',fontSize:'20px'}}>{count}</span> {t.personResponded(count)}</>}
     </div>}
-    <PersonalisedLink plan={plan} c={c} lang={lang}/>
-    <HR c={c}/>
-    <div style={{marginBottom:'6px'}}>
-      <div style={{fontSize:'12px',color:c.M2,marginBottom:'4px'}}>{t.shareLangLbl||'Message language'}</div>
-      <div style={{display:'flex',gap:'4px',justifyContent:'center'}}>
-        {LANGS.map(l=><button key={l} onClick={()=>setShareLang(l)} style={{padding:'4px 8px',borderRadius:'8px',border:shareLang===l?`2px solid ${mc}`:`1px solid ${c.BD}`,background:shareLang===l?`${mc}20`:c.CARD,cursor:'pointer',fontSize:'16px',lineHeight:1}}>{FLAGS[l]}</button>)}
-      </div>
+    {/* Share button + dropdown */}
+    <div style={{position:'relative',marginBottom:'14px'}}>
+      <Btn onClick={()=>setShareOpen(o=>!o)} full style={{padding:'16px',fontSize:'16px'}} c={c}>{isShareOpen?(lang==='es'?'Cerrar':'Close'):(lang==='es'?'Compartir':'Share')} ↗</Btn>
+      {isShareOpen&&<div style={{marginTop:'8px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'14px',overflow:'hidden'}}>
+        <div style={{padding:'8px 14px',borderBottom:`1px solid ${c.BD}`}}>
+          <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>{t.shareLangLbl||'Language'}</div>
+          <div style={{display:'flex',gap:'4px'}}>
+            {LANGS.map(l=><button key={l} onClick={()=>setShareLang(l)} style={{padding:'3px 6px',borderRadius:'6px',border:shareLang===l?`2px solid ${mc}`:`1px solid ${c.BD}`,background:shareLang===l?`${mc}20`:c.CARD,cursor:'pointer',fontSize:'14px',lineHeight:1}}>{FLAGS[l]}</button>)}
+          </div>
+        </div>
+        {[
+          {l:'WhatsApp',bg:'#25D366',cl:'#fff',fn:wa},
+          {l:'Telegram',bg:'#0088cc',cl:'#fff',fn:()=>window.open('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(getMsg()),'_blank')},
+          {l:'SMS',bg:'transparent',cl:c.T,fn:()=>window.open('sms:?body='+encodeURIComponent(getMsg()))},
+          {l:'Email',bg:'transparent',cl:c.T,fn:()=>window.open('mailto:?subject='+encodeURIComponent(plan.name||'queda.')+'&body='+encodeURIComponent(getMsg()))},
+          {l:codeCopied?(t.codeCopied||'✓ Copied'):(t.copyCode||'Copy code'),bg:'transparent',cl:c.T,fn:copyCode},
+          {l:copied?t.copied:(t.copyLink||'Copy link'),bg:'transparent',cl:c.T,fn:copy},
+        ].map((o,i)=><button key={i} onClick={o.fn} style={{width:'100%',padding:'13px 16px',background:o.bg,color:o.cl,border:'none',borderBottom:`1px solid ${c.BD}`,cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:'600',textAlign:'left'}}>{o.l}</button>)}
+      </div>}
     </div>
-    <button onClick={wa} style={{width:'100%',padding:'15px',borderRadius:'12px',border:'none',background:'#25D366',color:'#fff',fontSize:'15px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',marginBottom:'10px'}}>{t.shareWa}</button>
-    <button onClick={()=>window.open('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(getMsg()),'_blank')} style={{width:'100%',padding:'15px',borderRadius:'12px',border:'none',background:'#0088cc',color:'#fff',fontSize:'15px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',marginBottom:'10px'}}>{t.shareTelegram||'Telegram 📨'}</button>
-    <button onClick={()=>window.open('sms:?body='+encodeURIComponent(getMsg()))} style={{width:'100%',padding:'15px',borderRadius:'12px',border:'none',background:c.CARD,border:`1px solid ${c.BD}`,color:c.T,fontSize:'15px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',marginBottom:'10px'}}>{t.shareSMS||'SMS 💬'}</button>
-    <button onClick={()=>window.open('mailto:?subject='+encodeURIComponent(plan.name)+'&body='+encodeURIComponent(getMsg()))} style={{width:'100%',padding:'15px',borderRadius:'12px',border:'none',background:c.CARD,border:`1px solid ${c.BD}`,color:c.T,fontSize:'15px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',marginBottom:'10px'}}>{t.shareEmail||'Email ✉️'}</button>
-    <Btn onClick={copyCode} full style={{marginBottom:'10px',padding:'14px'}} c={c}>{codeCopied?(t.codeCopied||'Copied!'):(t.copyCode||'Copy code')}</Btn>
-    <Btn onClick={copy} full style={{marginBottom:'10px',padding:'14px'}} c={c}>{copied?t.copied:t.copyLink}</Btn>
-    <HR c={c}/>
-    <SavedGroups plan={plan} c={c} lang={lang}/>
     <HR c={c}/>
 {!planState.isPublic?<div style={{padding:'16px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'14px',marginBottom:'10px'}}>
   <div style={{fontSize:'13px',color:c.M2,marginBottom:'10px',textAlign:'center'}}>{t.noOneToShare}</div>
