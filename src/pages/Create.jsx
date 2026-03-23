@@ -40,7 +40,7 @@ const emptyStop = (id, suggestedStart) => ({
 });
 
 export default function Create({onBack,onCreated,c,lang,authUser,profile}){
-  const t=T[lang];const mc=c.A;
+  const t=T[lang];const mc=c.A;const isEs=lang==='es';
   const[step,setStep]=useState(0);
   const[name,setName]=useState('');const[desc,setDesc]=useState('');
   const[org,setOrg]=useState(profile?.name||ls.get('q_myname',''));
