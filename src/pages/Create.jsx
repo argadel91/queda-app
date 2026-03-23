@@ -398,9 +398,22 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{t.whereTitle||'Where?'}</h2>
         <p style={{color:c.M2,fontSize:'13px',marginBottom:'10px'}}>{t.whereSub||'Pick a place. You can edit or add alternatives later.'}</p>
 
+        {/* Online toggle */}
+        <button onClick={()=>{
+          const isOnline=stops.some(s=>(s.options||[]).some(o=>o.name==='Online'));
+          if(!isOnline){const ns=emptyStop(Date.now());updOption(ns.id,ns.options[0].id,'name','Online');updOption(ns.id,ns.options[0].id,'address','💻');setStops(p=>[...p,ns]);}
+        }} style={{width:'100%',padding:'10px',background:stops.some(s=>(s.options||[]).some(o=>o.name==='Online'))?`${mc}15`:c.CARD,border:`1px solid ${stops.some(s=>(s.options||[]).some(o=>o.name==='Online'))?mc+'50':c.BD}`,borderRadius:'10px',cursor:'pointer',fontFamily:'inherit',fontSize:'13px',color:stops.some(s=>(s.options||[]).some(o=>o.name==='Online'))?mc:c.M2,fontWeight:stops.some(s=>(s.options||[]).some(o=>o.name==='Online'))?'700':'400',marginBottom:'10px'}}>💻 {lang==='es'?'Es online (sin lugar físico)':'It\'s online (no physical location)'}</button>
+
         {/* Selected places */}
         {stops.filter(s=>(s.options||[]).some(o=>o.name)).map((s,i)=>{
           const opt=(s.options||[])[0]||{};
+          if(opt.name==='Online')return<div key={s.id} style={{padding:'10px 12px',background:c.CARD,border:`1px solid ${mc}30`,borderRadius:'12px',marginBottom:'8px'}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'6px'}}>
+              <span style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>💻 Online</span>
+              <button onClick={()=>remStop(s.id)} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'16px'}}>×</button>
+            </div>
+            <input value={opt.website||''} onChange={e=>updOption(s.id,opt.id,'website',e.target.value)} placeholder={lang==='es'?'Link o detalles (Zoom, Meet, Discord...)':'Link or details (Zoom, Meet, Discord...)'} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+          </div>;
           return<div key={s.id} style={{display:'flex',alignItems:'center',gap:'10px',padding:'10px 12px',background:c.CARD,border:`1px solid ${mc}30`,borderRadius:'12px',marginBottom:'8px'}}>
             <div style={{width:'24px',height:'24px',borderRadius:'50%',background:`${mc}25`,border:`1px solid ${mc}50`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',fontWeight:'800',color:mc,flexShrink:0}}>{i+1}</div>
             {opt.photo&&<img src={opt.photo} alt="" style={{width:'36px',height:'36px',borderRadius:'8px',objectFit:'cover',flexShrink:0}}/>}

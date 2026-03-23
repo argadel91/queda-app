@@ -3,7 +3,11 @@ import T from '../constants/translations.js'
 import CityInput from '../components/CityInput.jsx'
 import { Btn, Lbl, Back } from '../components/ui.jsx'
 
-export default function Profile({onBack,c,lang,authUser,profile,onUpdateProfile,onSignOut}){
+const FLAGS={es:'🇪🇸',en:'🇬🇧',pt:'🇵🇹',fr:'🇫🇷',de:'🇩🇪',it:'🇮🇹'};
+const LANG_NAMES={es:'Español',en:'English',pt:'Português',fr:'Français',de:'Deutsch',it:'Italiano'};
+const LANGS=['es','en','pt','fr','de','it'];
+
+export default function Profile({onBack,c,lang,authUser,profile,onUpdateProfile,onSignOut,onLangChange,onThemeToggle,theme}){
   const t=T[lang];
   const[editing,setEditing]=useState(false);
   const[newName,setNewName]=useState(profile?.name||'');
@@ -51,6 +55,17 @@ export default function Profile({onBack,c,lang,authUser,profile,onUpdateProfile,
         </div>
         {(!gender||!birthdate||!userCity)&&<div style={{fontSize:'11px',color:c.M2,marginBottom:'12px'}}>{t.completeDiscoverHint||'Complete your gender, age and location so people can find you on Discover.'}</div>}
 
+        {/* Language */}
+        <div style={{marginBottom:'12px'}}>
+          <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>{t.locationLbl?'🌐 '+( lang==='es'?'Idioma':'Language'):''||'🌐 Language'}</div>
+          <div style={{display:'flex',gap:'4px',flexWrap:'wrap'}}>
+            {LANGS.map(l=><button key={l} onClick={()=>onLangChange&&onLangChange(l)} style={{padding:'5px 10px',borderRadius:'8px',border:`1px solid ${l===lang?c.A+'60':c.BD}`,background:l===lang?`${c.A}15`:c.CARD,cursor:'pointer',fontSize:'13px',color:l===lang?c.A:c.T,fontWeight:l===lang?'700':'400',fontFamily:'inherit',display:'flex',alignItems:'center',gap:'4px'}}>{FLAGS[l]} <span style={{fontSize:'11px'}}>{LANG_NAMES[l]}</span></button>)}
+          </div>
+        </div>
+        {/* Theme */}
+        <div style={{marginBottom:'16px'}}>
+          <button onClick={onThemeToggle} style={{width:'100%',padding:'10px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'14px',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}}>{theme==='dark'?'☀️':'🌙'} {theme==='dark'?(lang==='es'?'Modo claro':'Light mode'):(lang==='es'?'Modo oscuro':'Dark mode')}</button>
+        </div>
         <div style={{display:'flex',gap:'8px'}}>
           <button onClick={()=>setEditing(true)} style={{flex:1,padding:'10px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:'600'}}>✏️ {t.editBtn||'Edit'}</button>
           <button onClick={onSignOut} style={{flex:1,padding:'10px',background:'transparent',border:'1px solid #ef444440',borderRadius:'10px',color:'#ef4444',cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:'500'}}>{t.signOut}</button>

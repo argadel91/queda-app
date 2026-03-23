@@ -225,7 +225,7 @@ export default function App(){
       </div>
     </div>
     {screen==='home'&&<Home onCreate={()=>nav('create')} onJoin={handleJoin} onProfile={()=>nav('myplans')} c={c} lang={lang}/>}
-    {screen==='profile'&&<Profile onBack={()=>nav('home')} c={c} lang={lang} authUser={authUser} profile={profile} onUpdateProfile={updateProfile} onSignOut={handleSignOut}/>}
+    {screen==='profile'&&<Profile onBack={()=>nav('home')} c={c} lang={lang} authUser={authUser} profile={profile} onUpdateProfile={updateProfile} onSignOut={handleSignOut} onLangChange={l=>{setLang(l);ls.set('q_lang',l);if(authUser)saveProfile(authUser.id,{...profile,lang:l}).catch(()=>{});}} onThemeToggle={tgTheme} theme={theme}/>}
     {screen==='myplans'&&<MyPlans onBack={()=>nav('home')} onOpen={handleFromProfile} c={c} lang={lang}/>}
     {screen==='discover'&&<Discover onBack={()=>nav('home')} onJoin={handleDiscoverJoin} c={c} lang={lang} profile={profile}/>}
     {screen==='create'&&<Create onBack={()=>nav('home')} onCreated={p=>nav('share',p,true)} c={c} lang={lang} authUser={authUser} profile={profile}/>}
