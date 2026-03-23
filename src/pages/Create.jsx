@@ -365,11 +365,9 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       {/* ── STEP 0: WHEN? ── */}
       {step===0&&<>
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{isEs?'¿Cuándo?':'When?'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{isEs?'Elige fecha y hora':'Pick a date and time'}</p>
-        <div style={{marginBottom:'14px'}}>
-          <input type="date" value={selDates[0]||''} min={new Date().toISOString().split('T')[0]} onChange={e=>{setSelDates(e.target.value?[e.target.value]:[]);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
-        </div>
-        {selDates.length>0&&<div style={{marginBottom:'14px'}}>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{isEs?'Elige un día':'Pick a day'}</p>
+        <CalendarPicker selected={selDates} onChange={d=>setSelDates(d.slice(-1))} c={c} lang={lang}/>
+        {selDates.length>0&&<div style={{marginTop:'16px'}}>
           <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'8px'}}>{isEs?'¿A qué hora?':'What time?'}</div>
           <input type="time" value={startTimes[0]||''} onChange={e=>{const n=[...startTimes];n[0]=e.target.value;setStartTimes(n);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
         </div>}
