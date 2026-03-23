@@ -200,62 +200,68 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       <Back onClick={step===0?onBack:()=>changeStep(step-1)} label={t.back} c={c}/>
       <Stepper cur={step} labels={stepLabels} c={c} accent={mc}/>
 
-      {/* ── STEP 0: BASICS ── */}
-      {step===0&&<>
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'20px'}}>{t.basics}</h2>
-        <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.planName}</Lbl><Inp value={name} onChange={setName} placeholder={t.planNamePh||'e.g. Dinner at Luigi\'s, Weekend trip...'} c={c}/></div>
-        <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.desc}</Lbl><Txa value={desc} onChange={setDesc} placeholder={t.descPh} c={c}/></div>
+      {/* ── STEP 0: BASICS — conversational wizard ── */}
+      {step===0&&(()=>{
+        // Sub-steps: each question appears after the previous is answered
+        const sub=[];
+        sub.push('name'); // always first
+        if(name.trim())sub.push('desc');
+        if(name.trim())sub.push('role');
+        if(name.trim())sub.push('visibility');
+        if(name.trim()&&isPublic)sub.push('filters');
+        if(name.trim())sub.push('deadline');
+        if(name.trim())sub.push('next');
 
-        {/* Organizer role (optional) */}
-        <div style={{marginBottom:'14px'}}>
-          <Lbl c={c}>{isEs?'Tu rol (opcional)':'Your role (optional)'}</Lbl>
+        const Q=({children,show})=>show?<div style={{marginBottom:'16px',animation:'fadeIn .3s ease'}}>{children}</div>:null;
+
+        return<>
+        <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}`}</style>
+
+        <Q show={true}>
+          <div style={{fontSize:'16px',color:c.T,fontWeight:'600',marginBottom:'8px'}}>{isEs?'¿Cómo se llama tu plan?':'What\'s your plan called?'}</div>
+          <Inp value={name} onChange={setName} placeholder={t.planNamePh||'e.g. Dinner at Luigi\'s...'} c={c}/>
+        </Q>
+
+        <Q show={sub.includes('desc')}>
+          <div style={{fontSize:'16px',color:c.T,fontWeight:'600',marginBottom:'4px'}}>{isEs?'Descríbelo':'Describe it'} <span style={{fontSize:'13px',color:c.M2,fontWeight:'400'}}>({isEs?'opcional':'optional'})</span></div>
+          <Txa value={desc} onChange={setDesc} placeholder={t.descPh} rows={2} c={c}/>
+        </Q>
+
+        <Q show={sub.includes('role')}>
+          <div style={{fontSize:'16px',color:c.T,fontWeight:'600',marginBottom:'4px'}}>{isEs?'¿Cuál es tu rol?':'What\'s your role?'} <span style={{fontSize:'13px',color:c.M2,fontWeight:'400'}}>({isEs?'opcional':'optional'})</span></div>
           <Inp value={orgRole} onChange={setOrgRole} placeholder={isEs?'Ej: Profesor, Manager, Cumpleañero...':'e.g. Professor, Manager, Birthday person...'} c={c}/>
-        </div>
+        </Q>
 
-        {/* Public / Private toggle */}
-        <div style={{marginBottom:'14px'}}>
-          <div style={{display:'flex',gap:'6px',marginBottom:'8px'}}>
+        <Q show={sub.includes('visibility')}>
+          <div style={{fontSize:'16px',color:c.T,fontWeight:'600',marginBottom:'8px'}}>{isEs?'¿Público o privado?':'Public or private?'}</div>
+          <div style={{display:'flex',gap:'6px'}}>
             {[{v:false,l:isEs?'🔒 Privado':'🔒 Private',sub:isEs?'Compártelo con quien elijas':'Share with whoever you choose'},{v:true,l:isEs?'🌍 Público':'🌍 Public',sub:isEs?'Compártelo con el mundo':'Share it with the world'}].map(o=>
               <button key={String(o.v)} onClick={()=>setIsPublic(o.v)} style={{flex:1,padding:'10px 8px',borderRadius:'10px',border:`1px solid ${isPublic===o.v?mc+'50':c.BD}`,background:isPublic===o.v?`${mc}15`:c.CARD,cursor:'pointer',textAlign:'center'}}>
                 <div style={{fontSize:'13px',color:isPublic===o.v?mc:c.T,fontWeight:isPublic===o.v?'700':'400'}}>{o.l}</div>
                 <div style={{fontSize:'11px',color:c.M2,marginTop:'2px'}}>{o.sub}</div>
               </button>)}
           </div>
-          {isPublic&&<div style={{display:'flex',flexDirection:'column',gap:'10px',padding:'14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px'}}>
-            {/* Gender filter — multi-select */}
+        </Q>
+
+        <Q show={sub.includes('filters')}>
+          <div style={{display:'flex',flexDirection:'column',gap:'10px',padding:'14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px'}}>
             <div>
               <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterGender||'Who can join?'}</div>
               <div style={{display:'flex',gap:'4px',flexWrap:'wrap'}}>
                 {[{v:'any',l:t.filterAny||'Anyone'},{v:'female',l:t.genderFemale||'Women'},{v:'male',l:t.genderMale||'Men'},{v:'other',l:t.genderOther||'Other'}].map(o=>{
-                  const genders=pubFilter.gender||'any';
-                  const isAny=genders==='any';
+                  const genders=pubFilter.gender||'any';const isAny=genders==='any';
                   const selected=o.v==='any'?isAny:!isAny&&(Array.isArray(genders)?genders.includes(o.v):genders===o.v);
                   return<button key={o.v} onClick={()=>{
                     if(o.v==='any'){setPubFilter(f=>({...f,gender:'any'}));}
-                    else{
-                      let cur=pubFilter.gender;
-                      if(cur==='any'||!cur)cur=[];
-                      if(!Array.isArray(cur))cur=[cur];
-                      if(cur.includes(o.v))cur=cur.filter(x=>x!==o.v);
-                      else cur=[...cur,o.v];
-                      setPubFilter(f=>({...f,gender:cur.length===0||cur.length===3?'any':cur}));
-                    }
+                    else{let cur=pubFilter.gender;if(cur==='any'||!cur)cur=[];if(!Array.isArray(cur))cur=[cur];if(cur.includes(o.v))cur=cur.filter(x=>x!==o.v);else cur=[...cur,o.v];setPubFilter(f=>({...f,gender:cur.length===0||cur.length===3?'any':cur}));}
                   }} style={{padding:'6px 12px',borderRadius:'20px',border:`1px solid ${selected?mc+'60':c.BD}`,background:selected?`${mc}15`:c.CARD,color:selected?mc:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:selected?'600':'400'}}>{o.l}</button>;
                 })}
               </div>
             </div>
-            {/* Age range */}
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px'}}>
-              <div>
-                <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterAgeMin||'Min age'}</div>
-                <input type="number" min="15" max="100" value={pubFilter.ageMin} onChange={e=>{let v=parseInt(e.target.value)||'';if(v&&v<15)v=15;if(v&&v>100)v=100;setPubFilter(f=>({...f,ageMin:v}));}} placeholder="15" style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
-              </div>
-              <div>
-                <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterAgeMax||'Max age'}</div>
-                <input type="number" min="15" max="100" value={pubFilter.ageMax} onChange={e=>{let v=parseInt(e.target.value)||'';if(v&&v<15)v=15;if(v&&v>100)v=100;setPubFilter(f=>({...f,ageMax:v}));}} placeholder="100" style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
-              </div>
+              <div><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterAgeMin||'Min age'}</div><input type="number" min="15" max="100" value={pubFilter.ageMin} onChange={e=>{let v=parseInt(e.target.value)||'';if(v&&v<15)v=15;if(v&&v>100)v=100;setPubFilter(f=>({...f,ageMin:v}));}} placeholder="15" style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/></div>
+              <div><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterAgeMax||'Max age'}</div><input type="number" min="15" max="100" value={pubFilter.ageMax} onChange={e=>{let v=parseInt(e.target.value)||'';if(v&&v<15)v=15;if(v&&v>100)v=100;setPubFilter(f=>({...f,ageMax:v}));}} placeholder="100" style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/></div>
             </div>
-            {/* Distance */}
             <div>
               <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterRadius||'Max distance'}</div>
               <div style={{display:'flex',gap:'4px',marginBottom:'8px'}}>
@@ -265,34 +271,30 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
               </div>
               {pubFilter.radius==='km'&&<>
                 <input type="range" min="1" max="100" value={pubFilter.radiusKm||50} onChange={e=>setPubFilter(f=>({...f,radiusKm:e.target.value}))} style={{width:'100%',accentColor:mc}}/>
-                <div style={{display:'flex',justifyContent:'space-between',fontSize:'11px',color:c.M2,marginBottom:'8px'}}>
-                  <span>1 km</span>
-                  <span style={{color:mc,fontWeight:'700'}}>{pubFilter.radiusKm||50} km</span>
-                  <span>100 km</span>
-                </div>
+                <div style={{display:'flex',justifyContent:'space-between',fontSize:'11px',color:c.M2,marginBottom:'8px'}}><span>1 km</span><span style={{color:mc,fontWeight:'700'}}>{pubFilter.radiusKm||50} km</span><span>100 km</span></div>
                 <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{isEs?'📍 ¿Desde dónde?':'📍 From where?'}</div>
                 <CityInput value={pubFilter.radiusCity||''} onChange={v=>setPubFilter(f=>({...f,radiusCity:v}))} onSelect={d=>setPubFilter(f=>({...f,radiusCity:d.label,radiusLat:d.lat,radiusLon:d.lon}))} placeholder={isEs?'Ciudad de referencia...':'Reference city...'} c={c}/>
                 <div style={{fontSize:'11px',color:c.M2,marginTop:'4px'}}>{isEs?'Si no eliges, se usa tu ubicación de perfil':'If empty, your profile location is used'}</div>
               </>}
             </div>
-          </div>}
-        </div>
+          </div>
+        </Q>
 
-        {/* Deadline */}
-        <div style={{marginBottom:'14px'}}>
+        <Q show={sub.includes('deadline')}>
           <div onClick={()=>{setHasDeadline(h=>!h);if(hasDeadline)setDeadline('');}} style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px 14px',background:c.CARD,border:`1px solid ${hasDeadline?mc+'50':c.BD}`,borderRadius:hasDeadline?'10px 10px 0 0':'10px',cursor:'pointer'}}>
-            <div style={{width:'20px',height:'20px',borderRadius:'50%',border:`2px solid ${hasDeadline?mc:c.BD}`,background:hasDeadline?mc:'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',color:'#0A0A0A',fontWeight:'800',flexShrink:0}}>{hasDeadline?'\u2713':''}</div>
-            <span style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>{isEs?'\u00bfPoner deadline?':'Set a deadline?'}</span>
+            <div style={{width:'20px',height:'20px',borderRadius:'50%',border:`2px solid ${hasDeadline?mc:c.BD}`,background:hasDeadline?mc:'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',color:'#0A0A0A',fontWeight:'800',flexShrink:0}}>{hasDeadline?'✓':''}</div>
+            <span style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>{isEs?'¿Poner deadline?':'Set a deadline?'} <span style={{fontSize:'12px',color:c.M2,fontWeight:'400'}}>({isEs?'opcional':'optional'})</span></span>
           </div>
           {hasDeadline&&<div style={{padding:'12px 14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderTop:'none',borderRadius:'0 0 10px 10px'}}>
             <input type="datetime-local" value={deadline} onChange={e=>setDeadline(e.target.value)} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
-            <div style={{fontSize:'12px',color:c.M2,marginTop:'6px'}}>{isEs?'Despues de esta fecha se confirmara la opcion mas votada':'After this date the most voted option will be confirmed'}</div>
+            <div style={{fontSize:'12px',color:c.M2,marginTop:'6px'}}>{isEs?'Después de esta fecha se confirmará la opción más votada':'After this date the most voted option will be confirmed'}</div>
           </div>}
-        </div>
+        </Q>
 
-        <div style={{height:'14px'}}/>
-        <Btn onClick={()=>changeStep(1)} disabled={!name.trim()} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn>
-      </>}
+        <Q show={sub.includes('next')}>
+          <Btn onClick={()=>changeStep(1)} disabled={!name.trim()} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn>
+        </Q>
+      </>;})()}
 
       {/* ── STEP 1: STOPS / ROUTE ── */}
       {step===1&&<>
