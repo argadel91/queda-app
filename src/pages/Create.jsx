@@ -315,102 +315,53 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
 
       {/* ── STEP 1: WHERE? ── */}
       {step===1&&<>
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{t.routeTitle}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'14px'}}>{t.routeSub}</p>
-        {autoCity&&<div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',marginBottom:'14px',display:'flex',alignItems:'center',gap:'8px',fontSize:'13px'}}>
-          <span>📍</span><span style={{color:c.T,fontWeight:'500'}}>{autoCity}</span>
-        </div>}
-        <HR c={c}/>
-        {stops.map((s,i)=>{
-          const endTime = calcEndTime(s.startTime, s.duration);
-          return <div key={s.id} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'14px',padding:'16px',marginBottom:'10px'}}>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'12px'}}>
-            <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{isEs?'¿Dónde?':'Where?'}</h2>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'14px'}}>{isEs?'Busca los sitios en el mapa':'Search for places on the map'}</p>
+        {stops.map((s,i)=>
+          <div key={s.id} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'14px',padding:'16px',marginBottom:'10px'}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'12px'}}>
               <div style={{width:'24px',height:'24px',borderRadius:'50%',background:`${mc}25`,border:`1px solid ${mc}50`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',fontWeight:'800',color:mc}}>{i+1}</div>
-              <span style={{fontSize:'12px',color:c.M2,fontWeight:'600',textTransform:'uppercase',letterSpacing:'.05em'}}>{t.stop} {i+1}</span>
+              {stops.length>1&&<button onClick={()=>remStop(s.id)} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'18px'}}>×</button>}
             </div>
-            {stops.length>1&&<button onClick={()=>remStop(s.id)} title={t.removeStop} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'18px'}}>×</button>}
-          </div>
-
-          {/* Options (A, B, C...) */}
-          {s.options.map((opt,oi)=><div key={opt.id} style={{marginBottom:'10px',paddingLeft:s.options.length>1?'8px':'0',borderLeft:s.options.length>1?`2px solid ${mc}30`:'none'}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'6px'}}>
-              <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
-                {s.options.length>1&&<span style={{fontSize:'11px',fontWeight:'700',color:mc,background:`${mc}15`,padding:'2px 8px',borderRadius:'10px'}}>{String.fromCharCode(65+oi)}</span>}
-                {opt.name&&<span style={{fontSize:'13px',color:c.T,fontWeight:'500'}}>{opt.name}</span>}
-                {opt.lat&&<span style={{fontSize:'10px',color:mc}}>📍</span>}
+            {/* Options (A, B, C...) */}
+            {(s.options||[]).map((opt,oi)=><div key={opt.id} style={{marginBottom:'8px',paddingLeft:s.options.length>1?'8px':'0',borderLeft:s.options.length>1?`2px solid ${mc}30`:'none'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'6px'}}>
+                <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
+                  {s.options.length>1&&<span style={{fontSize:'11px',fontWeight:'700',color:mc,background:`${mc}15`,padding:'2px 8px',borderRadius:'10px'}}>{String.fromCharCode(65+oi)}</span>}
+                  {opt.name&&<span style={{fontSize:'13px',color:c.T,fontWeight:'500'}}>{opt.name}</span>}
+                </div>
+                <div style={{display:'flex',gap:'6px'}}>
+                  <button onClick={()=>setMapTarget({stopId:s.id,optionId:opt.id})} style={{background:'none',border:`1px solid ${c.BD}`,color:mc,cursor:'pointer',fontSize:'12px',padding:'4px 10px',borderRadius:'8px',fontFamily:'inherit',fontWeight:'600'}}>{isEs?'📍 Mapa':'📍 Map'}</button>
+                  {s.options.length>1&&<button onClick={()=>remOption(s.id,opt.id)} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'16px'}}>×</button>}
+                </div>
               </div>
-              <div style={{display:'flex',gap:'6px'}}>
-                <button onClick={()=>setMapTarget({stopId:s.id,optionId:opt.id})} style={{background:'none',border:`1px solid ${c.BD}`,color:mc,cursor:'pointer',fontSize:'12px',padding:'4px 10px',borderRadius:'8px',fontFamily:'inherit',fontWeight:'600'}}>{t.searchMap}</button>
-                {s.options.length>1&&<button onClick={()=>remOption(s.id,opt.id)} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'16px'}}>×</button>}
+              <VenueCard opt={opt}/>
+              {!opt.name&&!opt.lat&&<div style={{fontSize:'12px',color:c.M2,fontStyle:'italic',padding:'4px 0'}}>{isEs?'Busca y selecciona en el mapa':'Search and select on map'}</div>}
+            </div>)}
+            <button onClick={()=>addOption(s.id)} style={{background:'none',border:`1px dashed ${c.BD}`,borderRadius:'8px',padding:'5px 10px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'11px',width:'100%',marginBottom:'8px'}}>+ {isEs?'Alternativa':'Alternative'}</button>
+            {/* Optional details — collapsible */}
+            <button onClick={()=>updStop(s.id,'showMore',!s.showMore)} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',padding:'4px 0'}}>
+              {s.showMore?(isEs?'▾ Menos opciones':'▾ Less options'):(isEs?'▸ Más opciones':'▸ More options')}
+            </button>
+            {s.showMore&&<div style={{marginTop:'8px',display:'flex',flexDirection:'column',gap:'8px'}}>
+              <div>
+                <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>{isEs?'Duración estimada':'Est. duration'}</div>
+                <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
+                  {DURATIONS.map(d=><button key={d.v} onClick={()=>updStop(s.id,'duration',s.duration===d.v?'':d.v)} style={chipStyle(s.duration===d.v)}>{d.l}</button>)}
+                </div>
               </div>
-            </div>
-            <VenueCard opt={opt}/>
-            {!opt.name&&!opt.lat&&<div style={{fontSize:'12px',color:c.M2,fontStyle:'italic',padding:'8px 0'}}>{t.searchOnMap||'Search and select on map'}</div>}
-          </div>)}
-          <button onClick={()=>addOption(s.id)} style={{background:'none',border:`1px dashed ${c.BD}`,borderRadius:'8px',padding:'6px 12px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',marginBottom:'12px',width:'100%'}}>+ {t.optionLbl||'Option'}</button>
-
-          {/* Start time */}
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'10px'}}>
-            <div>
-              <div style={{fontSize:'11px',color:c.M2,fontWeight:'600',marginBottom:'4px',textTransform:'uppercase',letterSpacing:'.04em'}}>{isEs?'Hora inicio':'Start time'}</div>
-              <input type="time" value={s.startTime} onChange={e=>{updStop(s.id,'startTime',e.target.value);if(i===0)setStartTimes(p=>{const n=[...p];n[0]=e.target.value;return n;});}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'9px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
-            </div>
-            <div>
-              <div style={{fontSize:'11px',color:c.M2,fontWeight:'600',marginBottom:'4px',textTransform:'uppercase',letterSpacing:'.04em'}}>{isEs?'Fin estimado':'Est. end'}</div>
-              <div style={{padding:'9px 12px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',fontSize:'13px',color:endTime?c.T:c.M2,minHeight:'18px'}}>{endTime||'--:--'}</div>
-            </div>
-          </div>
-
-          {/* Alternative start times (first stop only) */}
-          {i===0&&<>
-            {startTimes.length>1&&<div style={{marginTop:'6px'}}>
-              {startTimes.slice(1).map((st,j)=><div key={j} style={{display:'flex',gap:'6px',marginBottom:'4px',alignItems:'center'}}>
-                <span style={{fontSize:'12px',color:c.M2}}>or</span>
-                <input type="time" value={st} onChange={e=>{const n=[...startTimes];n[j+1]=e.target.value;setStartTimes(n);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'6px 10px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none'}}/>
-                <button onClick={()=>setStartTimes(p=>p.filter((_,k)=>k!==j+1))} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'14px'}}>×</button>
-              </div>)}
+              <div>
+                <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>{isEs?'Aforo máximo':'Max capacity'}</div>
+                <input type="number" min="1" max="999" value={s.maxCapacity||''} onChange={e=>updStop(s.id,'maxCapacity',e.target.value)} placeholder="∞" style={{width:'80px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'6px 10px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',textAlign:'center'}}/>
+              </div>
+              <div>
+                <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>{isEs?'Notas':'Notes'}</div>
+                <textarea value={s.notes||''} onChange={e=>updStop(s.id,'notes',e.target.value)} placeholder={isEs?'Opcional...':'Optional...'} rows={2} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box',resize:'vertical'}}/>
+              </div>
             </div>}
-            <button onClick={()=>setStartTimes(p=>[...p,''])} style={{background:'none',border:`1px dashed ${c.BD}`,borderRadius:'6px',padding:'4px 10px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'11px',marginTop:'4px'}}>{t.addStartTime||'+ Alternative time'}</button>
-          </>}
-
-          {/* Duration chips */}
-          <div style={{marginBottom:'8px'}}>
-            <div style={{fontSize:'11px',color:c.M2,fontWeight:'600',marginBottom:'4px',textTransform:'uppercase',letterSpacing:'.04em'}}>{isEs?'Duración':'Duration'}</div>
-            <div style={{display:'flex',flexWrap:'wrap',gap:'6px'}}>
-              {DURATIONS.map(d=><button key={d.v} onClick={()=>updStop(s.id,'duration',s.duration===d.v?'':d.v)} style={chipStyle(s.duration===d.v)}>{d.l}</button>)}
-            </div>
           </div>
-
-          {/* Tolerance chips */}
-          <div style={{marginBottom:'10px'}}>
-            <div style={{fontSize:'11px',color:c.M2,fontWeight:'600',marginBottom:'4px',textTransform:'uppercase',letterSpacing:'.04em'}}>{isEs?'Tolerancia':'Tolerance'}</div>
-            <div style={{display:'flex',flexWrap:'wrap',gap:'6px'}}>
-              {TOLERANCES.map(tol=><button key={tol.v} onClick={()=>updStop(s.id,'tolerance',tol.v)} style={chipStyle(s.tolerance===tol.v)}>{tol.l}</button>)}
-            </div>
-          </div>
-
-          {/* Notes */}
-          <div>
-            <div style={{fontSize:'11px',color:c.M2,fontWeight:'600',marginBottom:'4px',textTransform:'uppercase',letterSpacing:'.04em'}}>{isEs?'Notas':'Notes'}</div>
-            <textarea value={s.notes} onChange={e=>updStop(s.id,'notes',e.target.value)} placeholder={isEs?'Notas opcionales...':'Optional notes...'} rows={2} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'9px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box',resize:'vertical'}}/>
-          </div>
-
-          {/* Organizer attends this stop? */}
-          <div style={{display:'flex',alignItems:'center',gap:'8px',marginTop:'8px'}}>
-            <span style={{fontSize:'13px',color:c.M2}}>{t.orgAttendsStop||'You attend?'}</span>
-            {[{v:true,l:'Sí'},{v:false,l:'No'}].map(o=><button key={String(o.v)} onClick={()=>updStop(s.id,'orgAttends',o.v)} style={{padding:'6px 14px',borderRadius:'8px',border:`1px solid ${s.orgAttends===o.v?mc+'50':c.BD}`,background:s.orgAttends===o.v?`${mc}15`:c.CARD,color:s.orgAttends===o.v?mc:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:s.orgAttends===o.v?'700':'400'}}>{o.l}</button>)}
-          </div>
-
-          {/* Max capacity for this stop */}
-          <div style={{display:'flex',alignItems:'center',gap:'8px',marginTop:'8px'}}>
-            <span style={{fontSize:'13px',color:c.M2}}>{t.stopCapacity||'Max people'}</span>
-            <input type="number" min="1" max="999" value={s.maxCapacity||''} onChange={e=>updStop(s.id,'maxCapacity',e.target.value)} placeholder={t.noLimit||'∞'} style={{width:'70px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'6px 10px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',textAlign:'center'}}/>
-            {s.orgAttends&&s.maxCapacity&&<span style={{fontSize:'12px',color:c.M2}}>({1}/{s.maxCapacity})</span>}
-          </div>
-        </div>})}
-
-        <Btn onClick={addStop} v="secondary" full sm style={{marginBottom:'14px'}} c={c}>{t.addStop}</Btn>
+        )}
+        <Btn onClick={addStop} v="secondary" full sm style={{marginBottom:'14px'}} c={c}>{isEs?'+ Añadir parte':'+ Add part'}</Btn>
         <div style={{marginTop:'10px'}}><Btn onClick={create} disabled={saving} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?(isEs?'Creando...':'Creating...'):(isEs?'Crear plan 🎉':'Create plan 🎉')}</Btn></div>
       </>}
 
@@ -418,18 +369,20 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       {step===0&&<>
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{isEs?'¿Cuándo?':'When?'}</h2>
         <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{isEs?'Elige las fechas posibles':'Pick the possible dates'}</p>
-        {autoCity&&<div style={{fontSize:'12px',color:c.M2,marginBottom:'12px',display:'flex',flexWrap:'wrap',gap:'8px',alignItems:'center'}}>
-          <span>📍 <span style={{color:c.T,fontWeight:'500'}}>{autoCity}</span></span>
-          {planTz&&<span>🌍 <span style={{color:c.T,fontWeight:'500'}}>{getTzLabel(planTz)}</span> <span style={{color:c.M}}>({getGMTOffset(planTz)})</span></span>}
-          {(()=>{const uTz=getUserTz();if(!uTz||uTz===planTz)return null;return<span style={{color:c.M}}>· {t.yourZone} <span style={{fontWeight:'500'}}>{getGMTOffset(uTz)}</span></span>;})()}
-        </div>}
-        {autoCityShort&&selDates.length>0&&<div style={{marginBottom:'16px'}}>
-          <Lbl c={c}>{t.weatherForecast}</Lbl>
-          {selDates.slice(0,2).map(d=><div key={d} style={{marginBottom:'8px'}}><div style={{fontSize:'12px',color:c.M2,marginBottom:'4px',textTransform:'capitalize'}}>{fmtShort(d,lang)}</div><WeatherWidget city={autoCityShort} date={d} c={c} lang={lang}/></div>)}
-          {selDates.length>2&&<div style={{fontSize:'12px',color:c.M2,textAlign:'center',padding:'4px'}}>+{selDates.length-2} {t.moreDates}</div>}
-        </div>}
-        <Lbl c={c}>{t.selectDates}</Lbl>
         <CalendarPicker selected={selDates} onChange={setSelDates} c={c} lang={lang}/>
+        {selDates.length>0&&<>
+          <HR c={c}/>
+          <div style={{fontSize:'16px',color:c.T,fontWeight:'600',marginBottom:'8px'}}>{isEs?'¿A qué hora empieza?':'What time does it start?'}</div>
+          <div style={{display:'flex',gap:'8px',alignItems:'center',marginBottom:'8px'}}>
+            <input type="time" value={startTimes[0]||''} onChange={e=>{const n=[...startTimes];n[0]=e.target.value;setStartTimes(n);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',flex:1}}/>
+          </div>
+          {startTimes.length>1&&startTimes.slice(1).map((st,j)=><div key={j} style={{display:'flex',gap:'8px',alignItems:'center',marginBottom:'6px'}}>
+            <span style={{fontSize:'13px',color:c.M2}}>{isEs?'o':'or'}</span>
+            <input type="time" value={st} onChange={e=>{const n=[...startTimes];n[j+1]=e.target.value;setStartTimes(n);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',flex:1}}/>
+            <button onClick={()=>setStartTimes(p=>p.filter((_,k)=>k!==j+1))} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'16px'}}>×</button>
+          </div>)}
+          <button onClick={()=>setStartTimes(p=>[...p,''])} style={{background:'none',border:`1px dashed ${c.BD}`,borderRadius:'8px',padding:'6px 12px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px'}}>{isEs?'+ Otra hora posible':'+ Another possible time'}</button>
+        </>}
         <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(1)} disabled={selDates.length<1} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
       </>}
 
