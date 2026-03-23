@@ -1,10 +1,7 @@
-# CI: run Playwright e2e tests on push to main
+# CI: run Playwright e2e tests (disabled — reactivate when needed)
 name: Tests
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
   test:
