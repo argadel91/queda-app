@@ -401,7 +401,12 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
         {/* Online toggle */}
         <button onClick={()=>{
           const isOnline=stops.some(s=>(s.options||[]).some(o=>o.name==='Online'));
-          if(!isOnline){const ns=emptyStop(Date.now());updOption(ns.id,ns.options[0].id,'name','Online');updOption(ns.id,ns.options[0].id,'address','💻');setStops(p=>[...p,ns]);}
+          if(!isOnline){
+            const ns=emptyStop(Date.now());
+            ns.options[0].name='Online';
+            ns.options[0].address='💻';
+            setStops(p=>[...p,ns]);
+          }
         }} style={{width:'100%',padding:'10px',background:stops.some(s=>(s.options||[]).some(o=>o.name==='Online'))?`${mc}15`:c.CARD,border:`1px solid ${stops.some(s=>(s.options||[]).some(o=>o.name==='Online'))?mc+'50':c.BD}`,borderRadius:'10px',cursor:'pointer',fontFamily:'inherit',fontSize:'13px',color:stops.some(s=>(s.options||[]).some(o=>o.name==='Online'))?mc:c.M2,fontWeight:stops.some(s=>(s.options||[]).some(o=>o.name==='Online'))?'700':'400',marginBottom:'10px'}}>💻 {lang==='es'?'Es online (sin lugar físico)':'It\'s online (no physical location)'}</button>
 
         {/* Selected places */}
