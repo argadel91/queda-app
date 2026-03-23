@@ -112,7 +112,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
   const togglePub=async()=>{const up={...plan,isPublic:!plan.isPublic};await updatePlan(up);setPlan(up);};
   const howL=v=>({car:t.car,moto:t.moto,transit:t.transit,taxi:t.taxi,walk:t.walk,bike:t.bike}[v]||v);
   const haversine=(lat1,lon1,lat2,lon2)=>{const R=6371;const dLat=(lat2-lat1)*Math.PI/180;const dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));};
-  const TABS=['who','plan','dia','ir','extras'];
+  const TABS=['who','plan','dia','ir','extras','tips'];
   const tlbl=k=>t.tabs[k]||k;
   return(<>
     {payModal&&<PayModal plan={plan} amount={payAmt} onClose={()=>setPay(false)} c={c} lang={lang}/>}
@@ -575,7 +575,6 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
           </div>
           <div style={{fontSize:'12px',color:c.M2,textAlign:'center',marginTop:'8px'}}>{t.hintScreenshot}</div>
         </Card>}
-        {(city||plan.stops?.length>0)&&<AfterPlanSuggestions plan={plan} c={c} lang={lang}/>}
         {/* Suggested dates from guests */}
         {isOrgRef.current&&rs.some(r=>r.altDate)&&<Card c={c} style={{border:'1px solid #f59e0b30',background:'#f59e0b06'}}>
           <Lbl c={c}>📅 {t.datesSuggestedLbl}</Lbl>
@@ -585,6 +584,11 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
           </div>)}
         </Card>}
       </div></React.Suspense>}
+
+      {/* TIPS / SUGGESTIONS tab */}
+      {!ldg&&tab==='tips'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}>
+        <AfterPlanSuggestions plan={plan} c={c} lang={lang}/>
+      </React.Suspense>}
 
     </div>
   </>);
