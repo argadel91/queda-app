@@ -57,9 +57,10 @@ export default function Share({plan,onViewResults,onBack,c,lang}){
   return(<div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
     <Back onClick={onBack} label={t.back} c={c}/>
     <div style={{textAlign:'center',marginBottom:'28px'}}>
-      <div style={{fontSize:'52px',marginBottom:'14px'}}>{plan.mode==='intimate'?'\u{1F498}':plan.mode==='professional'?'\u{1F4BC}':'\u{1F389}'}</div>
+      <div style={{fontSize:'52px',marginBottom:'14px'}}>🎉</div>
       <h2 style={{fontFamily:"'Syne',serif",fontSize:'28px',fontWeight:'800',color:c.T,marginBottom:'8px'}}>{t.planCreated}</h2>
       <p style={{color:c.M2,fontSize:'14px'}}>{t.shareWith}</p>
+      <p style={{color:c.M,fontSize:'12px',marginTop:'8px'}}>{lang==='es'?'Ve a Mis planes para editar o añadir más detalles.':'Go to My plans to edit or add more details.'}</p>
     </div>
     <div style={{background:c.CARD,border:`1px solid ${mc}40`,borderRadius:'14px',padding:'20px',textAlign:'center',marginBottom:'14px'}}>
       <div style={{fontFamily:'monospace',fontSize:'58px',fontWeight:'900',color:mc,letterSpacing:'.2em',lineHeight:1,margin:'16px 0 12px'}}>{plan.id}</div>

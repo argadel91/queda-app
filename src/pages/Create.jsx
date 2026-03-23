@@ -132,7 +132,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   const remOption=(stopId,optId)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.filter(o=>o.id!==optId)}:s));
   const updOption=(stopId,optionId,key,value)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.map(o=>o.id===optionId?{...o,[key]:value}:o)}:s));
 
-  const stepLabels=[isEs?'¿Cuándo?':'When?',isEs?'¿Dónde?':'Where?'];
+  const stepLabels=[isEs?'¿Cuándo?':'When?',isEs?'¿Dónde?':'Where?',isEs?'Nombre':'Name'];
 
   const create=async()=>{
     setSaving(true);
@@ -359,7 +359,15 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
           </div>
         )}
         <Btn onClick={addStop} v="secondary" full sm style={{marginBottom:'14px'}} c={c}>{isEs?'+ Añadir parte':'+ Add part'}</Btn>
-        <div style={{marginTop:'10px'}}><Btn onClick={create} disabled={saving} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?(isEs?'Creando...':'Creating...'):(isEs?'Crear plan 🎉':'Create plan 🎉')}</Btn></div>
+        <div style={{marginTop:'10px'}}><Btn onClick={()=>changeStep(2)} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
+      </>}
+
+      {/* ── STEP 2: NAME (optional) ── */}
+      {step===2&&<>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{isEs?'¿Nombre?':'Name?'}</h2>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{isEs?'Dale un nombre a tu plan. Si no, se guardará por código.':'Give your plan a name. If not, it\'ll be saved by code.'}</p>
+        <Inp value={name} onChange={setName} placeholder={isEs?'Ej: Cena de cumple, Ruta por Valencia...':'e.g. Birthday dinner, Valencia trip...'} c={c}/>
+        <div style={{marginTop:'20px'}}><Btn onClick={create} disabled={saving} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?(isEs?'Creando...':'Creating...'):(isEs?'Crear plan 🎉':'Create plan 🎉')}</Btn></div>
       </>}
 
       {/* ── STEP 0: WHEN? ── */}
@@ -368,8 +376,11 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
         <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{isEs?'Elige una fecha y una hora. Podrás añadir alternativas después.':'Pick one date and time. You can add alternatives later.'}</p>
         <CalendarPicker selected={selDates} onChange={d=>setSelDates(d.slice(-1))} c={c} lang={lang}/>
         {selDates.length>0&&<div style={{marginTop:'16px'}}>
-          <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'8px'}}>{isEs?'¿A qué hora?':'What time?'}</div>
-          <input type="time" value={startTimes[0]||''} onChange={e=>{const n=[...startTimes];n[0]=e.target.value;setStartTimes(n);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
+          <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'8px'}}>{isEs?'¿A qué hora? (24h)':'What time? (24h)'}</div>
+          <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
+            <input type="time" value={startTimes[0]||''} onChange={e=>{const n=[...startTimes];n[0]=e.target.value;setStartTimes(n);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',flex:1}}/>
+            {startTimes[0]&&<span style={{fontSize:'14px',color:c.M2,fontWeight:'500',flexShrink:0}}>{(()=>{const[h,m]=(startTimes[0]||'').split(':').map(Number);if(isNaN(h))return'';const ampm=h>=12?'PM':'AM';const h12=h%12||12;return`${h12}:${String(m).padStart(2,'0')} ${ampm}`;})()}</span>}
+          </div>
         </div>}
         <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(1)} disabled={selDates.length<1} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
       </>}
