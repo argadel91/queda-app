@@ -129,22 +129,18 @@ export default function Profile({onBack,onOpen,c,lang,authUser,profile,onUpdateP
     :shown.map(p=>{
       const mode=modes[p.id]||p.mode||'social';const mc=getMC(mode,c);const d=dates[p.id];
       const du=d?daysUntil(d):null;const isToday=du===0;const isTmrw=du===1;const isSoon=du!=null&&du<=3&&du>=0;
-      return(<div key={p.id} style={{background:c.CARD,border:`1px solid ${isSoon?mc+'50':c.BD}`,borderRadius:'14px',marginBottom:'10px',overflow:'hidden',display:'flex',opacity:isPast(p.id)?0.65:1}}>
-        <div style={{width:'4px',background:mc,flexShrink:0}}/>
-        <div style={{flex:1,padding:'14px',display:'flex',alignItems:'center',gap:'10px',minWidth:0}}>
-          <div onClick={()=>{ls.set('q_seen_'+p.id,Date.now());onOpen(p.id);}} style={{flex:1,cursor:'pointer',minWidth:0}}>
-            <div style={{fontSize:'15px',color:c.T,fontWeight:'500',marginBottom:'4px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',display:'flex',alignItems:'center',gap:'6px'}}>{p.name}</div>
-            <div style={{fontSize:'12px',color:c.M2,display:'flex',gap:'6px',flexWrap:'wrap'}}>
-              <span style={{color:mc,fontWeight:'700',letterSpacing:'.08em'}}>{p.id}</span>
-              <span>·</span><span>{p.role==='organizer'?t.organizer:t.guest}</span>
-              {d&&<><span>·</span><span style={{color:isSoon?mc:c.M2,fontWeight:isSoon?'600':'400',textTransform:'capitalize'}}>{isToday?(t.todayLbl):isTmrw?(t.tomorrowLbl):fmtShort(d,lang)}</span></>}
-            </div>
+      return(<div key={p.id} onClick={()=>{ls.set('q_seen_'+p.id,Date.now());onOpen(p.id);}} style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'16px',padding:'16px',marginBottom:'10px',cursor:'pointer',opacity:isPast(p.id)?0.6:1}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+          <div>
+            <div style={{fontFamily:'monospace',fontSize:'24px',fontWeight:'900',color:mc,letterSpacing:'.15em'}}>{p.id}</div>
+            {p.name&&<div style={{fontSize:'14px',color:c.T,fontWeight:'600',marginTop:'4px'}}>{p.name}</div>}
           </div>
           <div style={{display:'flex',gap:'5px',flexShrink:0}}>
-            <button onClick={()=>onOpen(p.id)} title={t.viewPlan} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'6px 10px',color:c.M2,cursor:'pointer',fontSize:'12px',fontFamily:'inherit'}}>→</button>
-            <button onClick={e=>{e.stopPropagation();setConfirm(p);}} title={p.role==='organizer'?(t.deletePlan):(t.leavePlan)} style={{background:'none',border:'1px solid #ff444430',borderRadius:'8px',padding:'6px 10px',color:'#ff6666',cursor:'pointer',fontSize:'13px'}}>{p.role==='organizer'?'🗑️':'👋'}</button>
+            {d&&<span style={{fontSize:'12px',padding:'3px 10px',borderRadius:'10px',background:isSoon?`${mc}20`:c.CARD2,color:isSoon?mc:c.M2,border:`1px solid ${isSoon?mc+'40':c.BD}`,fontWeight:isSoon?'700':'400',textTransform:'capitalize'}}>{isToday?(t.todayLbl):isTmrw?(t.tomorrowLbl):fmtShort(d,lang)}</span>}
+            <button onClick={e=>{e.stopPropagation();setConfirm(p);}} style={{background:'none',border:'1px solid #ff444430',borderRadius:'8px',padding:'4px 8px',color:'#ff6666',cursor:'pointer',fontSize:'12px'}}>×</button>
           </div>
         </div>
+        <div style={{fontSize:'11px',color:c.M2,marginTop:'6px'}}>{p.role==='organizer'?t.organizer:t.guest}</div>
       </div>);
     })}
   </div>);

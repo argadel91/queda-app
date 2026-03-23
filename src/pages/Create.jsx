@@ -205,11 +205,8 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       <div style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'20px',padding:'16px 14px',textAlign:'center',marginBottom:'20px',transition:'all .3s ease'}}>
         <div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'11px',color:mc,letterSpacing:'.1em',textTransform:'uppercase',marginBottom:'8px'}}>queda.</div>
         <div style={{fontSize:'12px',color:c.M2,marginBottom:'2px'}}>{isEs?'Organiza':'By'}: <strong style={{color:c.T}}>{profile?.name||'—'}</strong></div>
-        {/* Dates */}
-        {selDates.length>0&&<div style={{marginTop:'8px',display:'flex',gap:'4px',justifyContent:'center',flexWrap:'wrap'}}>
-          {selDates.slice(0,5).map(d=><span key={d} style={{fontSize:'10px',padding:'2px 8px',borderRadius:'10px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`}}>{fmtShort(d,lang)}</span>)}
-          {selDates.length>5&&<span style={{fontSize:'10px',color:c.M2}}>+{selDates.length-5}</span>}
-        </div>}
+        {/* Date + time */}
+        {selDates[0]&&<div style={{marginTop:'8px',fontSize:'14px',color:mc,fontWeight:'600',textTransform:'capitalize'}}>{fmtShort(selDates[0],lang)}{startTimes[0]?' · '+startTimes[0]:''}</div>}
         {/* Stops */}
         {stops.some(s=>(s.options||[]).some(o=>o.name))&&<div style={{marginTop:'8px',borderTop:`1px solid ${mc}20`,paddingTop:'8px'}}>
           {stops.filter(s=>(s.options||[]).some(o=>o.name)).map((s,i)=>{
@@ -368,21 +365,14 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       {/* ── STEP 0: WHEN? ── */}
       {step===0&&<>
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{isEs?'¿Cuándo?':'When?'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{isEs?'Elige las fechas posibles':'Pick the possible dates'}</p>
-        <CalendarPicker selected={selDates} onChange={setSelDates} c={c} lang={lang}/>
-        {selDates.length>0&&<>
-          <HR c={c}/>
-          <div style={{fontSize:'16px',color:c.T,fontWeight:'600',marginBottom:'8px'}}>{isEs?'¿A qué hora empieza?':'What time does it start?'}</div>
-          <div style={{display:'flex',gap:'8px',alignItems:'center',marginBottom:'8px'}}>
-            <input type="time" value={startTimes[0]||''} onChange={e=>{const n=[...startTimes];n[0]=e.target.value;setStartTimes(n);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',flex:1}}/>
-          </div>
-          {startTimes.length>1&&startTimes.slice(1).map((st,j)=><div key={j} style={{display:'flex',gap:'8px',alignItems:'center',marginBottom:'6px'}}>
-            <span style={{fontSize:'13px',color:c.M2}}>{isEs?'o':'or'}</span>
-            <input type="time" value={st} onChange={e=>{const n=[...startTimes];n[j+1]=e.target.value;setStartTimes(n);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',flex:1}}/>
-            <button onClick={()=>setStartTimes(p=>p.filter((_,k)=>k!==j+1))} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'16px'}}>×</button>
-          </div>)}
-          <button onClick={()=>setStartTimes(p=>[...p,''])} style={{background:'none',border:`1px dashed ${c.BD}`,borderRadius:'8px',padding:'6px 12px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px'}}>{isEs?'+ Otra hora posible':'+ Another possible time'}</button>
-        </>}
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{isEs?'Elige fecha y hora':'Pick a date and time'}</p>
+        <div style={{marginBottom:'14px'}}>
+          <input type="date" value={selDates[0]||''} min={new Date().toISOString().split('T')[0]} onChange={e=>{setSelDates(e.target.value?[e.target.value]:[]);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
+        </div>
+        {selDates.length>0&&<div style={{marginBottom:'14px'}}>
+          <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'8px'}}>{isEs?'¿A qué hora?':'What time?'}</div>
+          <input type="time" value={startTimes[0]||''} onChange={e=>{const n=[...startTimes];n[0]=e.target.value;setStartTimes(n);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
+        </div>}
         <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(1)} disabled={selDates.length<1} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
       </>}
 
