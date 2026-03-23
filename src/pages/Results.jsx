@@ -5,8 +5,6 @@ import { db, updatePlan, loadResps, saveResp, savePlan } from '../lib/supabase.j
 import { ls, addMyPlan } from '../lib/storage.js'
 import { daysUntil, fmtDate, fmtShort, genId } from '../lib/utils.js'
 import { Btn, Card, Lbl, ModeBadge, Badge, Back, HR, Inp, Txa } from '../components/ui.jsx'
-import WeatherWidget from '../components/WeatherWidget.jsx'
-const TransportPanel = React.lazy(() => import('../components/TransportPanel.jsx'))
 import OutfitCard from '../components/OutfitCard.jsx'
 const ExpenseSplitter = React.lazy(() => import('../components/ExpenseSplitter.jsx'))
 import PostPlanSurvey from '../components/PostPlanSurvey.jsx'
@@ -109,10 +107,8 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
   const confirmDate=async(d,st)=>{setConf(true);const up={...plan,confirmedDate:d,confirmedStartTime:st||''};await updatePlan(up);setPlan(up);setConf(false);};
   const waConfirm=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`📌 *${plan.name}* — ${t.dateConfirmedMsg}\n\n🗓️ ${fmtDate(plan.confirmedDate,lang)}${plan.confirmedStartTime?' · 🕐 '+plan.confirmedStartTime:''}\n\n${url}`),'_blank');};
   const waRem=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`⏰ ${t.reminderMsg.replace('{name}',plan.name)}\n${url}`),'_blank');setRem(true);};
-  const togglePub=async()=>{const up={...plan,isPublic:!plan.isPublic};await updatePlan(up);setPlan(up);};
   const howL=v=>({car:t.car,moto:t.moto,transit:t.transit,taxi:t.taxi,walk:t.walk,bike:t.bike}[v]||v);
-  const haversine=(lat1,lon1,lat2,lon2)=>{const R=6371;const dLat=(lat2-lat1)*Math.PI/180;const dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));};
-  const TABS=['who','plan','dia','ir','extras','tips'];
+  const TABS=['who','plan','alts','extras','tips'];
   const tlbl=k=>t.tabs[k]||k;
   return(<>
     {payModal&&<PayModal plan={plan} amount={payAmt} onClose={()=>setPay(false)} c={c} lang={lang}/>}
@@ -166,9 +162,6 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
           <button onClick={waRem} title={t.waReminderMsg} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'8px 12px',color:remSent?mc:c.M2,fontSize:'12px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>{remSent?t.remSent:t.sendRem}</button>
           <button onClick={()=>generateICS(plan,lang)} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'8px 10px',color:c.M2,fontSize:'12px',cursor:'pointer',fontFamily:'inherit'}} title={t.addToCalendar}>📅</button>
         </div>
-      </div>}
-      {isOrgRef.current&&<div style={{marginBottom:'16px',display:'flex',gap:'6px',alignItems:'center',flexWrap:'wrap'}}>
-        <button onClick={togglePub} title={plan.isPublic?t.planInDiscover:(t.makePublicTitle)} style={{padding:'8px 16px',background:plan.isPublic?`${mc}15`:c.CARD,border:`1px solid ${plan.isPublic?mc+'50':c.BD}`,borderRadius:'10px',color:plan.isPublic?mc:c.M2,fontSize:'12px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>{plan.isPublic?t.isPublicLbl:t.makePublic}</button>
       </div>}
       {/* Smart summary for organizer */}
       {isOrgRef.current&&!ldg&&total>0&&!plan.confirmedDate&&(()=>{
@@ -406,6 +399,14 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
               <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
                 {slots.map(s=>{const v=r.avail?.[s.key];const vc={yes:'#22c55e',maybe:'#f59e0b'};const vi={yes:'✅',maybe:'🤔'};return(v==='yes'||v==='maybe')?<span key={s.key} style={{fontSize:'11px',padding:'3px 9px',borderRadius:'20px',background:`${vc[v]}20`,color:vc[v],border:`1px solid ${vc[v]}30`,textTransform:'capitalize'}}>{vi[v]} {fmtShort(s.date,lang)}{s.startTime?' · '+s.startTime:''}</span>:null;})}
               </div>
+              {/* Stop attendance per person */}
+              {r.stopAttend&&plan.stops?.length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:'4px',marginTop:'4px'}}>
+                {(plan.stops||[]).map((st,si)=>{const v=r.stopAttend?.[st.id];if(!v)return null;const sName=st.options?.[0]?.name||`${t.stop||'Stop'} ${si+1}`;const vc={yes:'#22c55e',no:'#ef4444',maybe:'#f59e0b'};const vi={yes:'✅',no:'❌',maybe:'🤔'};return<span key={st.id} style={{fontSize:'10px',padding:'2px 7px',borderRadius:'12px',background:`${vc[v]||c.CARD2}15`,color:vc[v]||c.M2,border:`1px solid ${(vc[v]||c.BD)}30`}}>{vi[v]||'?'} {sName}</span>;})}
+              </div>}
+              {/* Stop option preferences per person */}
+              {r.stopPrefs&&plan.stops?.length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:'4px',marginTop:'4px'}}>
+                {(plan.stops||[]).flatMap((st,si)=>(st.options||[]).filter((_,oi)=>r.stopPrefs?.[st.id]===oi||r.stopPrefs?.[st.id+'_'+oi]).map((opt,oi)=><span key={st.id+'_'+oi} style={{fontSize:'10px',padding:'2px 7px',borderRadius:'12px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`}}>⭐ {opt.name||`${t.stop||'Stop'} ${si+1}`}</span>))}
+              </div>}
             </div>)}
           </Card>
           {/* PLAN CARD for sharing */}
@@ -439,6 +440,8 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
 
       {/* PLAN tab = Route + budget + inline map */}
       {!ldg&&tab==='plan'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><>
+        {city&&(plan.confirmedDate||plan.dates?.[0])&&<a href={`https://www.google.com/search?q=weather+${encodeURIComponent(city)}+${plan.confirmedDate||plan.dates[0]}`} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:'4px',padding:'4px 10px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',textDecoration:'none',fontSize:'12px',color:c.M2,marginBottom:'10px'}}>🌤️ {t.weatherForecast||'Weather'} →</a>}
+        {plan.dressCode&&(Array.isArray(plan.dressCode)?plan.dressCode.length>0:plan.dressCode)&&<span style={{display:'inline-flex',padding:'4px 10px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',fontSize:'12px',color:c.M2,marginBottom:'10px',marginLeft:'6px'}}>👗 {Array.isArray(plan.dressCode)?plan.dressCode.join(', '):plan.dressCode}</span>}
         {(plan.stops||[]).length===0&&<Card c={c} style={{textAlign:'center',padding:'28px'}}><div style={{fontSize:'32px',marginBottom:'8px'}}>📍</div><div style={{color:c.M2,fontSize:'14px'}}>{t.noStopsMsg}</div></Card>}
         {(plan.stops||[]).map((s,i)=>{const opt=s.options?.[0]||s;return<div key={s.id||i} style={{display:'flex',gap:'12px',marginBottom:'10px'}}>
           <div style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
@@ -465,73 +468,14 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
         {plan.stops?.some(s=>(s.options?.[0]?.lat&&s.options?.[0]?.lng)||(s.lat&&s.lng))&&<><HR c={c}/><RouteMap stops={(plan.stops||[]).map(s=>{const o=s.options?.[0]||s;return{...s,lat:o.lat||s.lat,lng:o.lng||s.lng,name:o.name||s.name,address:o.address||s.address,placeId:o.placeId||s.placeId||null};})} c={c}/></>}
       </></React.Suspense>}
 
-      {/* DÍA tab = Weather + Outfit */}
-      {!ldg&&tab==='dia'&&<div style={{display:'flex',flexDirection:'column',gap:'16px'}}>
-        <div>
-          <Lbl c={c}>🌤️ {t.weatherForecast}</Lbl>
-          {!city&&<Card c={c} style={{textAlign:'center',padding:'20px'}}><div style={{color:c.M2,fontSize:'14px'}}>{t.noCity}</div></Card>}
-          {city&&(plan.confirmedDate
-            ?<WeatherWidget city={city} date={plan.confirmedDate} c={c} lang={lang} showAdvice={true}/>
-            :(plan.dates||[]).map(d=><div key={d} style={{marginBottom:'12px'}}><div style={{fontSize:'12px',color:c.M2,marginBottom:'5px',textTransform:'capitalize'}}>{fmtShort(d,lang)}</div><WeatherWidget city={city} date={d} c={c} lang={lang} showAdvice={true}/></div>)
-          )}
-        </div>
-        <HR c={c}/>
-        <div>
-          <Lbl c={c}>👗 Outfit</Lbl>
-          <p style={{fontSize:'13px',color:c.M2,marginBottom:'12px',lineHeight:1.6}}>{{social:t.whatToWear,intimate:t.firstImpressions,professional:t.rightLook}[plan.mode||'social']}</p>
-          {plan.dressCode
-            ?<OutfitCard dressCode={plan.dressCode} dressNote={plan.dressNote} city={city} date={plan.confirmedDate||plan.dates?.[0]} mc={mc} c={c} lang={lang} t={t}/>
-            :<div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'16px',textAlign:'center'}}><div style={{fontSize:'24px',marginBottom:'6px'}}>👗</div><div style={{fontSize:'13px',color:c.M2}}>{t.dcNoneNote}</div></div>
-          }
-        </div>
+      {/* ALTS tab = Alternative dates */}
+      {!ldg&&tab==='alts'&&<div>
+        <Card c={c} style={{textAlign:'center',padding:'24px'}}>
+          <div style={{fontSize:'32px',marginBottom:'10px'}}>📅</div>
+          <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'6px'}}>{t.alternativeDates||'Alternative dates'}</div>
+          <div style={{fontSize:'13px',color:c.M2,lineHeight:1.6}}>{t.alternativeDatesHint||'Coming soon — add alternative dates and times for your plan.'}</div>
+        </Card>
       </div>}
-
-      {/* IR tab = Transport */}
-      {!ldg&&tab==='ir'&&<>
-        {plan.stops?.length>0?(()=>{
-          const stopsWithCoords=(plan.stops||[]).map((s,i)=>{
-            const opt=s.options?.[0]||s;
-            return{...s,idx:i,name:opt.name||`Stop ${i+1}`,address:opt.address||'',lat:opt.lat||s.lat,lng:opt.lng||s.lng};
-          }).filter(s=>s.lat&&s.lng);
-
-          if(stopsWithCoords.length===0)return<Card c={c} style={{textAlign:'center',padding:'28px'}}><div style={{fontSize:'32px',marginBottom:'8px'}}>📍</div><div style={{color:c.M2,fontSize:'14px'}}>{t.noStops}</div></Card>;
-
-          return<>
-            {/* First leg: your location → stop 1 */}
-            <Card c={c} style={{marginBottom:'12px'}}>
-              <Lbl c={c}>📍 {t.howToGet||'How to get there'}</Lbl>
-              <div style={{fontSize:'15px',color:c.T,fontWeight:'600'}}>{stopsWithCoords[0].name}</div>
-              {stopsWithCoords[0].address&&<div style={{fontSize:'13px',color:c.M2}}>{stopsWithCoords[0].address}</div>}
-            </Card>
-            <React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}>
-              <TransportPanel to={stopsWithCoords[0]} planCity={city} c={c} lang={lang}/>
-            </React.Suspense>
-
-            {/* Between stops */}
-            {stopsWithCoords.length>1&&stopsWithCoords.slice(1).map((s,i)=>{
-              const prev=stopsWithCoords[i];
-              const dist=haversine(prev.lat,prev.lng,s.lat,s.lng);
-              const suggestion=dist<0.5?'🚶 Walk':dist<3?'🚶 Walk / 🚲 Bike':dist<15?'🚗 Car / 🚕 Taxi':'🚗 Car / 🚕 Taxi';
-              const mapsUrl=`https://www.google.com/maps/dir/${prev.lat},${prev.lng}/${s.lat},${s.lng}/`;
-              return<div key={s.idx}>
-                <HR c={c}/>
-                <div style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px'}}>
-                  <div style={{fontSize:'20px'}}>↓</div>
-                  <div style={{flex:1}}>
-                    <div style={{fontSize:'13px',color:mc,fontWeight:'600'}}>{prev.name} → {s.name}</div>
-                    <div style={{fontSize:'12px',color:c.M2}}>{dist<1?`${Math.round(dist*1000)}m`:`${dist.toFixed(1)} km`} · {suggestion}</div>
-                  </div>
-                  <a href={mapsUrl} target="_blank" rel="noreferrer" style={{padding:'6px 12px',background:'#4285F415',border:'1px solid #4285F440',borderRadius:'8px',textDecoration:'none',fontSize:'12px',color:'#4285F4',fontWeight:'600'}}>🗺️ Route</a>
-                </div>
-              </div>;
-            })}
-
-            {/* Per-person transport */}
-            {rs.filter(r=>r.how).length>0&&<><HR c={c}/><Lbl c={c}>{t.howEach}</Lbl>{rs.filter(r=>r.how).map((r,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:`1px solid ${c.BD}`,fontSize:'14px'}}><span style={{color:c.T}}>{r.name}</span><span style={{color:c.M2}}>{howL(r.how)}</span></div>)}</>}
-          </>;
-        })()
-        :<Card c={c} style={{textAlign:'center',padding:'28px'}}><div style={{fontSize:'32px',marginBottom:'8px'}}>📍</div><div style={{color:c.M2,fontSize:'14px'}}>{t.noStops}</div></Card>}
-      </>}
 
       {/* EXTRAS tab = Gift + Expenses + Pay + Plan card */}
       {!ldg&&tab==='extras'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
@@ -541,6 +485,11 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
           <div style={{fontSize:'14px'}}>{t.noExtrasConfigured}</div>
           {isOrgRef.current&&<div style={{fontSize:'12px',marginTop:'8px',color:c.M}}>{t.addThemEditing}</div>}
         </div>}
+        {/* Outfit */}
+        {plan.dressCode&&<Card c={c}>
+          <Lbl c={c}>👗 Outfit</Lbl>
+          <OutfitCard dressCode={plan.dressCode} dressNote={plan.dressNote} city={city} date={plan.confirmedDate||plan.dates?.[0]} mc={mc} c={c} lang={lang} t={t}/>
+        </Card>}
         {/* Expense splitter - always show for splitting costs */}
         <ExpenseSplitter plan={plan} rs={rs||[]} mc={mc} c={c} lang={lang}/>
         {/* Gift */}
