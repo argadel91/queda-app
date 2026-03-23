@@ -1,12 +1,11 @@
 import React from 'react'
 import T from '../constants/translations.js'
-import { getMC } from '../constants/theme.js'
 import { daysUntil, fmtDate, fmtShort } from '../lib/utils.js'
-import { Btn, Card, Lbl, ModeBadge, Back } from '../components/ui.jsx'
+import { Btn, Card, Lbl, Back } from '../components/ui.jsx'
 import { ls } from '../lib/storage.js'
 
 export default function PlanPreview({plan,onRespond,onBack,c,lang}){
-  const t=T[lang];const mc=getMC(plan.mode,c);
+  const t=T[lang];const mc=c.A;
   const budget=(plan.stops||[]).reduce((s,p)=>s+(parseFloat(p.cost)||0),0);
   const prev=ls.get('q_myresp_'+plan.id,null);
   const hasPrev=!!prev;
@@ -14,8 +13,7 @@ export default function PlanPreview({plan,onRespond,onBack,c,lang}){
   const AVICON={yes:'✅',maybe:'🤔',no:'❌'};
   return(<div style={{padding:'0',maxWidth:'420px',margin:'0 auto'}}>
     <div style={{background:`${mc}15`,borderBottom:`1px solid ${mc}30`,padding:'32px 24px 24px',textAlign:'center'}}>
-      <div style={{fontSize:'48px',marginBottom:'12px'}}>{plan.mode==='intimate'?'💘':plan.mode==='professional'?'💼':'🎉'}</div>
-      <ModeBadge mode={plan.mode||'social'} lang={plan.lang||lang} c={c}/>
+      <div style={{fontSize:'48px',marginBottom:'12px'}}>{'🎉'}</div>
       <h1 style={{fontFamily:"'Syne',serif",fontSize:'28px',fontWeight:'800',color:c.T,margin:'12px 0 6px',lineHeight:1.1}}>{plan.name}</h1>
       <div style={{fontSize:'14px',color:c.M2}}>{t.previewBy} <span style={{color:c.T,fontWeight:'600'}}>{plan.organizer}</span></div>
     </div>

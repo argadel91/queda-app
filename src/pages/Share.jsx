@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import T from '../constants/translations.js'
-import { getMC } from '../constants/theme.js'
 import { ls, getMyPlans } from '../lib/storage.js'
 import { db, loadResps, updatePlan } from '../lib/supabase.js'
-import { Btn, Card, Lbl, Back, ModeBadge, HR } from '../components/ui.jsx'
+import { Btn, Card, Lbl, Back, HR } from '../components/ui.jsx'
 
 const FLAGS={es:'\u{1F1EA}\u{1F1F8}',en:'\u{1F1EC}\u{1F1E7}',pt:'\u{1F1F5}\u{1F1F9}',fr:'\u{1F1EB}\u{1F1F7}',de:'\u{1F1E9}\u{1F1EA}',it:'\u{1F1EE}\u{1F1F9}'};
 const LANGS=['es','en','pt','fr','de','it'];
@@ -36,7 +35,7 @@ const waMsgs={
 };
 
 export default function Share({plan,onViewResults,onBack,c,lang}){
-  const t=T[lang];const mc=getMC(plan.mode,c);const[planState,setPlanState]=useState(plan);
+  const t=T[lang];const mc=c.A;const[planState,setPlanState]=useState(plan);
   const[copied,setCopied]=useState(false);const[codeCopied,setCodeCopied]=useState(false);const[count,setCount]=useState(null);const[shareLang,setShareLang]=useState(lang);const[isShareOpen,setShareOpen]=useState(false);
   const url=location.href.split('?')[0]+'?code='+plan.id;
   const copy=()=>{navigator.clipboard?.writeText(url).catch(()=>{});setCopied(true);setTimeout(()=>setCopied(false),2000);};

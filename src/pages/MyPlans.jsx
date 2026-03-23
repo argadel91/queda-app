@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import T from '../constants/translations.js'
-import { getMC } from '../constants/theme.js'
 import { ls, getMyPlans } from '../lib/storage.js'
 import { loadPlan, db } from '../lib/supabase.js'
 import { daysUntil, fmtShort, dayStart } from '../lib/utils.js'

@@ -1,24 +1,21 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import T from '../constants/translations.js'
-import { getMC } from '../constants/theme.js'
 import { db, updatePlan, loadResps, saveResp, savePlan } from '../lib/supabase.js'
 import { ls, addMyPlan } from '../lib/storage.js'
 import { daysUntil, fmtDate, fmtShort, genId } from '../lib/utils.js'
-import { Btn, Card, Lbl, ModeBadge, Badge, Back, HR, Inp, Txa } from '../components/ui.jsx'
+import { Btn, Card, Lbl, Badge, Back, HR, Inp, Txa } from '../components/ui.jsx'
 import OutfitCard from '../components/OutfitCard.jsx'
 const ExpenseSplitter = React.lazy(() => import('../components/ExpenseSplitter.jsx'))
 import PostPlanSurvey from '../components/PostPlanSurvey.jsx'
-import SavedGroups from '../components/SavedGroups.jsx'
 const AfterPlanSuggestions = React.lazy(() => import('../components/AfterPlanSuggestions.jsx'))
 import PayModal from '../components/PayModal.jsx'
-import PersonalisedLink from '../components/PersonalisedLink.jsx'
 import { generateICS } from '../lib/ics.js'
 const RouteMap = React.lazy(() => import('../components/RouteMap.jsx'))
 import VenueInfo from '../components/VenueInfo.jsx'
 
 export default function Results({plan:ip,onBack,isOrg,c,lang}){
   const[plan,setPlan]=useState(ip);const t=T[lang];
-  const mc=getMC(plan.mode,c);
+  const mc=c.A;
   const[tab,setTab]=useState('plan');const[rs,setRs]=useState([]);const[ldg,setL]=useState(true);
   const[conf,setConf]=useState(false);const[remSent,setRem]=useState(false);
   const[payModal,setPay]=useState(false);const[payAmt,setPayAmt]=useState(0);
@@ -146,7 +143,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
         <div style={{fontSize:'12px',color:c.M2,textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,lang)}{plan.confirmedStartTime?' · 🕐 '+plan.confirmedStartTime:''}</div></div>
       </div>}
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'6px'}}>
-        <div><div style={{display:'flex',alignItems:'center'}}><h2 style={{fontFamily:"'Syne',serif",fontSize:'24px',fontWeight:'800',color:c.T,margin:'0 0 4px'}}>{plan.name}</h2>{isOrgRef.current&&<button onClick={()=>setEditMode(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',marginLeft:'8px'}}>✏️</button>}</div><ModeBadge mode={plan.mode||'social'} lang={lang} c={c}/></div>
+        <div><div style={{display:'flex',alignItems:'center'}}><h2 style={{fontFamily:"'Syne',serif",fontSize:'24px',fontWeight:'800',color:c.T,margin:'0 0 4px'}}>{plan.name}</h2>{isOrgRef.current&&<button onClick={()=>setEditMode(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',marginLeft:'8px'}}>✏️</button>}</div></div>
         <div style={{display:'flex',gap:'5px'}}>
           <button onClick={()=>{const url=location.href.split('?')[0]+'?code='+plan.id;const txt=`${t.respondToPlan.replace('{name}',plan.name)}\n${url}`;window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}} title={t.shareWATitle} style={{background:'#25D36618',border:'1px solid #25D36640',borderRadius:'8px',padding:'6px 10px',color:'#25D366',cursor:'pointer',fontSize:'13px'}}>💬</button>
           <button onClick={()=>{const url=location.href.split('?')[0]+'?code='+plan.id;navigator.clipboard?.writeText(url);}} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}} title={t.copyLinkTitle}>🔗</button>
@@ -229,7 +226,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
         <Card c={c} style={{marginBottom:'14px'}}>
           <Lbl c={c}>📸 {t.shareMemory||'Share the memory'}</Lbl>
           <div id="memory-card" style={{background:`linear-gradient(135deg,${mc}30,${mc}08)`,border:`2px solid ${mc}50`,borderRadius:'16px',padding:'24px',textAlign:'center'}}>
-            <div style={{fontSize:'36px',marginBottom:'8px'}}>{plan.mode==='intimate'?'💘':plan.mode==='professional'?'💼':'🎉'}</div>
+            <div style={{fontSize:'36px',marginBottom:'8px'}}>{'🎉'}</div>
             <div style={{fontFamily:"'Syne',serif",fontSize:'22px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{plan.name}</div>
             <div style={{fontSize:'14px',color:mc,fontWeight:'600',marginBottom:'12px',textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,lang)}{plan.confirmedStartTime?' · '+plan.confirmedStartTime:''}</div>
             {(plan.stops||[]).filter(s=>(s.options?.[0]?.name||s.name)).slice(0,4).map((s,i)=>{
@@ -434,7 +431,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
           {plan.confirmedDate&&<Card c={c} style={{marginBottom:'12px'}}>
             <Lbl c={c}>{t.planCard}</Lbl>
             <div id="plan-share-card" style={{background:`linear-gradient(135deg,${mc}20,${mc}05)`,border:`2px solid ${mc}40`,borderRadius:'12px',padding:'16px',textAlign:'center',fontFamily:"'Syne',serif"}}>
-              <div style={{fontSize:'28px',marginBottom:'6px'}}>{plan.mode==='intimate'?'💘':plan.mode==='professional'?'💼':'🎉'}</div>
+              <div style={{fontSize:'28px',marginBottom:'6px'}}>{'🎉'}</div>
               <div style={{fontSize:'18px',fontWeight:'800',color:c.T,marginBottom:'4px'}}>{plan.name}</div>
               <div style={{fontSize:'13px',color:mc,fontWeight:'600',marginBottom:'8px',textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,lang)}{plan.confirmedStartTime?' · 🕐 '+plan.confirmedStartTime:''}</div>
               {plan.times?.[plan.confirmedDate]?.length>0&&<div style={{fontSize:'12px',color:c.M2,marginBottom:'6px'}}>🕐 {plan.times[plan.confirmedDate].join(' · ')}</div>}
@@ -585,7 +582,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
         {plan.confirmedDate&&<Card c={c}>
           <Lbl c={c}>{t.planCard}</Lbl>
           <div style={{background:`linear-gradient(135deg,${mc}20,${mc}05)`,border:`2px solid ${mc}40`,borderRadius:'12px',padding:'16px',textAlign:'center',fontFamily:"'Syne',serif"}}>
-            <div style={{fontSize:'28px',marginBottom:'6px'}}>{plan.mode==='intimate'?'💘':plan.mode==='professional'?'💼':'🎉'}</div>
+            <div style={{fontSize:'28px',marginBottom:'6px'}}>{'🎉'}</div>
             <div style={{fontSize:'18px',fontWeight:'800',color:c.T,marginBottom:'4px'}}>{plan.name}</div>
             <div style={{fontSize:'13px',color:mc,fontWeight:'600',marginBottom:'6px',textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,lang)}{plan.confirmedStartTime?' · 🕐 '+plan.confirmedStartTime:''}</div>
             {plan.times?.[plan.confirmedDate]?.length>0&&<div style={{fontSize:'12px',color:c.M2,marginBottom:'4px'}}>🕐 {plan.times[plan.confirmedDate].join(' · ')}</div>}

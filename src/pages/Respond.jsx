@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react'
 import T from '../constants/translations.js'
-import { getMC } from '../constants/theme.js'
 import { saveResp, loadResps, db } from '../lib/supabase.js'
 import { ls, addMyPlan } from '../lib/storage.js'
 import { fmtDate, daysUntil } from '../lib/utils.js'
-import { Btn, Card, Lbl, Inp, Txa, HR, Back, ModeBadge } from '../components/ui.jsx'
+import { Btn, Card, Lbl, Inp, Txa, HR, Back } from '../components/ui.jsx'
 
 export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,authUser,profile}){
   const pLang=appLang;const t=T[pLang];
-  const mc=getMC(plan.mode,c);
+  const mc=c.A;
   const prevKey='q_myresp_'+plan.id;
   const prev=ls.get(prevKey,null);
   const urlName=new URLSearchParams(location.search).get('name')||'';
@@ -71,7 +70,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
     const respName=name.trim()||t.someone;
     const waOrgText=pLang==='es'?`Hola ${plan.organizer}, soy *${respName}* y acabo de responder al plan *${plan.name}*. Mira las respuestas! ${planUrl}`:`Hi ${plan.organizer}, I'm *${respName}* and just responded to *${plan.name}*. Check the responses! ${planUrl}`;
   return(<div style={{padding:'60px 24px',maxWidth:'420px',margin:'0 auto',textAlign:'center'}}>
-    <div style={{fontSize:'64px',marginBottom:'20px'}}>{plan.mode==='intimate'?'💘':'🎉'}</div>
+    <div style={{fontSize:'64px',marginBottom:'20px'}}>{'🎉'}</div>
     <h2 style={{fontFamily:"'Syne',serif",fontSize:'28px',fontWeight:'800',color:mc,marginBottom:'10px'}}>{t.savedTitle}</h2>
     <p style={{color:c.M2,marginBottom:'20px'}}>{t.savedSub}</p>
     {plan.organizer&&<a href={`https://wa.me/?text=${encodeURIComponent(waOrgText)}`} target="_blank" rel="noreferrer" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',padding:'13px 20px',background:'#25D366',borderRadius:'12px',color:'#fff',textDecoration:'none',fontWeight:'700',fontSize:'14px',marginBottom:'16px'}}>💬 {`${t.notifyTo} ${plan.organizer}`}</a>}
@@ -88,7 +87,6 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
   return(<div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
     <Back onClick={()=>{if(Object.keys(avail).length>0&&!window.confirm(t.unsavedWarning))return;onBack();}} label={t.back} c={c}/>
     <div style={{background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'12px',padding:'12px 14px',marginBottom:'16px',display:'flex',alignItems:'center',gap:'10px'}}>
-      <ModeBadge mode={plan.mode||'social'} lang={pLang} c={c}/>
       <div style={{flex:1,minWidth:0}}><div style={{fontSize:'15px',color:c.T,fontWeight:'600',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{plan.name}</div><div style={{fontSize:'12px',color:c.M2}}>@ {plan.organizer}</div></div>
     </div>
     {prev&&<div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',marginBottom:'14px',fontSize:'12px',color:c.M2}}>✏️ {t.editingPrev}</div>}
@@ -97,14 +95,12 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
     {budget>0&&<div style={{background:`${mc}0D`,border:`1px solid ${mc}30`,borderRadius:'10px',padding:'12px 16px',marginBottom:'16px',display:'flex',justifyContent:'space-between'}}><span style={{color:c.M2,fontSize:'13px'}}>{t.estPer||'Estimado'}</span><span style={{color:mc,fontWeight:'700'}}>{budget.toFixed(0)}€</span></div>}
     <HR c={c}/>
     <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.yourName}</Lbl><Inp value={name} onChange={v=>{setName(v);ls.set('q_myname',v);}} placeholder={t.yourNamePh} c={c}/></div>
-    {plan.mode==='professional'&&<div style={{marginBottom:'14px'}}>
+    {plan.customRoles?.length>0&&<div style={{marginBottom:'14px'}}>
       <Lbl c={c}>{t.yourRoleLbl||'Your role'} <span style={{fontWeight:'400',textTransform:'none',fontSize:'11px'}}>({t.optionalLbl||'optional'})</span></Lbl>
-      {plan.customRoles?.length>0?<>
         <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'8px'}}>
           {plan.customRoles.map((r,i)=><button key={i} onClick={()=>setGuestRole(guestRole===r?'':r)} style={{padding:'8px 14px',borderRadius:'20px',border:`1px solid ${guestRole===r?mc+'60':c.BD}`,background:guestRole===r?`${mc}15`:c.CARD,color:guestRole===r?mc:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:guestRole===r?'700':'400'}}>{r}</button>)}
         </div>
         <input value={plan.customRoles.includes(guestRole)?'':guestRole} onChange={e=>{setGuestRole(e.target.value);}} placeholder={t.otherRolePh||'Or type your own...'} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
-      </>:<input value={guestRole} onChange={e=>setGuestRole(e.target.value)} placeholder={t.yourRolePh||'e.g. Manager, Student, Client...'} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
     </div>}
 
         {/* DATE + START TIME VOTING */}
@@ -215,7 +211,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
       })}
     </div>}
 
-    {plan.mode!=='professional'&&<div style={{marginBottom:'14px'}}>
+    <div style={{marginBottom:'14px'}}>
       <Lbl c={c}>{t.howGet} <span style={{fontWeight:'400',textTransform:'none',fontSize:'11px'}}>{t.howOpt}</span></Lbl>
       <select value={how} onChange={e=>setHow(e.target.value)} style={{background:c.CARD,border:`1px solid ${c.BD}`,color:how?c.T:c.M,fontSize:'14px',padding:'12px 14px',borderRadius:'10px',width:'100%',fontFamily:'inherit',marginBottom:how==='other'?'8px':'0'}}>
         <option value="">—</option>
@@ -225,7 +221,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
         <option value="other">{t.other}</option>
       </select>
       {how==='other'&&<Inp value={howOther} onChange={setHowOther} placeholder={t.otherPh} c={c}/>}
-    </div>}
+    </div>
 
     {/* POLL VOTE */}
     {plan.poll?.q&&<div style={{marginBottom:'16px'}}>
@@ -241,7 +237,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
     </div>
 
     {err&&<div style={{color:'#ef4444',fontSize:'13px',padding:'8px 12px',background:'#ef444410',borderRadius:'8px',border:'1px solid #ef444430',marginBottom:'10px'}}>{err}</div>}
-    <Btn onClick={submit} disabled={!name.trim()||saving} full style={{padding:'15px',fontSize:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?t.saving:plan.mode==='professional'?(t.confirmAttendance):plan.mode==='intimate'?(t.confirmBtn):t.saveAvail}</Btn>
+    <Btn onClick={submit} disabled={!name.trim()||saving} full style={{padding:'15px',fontSize:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?t.saving:t.saveAvail}</Btn>
   </div>);
 }
 
