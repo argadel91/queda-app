@@ -201,19 +201,34 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       <Back onClick={step===0?onBack:()=>changeStep(step-1)} label={t.back} c={c}/>
       <Stepper cur={step} labels={stepLabels} c={c} accent={mc}/>
 
-      {/* ── STEP 0: BASICS — invitation card wizard ── */}
-      {step===0&&<>
-        {/* INVITATION CARD — live preview */}
-        <div style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'20px',padding:'24px 20px',textAlign:'center',marginBottom:'24px',minHeight:'180px',display:'flex',flexDirection:'column',justifyContent:'center',transition:'all .3s ease'}}>
-          <div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'11px',color:mc,letterSpacing:'.1em',textTransform:'uppercase',marginBottom:'12px'}}>queda.</div>
-          {name.trim()?<div style={{fontFamily:"'Syne',serif",fontSize:'24px',fontWeight:'800',color:c.T,marginBottom:'6px',lineHeight:1.2}}>{name}</div>:<div style={{fontSize:'20px',color:c.BD,fontStyle:'italic',marginBottom:'6px'}}>{isEs?'Tu plan...':'Your plan...'}</div>}
-          {desc&&<div style={{fontSize:'13px',color:c.M2,marginBottom:'8px',lineHeight:1.5}}>"{desc}"</div>}
-          <div style={{fontSize:'12px',color:c.M2}}>{isEs?'Organiza':'By'}: <strong style={{color:c.T}}>{org||profile?.name||'—'}</strong>{orgRole?` · ${orgRole}`:''}</div>
-          {subStep>=3&&<div style={{marginTop:'8px',fontSize:'12px'}}>{isPublic?<span style={{color:mc}}>🌍 {isEs?'Público':'Public'}</span>:<span style={{color:c.M2}}>🔒 {isEs?'Privado':'Private'}</span>}</div>}
-          {hasDeadline&&deadline&&<div style={{marginTop:'4px',fontSize:'11px',color:c.M2}}>⏰ Deadline: {new Date(deadline).toLocaleDateString()}</div>}
-        </div>
+      {/* ── GLOBAL INVITATION CARD — live preview across all steps ── */}
+      <div style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'20px',padding:'20px 16px',textAlign:'center',marginBottom:'20px',transition:'all .3s ease'}}>
+        <div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'11px',color:mc,letterSpacing:'.1em',textTransform:'uppercase',marginBottom:'10px'}}>queda.</div>
+        {name.trim()?<div style={{fontFamily:"'Syne',serif",fontSize:'22px',fontWeight:'800',color:c.T,marginBottom:'4px',lineHeight:1.2}}>{name}</div>:<div style={{fontSize:'18px',color:c.BD,fontStyle:'italic',marginBottom:'4px'}}>{isEs?'Tu plan...':'Your plan...'}</div>}
+        {desc&&<div style={{fontSize:'12px',color:c.M2,marginBottom:'6px',lineHeight:1.4}}>"{desc}"</div>}
+        <div style={{fontSize:'11px',color:c.M2}}>{isEs?'Organiza':'By'}: <strong style={{color:c.T}}>{org||profile?.name||'—'}</strong>{orgRole?` · ${orgRole}`:''}</div>
+        {(subStep>=3||step>0)&&<div style={{marginTop:'6px',fontSize:'11px'}}>{isPublic?<span style={{color:mc}}>🌍 {isEs?'Público':'Public'}</span>:<span style={{color:c.M2}}>🔒 {isEs?'Privado':'Private'}</span>}</div>}
+        {hasDeadline&&deadline&&<div style={{marginTop:'3px',fontSize:'10px',color:c.M2}}>⏰ {new Date(deadline).toLocaleDateString()}</div>}
+        {/* Stops preview */}
+        {stops.some(s=>(s.options||[]).some(o=>o.name))&&<div style={{marginTop:'10px',borderTop:`1px solid ${mc}20`,paddingTop:'10px'}}>
+          {stops.filter(s=>(s.options||[]).some(o=>o.name)).map((s,i)=>{const opt=(s.options||[])[0]||{};return<div key={s.id} style={{display:'flex',alignItems:'center',gap:'6px',justifyContent:'center',marginBottom:'3px',fontSize:'11px',color:c.M2}}>
+            <span style={{color:mc,fontWeight:'700'}}>{i+1}.</span>
+            {opt.photo&&<img src={opt.photo} alt="" style={{width:'20px',height:'20px',borderRadius:'4px',objectFit:'cover'}}/>}
+            <span>{opt.name}</span>
+            {s.startTime&&<span style={{color:c.M}}>· {s.startTime}</span>}
+          </div>;})}
+        </div>}
+        {/* Dates preview */}
+        {selDates.length>0&&<div style={{marginTop:'8px',display:'flex',gap:'4px',justifyContent:'center',flexWrap:'wrap'}}>
+          {selDates.slice(0,4).map(d=><span key={d} style={{fontSize:'10px',padding:'2px 8px',borderRadius:'10px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`}}>{fmtShort(d,lang)}</span>)}
+          {selDates.length>4&&<span style={{fontSize:'10px',color:c.M2}}>+{selDates.length-4}</span>}
+        </div>}
+        {/* Extras preview */}
+        {dressCode?.length>0&&<div style={{marginTop:'6px',fontSize:'10px',color:c.M2}}>👗 {Array.isArray(dressCode)?dressCode.join(', '):dressCode}</div>}
+      </div>
 
-        {/* CURRENT QUESTION — only one visible at a time */}
+      {/* ── STEP 0: BASICS ── */}
+      {step===0&&<>
         {subStep===0&&<div style={{textAlign:'center',padding:'8px 0'}}>
           <div style={{fontSize:'18px',color:c.T,fontWeight:'700',marginBottom:'12px'}}>{isEs?'¿Cómo se llama tu plan?':'What\'s your plan called?'}</div>
           <Inp value={name} onChange={setName} placeholder={t.planNamePh||'e.g. Dinner at Luigi\'s...'} c={c}/>
