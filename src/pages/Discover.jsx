@@ -18,7 +18,8 @@ export default function Discover({onBack,onJoin,c,lang,profile}){
   const userAge=profile?.birthdate?Math.floor((Date.now()-new Date(profile.birthdate).getTime())/31557600000):null;
   const filtered=plans.filter(p=>{
     const matchText=!fc||p.city?.toLowerCase().includes(fc.toLowerCase())||p.name?.toLowerCase().includes(fc.toLowerCase());
-    const matchMode=modeF==='all'||p.mode===modeF;
+    const cat=p.pubFilter?.category||p.mode||'social';
+    const matchMode=modeF==='all'||cat===modeF;
     if(!matchText||!matchMode)return false;
     // Apply plan's public filters
     const f=p.pubFilter;
@@ -38,7 +39,7 @@ export default function Discover({onBack,onJoin,c,lang,profile}){
     return{...p,_dist:dist};
   });
   const sorted=sortBy==='distance'&&hasLoc?[...withDist].sort((a,b)=>(a._dist??Infinity)-(b._dist??Infinity)):withDist;
-  const modes=[{k:'all',l:t.allLbl},{k:'social',l:'👥 Social'},{k:'intimate',l:'💘 Íntimo'},{k:'professional',l:'💼 Pro'}];
+  const modes=[{k:'all',l:t.allLbl||'All'},{k:'social',l:'🎉 Social'},{k:'dating',l:lang==='es'?'💘 Citas':'💘 Dating'},{k:'professional',l:'💼 Pro'}];
   return(<div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
     <Back onClick={onBack} label={t.back} c={c}/>
     <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'4px'}}>{t.discoverT}</h2>

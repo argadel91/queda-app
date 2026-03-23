@@ -96,6 +96,17 @@ export default function Share({plan,onViewResults,onBack,c,lang}){
   {!showFilters?<Btn onClick={()=>setShowFilters(true)} full sm c={c}>{t.makePublicBtn}</Btn>
   :<div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
     <div>
+      <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{lang==='es'?'Categoría':'Category'}</div>
+      <div style={{display:'flex',gap:'4px'}}>
+        {[{v:'social',l:'🎉 Social',sub:lang==='es'?'Todo lo demás':'Everything else'},{v:'dating',l:'💘 '+(lang==='es'?'Citas':'Dating'),sub:lang==='es'?'Conocer gente':'Meet people'},{v:'professional',l:'💼 Pro',sub:lang==='es'?'Trabajo y estudios':'Work & studies'}].map(o=>
+          <button key={o.v} onClick={()=>setPubFilter(f=>({...f,category:o.v}))} style={{flex:1,padding:'8px 4px',borderRadius:'10px',border:`1px solid ${(pubFilter.category||'social')===o.v?mc+'60':c.BD}`,background:(pubFilter.category||'social')===o.v?`${mc}15`:c.CARD2,cursor:'pointer',textAlign:'center'}}>
+            <div style={{fontSize:'12px',color:(pubFilter.category||'social')===o.v?mc:c.T,fontWeight:(pubFilter.category||'social')===o.v?'700':'400'}}>{o.l}</div>
+            <div style={{fontSize:'10px',color:c.M2,marginTop:'1px'}}>{o.sub}</div>
+          </button>
+        )}
+      </div>
+    </div>
+    <div>
       <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterGender||'Who can join?'}</div>
       <div style={{display:'flex',gap:'4px',flexWrap:'wrap'}}>
         {[{v:'any',l:t.filterAny||'Anyone'},{v:'female',l:t.genderFemale||'Women only'},{v:'male',l:t.genderMale||'Men only'},{v:'other',l:t.genderOther||'Other only'}].map(o=>
