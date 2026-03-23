@@ -1,3 +1,4 @@
+# CI: run Playwright e2e tests on push to main
 name: Tests
 on:
   push:
