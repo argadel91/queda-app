@@ -366,29 +366,6 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
           }} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
         </Card>}
 
-        {/* Participation table — if multiple dates */}
-        {plan.dates?.length>1&&total>0&&<Card c={c}>
-          <Lbl c={c}>📊 {t.participationSummary||'Participation'}</Lbl>
-          {slots.filter(s=>cntY(s.key)>0).sort((a,b)=>cntY(b.key)-cntY(a.key)).map((s,i)=>{
-            const ny=cntY(s.key);const nm=cntM(s.key);
-            const isBest=i===0;
-            return<div key={s.key} style={{padding:'10px 0',borderBottom:i<slots.length-1?`1px solid ${c.BD}`:'none'}}>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'4px'}}>
-                <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
-                  {isBest&&<span>⭐</span>}
-                  <span style={{fontSize:'14px',color:isBest?mc:c.T,fontWeight:isBest?'700':'400',textTransform:'capitalize'}}>{fmtShort(s.date,lang)}{s.startTime?' · '+s.startTime:''}</span>
-                </div>
-                <span style={{fontSize:'13px',color:mc,fontWeight:'700'}}>{ny} ✅{nm>0?` ${nm} 🤔`:''}</span>
-              </div>
-              {/* Progress bar */}
-              <div style={{height:'6px',background:c.BD,borderRadius:'3px',overflow:'hidden'}}>
-                <div style={{height:'100%',width:`${total>0?ny/total*100:0}%`,background:isBest?mc:'#22c55e',borderRadius:'3px'}}/>
-              </div>
-              {/* Confirm button for organizer */}
-              {isOrgRef.current&&!plan.confirmedDate&&isBest&&<button onClick={()=>confirmDate(s.date,s.startTime)} style={{marginTop:'6px',padding:'6px 14px',background:mc,border:'none',borderRadius:'8px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:'700'}}>{t.confirmBtn||'Confirm'}</button>}
-            </div>;
-          })}
-        </Card>}
       </div>}
 
       {/* SUMMARY tab = Ranking + collapsible vote bars, per-person, comments */}
