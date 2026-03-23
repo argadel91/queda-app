@@ -7,6 +7,7 @@ import { genId, fmtShort } from '../lib/utils.js'
 import { Btn, Card, Lbl, Inp, Txa, HR, Back, ModeBadge, Stepper, Badge } from '../components/ui.jsx'
 import CalendarPicker from '../components/CalendarPicker.jsx'
 import MapModal from '../components/MapModal.jsx'
+import CityInput from '../components/CityInput.jsx'
 import { getCityTz, getTzLabel, getGMTOffset, getUserTz } from '../constants/weather.js'
 import WeatherWidget from '../components/WeatherWidget.jsx'
 
@@ -254,21 +255,24 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
                 <input type="number" min="13" max="99" value={pubFilter.ageMax} onChange={e=>setPubFilter(f=>({...f,ageMax:e.target.value}))} placeholder="--" style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
               </div>
             </div>
-            {/* Distance — slider + special options */}
+            {/* Distance */}
             <div>
               <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterRadius||'Max distance'}</div>
               <div style={{display:'flex',gap:'4px',marginBottom:'8px'}}>
-                {[{v:'world',l:isEs?'🌍 Todo el mundo':'🌍 Worldwide'},{v:'online',l:isEs?'💻 Online':'💻 Online'}].map(o=>
-                  <button key={o.v} onClick={()=>setPubFilter(f=>({...f,radius:o.v,radiusKm:''}))} style={{flex:1,padding:'6px 10px',borderRadius:'20px',border:`1px solid ${pubFilter.radius===o.v?mc+'60':c.BD}`,background:pubFilter.radius===o.v?`${mc}15`:c.CARD,color:pubFilter.radius===o.v?mc:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:pubFilter.radius===o.v?'600':'400'}}>{o.l}</button>
+                {[{v:'km',l:isEs?'📍 Radio':'📍 Radius'},{v:'world',l:isEs?'🌍 Todo el mundo':'🌍 Worldwide'},{v:'online',l:'💻 Online'}].map(o=>
+                  <button key={o.v} onClick={()=>setPubFilter(f=>({...f,radius:o.v}))} style={{flex:1,padding:'6px 10px',borderRadius:'20px',border:`1px solid ${pubFilter.radius===o.v?mc+'60':c.BD}`,background:pubFilter.radius===o.v?`${mc}15`:c.CARD,color:pubFilter.radius===o.v?mc:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:pubFilter.radius===o.v?'600':'400'}}>{o.l}</button>
                 )}
               </div>
-              {pubFilter.radius!=='world'&&pubFilter.radius!=='online'&&<>
-                <input type="range" min="1" max="100" value={pubFilter.radiusKm||50} onChange={e=>setPubFilter(f=>({...f,radius:'km',radiusKm:e.target.value}))} style={{width:'100%',accentColor:mc}}/>
-                <div style={{display:'flex',justifyContent:'space-between',fontSize:'11px',color:c.M2}}>
+              {pubFilter.radius==='km'&&<>
+                <input type="range" min="1" max="100" value={pubFilter.radiusKm||50} onChange={e=>setPubFilter(f=>({...f,radiusKm:e.target.value}))} style={{width:'100%',accentColor:mc}}/>
+                <div style={{display:'flex',justifyContent:'space-between',fontSize:'11px',color:c.M2,marginBottom:'8px'}}>
                   <span>1 km</span>
                   <span style={{color:mc,fontWeight:'700'}}>{pubFilter.radiusKm||50} km</span>
                   <span>100 km</span>
                 </div>
+                <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{isEs?'📍 ¿Desde dónde?':'📍 From where?'}</div>
+                <CityInput value={pubFilter.radiusCity||''} onChange={v=>setPubFilter(f=>({...f,radiusCity:v}))} onSelect={d=>setPubFilter(f=>({...f,radiusCity:d.label,radiusLat:d.lat,radiusLon:d.lon}))} placeholder={isEs?'Ciudad de referencia...':'Reference city...'} c={c}/>
+                <div style={{fontSize:'11px',color:c.M2,marginTop:'4px'}}>{isEs?'Si no eliges, se usa tu ubicación de perfil':'If empty, your profile location is used'}</div>
               </>}
             </div>
           </div>}
