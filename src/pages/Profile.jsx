@@ -23,9 +23,9 @@ export default function Profile({onBack,onOpen,c,lang,authUser,profile,onUpdateP
   const[userLon,setUserLon]=useState(profile?.lon||null);
   const saveName=async()=>{if(!newName.trim())return;await onUpdateProfile({name:newName.trim(),username:newUsername.trim()||null});setEditingName(false);};
   const[tab,setTab]=useState('upcoming');
-  const[dates,setDates]=useState({});const[modes,setModes]=useState({});
+  const[dates,setDates]=useState({});const[modes,setModes]=useState({});const[fullPlans,setFullPlans]=useState({});
   const now=dayStart();
-  useEffect(()=>{plans.forEach(async p=>{if(!dates[p.id]){const full=await loadPlan(p.id);if(full){setDates(prev=>({...prev,[p.id]:full.confirmedDate||full.dates?.[0]||null}));setModes(prev=>({...prev,[p.id]:full.mode||p.mode||'social'}));}}})},[]);
+  useEffect(()=>{plans.forEach(async p=>{if(!dates[p.id]){const full=await loadPlan(p.id);if(full){setDates(prev=>({...prev,[p.id]:full.confirmedDate||full.dates?.[0]||null}));setModes(prev=>({...prev,[p.id]:full.mode||p.mode||'social'}));setFullPlans(prev=>({...prev,[p.id]:full}));}}})},[]);
   const isPast=id=>{const d=dates[id];if(!d)return false;return new Date(d+'T23:59:59')<now;};
   const sortByDate=arr=>[...arr].sort((a,b)=>(dates[a.id]||'9999').localeCompare(dates[b.id]||'9999'));
   const upcoming=sortByDate(plans.filter(p=>!isPast(p.id)));
@@ -129,18 +129,30 @@ export default function Profile({onBack,onOpen,c,lang,authUser,profile,onUpdateP
     :shown.map(p=>{
       const mode=modes[p.id]||p.mode||'social';const mc=getMC(mode,c);const d=dates[p.id];
       const du=d?daysUntil(d):null;const isToday=du===0;const isTmrw=du===1;const isSoon=du!=null&&du<=3&&du>=0;
-      return(<div key={p.id} onClick={()=>{ls.set('q_seen_'+p.id,Date.now());onOpen(p.id);}} style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'16px',padding:'16px',marginBottom:'10px',cursor:'pointer',opacity:isPast(p.id)?0.6:1}}>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
-          <div>
-            <div style={{fontFamily:'monospace',fontSize:'24px',fontWeight:'900',color:mc,letterSpacing:'.15em'}}>{p.id}</div>
-            {p.name&&<div style={{fontSize:'14px',color:c.T,fontWeight:'600',marginTop:'4px'}}>{p.name}</div>}
-          </div>
-          <div style={{display:'flex',gap:'5px',flexShrink:0}}>
-            {d&&<span style={{fontSize:'12px',padding:'3px 10px',borderRadius:'10px',background:isSoon?`${mc}20`:c.CARD2,color:isSoon?mc:c.M2,border:`1px solid ${isSoon?mc+'40':c.BD}`,fontWeight:isSoon?'700':'400',textTransform:'capitalize'}}>{isToday?(t.todayLbl):isTmrw?(t.tomorrowLbl):fmtShort(d,lang)}</span>}
-            <button onClick={e=>{e.stopPropagation();setConfirm(p);}} style={{background:'none',border:'1px solid #ff444430',borderRadius:'8px',padding:'4px 8px',color:'#ff6666',cursor:'pointer',fontSize:'12px'}}>×</button>
-          </div>
+      const fp=fullPlans[p.id];
+      const stopsWithName=(fp?.stops||[]).filter(s=>(s.options||[]).some(o=>o.name));
+      return(<div key={p.id} onClick={()=>{ls.set('q_seen_'+p.id,Date.now());onOpen(p.id);}} style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'16px',padding:'16px',marginBottom:'12px',cursor:'pointer',opacity:isPast(p.id)?0.6:1}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'8px'}}>
+          <div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'11px',color:mc,letterSpacing:'.08em',textTransform:'uppercase'}}>queda.</div>
+          <button onClick={e=>{e.stopPropagation();setConfirm(p);}} style={{background:'none',border:'none',color:'#ff666640',cursor:'pointer',fontSize:'14px',padding:'0'}}>×</button>
         </div>
-        <div style={{fontSize:'11px',color:c.M2,marginTop:'6px'}}>{p.role==='organizer'?t.organizer:t.guest}</div>
+        <div style={{textAlign:'center',marginBottom:'8px'}}>
+          <div style={{fontFamily:'monospace',fontSize:'28px',fontWeight:'900',color:mc,letterSpacing:'.15em'}}>{p.id}</div>
+          {p.name&&<div style={{fontSize:'14px',color:c.T,fontWeight:'600',marginTop:'4px'}}>{p.name}</div>}
+          <div style={{fontSize:'11px',color:c.M2,marginTop:'2px'}}>{p.role==='organizer'?t.organizer:t.guest}{fp?.organizer?' · '+fp.organizer:''}</div>
+        </div>
+        {d&&<div style={{textAlign:'center',marginBottom:'6px'}}>
+          <span style={{fontSize:'13px',padding:'3px 12px',borderRadius:'10px',background:isSoon?`${mc}20`:c.CARD2,color:isSoon?mc:c.T,border:`1px solid ${isSoon?mc+'40':c.BD}`,fontWeight:'600',textTransform:'capitalize'}}>{isToday?t.todayLbl:isTmrw?t.tomorrowLbl:fmtShort(d,lang)}{fp?.startTimes?.[0]?' · '+fp.startTimes[0]:''}</span>
+        </div>}
+        {stopsWithName.length>0&&<div style={{borderTop:`1px solid ${mc}20`,paddingTop:'6px',marginTop:'6px'}}>
+          {stopsWithName.slice(0,3).map((s,si)=>{const opt=(s.options||[])[0]||{};return<div key={si} style={{display:'flex',alignItems:'center',gap:'5px',justifyContent:'center',fontSize:'11px',color:c.M2,marginBottom:'2px'}}>
+            <span style={{color:mc,fontWeight:'700'}}>{si+1}.</span>
+            {opt.photo&&<img src={opt.photo} alt="" style={{width:'16px',height:'16px',borderRadius:'3px',objectFit:'cover'}}/>}
+            <span>{opt.name}</span>
+            {opt.rating&&<span style={{color:mc,fontSize:'10px'}}>⭐{opt.rating}</span>}
+          </div>;})}
+          {stopsWithName.length>3&&<div style={{fontSize:'10px',color:c.M2,textAlign:'center'}}>+{stopsWithName.length-3}</div>}
+        </div>}
       </div>);
     })}
   </div>);
