@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import T from '../constants/translations.js'
-import { ls, getMyPlans } from '../lib/storage.js'
-import { db, loadResps, updatePlan } from '../lib/supabase.js'
-import { Btn, Card, Lbl, Back, HR } from '../components/ui.jsx'
+import { db, loadResps } from '../lib/supabase.js'
+import { Btn, Lbl, Back } from '../components/ui.jsx'
 
 const FLAGS={es:'\u{1F1EA}\u{1F1F8}',en:'\u{1F1EC}\u{1F1E7}',pt:'\u{1F1F5}\u{1F1F9}',fr:'\u{1F1EB}\u{1F1F7}',de:'\u{1F1E9}\u{1F1EA}',it:'\u{1F1EE}\u{1F1F9}'};
 const LANGS=['es','en','pt','fr','de','it'];
