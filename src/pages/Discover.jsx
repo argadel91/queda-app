@@ -39,7 +39,7 @@ export default function Discover({onBack,onJoin,c,lang,profile}){
     return{...p,_dist:dist};
   });
   const sorted=sortBy==='distance'&&hasLoc?[...withDist].sort((a,b)=>(a._dist??Infinity)-(b._dist??Infinity)):withDist;
-  const modes=[{k:'all',l:t.allLbl||'All'},{k:'social',l:'🎉 Social'},{k:'dating',l:lang==='es'?'💘 Citas':'💘 Dating'},{k:'professional',l:'💼 Pro'}];
+  const modes=[{k:'all',l:t.allLbl||'All'},{k:'social',l:'🎉 Social'},{k:'dating',l:'💘 '+(t.catDatingLabel||'Dating')},{k:'professional',l:'💼 Pro'}];
   return(<div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
     <Back onClick={onBack} label={t.back} c={c}/>
     <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'4px'}}>{t.discoverT}</h2>

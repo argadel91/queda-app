@@ -220,7 +220,7 @@ export default function App(){
             </button>)}
           </div>}
         </div>
-        <button onClick={tgTheme} title={theme==='dark'?(lang==='es'?'Modo claro':'Light mode'):(lang==='es'?'Modo oscuro':'Dark mode')} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'6px 10px',cursor:'pointer',fontSize:'15px'}}>{theme==='dark'?'☀️':'🌙'}</button>
+        <button onClick={tgTheme} title={theme==='dark'?(T[lang]?.lightMode||'Light mode'):(T[lang]?.darkMode||'Dark mode')} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'6px 10px',cursor:'pointer',fontSize:'15px'}}>{theme==='dark'?'☀️':'🌙'}</button>
         {authUser&&<div style={{position:'relative'}} onClick={e=>e.stopPropagation()}>
           <button onClick={e=>{e.stopPropagation();setAvatarOpen(o=>!o);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 10px',cursor:'pointer',fontSize:'13px',color:c.T,fontFamily:'inherit',fontWeight:'500',display:'flex',alignItems:'center',gap:'5px'}}>
             <span style={{width:'22px',height:'22px',borderRadius:'50%',background:c.A,color:'#0A0A0A',display:'inline-flex',alignItems:'center',justifyContent:'center',fontSize:'11px',fontWeight:'800',flexShrink:0}}>{(profile?.name||authUser.email||'?')[0].toUpperCase()}</span>
@@ -228,7 +228,7 @@ export default function App(){
             <span style={{fontSize:'10px',color:c.M}}>▾</span>
           </button>
           {avatarOpen&&<div style={{position:'absolute',right:0,top:'calc(100% + 4px)',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',boxShadow:'0 8px 24px rgba(0,0,0,.3)',zIndex:100,overflow:'hidden',minWidth:'150px'}}>
-            <button onClick={e=>{e.stopPropagation();nav('profile');setAvatarOpen(false);}} style={{display:'flex',alignItems:'center',gap:'8px',width:'100%',padding:'11px 14px',background:'transparent',border:'none',borderBottom:`1px solid ${c.BD}`,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',color:c.T,textAlign:'left'}}>👤 {lang==='es'?'Mi perfil':'My profile'}</button>
+            <button onClick={e=>{e.stopPropagation();nav('profile');setAvatarOpen(false);}} style={{display:'flex',alignItems:'center',gap:'8px',width:'100%',padding:'11px 14px',background:'transparent',border:'none',borderBottom:`1px solid ${c.BD}`,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',color:c.T,textAlign:'left'}}>👤 {T[lang]?.myProfile||'My profile'}</button>
             <button onClick={e=>{e.stopPropagation();handleSignOut();setAvatarOpen(false);}} style={{display:'flex',alignItems:'center',gap:'8px',width:'100%',padding:'11px 14px',background:'transparent',border:'none',cursor:'pointer',fontFamily:'inherit',fontSize:'13px',color:'#ef4444',textAlign:'left'}}>🚪 {T[lang]?.signOut||'Cerrar sesión'}</button>
           </div>}
         </div>}

@@ -19,7 +19,7 @@ const RouteMap = React.lazy(() => import('../components/RouteMap.jsx'))
 import VenueInfo from '../components/VenueInfo.jsx'
 
 export default function Results({plan:ip,onBack,isOrg,c,lang}){
-  const[plan,setPlan]=useState(ip);const t=T[lang];const isEs=lang==='es';
+  const[plan,setPlan]=useState(ip);const t=T[lang];
   const mc=getMC(plan.mode,c);
   const[tab,setTab]=useState('who');const[rs,setRs]=useState([]);const[ldg,setL]=useState(true);
   const[conf,setConf]=useState(false);const[remSent,setRem]=useState(false);
@@ -47,7 +47,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
         setTimeout(()=>setAlert(null),4000);
         // Browser notification if permission granted
         if(Notification.permission==='granted'){
-          new Notification(plan.name,{body:(plan.lang==='es'?`Nueva respuesta de ${who}`:`New response from ${who}`),icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">📅</text></svg>'});
+          new Notification(plan.name,{body:((T[plan.lang]?.newRespNotif||'New response from')+' '+who),icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">📅</text></svg>'});
         }
       }
     }
@@ -177,9 +177,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
         const awaiting=slots.length>0?0:0; // placeholder
         if(!topDate||topY===0)return null;
         const topLbl=fmtShort(topDate.date,lang)+(topDate.startTime?' · '+topDate.startTime:'');
-        const msg=isEs
-          ?`${topY} de ${total} puede${topY!==1?'n':''} el ${topLbl}${topM>0?` · ${topM} quizás`:''}${noResp>0?` · ${noResp} sin responder`:''}.`
-          :`${topY} of ${total} can make ${topLbl}${topM>0?` · ${topM} maybe`:''}${noResp>0?` · ${noResp} yet to respond`:''}.`;
+        const msg=t.summaryMsg?t.summaryMsg(topY,total,topLbl,topM,noResp):`${topY} of ${total} can make ${topLbl}${topM>0?` · ${topM} maybe`:''}${noResp>0?` · ${noResp} yet to respond`:''}.`;
         return(<div style={{background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'12px',padding:'12px 16px',marginBottom:'14px',display:'flex',justifyContent:'space-between',alignItems:'center',gap:'10px'}}>
           <div style={{fontSize:'14px',color:c.T,fontWeight:'500',lineHeight:1.4}}>{msg}</div>
           <Btn onClick={()=>confirmDate(topDate.date,topDate.startTime)} disabled={conf} sm c={c} accent={mc} style={{flexShrink:0,fontSize:'12px',padding:'8px 12px'}}>{conf?'...':t.confirmBtn2}</Btn>

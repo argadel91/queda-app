@@ -4,7 +4,7 @@ import CityInput from '../components/CityInput.jsx'
 import { Btn, Lbl, Back } from '../components/ui.jsx'
 
 export default function Profile({onBack,c,lang,authUser,profile,onUpdateProfile,onSignOut}){
-  const t=T[lang];const isEs=lang==='es';
+  const t=T[lang];
   const[editing,setEditing]=useState(false);
   const[newName,setNewName]=useState(profile?.name||'');
   const[newUsername,setNewUsername]=useState(profile?.username||'');
@@ -30,7 +30,7 @@ export default function Profile({onBack,c,lang,authUser,profile,onUpdateProfile,
 
   return(<div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
     <Back onClick={onBack} label={t.back} c={c}/>
-    <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'20px'}}>{isEs?'Mi perfil':'My profile'}</h2>
+    <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'20px'}}>{t.myProfile||'My profile'}</h2>
 
     <div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'16px',padding:'20px'}}>
       {!editing?<>
@@ -49,35 +49,35 @@ export default function Profile({onBack,c,lang,authUser,profile,onUpdateProfile,
           {age&&<span style={{fontSize:'13px',padding:'4px 12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'20px',color:c.T}}>{age} {t.yearsOld||'years'}</span>}
           {userCity&&<span style={{fontSize:'13px',padding:'4px 12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'20px',color:c.T}}>📍 {userCity}</span>}
         </div>
-        {(!gender||!birthdate||!userCity)&&<div style={{fontSize:'11px',color:c.M2,marginBottom:'12px'}}>{isEs?'Completa tu género, edad y ubicación para que te encuentren en Discover.':'Complete your gender, age and location so people can find you on Discover.'}</div>}
+        {(!gender||!birthdate||!userCity)&&<div style={{fontSize:'11px',color:c.M2,marginBottom:'12px'}}>{t.completeDiscoverHint||'Complete your gender, age and location so people can find you on Discover.'}</div>}
 
         <div style={{display:'flex',gap:'8px'}}>
-          <button onClick={()=>setEditing(true)} style={{flex:1,padding:'10px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:'600'}}>✏️ {isEs?'Editar':'Edit'}</button>
+          <button onClick={()=>setEditing(true)} style={{flex:1,padding:'10px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:'600'}}>✏️ {t.editBtn||'Edit'}</button>
           <button onClick={onSignOut} style={{flex:1,padding:'10px',background:'transparent',border:'1px solid #ef444440',borderRadius:'10px',color:'#ef4444',cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:'500'}}>{t.signOut}</button>
         </div>
       </>:<>
         {/* Edit mode */}
         <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
           <div>
-            <div style={{fontSize:'13px',color:c.M,marginBottom:'4px'}}>{isEs?'Nombre *':'Name *'}</div>
-            <input value={newName} onChange={e=>setNewName(e.target.value)} placeholder={isEs?'Tu nombre':'Your name'} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
+            <div style={{fontSize:'13px',color:c.M,marginBottom:'4px'}}>{t.nameLbl||'Name *'}</div>
+            <input value={newName} onChange={e=>setNewName(e.target.value)} placeholder={t.yourNamePh2||'Your name'} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
           </div>
           <div>
-            <div style={{fontSize:'13px',color:c.M,marginBottom:'4px'}}>{isEs?'Usuario *':'Username *'}</div>
+            <div style={{fontSize:'13px',color:c.M,marginBottom:'4px'}}>{t.usernameLbl||'Username *'}</div>
             <div style={{display:'flex',alignItems:'center',gap:'4px'}}>
               <span style={{color:c.M,fontSize:'15px',fontWeight:'600'}}>@</span>
               <input value={newUsername} onChange={e=>setNewUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g,'').slice(0,20))} placeholder="username" style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none'}}/>
             </div>
-            <div style={{fontSize:'11px',color:c.M2,marginTop:'4px'}}>{isEs?'Para que otros puedan encontrarte.':'So others can find you.'}</div>
+            <div style={{fontSize:'11px',color:c.M2,marginTop:'4px'}}>{t.usernameHint||'So others can find you.'}</div>
           </div>
           <div style={{height:'1px',background:c.BD,margin:'4px 0'}}/>
-          <div style={{fontSize:'12px',color:c.M2,marginBottom:'-4px'}}>{isEs?'Opcional — útil para planes públicos en Discover':'Optional — useful for public plans on Discover'}</div>
+          <div style={{fontSize:'12px',color:c.M2,marginBottom:'-4px'}}>{t.optionalDiscoverHint||'Optional — useful for public plans on Discover'}</div>
           <div>
             <div style={{fontSize:'13px',color:c.M,marginBottom:'4px'}}>{t.birthdateLbl||'Date of birth'}</div>
             <input type="date" value={birthdate} onChange={e=>setBirthdate(e.target.value)} max={new Date().toISOString().split('T')[0]} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
           </div>
           <div>
-            <div style={{fontSize:'13px',color:c.M,marginBottom:'4px'}}>{t.genderLbl||'Gender'} <span style={{color:c.M2,fontSize:'11px'}}>({isEs?'opcional':'optional'})</span></div>
+            <div style={{fontSize:'13px',color:c.M,marginBottom:'4px'}}>{t.genderLbl||'Gender'} <span style={{color:c.M2,fontSize:'11px'}}>({t.optionalWord||'optional'})</span></div>
             <div style={{display:'flex',gap:'6px'}}>
               {[{v:'female',l:t.genderFemale||'Woman'},{v:'male',l:t.genderMale||'Man'},{v:'other',l:t.genderOther||'Other'}].map(o=>
                 <button key={o.v} onClick={()=>setGender(gender===o.v?'':o.v)} style={{flex:1,padding:'10px 6px',borderRadius:'10px',border:`1px solid ${gender===o.v?c.A+'60':c.BD}`,background:gender===o.v?`${c.A}15`:c.CARD,color:gender===o.v?c.A:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:gender===o.v?'700':'400'}}>{o.l}</button>
@@ -86,8 +86,8 @@ export default function Profile({onBack,c,lang,authUser,profile,onUpdateProfile,
             {gender==='other'&&<input value={genderCustom} onChange={e=>setGenderCustom(e.target.value)} placeholder={t.genderCustomPh||'How do you identify?'} style={{marginTop:'6px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
           </div>
           <div>
-            <div style={{fontSize:'13px',color:c.M,marginBottom:'4px'}}>{t.locationLbl||'Location'} <span style={{color:c.M2,fontSize:'11px'}}>({isEs?'opcional':'optional'})</span></div>
-            <CityInput value={userCity} onChange={setUserCity} onSelect={d=>{setUserCity(d.city||d.label);setUserLat(d.lat);setUserLon(d.lon);}} placeholder={isEs?'Tu ciudad...':'Your city...'} c={c}/>
+            <div style={{fontSize:'13px',color:c.M,marginBottom:'4px'}}>{t.locationLbl||'Location'} <span style={{color:c.M2,fontSize:'11px'}}>({t.optionalWord||'optional'})</span></div>
+            <CityInput value={userCity} onChange={setUserCity} onSelect={d=>{setUserCity(d.city||d.label);setUserLat(d.lat);setUserLon(d.lon);}} placeholder={t.yourCityPh||'Your city...'} c={c}/>
           </div>
           <div style={{display:'flex',gap:'8px',marginTop:'4px'}}>
             <button onClick={()=>setEditing(false)} style={{flex:1,padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontWeight:'600',fontSize:'14px'}}>{t.cancel||'Cancel'}</button>

@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
+import T from '../constants/translations.js'
 import { addDays, toISO, dayStart, fmtShort, fmtMonthYear } from '../lib/utils.js'
 
 export default function CalendarPicker({selected,onChange,c,lang}){
+  const t=T[lang];
   const now=dayStart();const max=addDays(now,365);
   const[vy,setVy]=useState(now.getFullYear());const[vm,setVm]=useState(now.getMonth());
   const days=new Date(vy,vm+1,0).getDate();const first=(new Date(vy,vm,1).getDay()+6)%7;
@@ -11,9 +13,9 @@ export default function CalendarPicker({selected,onChange,c,lang}){
   const tog=iso=>onChange(selected.includes(iso)?selected.filter(d=>d!==iso):[...selected,iso]);
   return(<div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'14px',padding:'16px'}}>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'12px'}}>
-      <button onClick={prev} title={lang==='es'?'Mes anterior':'Previous month'} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'20px',padding:'2px 8px'}}>‹</button>
+      <button onClick={prev} title={t.prevMonth||'Previous month'} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'20px',padding:'2px 8px'}}>‹</button>
       <span style={{fontSize:'14px',fontWeight:'600',color:c.T,textTransform:'capitalize'}}>{fmtMonthYear(vy,vm,lang)}</span>
-      <button onClick={next} title={lang==='es'?'Mes siguiente':'Next month'} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'20px',padding:'2px 8px'}}>›</button>
+      <button onClick={next} title={t.nextMonth||'Next month'} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'20px',padding:'2px 8px'}}>›</button>
     </div>
     <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:'3px',marginBottom:'4px'}}>
       {dl.map((d,i)=><div key={i} style={{textAlign:'center',fontSize:'11px',color:c.M,fontWeight:'600',padding:'4px'}}>{d}</div>)}

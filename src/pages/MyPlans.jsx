@@ -7,7 +7,7 @@ import { daysUntil, fmtShort, dayStart } from '../lib/utils.js'
 import { Btn, Back } from '../components/ui.jsx'
 
 export default function MyPlans({onBack,onOpen,c,lang}){
-  const t=T[lang];const isEs=lang==='es';
+  const t=T[lang];
   const[plans,setPlans]=useState(getMyPlans());
   const[confirm,setConfirm]=useState(null);
   const[tab,setTab]=useState('upcoming');
@@ -26,7 +26,7 @@ export default function MyPlans({onBack,onOpen,c,lang}){
 
   return(<div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
     <Back onClick={onBack} label={t.back} c={c}/>
-    <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'20px'}}>{isEs?'Mis planes':'My plans'}</h2>
+    <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'20px'}}>{t.myPlansTitle||'My plans'}</h2>
 
     {confirm&&<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:100,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setConfirm(null)}>
       <div onClick={e=>e.stopPropagation()} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'16px',padding:'24px',width:'100%',maxWidth:'340px'}}>

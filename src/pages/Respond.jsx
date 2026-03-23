@@ -7,7 +7,7 @@ import { fmtDate, daysUntil } from '../lib/utils.js'
 import { Btn, Card, Lbl, Inp, Txa, HR, Back, ModeBadge } from '../components/ui.jsx'
 
 export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,authUser,profile}){
-  const pLang=appLang;const t=T[pLang];const isEs=pLang==='es';
+  const pLang=appLang;const t=T[pLang];
   const mc=getMC(plan.mode,c);
   const prevKey='q_myresp_'+plan.id;
   const prev=ls.get(prevKey,null);

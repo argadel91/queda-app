@@ -60,19 +60,19 @@ export default function Share({plan,onViewResults,onBack,c,lang}){
       <div style={{fontSize:'52px',marginBottom:'14px'}}>🎉</div>
       <h2 style={{fontFamily:"'Syne',serif",fontSize:'28px',fontWeight:'800',color:c.T,marginBottom:'8px'}}>{t.planCreated}</h2>
       <p style={{color:c.M2,fontSize:'14px'}}>{t.shareWith}</p>
-      <p style={{color:c.M,fontSize:'12px',marginTop:'8px'}}>{lang==='es'?'Ve a Mis planes para editar o añadir más detalles.':'Go to My plans to edit or add more details.'}</p>
+      <p style={{color:c.M,fontSize:'12px',marginTop:'8px'}}>{t.goToMyPlansHint||'Go to My plans to edit or add more details.'}</p>
     </div>
     <div style={{background:c.CARD,border:`1px solid ${mc}40`,borderRadius:'14px',padding:'20px',textAlign:'center',marginBottom:'14px'}}>
       <div style={{fontFamily:'monospace',fontSize:'58px',fontWeight:'900',color:mc,letterSpacing:'.2em',lineHeight:1,margin:'16px 0 12px'}}>{plan.id}</div>
       {plan.name&&<div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'4px'}}>{plan.name}</div>}
-      <div style={{fontSize:'13px',color:c.M2}}>@ {plan.organizer} · {plan.dates?.length||0} {lang==='es'?'fecha':'date'}{plan.dates?.length!==1?'s':''}</div>
+      <div style={{fontSize:'13px',color:c.M2}}>@ {plan.organizer} · {plan.dates?.length||0} {t.dateWord||'date'}{plan.dates?.length!==1?'s':''}</div>
     </div>
     {count!==null&&<div style={{textAlign:'center',padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',marginBottom:'14px',fontSize:'14px',color:c.T}}>
       {count===0?t.noResponsesYet:<><span style={{color:mc,fontWeight:'800',fontSize:'20px'}}>{count}</span> {t.personResponded(count)}</>}
     </div>}
     {/* Share button + dropdown */}
     <div style={{position:'relative',marginBottom:'14px'}}>
-      <Btn onClick={()=>setShareOpen(o=>!o)} full style={{padding:'16px',fontSize:'16px'}} c={c}>{isShareOpen?(lang==='es'?'Cerrar':'Close'):(lang==='es'?'Compartir':'Share')} ↗</Btn>
+      <Btn onClick={()=>setShareOpen(o=>!o)} full style={{padding:'16px',fontSize:'16px'}} c={c}>{isShareOpen?(t.closeBtn||'Close'):(t.shareBtn||'Share')} ↗</Btn>
       {isShareOpen&&<div style={{marginTop:'8px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'14px',overflow:'hidden'}}>
         <div style={{padding:'8px 14px',borderBottom:`1px solid ${c.BD}`}}>
           <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>{t.shareLangLbl||'Language'}</div>
@@ -96,9 +96,9 @@ export default function Share({plan,onViewResults,onBack,c,lang}){
   {!showFilters?<Btn onClick={()=>setShowFilters(true)} full sm c={c}>{t.makePublicBtn}</Btn>
   :<div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
     <div>
-      <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{lang==='es'?'Categoría':'Category'}</div>
+      <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.categoryLabel||'Category'}</div>
       <div style={{display:'flex',gap:'4px'}}>
-        {[{v:'social',l:'🎉 Social',sub:lang==='es'?'Todo lo demás':'Everything else'},{v:'dating',l:'💘 '+(lang==='es'?'Citas':'Dating'),sub:lang==='es'?'Conocer gente':'Meet people'},{v:'professional',l:'💼 Pro',sub:lang==='es'?'Trabajo y estudios':'Work & studies'}].map(o=>
+        {[{v:'social',l:'🎉 Social',sub:t.catSocialSub||'Everything else'},{v:'dating',l:'💘 '+(t.catDatingLabel||'Dating'),sub:t.catDatingSub||'Meet people'},{v:'professional',l:'💼 Pro',sub:t.catProSub||'Work & studies'}].map(o=>
           <button key={o.v} onClick={()=>setPubFilter(f=>({...f,category:o.v}))} style={{flex:1,padding:'8px 4px',borderRadius:'10px',border:`1px solid ${(pubFilter.category||'social')===o.v?mc+'60':c.BD}`,background:(pubFilter.category||'social')===o.v?`${mc}15`:c.CARD2,cursor:'pointer',textAlign:'center'}}>
             <div style={{fontSize:'12px',color:(pubFilter.category||'social')===o.v?mc:c.T,fontWeight:(pubFilter.category||'social')===o.v?'700':'400'}}>{o.l}</div>
             <div style={{fontSize:'10px',color:c.M2,marginTop:'1px'}}>{o.sub}</div>

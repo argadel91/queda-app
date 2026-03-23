@@ -41,7 +41,7 @@ const emptyStop = (id, suggestedStart) => ({
 });
 
 export default function Create({onBack,onCreated,c,lang,authUser,profile}){
-  const t=T[lang];const mc=c.A;const isEs=lang==='es';
+  const t=T[lang];const mc=c.A;
   const[step,setStep]=useState(0);
   const[name,setName]=useState('');const[desc,setDesc]=useState('');
   const[org,setOrg]=useState(profile?.name||ls.get('q_myname',''));
@@ -137,7 +137,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   const remOption=(stopId,optId)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.filter(o=>o.id!==optId)}:s));
   const updOption=(stopId,optionId,key,value)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.map(o=>o.id===optionId?{...o,[key]:value}:o)}:s));
 
-  const stepLabels=[isEs?'¿Cuándo?':'When?',isEs?'¿Dónde?':'Where?',isEs?'Nombre':'Name'];
+  const stepLabels=[t.whenTitle||'When?',t.whereTitle||'Where?',t.nameTitle||'Name'];
 
   const create=async()=>{
     setSaving(true);
@@ -287,7 +287,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       {/* ── INVITATION CARD — live preview ── */}
       <div style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'20px',padding:'16px 14px',textAlign:'center',marginBottom:'20px',transition:'all .3s ease'}}>
         <div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'11px',color:mc,letterSpacing:'.1em',textTransform:'uppercase',marginBottom:'8px'}}>queda.</div>
-        <div style={{fontSize:'12px',color:c.M2,marginBottom:'2px'}}>{isEs?'Organiza':'By'}: <strong style={{color:c.T}}>{profile?.name||'—'}</strong></div>
+        <div style={{fontSize:'12px',color:c.M2,marginBottom:'2px'}}>{t.organizedBy||'By'}: <strong style={{color:c.T}}>{profile?.name||'—'}</strong></div>
         {/* Date + time */}
         {selDates[0]&&<div style={{marginTop:'8px',fontSize:'14px',color:mc,fontWeight:'600',textTransform:'capitalize'}}>{fmtShort(selDates[0],lang)}{startTimes[0]?' · '+startTimes[0]:''}</div>}
         {/* Stops */}
@@ -305,35 +305,35 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
             </div>;})}
         </div>}
         {/* Empty state */}
-        {selDates.length===0&&!stops.some(s=>(s.options||[]).some(o=>o.name))&&<div style={{fontSize:'14px',color:c.BD,fontStyle:'italic',padding:'8px 0'}}>{isEs?'Tu plan se verá aquí...':'Your plan will appear here...'}</div>}
+        {selDates.length===0&&!stops.some(s=>(s.options||[]).some(o=>o.name))&&<div style={{fontSize:'14px',color:c.BD,fontStyle:'italic',padding:'8px 0'}}>{t.planPreviewEmpty||'Your plan will appear here...'}</div>}
       </div>
 
       {/* ── OLD STEP 0 REMOVED — basics are optional, added after creation ── */}
       {step===99&&<>
         {subStep===0&&<div style={{textAlign:'center',padding:'8px 0'}}>
-          <div style={{fontSize:'18px',color:c.T,fontWeight:'700',marginBottom:'12px'}}>{isEs?'¿Cómo se llama tu plan?':'What\'s your plan called?'}</div>
+          <div style={{fontSize:'18px',color:c.T,fontWeight:'700',marginBottom:'12px'}}>{t.whatsPlanName||"What's your plan called?"}</div>
           <Inp value={name} onChange={setName} placeholder={t.planNamePh||'e.g. Dinner at Luigi\'s...'} c={c}/>
           <button onClick={()=>setSubStep(1)} disabled={!name.trim()} style={{padding:'12px 32px',background:!name.trim()?c.BD:mc,color:'#0A0A0A',border:'none',borderRadius:'10px',fontSize:'15px',fontWeight:'700',cursor:!name.trim()?'not-allowed':'pointer',fontFamily:'inherit',opacity:!name.trim()?.4:1,marginTop:'12px'}}>→</button>
         </div>}
 
         {subStep===1&&<div style={{textAlign:'center',padding:'8px 0'}}>
-          <div style={{fontSize:'18px',color:c.T,fontWeight:'700',marginBottom:'4px'}}>{isEs?'Descríbelo':'Describe it'}</div>
-          <div style={{fontSize:'13px',color:c.M2,marginBottom:'12px'}}>{isEs?'Opcional — puedes dejarlo vacío':'Optional — you can skip this'}</div>
+          <div style={{fontSize:'18px',color:c.T,fontWeight:'700',marginBottom:'4px'}}>{t.describeIt||'Describe it'}</div>
+          <div style={{fontSize:'13px',color:c.M2,marginBottom:'12px'}}>{t.optionalSkip||'Optional — you can skip this'}</div>
           <Txa value={desc} onChange={setDesc} placeholder={t.descPh} rows={2} c={c}/>
           <button onClick={()=>setSubStep(2)} style={{padding:'12px 32px',background:mc,color:'#0A0A0A',border:'none',borderRadius:'10px',fontSize:'15px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',marginTop:'12px'}}>→</button>
         </div>}
 
         {subStep===2&&<div style={{textAlign:'center',padding:'8px 0'}}>
-          <div style={{fontSize:'18px',color:c.T,fontWeight:'700',marginBottom:'4px'}}>{isEs?'¿Cuál es tu rol?':'What\'s your role?'}</div>
-          <div style={{fontSize:'13px',color:c.M2,marginBottom:'12px'}}>{isEs?'Opcional — ej: profesor, cumpleañero...':'Optional — e.g. professor, birthday person...'}</div>
-          <Inp value={orgRole} onChange={setOrgRole} placeholder={isEs?'Tu rol...':'Your role...'} c={c}/>
+          <div style={{fontSize:'18px',color:c.T,fontWeight:'700',marginBottom:'4px'}}>{t.whatsYourRole||"What's your role?"}</div>
+          <div style={{fontSize:'13px',color:c.M2,marginBottom:'12px'}}>{t.optionalRoleHint||'Optional — e.g. professor, birthday person...'}</div>
+          <Inp value={orgRole} onChange={setOrgRole} placeholder={t.yourRolePh2||'Your role...'} c={c}/>
           <button onClick={()=>setSubStep(3)} style={{padding:'12px 32px',background:mc,color:'#0A0A0A',border:'none',borderRadius:'10px',fontSize:'15px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',marginTop:'12px'}}>→</button>
         </div>}
 
         {subStep===3&&<div style={{textAlign:'center',padding:'8px 0'}}>
-          <div style={{fontSize:'18px',color:c.T,fontWeight:'700',marginBottom:'12px'}}>{isEs?'¿Público o privado?':'Public or private?'}</div>
+          <div style={{fontSize:'18px',color:c.T,fontWeight:'700',marginBottom:'12px'}}>{t.publicOrPrivate||'Public or private?'}</div>
           <div style={{display:'flex',gap:'8px'}}>
-            {[{v:false,l:isEs?'🔒 Privado':'🔒 Private',sub:isEs?'Compártelo con quien elijas':'Share with who you choose'},{v:true,l:isEs?'🌍 Público':'🌍 Public',sub:isEs?'Compártelo con el mundo':'Share with the world'}].map(o=>
+            {[{v:false,l:t.privateLabel||'🔒 Private',sub:t.privateDesc||'Share with who you choose'},{v:true,l:t.publicLabel||'🌍 Public',sub:t.publicDesc||'Share with the world'}].map(o=>
               <button key={String(o.v)} onClick={()=>{setIsPublic(o.v);setSubStep(o.v?4:5);}} style={{flex:1,padding:'14px 8px',borderRadius:'12px',border:`1px solid ${c.BD}`,background:c.CARD,cursor:'pointer',textAlign:'center'}}>
                 <div style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>{o.l}</div>
                 <div style={{fontSize:'11px',color:c.M2,marginTop:'4px'}}>{o.sub}</div>
@@ -342,7 +342,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
         </div>}
 
         {isPublic&&subStep===4&&<div style={{padding:'8px 0'}}>
-          <div style={{fontSize:'18px',color:c.T,fontWeight:'700',marginBottom:'12px',textAlign:'center'}}>{isEs?'¿Quién puede unirse?':'Who can join?'}</div>
+          <div style={{fontSize:'18px',color:c.T,fontWeight:'700',marginBottom:'12px',textAlign:'center'}}>{t.whoCanJoin||'Who can join?'}</div>
           <div style={{display:'flex',flexDirection:'column',gap:'10px',padding:'14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px'}}>
             <div>
               <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterGender||'Gender'}</div>
@@ -364,15 +364,15 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
             <div>
               <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterRadius||'Max distance'}</div>
               <div style={{display:'flex',gap:'4px',marginBottom:'8px'}}>
-                {[{v:'km',l:isEs?'📍 Radio':'📍 Radius'},{v:'world',l:isEs?'🌍 Todo el mundo':'🌍 Worldwide'},{v:'online',l:'💻 Online'}].map(o=>
+                {[{v:'km',l:t.radiusLabel||'📍 Radius'},{v:'world',l:t.worldwideLabel||'🌍 Worldwide'},{v:'online',l:'💻 Online'}].map(o=>
                   <button key={o.v} onClick={()=>setPubFilter(f=>({...f,radius:o.v}))} style={{flex:1,padding:'6px 10px',borderRadius:'20px',border:`1px solid ${pubFilter.radius===o.v?mc+'60':c.BD}`,background:pubFilter.radius===o.v?`${mc}15`:c.CARD,color:pubFilter.radius===o.v?mc:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:pubFilter.radius===o.v?'600':'400'}}>{o.l}</button>
                 )}
               </div>
               {pubFilter.radius==='km'&&<>
                 <input type="range" min="1" max="100" value={pubFilter.radiusKm||50} onChange={e=>setPubFilter(f=>({...f,radiusKm:e.target.value}))} style={{width:'100%',accentColor:mc}}/>
                 <div style={{display:'flex',justifyContent:'space-between',fontSize:'11px',color:c.M2,marginBottom:'8px'}}><span>1 km</span><span style={{color:mc,fontWeight:'700'}}>{pubFilter.radiusKm||50} km</span><span>100 km</span></div>
-                <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{isEs?'📍 ¿Desde dónde?':'📍 From where?'}</div>
-                <CityInput value={pubFilter.radiusCity||''} onChange={v=>setPubFilter(f=>({...f,radiusCity:v}))} onSelect={d=>setPubFilter(f=>({...f,radiusCity:d.label,radiusLat:d.lat,radiusLon:d.lon}))} placeholder={isEs?'Ciudad de referencia...':'Reference city...'} c={c}/>
+                <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.fromWhere||'📍 From where?'}</div>
+                <CityInput value={pubFilter.radiusCity||''} onChange={v=>setPubFilter(f=>({...f,radiusCity:v}))} onSelect={d=>setPubFilter(f=>({...f,radiusCity:d.label,radiusLat:d.lat,radiusLon:d.lon}))} placeholder={t.refCityPh||'Reference city...'} c={c}/>
               </>}
             </div>
           </div>
@@ -380,14 +380,14 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
         </div>}
 
         {subStep===5&&<div style={{textAlign:'center',padding:'8px 0'}}>
-          <div style={{fontSize:'18px',color:c.T,fontWeight:'700',marginBottom:'12px'}}>{isEs?'¿Poner deadline?':'Set a deadline?'}</div>
+          <div style={{fontSize:'18px',color:c.T,fontWeight:'700',marginBottom:'12px'}}>{t.setDeadlineQ||'Set a deadline?'}</div>
           <div style={{display:'flex',gap:'8px',justifyContent:'center',marginBottom:'12px'}}>
             <button onClick={()=>{setHasDeadline(false);setDeadline('');}} style={{padding:'10px 20px',borderRadius:'10px',border:`1px solid ${!hasDeadline?mc+'50':c.BD}`,background:!hasDeadline?`${mc}15`:c.CARD,color:!hasDeadline?mc:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:!hasDeadline?'700':'400'}}>No</button>
-            <button onClick={()=>setHasDeadline(true)} style={{padding:'10px 20px',borderRadius:'10px',border:`1px solid ${hasDeadline?mc+'50':c.BD}`,background:hasDeadline?`${mc}15`:c.CARD,color:hasDeadline?mc:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:hasDeadline?'700':'400'}}>{isEs?'Sí':'Yes'}</button>
+            <button onClick={()=>setHasDeadline(true)} style={{padding:'10px 20px',borderRadius:'10px',border:`1px solid ${hasDeadline?mc+'50':c.BD}`,background:hasDeadline?`${mc}15`:c.CARD,color:hasDeadline?mc:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:hasDeadline?'700':'400'}}>{t.yesLbl||'Yes'}</button>
           </div>
           {hasDeadline&&<div style={{marginBottom:'12px'}}>
             <input type="datetime-local" value={deadline} onChange={e=>setDeadline(e.target.value)} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
-            <div style={{fontSize:'12px',color:c.M2,marginTop:'6px'}}>{isEs?'Después de esta fecha se confirmará la opción más votada':'After this date the most voted option will be confirmed'}</div>
+            <div style={{fontSize:'12px',color:c.M2,marginTop:'6px'}}>{t.deadlineExplain||'After this date the most voted option will be confirmed'}</div>
           </div>}
           <Btn onClick={()=>changeStep(1)} disabled={!name.trim()} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn>
         </div>}
@@ -395,8 +395,8 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
 
       {/* ── STEP 1: WHERE? — inline map ── */}
       {step===1&&<>
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{isEs?'¿Dónde?':'Where?'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'10px'}}>{isEs?'Elige un lugar. Podrás editar o añadir alternativas después.':'Pick a place. You can edit or add alternatives later.'}</p>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{t.whereTitle||'Where?'}</h2>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'10px'}}>{t.whereSub||'Pick a place. You can edit or add alternatives later.'}</p>
 
         {/* Selected places */}
         {stops.filter(s=>(s.options||[]).some(o=>o.name)).map((s,i)=>{
@@ -416,12 +416,12 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
         <div style={{marginBottom:'12px'}}>
           <div style={{fontSize:'13px',color:mc,fontWeight:'600',marginBottom:'6px'}}>
             {stops.filter(s=>(s.options||[]).some(o=>o.name)).length===0
-              ?(isEs?'📍 Elige el primer lugar':'📍 Pick the first place')
-              :(isEs?`📍 Lugar ${stops.filter(s=>(s.options||[]).some(o=>o.name)).length+1}`:`📍 Place ${stops.filter(s=>(s.options||[]).some(o=>o.name)).length+1}`)}
+              ?(t.pickFirstPlace||'📍 Pick the first place')
+              :`📍 ${t.placeN||'Place'} ${stops.filter(s=>(s.options||[]).some(o=>o.name)).length+1}`}
           </div>
           {/* Search bar */}
           <div style={{display:'flex',gap:'6px',marginBottom:'8px'}}>
-            <input ref={inlineSearchRef} defaultValue='' onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();inlineSearch(inlineSearchRef.current?.value);}}} placeholder={isEs?'Busca un sitio... (Enter)':'Search a place... (Enter)'} style={{flex:1,background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none'}}/>
+            <input ref={inlineSearchRef} defaultValue='' onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();inlineSearch(inlineSearchRef.current?.value);}}} placeholder={t.searchPlacePh||'Search a place... (Enter)'} style={{flex:1,background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none'}}/>
             <button onClick={()=>inlineSearch(inlineSearchRef.current?.value)} style={{background:mc,border:'none',borderRadius:'10px',padding:'10px 14px',color:'#0A0A0A',cursor:'pointer',fontWeight:'700',fontSize:'14px'}}>🔍</button>
           </div>
           {/* Search results */}
@@ -447,19 +447,19 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
 
       {/* ── STEP 2: NAME (optional) ── */}
       {step===2&&<>
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{isEs?'¿Nombre?':'Name?'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{isEs?'Dale un nombre a tu plan. Si no, se guardará por código.':'Give your plan a name. If not, it\'ll be saved by code.'}</p>
-        <Inp value={name} onChange={setName} placeholder={isEs?'Ej: Cena de cumple, Ruta por Valencia...':'e.g. Birthday dinner, Valencia trip...'} c={c}/>
-        <div style={{marginTop:'20px'}}><Btn onClick={create} disabled={saving} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?(isEs?'Creando...':'Creating...'):(isEs?'Crear plan 🎉':'Create plan 🎉')}</Btn></div>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{t.nameQ||'Name?'}</h2>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{t.nameSub||"Give your plan a name. If not, it'll be saved by code."}</p>
+        <Inp value={name} onChange={setName} placeholder={t.namePh||'e.g. Birthday dinner, Valencia trip...'} c={c}/>
+        <div style={{marginTop:'20px'}}><Btn onClick={create} disabled={saving} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?(t.creatingBtn||'Creating...'):(t.createBtn)}</Btn></div>
       </>}
 
       {/* ── STEP 0: WHEN? ── */}
       {step===0&&<>
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{isEs?'¿Cuándo?':'When?'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{isEs?'Elige una fecha y una hora. Podrás añadir alternativas después.':'Pick one date and time. You can add alternatives later.'}</p>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{t.whenTitle||'When?'}</h2>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{t.whenSub||'Pick one date and time. You can add alternatives later.'}</p>
         <CalendarPicker selected={selDates} onChange={d=>setSelDates(d.slice(-1))} c={c} lang={lang}/>
         {selDates.length>0&&<div style={{marginTop:'16px'}}>
-          <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'8px'}}>{isEs?'¿A qué hora? (24h)':'What time? (24h)'}</div>
+          <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'8px'}}>{t.whatTime||'What time? (24h)'}</div>
           <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
             <input type="time" value={startTimes[0]||''} onChange={e=>{const n=[...startTimes];n[0]=e.target.value;setStartTimes(n);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',flex:1}}/>
             {startTimes[0]&&<span style={{fontSize:'14px',color:c.M2,fontWeight:'500',flexShrink:0}}>{(()=>{const[h,m]=(startTimes[0]||'').split(':').map(Number);if(isNaN(h))return'';const ampm=h>=12?'PM':'AM';const h12=h%12||12;return`${h12}:${String(m).padStart(2,'0')} ${ampm}`;})()}</span>}
