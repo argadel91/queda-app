@@ -212,12 +212,17 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
         </div>}
         {/* Stops */}
         {stops.some(s=>(s.options||[]).some(o=>o.name))&&<div style={{marginTop:'8px',borderTop:`1px solid ${mc}20`,paddingTop:'8px'}}>
-          {stops.filter(s=>(s.options||[]).some(o=>o.name)).map((s,i)=>{const opt=(s.options||[])[0]||{};return<div key={s.id} style={{display:'flex',alignItems:'center',gap:'6px',justifyContent:'center',marginBottom:'3px',fontSize:'11px',color:c.M2}}>
-            <span style={{color:mc,fontWeight:'700'}}>{i+1}.</span>
-            {opt.photo&&<img src={opt.photo} alt="" style={{width:'18px',height:'18px',borderRadius:'4px',objectFit:'cover'}}/>}
-            <span>{opt.name}</span>
-            {s.startTime&&<span style={{color:c.M}}>· {s.startTime}</span>}
-          </div>;})}
+          {stops.filter(s=>(s.options||[]).some(o=>o.name)).map((s,i)=>{
+            const endTime=calcEndTime(s.startTime,s.duration);
+            return<div key={s.id} style={{marginBottom:'6px'}}>
+              {(s.options||[]).filter(o=>o.name).map((opt,oi)=><div key={opt.id} style={{display:'flex',alignItems:'center',gap:'5px',justifyContent:'center',fontSize:'11px',color:c.M2,marginBottom:'1px'}}>
+                {oi===0?<span style={{color:mc,fontWeight:'700'}}>{i+1}.</span>:<span style={{color:c.M,fontSize:'10px',marginLeft:'14px'}}>↳ o:</span>}
+                {opt.photo&&<img src={opt.photo} alt="" style={{width:'16px',height:'16px',borderRadius:'3px',objectFit:'cover'}}/>}
+                <span style={{color:oi===0?c.T:c.M2}}>{opt.name}</span>
+                {opt.rating&&<span style={{color:mc,fontSize:'10px'}}>⭐{opt.rating}</span>}
+              </div>)}
+              {s.startTime&&<div style={{fontSize:'10px',color:c.M,textAlign:'center'}}>🕐 {s.startTime}{endTime?`–${endTime}`:''}{s.duration?` (${s.duration})`:''}</div>}
+            </div>;})}
         </div>}
         {/* Empty state */}
         {selDates.length===0&&!stops.some(s=>(s.options||[]).some(o=>o.name))&&<div style={{fontSize:'14px',color:c.BD,fontStyle:'italic',padding:'8px 0'}}>{isEs?'Tu plan se verá aquí...':'Your plan will appear here...'}</div>}
