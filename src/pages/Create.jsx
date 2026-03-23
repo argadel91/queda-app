@@ -39,8 +39,8 @@ const emptyStop = (id, suggestedStart) => ({
   maxCapacity: '', orgAttends: true,
 });
 
-export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
-  const t=T[lang];const mc=getMC(mode,c);const isEs=lang==='es';
+export default function Create({onBack,onCreated,c,lang,authUser,profile}){
+  const t=T[lang];const mc=c.A;
   const[step,setStep]=useState(0);
   const[name,setName]=useState('');const[desc,setDesc]=useState('');
   const[org,setOrg]=useState(profile?.name||ls.get('q_myname',''));
@@ -130,14 +130,14 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
   const remOption=(stopId,optId)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.filter(o=>o.id!==optId)}:s));
   const updOption=(stopId,optionId,key,value)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.map(o=>o.id===optionId?{...o,[key]:value}:o)}:s));
 
-  const stepLabels=mode==='intimate'?[t.basics,t.routeStep,t.datesStep]:[t.basics,t.routeStep,t.datesStep,t.extrasStep];
+  const stepLabels=[t.basics,t.routeStep,t.datesStep,t.extrasStep];
 
   const create=async()=>{
     setSaving(true);
     try{
-      const plan={id:genId(),name:name.trim(),desc:desc.trim(),organizer:org.trim(),orgRole:orgRole.trim()||null,mode,dates:[...selDates].sort(),startTimes:startTimes.filter(t=>t),timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,poll:poll.q.trim()?poll:null,gift:giftOn?gift:null,bring:bring.filter(b=>b.text.trim()),payment,confirmedDate:null,isPublic,pubFilter:isPublic?pubFilter:null,deadline:hasDeadline&&deadline?deadline:null,lang,createdAt:new Date().toISOString()};
+      const plan={id:genId(),name:name.trim(),desc:desc.trim(),organizer:org.trim(),orgRole:orgRole.trim()||null,dates:[...selDates].sort(),startTimes:startTimes.filter(t=>t),timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,poll:poll.q.trim()?poll:null,gift:giftOn?gift:null,bring:bring.filter(b=>b.text.trim()),payment,confirmedDate:null,isPublic,pubFilter:isPublic?pubFilter:null,deadline:hasDeadline&&deadline?deadline:null,lang,createdAt:new Date().toISOString()};
       if(authUser)await savePlanWithUser(plan,authUser.id);else await savePlan(plan);
-      addMyPlan(plan.id,plan.name,'organizer',mode);
+      addMyPlan(plan.id,plan.name,'organizer');
       ls.set('q_state',{screen:'share',planId:plan.id,isOrg:true});clearDraft();onCreated(plan);
     }catch(e){showErr(t.createError);}
     setSaving(false);
@@ -197,7 +197,6 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
         </div>
       </div>}
       <Back onClick={step===0?onBack:()=>changeStep(step-1)} label={t.back} c={c}/>
-      <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'20px'}}><ModeBadge mode={mode} lang={lang} c={c}/><div style={{flex:1,height:'1px',background:c.BD}}/></div>
       <Stepper cur={step} labels={stepLabels} c={c} accent={mc}/>
 
       {/* ── STEP 0: BASICS ── */}
@@ -400,11 +399,11 @@ export default function Create({onBack,onCreated,c,lang,mode,authUser,profile}){
         </div>}
         <Lbl c={c}>{t.selectDates}</Lbl>
         <CalendarPicker selected={selDates} onChange={setSelDates} c={c} lang={lang}/>
-        <div style={{marginTop:'20px'}}><Btn onClick={()=>stepLabels.length>3?changeStep(3):create()} disabled={selDates.length<1||saving} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{stepLabels.length>3?t.cont:(saving?t.saving:t.createBtn)}</Btn></div>
+        <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(3)} disabled={selDates.length<1} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
       </>}
 
       {/* ── STEP 3: EXTRAS ── */}
-      {step===3&&stepLabels.length>3&&(()=>{
+      {step===3&&(()=>{
         const togSec=id=>setOpenSections(p=>({...p,[id]:!p[id]}));
         const Sec=({id,icon,label,hasData,children})=>{const open=!!openSections[id];return<div style={{marginBottom:'12px'}}>
           <div onClick={()=>togSec(id)} style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px 16px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:open?'12px 12px 0 0':'12px',cursor:'pointer',userSelect:'none'}}>
