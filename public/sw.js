@@ -1,9 +1,9 @@
-const CACHE_NAME = 'queda-v1'
+const CACHE_NAME = 'queda-v2'
 const STATIC_ASSETS = [
-  '/',
   '/manifest.json',
   '/icon-192.svg',
-  '/icon-512.svg'
+  '/icon-512.svg',
+  '/og.png'
 ]
 
 self.addEventListener('install', e => {
@@ -24,15 +24,11 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return
+  const url = new URL(e.request.url)
+  // Never cache HTML or JS bundles — always fetch fresh
+  if (url.pathname === '/' || url.pathname.endsWith('.html') || url.pathname.startsWith('/assets/')) return
+  // Only cache static assets (icons, manifest, images)
   e.respondWith(
-    fetch(e.request)
-      .then(res => {
-        if (res.ok && e.request.url.startsWith(self.location.origin)) {
-          const clone = res.clone()
-          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone))
-        }
-        return res
-      })
-      .catch(() => caches.match(e.request))
+    caches.match(e.request).then(cached => cached || fetch(e.request))
   )
 })
