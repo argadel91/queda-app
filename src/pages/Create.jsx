@@ -1,22 +1,14 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import T from '../constants/translations.js'
-import { getMC } from '../constants/theme.js'
 import { savePlan, savePlanWithUser, showErr } from '../lib/supabase.js'
 import { ls, addMyPlan } from '../lib/storage.js'
 import { genId, fmtShort } from '../lib/utils.js'
-import { Btn, Card, Lbl, Inp, Txa, HR, Back, ModeBadge, Stepper, Badge } from '../components/ui.jsx'
+import { Btn, Lbl, Inp, Txa, HR, Back, Stepper } from '../components/ui.jsx'
 import CalendarPicker from '../components/CalendarPicker.jsx'
 import MapModal from '../components/MapModal.jsx'
 import CityInput from '../components/CityInput.jsx'
-import { getCityTz, getTzLabel, getGMTOffset, getUserTz } from '../constants/weather.js'
-import WeatherWidget from '../components/WeatherWidget.jsx'
+import { getCityTz } from '../constants/weather.js'
 
-const DURATIONS = [
-  {v:'30min',l:'30min'},{v:'1h',l:'1h'},{v:'1h30',l:'1h30'},{v:'2h',l:'2h'},{v:'3h',l:'3h'},{v:'4h+',l:'4h+'}
-];
-const TOLERANCES = [
-  {v:'',l:'Exact'},{v:'±15min',l:'±15min'},{v:'±30min',l:'±30min'},{v:'±1h',l:'±1h'}
-];
 
 const calcEndTime = (start, duration) => {
   if (!start || !duration) return '';
@@ -309,8 +301,8 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
         {selDates.length===0&&!stops.some(s=>(s.options||[]).some(o=>o.name))&&<div style={{fontSize:'14px',color:c.BD,fontStyle:'italic',padding:'8px 0'}}>{t.planPreviewEmpty||'Your plan will appear here...'}</div>}
       </div>
 
-      {/* ── OLD STEP 0 REMOVED — basics are optional, added after creation ── */}
-      {step===99&&<>
+      {/* dead code removed */}
+      {false&&<>
         {subStep===0&&<div style={{textAlign:'center',padding:'8px 0'}}>
           <div style={{fontSize:'18px',color:c.T,fontWeight:'700',marginBottom:'12px'}}>{t.whatsPlanName||"What's your plan called?"}</div>
           <Inp value={name} onChange={setName} placeholder={t.planNamePh||'e.g. Dinner at Luigi\'s...'} c={c}/>
