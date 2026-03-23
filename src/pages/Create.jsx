@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import T from '../constants/translations.js'
 import { getMC } from '../constants/theme.js'
 import { savePlan, savePlanWithUser, showErr } from '../lib/supabase.js'
