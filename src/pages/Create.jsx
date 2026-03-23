@@ -132,12 +132,12 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   const remOption=(stopId,optId)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.filter(o=>o.id!==optId)}:s));
   const updOption=(stopId,optionId,key,value)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.map(o=>o.id===optionId?{...o,[key]:value}:o)}:s));
 
-  const stepLabels=[t.basics,t.routeStep,t.datesStep,t.extrasStep];
+  const stepLabels=[isEs?'¿Cuándo?':'When?',isEs?'¿Dónde?':'Where?'];
 
   const create=async()=>{
     setSaving(true);
     try{
-      const plan={id:genId(),name:name.trim(),desc:desc.trim(),organizer:org.trim(),orgRole:orgRole.trim()||null,dates:[...selDates].sort(),startTimes:startTimes.filter(t=>t),timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,poll:poll.q.trim()?poll:null,gift:giftOn?gift:null,bring:bring.filter(b=>b.text.trim()),payment,confirmedDate:null,isPublic,pubFilter:isPublic?pubFilter:null,deadline:hasDeadline&&deadline?deadline:null,lang,createdAt:new Date().toISOString()};
+      const plan={id:genId(),name:name.trim()||null,desc:desc.trim()||null,organizer:profile?.name||org.trim()||'',orgRole:orgRole.trim()||null,dates:[...selDates].sort(),startTimes:startTimes.filter(t=>t),timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,poll:poll.q.trim()?poll:null,gift:giftOn?gift:null,bring:bring.filter(b=>b.text.trim()),payment,confirmedDate:null,isPublic,pubFilter:isPublic?pubFilter:null,deadline:hasDeadline&&deadline?deadline:null,lang,createdAt:new Date().toISOString()};
       if(authUser)await savePlanWithUser(plan,authUser.id);else await savePlan(plan);
       addMyPlan(plan.id,plan.name,'organizer');
       ls.set('q_state',{screen:'share',planId:plan.id,isOrg:true});clearDraft();onCreated(plan);
@@ -198,37 +198,33 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
           <button onClick={()=>setDraftRestored(false)} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'16px',lineHeight:1}}>x</button>
         </div>
       </div>}
-      <Back onClick={step===0?onBack:()=>changeStep(step-1)} label={t.back} c={c}/>
+      <Back onClick={step===0?onBack:()=>changeStep(0)} label={t.back} c={c}/>
       <Stepper cur={step} labels={stepLabels} c={c} accent={mc}/>
 
-      {/* ── GLOBAL INVITATION CARD — live preview across all steps ── */}
-      <div style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'20px',padding:'20px 16px',textAlign:'center',marginBottom:'20px',transition:'all .3s ease'}}>
-        <div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'11px',color:mc,letterSpacing:'.1em',textTransform:'uppercase',marginBottom:'10px'}}>queda.</div>
-        {name.trim()?<div style={{fontFamily:"'Syne',serif",fontSize:'22px',fontWeight:'800',color:c.T,marginBottom:'4px',lineHeight:1.2}}>{name}</div>:<div style={{fontSize:'18px',color:c.BD,fontStyle:'italic',marginBottom:'4px'}}>{isEs?'Tu plan...':'Your plan...'}</div>}
-        {desc&&<div style={{fontSize:'12px',color:c.M2,marginBottom:'6px',lineHeight:1.4}}>"{desc}"</div>}
-        <div style={{fontSize:'11px',color:c.M2}}>{isEs?'Organiza':'By'}: <strong style={{color:c.T}}>{org||profile?.name||'—'}</strong>{orgRole?` · ${orgRole}`:''}</div>
-        {(subStep>=3||step>0)&&<div style={{marginTop:'6px',fontSize:'11px'}}>{isPublic?<span style={{color:mc}}>🌍 {isEs?'Público':'Public'}</span>:<span style={{color:c.M2}}>🔒 {isEs?'Privado':'Private'}</span>}</div>}
-        {hasDeadline&&deadline&&<div style={{marginTop:'3px',fontSize:'10px',color:c.M2}}>⏰ {new Date(deadline).toLocaleDateString()}</div>}
-        {/* Stops preview */}
-        {stops.some(s=>(s.options||[]).some(o=>o.name))&&<div style={{marginTop:'10px',borderTop:`1px solid ${mc}20`,paddingTop:'10px'}}>
+      {/* ── INVITATION CARD — live preview ── */}
+      <div style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'20px',padding:'16px 14px',textAlign:'center',marginBottom:'20px',transition:'all .3s ease'}}>
+        <div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'11px',color:mc,letterSpacing:'.1em',textTransform:'uppercase',marginBottom:'8px'}}>queda.</div>
+        <div style={{fontSize:'12px',color:c.M2,marginBottom:'2px'}}>{isEs?'Organiza':'By'}: <strong style={{color:c.T}}>{profile?.name||'—'}</strong></div>
+        {/* Dates */}
+        {selDates.length>0&&<div style={{marginTop:'8px',display:'flex',gap:'4px',justifyContent:'center',flexWrap:'wrap'}}>
+          {selDates.slice(0,5).map(d=><span key={d} style={{fontSize:'10px',padding:'2px 8px',borderRadius:'10px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`}}>{fmtShort(d,lang)}</span>)}
+          {selDates.length>5&&<span style={{fontSize:'10px',color:c.M2}}>+{selDates.length-5}</span>}
+        </div>}
+        {/* Stops */}
+        {stops.some(s=>(s.options||[]).some(o=>o.name))&&<div style={{marginTop:'8px',borderTop:`1px solid ${mc}20`,paddingTop:'8px'}}>
           {stops.filter(s=>(s.options||[]).some(o=>o.name)).map((s,i)=>{const opt=(s.options||[])[0]||{};return<div key={s.id} style={{display:'flex',alignItems:'center',gap:'6px',justifyContent:'center',marginBottom:'3px',fontSize:'11px',color:c.M2}}>
             <span style={{color:mc,fontWeight:'700'}}>{i+1}.</span>
-            {opt.photo&&<img src={opt.photo} alt="" style={{width:'20px',height:'20px',borderRadius:'4px',objectFit:'cover'}}/>}
+            {opt.photo&&<img src={opt.photo} alt="" style={{width:'18px',height:'18px',borderRadius:'4px',objectFit:'cover'}}/>}
             <span>{opt.name}</span>
             {s.startTime&&<span style={{color:c.M}}>· {s.startTime}</span>}
           </div>;})}
         </div>}
-        {/* Dates preview */}
-        {selDates.length>0&&<div style={{marginTop:'8px',display:'flex',gap:'4px',justifyContent:'center',flexWrap:'wrap'}}>
-          {selDates.slice(0,4).map(d=><span key={d} style={{fontSize:'10px',padding:'2px 8px',borderRadius:'10px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`}}>{fmtShort(d,lang)}</span>)}
-          {selDates.length>4&&<span style={{fontSize:'10px',color:c.M2}}>+{selDates.length-4}</span>}
-        </div>}
-        {/* Extras preview */}
-        {dressCode?.length>0&&<div style={{marginTop:'6px',fontSize:'10px',color:c.M2}}>👗 {Array.isArray(dressCode)?dressCode.join(', '):dressCode}</div>}
+        {/* Empty state */}
+        {selDates.length===0&&!stops.some(s=>(s.options||[]).some(o=>o.name))&&<div style={{fontSize:'14px',color:c.BD,fontStyle:'italic',padding:'8px 0'}}>{isEs?'Tu plan se verá aquí...':'Your plan will appear here...'}</div>}
       </div>
 
-      {/* ── STEP 0: BASICS ── */}
-      {step===0&&<>
+      {/* ── OLD STEP 0 REMOVED — basics are optional, added after creation ── */}
+      {step===99&&<>
         {subStep===0&&<div style={{textAlign:'center',padding:'8px 0'}}>
           <div style={{fontSize:'18px',color:c.T,fontWeight:'700',marginBottom:'12px'}}>{isEs?'¿Cómo se llama tu plan?':'What\'s your plan called?'}</div>
           <Inp value={name} onChange={setName} placeholder={t.planNamePh||'e.g. Dinner at Luigi\'s...'} c={c}/>
@@ -312,7 +308,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
         </div>}
       </>}
 
-      {/* ── STEP 1: STOPS / ROUTE ── */}
+      {/* ── STEP 1: WHERE? ── */}
       {step===1&&<>
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{t.routeTitle}</h2>
         <p style={{color:c.M2,fontSize:'13px',marginBottom:'14px'}}>{t.routeSub}</p>
@@ -410,13 +406,13 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
         </div>})}
 
         <Btn onClick={addStop} v="secondary" full sm style={{marginBottom:'14px'}} c={c}>{t.addStop}</Btn>
-        <div style={{marginTop:'10px'}}><Btn onClick={()=>changeStep(2)} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
+        <div style={{marginTop:'10px'}}><Btn onClick={create} disabled={saving} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?(isEs?'Creando...':'Creating...'):(isEs?'Crear plan 🎉':'Create plan 🎉')}</Btn></div>
       </>}
 
-      {/* ── STEP 2: DATES ── */}
-      {step===2&&<>
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{t.datesTitle}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{t.datesSub}</p>
+      {/* ── STEP 0: WHEN? ── */}
+      {step===0&&<>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{isEs?'¿Cuándo?':'When?'}</h2>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{isEs?'Elige las fechas posibles':'Pick the possible dates'}</p>
         {autoCity&&<div style={{fontSize:'12px',color:c.M2,marginBottom:'12px',display:'flex',flexWrap:'wrap',gap:'8px',alignItems:'center'}}>
           <span>📍 <span style={{color:c.T,fontWeight:'500'}}>{autoCity}</span></span>
           {planTz&&<span>🌍 <span style={{color:c.T,fontWeight:'500'}}>{getTzLabel(planTz)}</span> <span style={{color:c.M}}>({getGMTOffset(planTz)})</span></span>}
@@ -429,7 +425,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
         </div>}
         <Lbl c={c}>{t.selectDates}</Lbl>
         <CalendarPicker selected={selDates} onChange={setSelDates} c={c} lang={lang}/>
-        <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(3)} disabled={selDates.length<1} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
+        <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(1)} disabled={selDates.length<1} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
       </>}
 
       {/* ── STEP 3: EXTRAS ── */}
