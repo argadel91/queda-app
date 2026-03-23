@@ -205,45 +205,45 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
         <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.planName}</Lbl><Inp value={name} onChange={setName} placeholder={t.planNamePh||'e.g. Dinner at Luigi\'s, Weekend trip...'} c={c}/></div>
         <div style={{marginBottom:'14px'}}><Lbl c={c}>{t.desc}</Lbl><Txa value={desc} onChange={setDesc} placeholder={t.descPh} c={c}/></div>
 
-        {/* Organizer name */}
-        <div style={{marginBottom:'14px'}}>
-          <Lbl c={c}>{isEs?'Organizador':'Organizer'}</Lbl>
-          {!editingOrg
-            ? <div style={{display:'flex',alignItems:'center',gap:'8px',padding:'12px 14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px'}}>
-                <span style={{fontSize:'14px',color:c.T,flex:1}}>{isEs?'Organizado por:':'Organized by:'} <strong>{org||'—'}</strong></span>
-                <button onClick={()=>setEditingOrg(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'4px 10px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px'}}>{isEs?'Editar':'Edit'}</button>
-              </div>
-            : <div style={{display:'flex',gap:'6px'}}>
-                <Inp value={org} onChange={setOrg} placeholder={t.yourNamePh} c={c}/>
-                <button onClick={()=>setEditingOrg(false)} style={{padding:'10px 14px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'13px',whiteSpace:'nowrap'}}>OK</button>
-              </div>}
-        </div>
-
-        {/* Organizer role */}
+        {/* Organizer role (optional) */}
         <div style={{marginBottom:'14px'}}>
           <Lbl c={c}>{isEs?'Tu rol (opcional)':'Your role (optional)'}</Lbl>
-          <Inp value={orgRole} onChange={setOrgRole} placeholder={isEs?'Ej. Profesor, Manager, Cumpleanero...':'e.g. Professor, Manager, Birthday person...'} c={c}/>
+          <Inp value={orgRole} onChange={setOrgRole} placeholder={isEs?'Ej: Profesor, Manager, Cumpleañero...':'e.g. Professor, Manager, Birthday person...'} c={c}/>
         </div>
 
         {/* Public / Private toggle */}
         <div style={{marginBottom:'14px'}}>
-          <Lbl c={c}>{isEs?'Visibilidad':'Visibility'}</Lbl>
           <div style={{display:'flex',gap:'6px',marginBottom:'8px'}}>
-            {[{v:false,l:isEs?'Privado':'Private',sub:isEs?'Solo por codigo':'Invite code only'},{v:true,l:isEs?'Publico':'Public',sub:isEs?'Aparece en Discover':'Appears in Discover'}].map(o=>
+            {[{v:false,l:isEs?'🔒 Privado':'🔒 Private',sub:isEs?'Compártelo con quien elijas':'Share with whoever you choose'},{v:true,l:isEs?'🌍 Público':'🌍 Public',sub:isEs?'Compártelo con el mundo':'Share it with the world'}].map(o=>
               <button key={String(o.v)} onClick={()=>setIsPublic(o.v)} style={{flex:1,padding:'10px 8px',borderRadius:'10px',border:`1px solid ${isPublic===o.v?mc+'50':c.BD}`,background:isPublic===o.v?`${mc}15`:c.CARD,cursor:'pointer',textAlign:'center'}}>
                 <div style={{fontSize:'13px',color:isPublic===o.v?mc:c.T,fontWeight:isPublic===o.v?'700':'400'}}>{o.l}</div>
                 <div style={{fontSize:'11px',color:c.M2,marginTop:'2px'}}>{o.sub}</div>
               </button>)}
           </div>
           {isPublic&&<div style={{display:'flex',flexDirection:'column',gap:'10px',padding:'14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px'}}>
+            {/* Gender filter — multi-select */}
             <div>
               <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterGender||'Who can join?'}</div>
               <div style={{display:'flex',gap:'4px',flexWrap:'wrap'}}>
-                {[{v:'any',l:t.filterAny||'Anyone'},{v:'female',l:t.genderFemale||'Women only'},{v:'male',l:t.genderMale||'Men only'},{v:'other',l:t.genderOther||'Other only'}].map(o=>
-                  <button key={o.v} onClick={()=>setPubFilter(f=>({...f,gender:o.v}))} style={{padding:'6px 12px',borderRadius:'20px',border:`1px solid ${pubFilter.gender===o.v?mc+'60':c.BD}`,background:pubFilter.gender===o.v?`${mc}15`:c.CARD2,color:pubFilter.gender===o.v?mc:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:pubFilter.gender===o.v?'600':'400'}}>{o.l}</button>
-                )}
+                {[{v:'any',l:t.filterAny||'Anyone'},{v:'female',l:t.genderFemale||'Women'},{v:'male',l:t.genderMale||'Men'},{v:'other',l:t.genderOther||'Other'}].map(o=>{
+                  const genders=pubFilter.gender||'any';
+                  const isAny=genders==='any';
+                  const selected=o.v==='any'?isAny:!isAny&&(Array.isArray(genders)?genders.includes(o.v):genders===o.v);
+                  return<button key={o.v} onClick={()=>{
+                    if(o.v==='any'){setPubFilter(f=>({...f,gender:'any'}));}
+                    else{
+                      let cur=pubFilter.gender;
+                      if(cur==='any'||!cur)cur=[];
+                      if(!Array.isArray(cur))cur=[cur];
+                      if(cur.includes(o.v))cur=cur.filter(x=>x!==o.v);
+                      else cur=[...cur,o.v];
+                      setPubFilter(f=>({...f,gender:cur.length===0||cur.length===3?'any':cur}));
+                    }
+                  }} style={{padding:'6px 12px',borderRadius:'20px',border:`1px solid ${selected?mc+'60':c.BD}`,background:selected?`${mc}15`:c.CARD,color:selected?mc:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:selected?'600':'400'}}>{o.l}</button>;
+                })}
               </div>
             </div>
+            {/* Age range */}
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px'}}>
               <div>
                 <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterAgeMin||'Min age'}</div>
@@ -254,13 +254,22 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
                 <input type="number" min="13" max="99" value={pubFilter.ageMax} onChange={e=>setPubFilter(f=>({...f,ageMax:e.target.value}))} placeholder="--" style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
               </div>
             </div>
+            {/* Distance — slider + special options */}
             <div>
               <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterRadius||'Max distance'}</div>
-              <div style={{display:'flex',gap:'4px',flexWrap:'wrap'}}>
-                {[{v:'',l:t.filterNoLimit||'No limit'},{v:'5',l:'5 km'},{v:'10',l:'10 km'},{v:'25',l:'25 km'},{v:'50',l:'50 km'},{v:'100',l:'100 km'}].map(o=>
-                  <button key={o.v} onClick={()=>setPubFilter(f=>({...f,radius:o.v}))} style={{padding:'6px 10px',borderRadius:'20px',border:`1px solid ${pubFilter.radius===o.v?mc+'60':c.BD}`,background:pubFilter.radius===o.v?`${mc}15`:c.CARD2,color:pubFilter.radius===o.v?mc:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:pubFilter.radius===o.v?'600':'400'}}>{o.l}</button>
+              <div style={{display:'flex',gap:'4px',marginBottom:'8px'}}>
+                {[{v:'world',l:isEs?'🌍 Todo el mundo':'🌍 Worldwide'},{v:'online',l:isEs?'💻 Online':'💻 Online'}].map(o=>
+                  <button key={o.v} onClick={()=>setPubFilter(f=>({...f,radius:o.v,radiusKm:''}))} style={{flex:1,padding:'6px 10px',borderRadius:'20px',border:`1px solid ${pubFilter.radius===o.v?mc+'60':c.BD}`,background:pubFilter.radius===o.v?`${mc}15`:c.CARD,color:pubFilter.radius===o.v?mc:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:pubFilter.radius===o.v?'600':'400'}}>{o.l}</button>
                 )}
               </div>
+              {pubFilter.radius!=='world'&&pubFilter.radius!=='online'&&<>
+                <input type="range" min="1" max="100" value={pubFilter.radiusKm||50} onChange={e=>setPubFilter(f=>({...f,radius:'km',radiusKm:e.target.value}))} style={{width:'100%',accentColor:mc}}/>
+                <div style={{display:'flex',justifyContent:'space-between',fontSize:'11px',color:c.M2}}>
+                  <span>1 km</span>
+                  <span style={{color:mc,fontWeight:'700'}}>{pubFilter.radiusKm||50} km</span>
+                  <span>100 km</span>
+                </div>
+              </>}
             </div>
           </div>}
         </div>
@@ -278,7 +287,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
         </div>
 
         <div style={{height:'14px'}}/>
-        <Btn onClick={()=>changeStep(1)} disabled={!name.trim()||!org.trim()} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn>
+        <Btn onClick={()=>changeStep(1)} disabled={!name.trim()} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn>
       </>}
 
       {/* ── STEP 1: STOPS / ROUTE ── */}
