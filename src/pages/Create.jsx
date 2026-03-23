@@ -248,11 +248,11 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px'}}>
               <div>
                 <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterAgeMin||'Min age'}</div>
-                <input type="number" min="13" max="99" value={pubFilter.ageMin} onChange={e=>setPubFilter(f=>({...f,ageMin:e.target.value}))} placeholder="--" style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
+                <input type="number" min="15" max="100" value={pubFilter.ageMin} onChange={e=>{let v=parseInt(e.target.value)||'';if(v&&v<15)v=15;if(v&&v>100)v=100;setPubFilter(f=>({...f,ageMin:v}));}} placeholder="15" style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
               </div>
               <div>
                 <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterAgeMax||'Max age'}</div>
-                <input type="number" min="13" max="99" value={pubFilter.ageMax} onChange={e=>setPubFilter(f=>({...f,ageMax:e.target.value}))} placeholder="--" style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
+                <input type="number" min="15" max="100" value={pubFilter.ageMax} onChange={e=>{let v=parseInt(e.target.value)||'';if(v&&v<15)v=15;if(v&&v>100)v=100;setPubFilter(f=>({...f,ageMax:v}));}} placeholder="100" style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
               </div>
             </div>
             {/* Distance */}
