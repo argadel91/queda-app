@@ -216,7 +216,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
           <div style={{display:'flex',gap:'4px',marginBottom:'12px',justifyContent:'center'}}>
             {[1,2,3,4,5].map(s=><button key={s} onClick={()=>setPlanRating(s)} style={{background:'none',border:'none',cursor:'pointer',fontSize:'28px',color:planRating>=s?'#f59e0b':'#555',padding:'4px'}}>{planRating>=s?'★':'☆'}</button>)}
           </div>
-          {planRating>0&&<Btn onClick={async()=>{const me=rs.find(r=>r.name===ls('name'));if(me){await saveResp({...me,planRating});} setRatingDone(true);}} full sm c={c} accent={mc}>{t.ratePlan}</Btn>}
+          {planRating>0&&<Btn onClick={async()=>{const me=rs.find(r=>r.name===ls.get('q_myname',''));if(me){await saveResp({...me,planRating});} setRatingDone(true);}} full sm c={c} accent={mc}>{t.ratePlan}</Btn>}
         </Card>
       )}
       {ratingDone&&plan.confirmedDate&&daysUntil(plan.confirmedDate)<0&&(
@@ -423,7 +423,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
               </div>}
               {/* Stop option preferences per person */}
               {r.stopPrefs&&plan.stops?.length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:'4px',marginTop:'4px'}}>
-                {(plan.stops||[]).flatMap((st,si)=>(st.options||[]).filter((_,oi)=>r.stopPrefs?.[st.id]===oi||r.stopPrefs?.[st.id+'_'+oi]).map((opt,oi)=><span key={st.id+'_'+oi} style={{fontSize:'10px',padding:'2px 7px',borderRadius:'12px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`}}>⭐ {opt.name||`${t.stop||'Stop'} ${si+1}`}</span>))}
+                {(plan.stops||[]).flatMap((st,si)=>(st.options||[]).filter((opt)=>r.stopPrefs?.[st.id]===opt.id||r.stopPrefs?.[st.id+'_'+opt.id]).map((opt)=><span key={st.id+'_'+opt.id} style={{fontSize:'10px',padding:'2px 7px',borderRadius:'12px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`}}>⭐ {opt.name||`${t.stop||'Stop'} ${si+1}`}</span>))}
               </div>}
             </div>)}
           </Card>
@@ -443,7 +443,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
           {rs.some(r=>r.altDate)&&<Card c={c} style={{border:`1px solid #f59e0b30`,background:'#f59e0b08'}}>
             <Lbl c={c}>📅 {t.datesSuggestedLbl}</Lbl>
             {rs.filter(r=>r.altDate).map((r,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 0',borderBottom:i<rs.filter(x=>x.altDate).length-1?`1px solid ${c.BD}`:'none'}}>
-              <div><div style={{fontSize:'13px',color:c.T,fontWeight:'500'}}>{fmtDate(r.altDate,'es')}</div>{r.altNote&&<div style={{fontSize:'12px',color:c.M2}}>{r.altNote}</div>}</div>
+              <div><div style={{fontSize:'13px',color:c.T,fontWeight:'500'}}>{fmtDate(r.altDate,lang)}</div>{r.altNote&&<div style={{fontSize:'12px',color:c.M2}}>{r.altNote}</div>}</div>
               <span style={{fontSize:'12px',color:c.M2}}>— {r.name}</span>
             </div>)}
           </Card>}
