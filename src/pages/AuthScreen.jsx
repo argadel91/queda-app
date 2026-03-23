@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import T from '../constants/translations.js'
 import { authSignIn, authSignUp, authResetPassword, authSignInWithProvider } from '../lib/auth.js'
-import { loadProfile, saveProfile } from '../lib/supabase.js'
+import { saveProfile } from '../lib/supabase.js'
 
 export default function AuthScreen({onAuth,c,lang,onLangChange}){
   const t=T[lang];

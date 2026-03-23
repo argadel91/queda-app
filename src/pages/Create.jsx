@@ -3,7 +3,7 @@ import T from '../constants/translations.js'
 import { savePlan, savePlanWithUser, showErr } from '../lib/supabase.js'
 import { ls, addMyPlan } from '../lib/storage.js'
 import { genId, fmtShort } from '../lib/utils.js'
-import { Btn, Lbl, Inp, Txa, HR, Back, Stepper } from '../components/ui.jsx'
+import { Btn, Lbl, Inp, Back, Stepper } from '../components/ui.jsx'
 import CalendarPicker from '../components/CalendarPicker.jsx'
 import MapModal from '../components/MapModal.jsx'
 import CityInput from '../components/CityInput.jsx'
@@ -42,8 +42,6 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   const[pubFilter,setPubFilter]=useState({gender:'any',ageMin:'',ageMax:'',radius:''});
   const[deadline,setDeadline]=useState('');
   const[hasDeadline,setHasDeadline]=useState(false);
-  const[editingOrg,setEditingOrg]=useState(false);
-  const[subStep,setSubStep]=useState(0);
   const[selDates,setSelDates]=useState([]);
   const[startTimes,setStartTimes]=useState(['']);
   const[inlineResults,setInlineResults]=useState([]);

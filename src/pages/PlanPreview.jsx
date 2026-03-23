@@ -1,7 +1,7 @@
 import React from 'react'
 import T from '../constants/translations.js'
-import { daysUntil, fmtDate, fmtShort } from '../lib/utils.js'
-import { Btn, Card, Lbl, Back } from '../components/ui.jsx'
+import { fmtDate, fmtShort } from '../lib/utils.js'
+import { Lbl, Back } from '../components/ui.jsx'
 import { ls } from '../lib/storage.js'
 
 export default function PlanPreview({plan,onRespond,onBack,c,lang}){

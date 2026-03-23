@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import T from '../constants/translations.js'
 import { db, updatePlan, loadResps, saveResp, savePlan } from '../lib/supabase.js'
 import { ls, addMyPlan } from '../lib/storage.js'
 import { daysUntil, fmtDate, fmtShort, genId } from '../lib/utils.js'
-import { Btn, Card, Lbl, Badge, Back, HR, Inp, Txa } from '../components/ui.jsx'
+import { Btn, Card, Lbl, Badge, Back, HR } from '../components/ui.jsx'
 import OutfitCard from '../components/OutfitCard.jsx'
 const ExpenseSplitter = React.lazy(() => import('../components/ExpenseSplitter.jsx'))
 import PostPlanSurvey from '../components/PostPlanSurvey.jsx'
@@ -22,11 +22,9 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
   const[newRespAlert,setAlert]=useState(null);
   const[autoConfirmPending,setAutoConfirmPending]=useState(null);
   const[editMode,setEditMode]=useState(false);
-  const[duplicating,setDuplicating]=useState(false);
   const[editName,setEditName]=useState(ip.name);
   const[editDesc,setEditDesc]=useState(ip.desc||'');
   const[attendance,setAttendance]=useState(ip.attendance||{});
-  const[attStars,setAttStars]=useState({});
   const[openSection,setOpenSection]=useState({});
   const[planRating,setPlanRating]=useState(0);
   const[ratingDone,setRatingDone]=useState(false);

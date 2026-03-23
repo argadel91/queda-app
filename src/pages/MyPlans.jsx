@@ -3,7 +3,7 @@ import T from '../constants/translations.js'
 import { ls, getMyPlans } from '../lib/storage.js'
 import { loadPlan, db } from '../lib/supabase.js'
 import { daysUntil, fmtShort, dayStart } from '../lib/utils.js'
-import { Btn, Back } from '../components/ui.jsx'
+import { Back } from '../components/ui.jsx'
 
 export default function MyPlans({onBack,onOpen,c,lang}){
   const t=T[lang];
