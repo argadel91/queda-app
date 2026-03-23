@@ -36,8 +36,8 @@ export default function Landing({onGetStarted, c, lang, onLangChange}){
         {[
           {emoji:'📍',label:t.landingStep1T||'Pick spots'},
           {emoji:'📅',label:t.landingStep2T||'Vote dates'},
-          {emoji:'📨',label:t.landingStep3T||'Share code'},
           {emoji:'🤖',label:t.landingStep4T||'Ask AI'},
+          {emoji:'📨',label:t.landingStep3T||'Share code'},
         ].map((s,i)=><div key={i} style={{flex:1,minWidth:'calc(50% - 6px)',textAlign:'center',padding:'16px 8px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'14px'}}>
           <div style={{fontSize:'24px',marginBottom:'6px'}}>{s.emoji}</div>
           <div style={{fontSize:'13px',fontWeight:'600'}}>{s.label}</div>
