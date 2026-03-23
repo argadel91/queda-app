@@ -270,6 +270,25 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
 
       {/* PLAN tab = Route + budget + inline map + respondents */}
       {!ldg&&tab==='plan'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><>
+        {/* Inline edit for organizer */}
+        {isOrgRef.current&&<div style={{marginBottom:'14px'}}>
+          {!editMode?<div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+            <div>
+              {plan.name&&<div style={{fontSize:'18px',fontWeight:'700',color:c.T,marginBottom:'4px'}}>{plan.name}</div>}
+              {plan.desc&&<div style={{fontSize:'13px',color:c.M2,lineHeight:1.5}}>{plan.desc}</div>}
+              {plan.orgRole&&<div style={{fontSize:'12px',color:c.M2,marginTop:'4px'}}>👤 {plan.organizer} · {plan.orgRole}</div>}
+            </div>
+            <button onClick={()=>setEditMode(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'6px 10px',color:c.M2,cursor:'pointer',fontSize:'12px',flexShrink:0}}>✏️</button>
+          </div>
+          :<div style={{display:'flex',flexDirection:'column',gap:'8px',marginBottom:'8px'}}>
+            <input value={editName} onChange={e=>setEditName(e.target.value)} placeholder={t.planName||'Plan name'} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
+            <textarea value={editDesc} onChange={e=>setEditDesc(e.target.value)} placeholder={t.desc||'Description'} rows={2} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box',resize:'vertical'}}/>
+            <div style={{display:'flex',gap:'6px'}}>
+              <button onClick={()=>setEditMode(false)} style={{flex:1,padding:'8px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'13px'}}>{t.cancel||'Cancel'}</button>
+              <button onClick={async()=>{const up={...plan,name:editName.trim()||null,desc:editDesc.trim()||null};await updatePlan(up);setPlan(up);setEditMode(false);}} style={{flex:1,padding:'8px',background:mc,border:'none',borderRadius:'8px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'700'}}>{t.saveLbl||'Save'}</button>
+            </div>
+          </div>}
+        </div>}
         {/* Respondents summary (merged from WHO tab) */}
         {total===0
         ?<Card c={c} style={{textAlign:'center',padding:'32px',marginBottom:'14px'}}><div style={{fontSize:'36px',marginBottom:'12px'}}>⏳</div><div style={{color:c.T,fontWeight:'500',marginBottom:'6px'}}>{t.noResp}</div><div style={{color:c.M2,fontSize:'13px'}}>{t.noRespSub} <span style={{color:mc,fontWeight:'700'}}>{plan.id}</span></div></Card>
@@ -459,6 +478,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
               {(opt.address||opt.name)&&<a href={`https://maps.google.com/?q=${encodeURIComponent((opt.name||'')+(opt.address?' '+opt.address:''))}`} target="_blank" rel="noreferrer" style={{fontSize:'12px',color:c.M2,textDecoration:'none',padding:'4px 10px',border:`1px solid ${c.BD}`,borderRadius:'8px'}}>Google Maps 🗺️</a>}
               {s.link&&<a href={s.link.startsWith('http')?s.link:'https://'+s.link} target="_blank" rel="noreferrer" style={{fontSize:'12px',color:mc,textDecoration:'none',padding:'4px 10px',border:`1px solid ${mc}40`,borderRadius:'8px'}}>{t.bookLbl} ↗</a>}
             </div>
+            {isOrgRef.current&&<button onClick={()=>alert(lang==='es'?'Próximamente: añadir alternativas para esta parada':'Coming soon: add alternatives for this stop')} style={{marginTop:'8px',padding:'5px 10px',background:'none',border:`1px dashed ${c.BD}`,borderRadius:'8px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'11px',width:'100%'}}>+ {t.alternative||'Alternative'}</button>}
           </Card>
         </div>})}
         {budget>0&&<><HR c={c}/>
@@ -471,11 +491,62 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
 
       {/* ALTS tab = Alternative dates */}
       {!ldg&&tab==='alts'&&<div>
-        <Card c={c} style={{textAlign:'center',padding:'24px'}}>
-          <div style={{fontSize:'32px',marginBottom:'10px'}}>📅</div>
-          <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'6px'}}>{t.alternativeDates||'Alternative dates'}</div>
-          <div style={{fontSize:'13px',color:c.M2,lineHeight:1.6}}>{t.alternativeDatesHint||'Coming soon — add alternative dates and times for your plan.'}</div>
+        {/* Current date+time */}
+        <Card c={c} style={{marginBottom:'12px'}}>
+          <Lbl c={c}>📅 {t.confirmedDate||'Date'}</Lbl>
+          {plan.dates?.map((d,i)=><div key={d} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 0',borderBottom:i<plan.dates.length-1?`1px solid ${c.BD}`:'none'}}>
+            <span style={{fontSize:'14px',color:d===plan.confirmedDate?mc:c.T,fontWeight:d===plan.confirmedDate?'700':'400',textTransform:'capitalize'}}>{fmtShort(d,lang)}</span>
+            <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
+              <span style={{fontSize:'12px',color:'#22c55e'}}>✅ {cntY(slots.find(s=>s.date===d)?.key||d)}</span>
+              {d===plan.confirmedDate&&<span style={{fontSize:'10px',background:mc,color:'#0A0A0A',padding:'1px 7px',borderRadius:'10px',fontWeight:'700'}}>✓</span>}
+            </div>
+          </div>)}
+          {plan.startTimes?.filter(t=>t).length>0&&<div style={{marginTop:'8px',fontSize:'13px',color:c.M2}}>🕐 {plan.startTimes.filter(t=>t).join(' / ')}</div>}
         </Card>
+
+        {/* Add alternative dates — organizer only */}
+        {isOrgRef.current&&<Card c={c}>
+          <Lbl c={c}>+ {t.alternativeDates||'Add alternative dates'}</Lbl>
+          <p style={{fontSize:'12px',color:c.M2,marginBottom:'10px'}}>{lang==='es'?'Añade más fechas para que los invitados voten':'Add more dates for invitees to vote on'}</p>
+          <input type="date" min={new Date().toISOString().split('T')[0]} onChange={async e=>{
+            if(!e.target.value)return;
+            const newDates=[...(plan.dates||[]),e.target.value].filter((v,i,a)=>a.indexOf(v)===i).sort();
+            const up={...plan,dates:newDates};
+            await updatePlan(up);setPlan(up);
+            e.target.value='';
+          }} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box',marginBottom:'8px'}}/>
+          <input type="time" placeholder={lang==='es'?'Hora alternativa':'Alternative time'} onChange={async e=>{
+            if(!e.target.value)return;
+            const newTimes=[...(plan.startTimes||[]),e.target.value].filter((v,i,a)=>a.indexOf(v)===i);
+            const up={...plan,startTimes:newTimes};
+            await updatePlan(up);setPlan(up);
+            e.target.value='';
+          }} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
+        </Card>}
+
+        {/* Participation table — if multiple dates */}
+        {plan.dates?.length>1&&total>0&&<Card c={c}>
+          <Lbl c={c}>📊 {t.participationSummary||'Participation'}</Lbl>
+          {slots.filter(s=>cntY(s.key)>0).sort((a,b)=>cntY(b.key)-cntY(a.key)).map((s,i)=>{
+            const ny=cntY(s.key);const nm=cntM(s.key);
+            const isBest=i===0;
+            return<div key={s.key} style={{padding:'10px 0',borderBottom:i<slots.length-1?`1px solid ${c.BD}`:'none'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'4px'}}>
+                <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
+                  {isBest&&<span>⭐</span>}
+                  <span style={{fontSize:'14px',color:isBest?mc:c.T,fontWeight:isBest?'700':'400',textTransform:'capitalize'}}>{fmtShort(s.date,lang)}{s.startTime?' · '+s.startTime:''}</span>
+                </div>
+                <span style={{fontSize:'13px',color:mc,fontWeight:'700'}}>{ny} ✅{nm>0?` ${nm} 🤔`:''}</span>
+              </div>
+              {/* Progress bar */}
+              <div style={{height:'6px',background:c.BD,borderRadius:'3px',overflow:'hidden'}}>
+                <div style={{height:'100%',width:`${total>0?ny/total*100:0}%`,background:isBest?mc:'#22c55e',borderRadius:'3px'}}/>
+              </div>
+              {/* Confirm button for organizer */}
+              {isOrgRef.current&&!plan.confirmedDate&&isBest&&<button onClick={()=>confirmDate(s.date,s.startTime)} style={{marginTop:'6px',padding:'6px 14px',background:mc,border:'none',borderRadius:'8px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:'700'}}>{t.confirmBtn||'Confirm'}</button>}
+            </div>;
+          })}
+        </Card>}
       </div>}
 
       {/* MORE tab = Extras + Suggestions */}
