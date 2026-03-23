@@ -44,11 +44,12 @@ export default function Profile({onBack,c,lang,authUser,profile,onUpdateProfile,
           </div>
         </div>
 
-        <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'16px'}}>
+        <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'6px'}}>
           {gender&&<span style={{fontSize:'13px',padding:'4px 12px',background:`${c.A}15`,border:`1px solid ${c.A}30`,borderRadius:'20px',color:c.A}}>{gender==='other'?genderCustom||t.genderOther:gender==='male'?(t.genderMale||'Man'):(t.genderFemale||'Woman')}</span>}
           {age&&<span style={{fontSize:'13px',padding:'4px 12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'20px',color:c.T}}>{age} {t.yearsOld||'years'}</span>}
           {userCity&&<span style={{fontSize:'13px',padding:'4px 12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'20px',color:c.T}}>📍 {userCity}</span>}
         </div>
+        {(!gender||!birthdate||!userCity)&&<div style={{fontSize:'11px',color:c.M2,marginBottom:'12px'}}>{isEs?'Completa tu género, edad y ubicación para que te encuentren en Discover.':'Complete your gender, age and location so people can find you on Discover.'}</div>}
 
         <div style={{display:'flex',gap:'8px'}}>
           <button onClick={()=>setEditing(true)} style={{flex:1,padding:'10px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:'600'}}>✏️ {isEs?'Editar':'Edit'}</button>
