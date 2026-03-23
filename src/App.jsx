@@ -17,6 +17,7 @@ import PlanPreview from './pages/PlanPreview.jsx'
 import Respond from './pages/Respond.jsx'
 import Results from './pages/Results.jsx'
 import Profile from './pages/Profile.jsx'
+import MyPlans from './pages/MyPlans.jsx'
 import Discover from './pages/Discover.jsx'
 import Landing from './pages/Landing.jsx'
 
@@ -175,7 +176,7 @@ export default function App(){
   const handleFromProfile=async id=>{const p=await loadPlan(id);if(p){const mine=getMyPlans().find(x=>x.id===id);nav('results',p,mine?.role==='organizer');}};
   const handleDiscoverJoin=async id=>{const p=await loadPlan(id);if(p){setPlan(p);setIsOrg(false);setScreen('preview');}};
   const mc=plan?.mode?getMC(plan.mode,c):c.A;
-  const noNav=['home','create','profile','discover','preview'];
+  const noNav=['home','create','profile','myplans','discover','preview'];
   if(authLoading)return(<div style={{minHeight:'100vh',background:c.BG,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'16px'}}><div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'28px',color:c.T}}>queda<span style={{color:c.A}}>.</span></div><div style={{width:'24px',height:'24px',border:`3px solid ${c.BD}`,borderTop:`3px solid ${c.A}`,borderRadius:'50%',animation:'spin 1s linear infinite'}}/></div>);
   if(resetMode)return<ResetPasswordScreen onDone={()=>{setResetMode(false);authSignOut();}} c={c} lang={lang}/>;
   const hasCode=new URLSearchParams(location.search).get('code');
@@ -233,8 +234,9 @@ export default function App(){
         </div>}
       </div>
     </div>
-    {screen==='home'&&<Home onCreate={()=>nav('create')} onJoin={handleJoin} onProfile={()=>nav('profile')} onDiscover={()=>nav('discover')} c={c} lang={lang}/>}
+    {screen==='home'&&<Home onCreate={()=>nav('create')} onJoin={handleJoin} onProfile={()=>nav('myplans')} onDiscover={()=>nav('discover')} c={c} lang={lang}/>}
     {screen==='profile'&&<Profile onBack={()=>nav('home')} c={c} lang={lang} authUser={authUser} profile={profile} onUpdateProfile={updateProfile} onSignOut={handleSignOut}/>}
+    {screen==='myplans'&&<MyPlans onBack={()=>nav('home')} onOpen={handleFromProfile} c={c} lang={lang}/>}
     {screen==='discover'&&<Discover onBack={()=>nav('home')} onJoin={handleDiscoverJoin} c={c} lang={lang} profile={profile}/>}
     {screen==='create'&&<Create onBack={()=>nav('home')} onCreated={p=>nav('share',p,true)} c={c} lang={lang} authUser={authUser} profile={profile}/>}
     {screen==='share'&&plan&&<Share plan={plan} onViewResults={()=>nav('results',plan,isOrg)} onBack={()=>nav('home')} c={c} lang={lang}/>}

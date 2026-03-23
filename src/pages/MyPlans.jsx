@@ -1,0 +1,83 @@
+import React, { useState, useEffect } from 'react'
+import T from '../constants/translations.js'
+import { getMC } from '../constants/theme.js'
+import { ls, getMyPlans } from '../lib/storage.js'
+import { loadPlan, db } from '../lib/supabase.js'
+import { daysUntil, fmtShort, dayStart } from '../lib/utils.js'
+import { Btn, Back } from '../components/ui.jsx'
+
+export default function MyPlans({onBack,onOpen,c,lang}){
+  const t=T[lang];const isEs=lang==='es';
+  const[plans,setPlans]=useState(getMyPlans());
+  const[confirm,setConfirm]=useState(null);
+  const[tab,setTab]=useState('upcoming');
+  const[dates,setDates]=useState({});const[fullPlans,setFullPlans]=useState({});
+  const now=dayStart();
+
+  useEffect(()=>{plans.forEach(async p=>{if(!dates[p.id]){const full=await loadPlan(p.id);if(full){setDates(prev=>({...prev,[p.id]:full.confirmedDate||full.dates?.[0]||null}));setFullPlans(prev=>({...prev,[p.id]:full}));}}})},[]);
+
+  const isPast=id=>{const d=dates[id];if(!d)return false;return new Date(d+'T23:59:59')<now;};
+  const sortByDate=arr=>[...arr].sort((a,b)=>(dates[a.id]||'9999').localeCompare(dates[b.id]||'9999'));
+  const upcoming=sortByDate(plans.filter(p=>!isPast(p.id)));
+  const past=sortByDate(plans.filter(p=>isPast(p.id))).reverse();
+  const shown=tab==='upcoming'?upcoming:past;
+  const removeLocal=id=>{const u=getMyPlans().filter(x=>x.id!==id);ls.set('q_plans',u);setPlans(u);setConfirm(null);};
+  const delFull=async id=>{try{await db.from('responses').delete().eq('plan_id',id);await db.from('plans').delete().eq('id',id);}catch{}removeLocal(id);};
+
+  return(<div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
+    <Back onClick={onBack} label={t.back} c={c}/>
+    <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'20px'}}>{isEs?'Mis planes':'My plans'}</h2>
+
+    {confirm&&<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:100,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setConfirm(null)}>
+      <div onClick={e=>e.stopPropagation()} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'16px',padding:'24px',width:'100%',maxWidth:'340px'}}>
+        <div style={{fontSize:'32px',textAlign:'center',marginBottom:'12px'}}>{confirm.role==='organizer'?'🗑️':'👋'}</div>
+        <div style={{fontSize:'16px',fontWeight:'700',color:c.T,textAlign:'center',marginBottom:'8px'}}>{confirm.role==='organizer'?(t.delConfirm||'Delete plan?'):(t.leaveConfirm||'Leave plan?')}</div>
+        <div style={{fontSize:'13px',color:c.M2,textAlign:'center',marginBottom:'20px'}}>{confirm.role==='organizer'?(t.delWarn||'This cannot be undone'):(t.leaveWarn||'You will be removed')}</div>
+        <div style={{display:'flex',gap:'8px'}}>
+          <button onClick={()=>setConfirm(null)} style={{flex:1,padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontWeight:'600',fontSize:'14px'}}>{t.cancel||'Cancel'}</button>
+          <button onClick={()=>confirm.role==='organizer'?delFull(confirm.id):removeLocal(confirm.id)} style={{flex:1,padding:'12px',background:'#ff4444',border:'none',borderRadius:'10px',color:'#fff',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{confirm.role==='organizer'?(t.del||'Delete'):(t.leave||'Leave')}</button>
+        </div>
+      </div>
+    </div>}
+
+    <div style={{display:'flex',gap:'6px',marginBottom:'20px'}}>
+      {['upcoming','past'].map(tb=><button key={tb} onClick={()=>setTab(tb)} style={{flex:1,padding:'10px',borderRadius:'10px',border:`1px solid ${tab===tb?c.A+'60':c.BD}`,background:tab===tb?`${c.A}15`:c.CARD,color:tab===tb?c.A:c.M2,fontSize:'13px',fontWeight:tab===tb?'700':'400',cursor:'pointer',fontFamily:'inherit'}}>
+        {tb==='upcoming'?`${t.upcoming||'📅 Upcoming'} (${upcoming.length})`:`${t.pastTab||'✅ Past'} (${past.length})`}
+      </button>)}
+    </div>
+
+    {shown.length===0?<div style={{textAlign:'center',padding:'32px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'14px'}}>
+      <div style={{fontSize:'36px',marginBottom:'12px'}}>📋</div>
+      <div style={{color:c.T,fontWeight:'500',marginBottom:'6px'}}>{tab==='upcoming'?(t.noPlansUp||'No upcoming plans'):(t.noPlansPast||'No past plans')}</div>
+    </div>
+    :shown.map(p=>{
+      const mc=c.A;const d=dates[p.id];
+      const du=d?daysUntil(d):null;const isToday=du===0;const isTmrw=du===1;const isSoon=du!=null&&du<=3&&du>=0;
+      const fp=fullPlans[p.id];
+      const stopsWithName=(fp?.stops||[]).filter(s=>(s.options||[]).some(o=>o.name));
+      return(<div key={p.id} onClick={()=>{ls.set('q_seen_'+p.id,Date.now());onOpen(p.id);}} style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'16px',padding:'16px',marginBottom:'12px',cursor:'pointer',opacity:isPast(p.id)?0.6:1}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'8px'}}>
+          <div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'11px',color:mc,letterSpacing:'.08em',textTransform:'uppercase'}}>queda.</div>
+          <button onClick={e=>{e.stopPropagation();setConfirm(p);}} style={{background:'none',border:'none',color:'#ff666640',cursor:'pointer',fontSize:'14px',padding:'0'}}>×</button>
+        </div>
+        <div style={{textAlign:'center',marginBottom:'8px'}}>
+          <div style={{fontFamily:'monospace',fontSize:'28px',fontWeight:'900',color:mc,letterSpacing:'.15em'}}>{p.id}</div>
+          {p.name&&<div style={{fontSize:'14px',color:c.T,fontWeight:'600',marginTop:'4px'}}>{p.name}</div>}
+          <div style={{fontSize:'11px',color:c.M2,marginTop:'2px'}}>{p.role==='organizer'?(t.organizer||'Organizer'):(t.guest||'Guest')}{fp?.organizer?' · '+fp.organizer:''}</div>
+        </div>
+        {d&&<div style={{textAlign:'center',marginBottom:'6px'}}>
+          <span style={{fontSize:'13px',padding:'3px 12px',borderRadius:'10px',background:isSoon?`${mc}20`:c.CARD2,color:isSoon?mc:c.T,border:`1px solid ${isSoon?mc+'40':c.BD}`,fontWeight:'600',textTransform:'capitalize'}}>{isToday?(t.todayLbl||'Today'):isTmrw?(t.tomorrowLbl||'Tomorrow'):fmtShort(d,lang)}{fp?.startTimes?.[0]?' · '+fp.startTimes[0]:''}</span>
+        </div>}
+        {stopsWithName.length>0&&<div style={{borderTop:`1px solid ${mc}20`,paddingTop:'6px',marginTop:'6px'}}>
+          {stopsWithName.slice(0,3).map((s,si)=>{const opt=(s.options||[])[0]||{};return<div key={si} style={{display:'flex',alignItems:'center',gap:'5px',justifyContent:'center',fontSize:'11px',color:c.M2,marginBottom:'2px'}}>
+            <span style={{color:mc,fontWeight:'700'}}>{si+1}.</span>
+            {opt.photo&&<img src={opt.photo} alt="" style={{width:'16px',height:'16px',borderRadius:'3px',objectFit:'cover'}}/>}
+            <span>{opt.name}</span>
+            {opt.rating&&<span style={{color:mc,fontSize:'10px'}}>⭐{opt.rating}</span>}
+          </div>;})}
+          {stopsWithName.length>3&&<div style={{fontSize:'10px',color:c.M2,textAlign:'center'}}>+{stopsWithName.length-3}</div>}
+        </div>}
+      </div>);
+    })}
+  </div>);
+}
