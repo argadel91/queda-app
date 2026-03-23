@@ -1,9 +1,9 @@
 // ─── TRANSLATIONS ────────────────────────────────────
 const T ={
   es:{
-    tagline:'Planes sin caos.',sub:'Fechas, horarios, ruta, outfit, clima y pagos en un código.',
+    tagline:'Más planes, menos caos.',sub:'Despídete de chats interminables.',
     create:'Crear un plan →',myPlans:'👤 Mis planes',discover:'🔍 Descubrir',orJoin:'o únete',codePh:'Código del plan',go:'Ir',notFound:'Código no encontrado.',
-    howWorks:'Cómo funciona',s1:'Elige tipo de plan',s2:'Añade fechas y ruta',s3:'Comparte — cada uno marca cuándo puede',s4:'Confirma y avisa al grupo',
+    howWorks:'Cómo funciona',s1:'Crea un plan',s2:'Compártelo',s3:'Evita el lío',s4:'Quedáis de verdad',
     onboardingTitle:'Crea tu primer plan',onboardingSub:'En 2 minutos. Comparte el código. Listo.',
     back:'← Volver',cont:'Continuar →',
     basics:'Lo básico',datesStep:'Fechas',routeStep:'Ruta',extrasStep:'Extras',
@@ -335,9 +335,9 @@ const T ={
     landingSignIn:'Entrar',landingBadge:'Gratis para siempre',landingHero1:'Más planes,',landingHero2:'menos caos.',landingSub2:'Despídete de chats interminables.',landingCTA2:'Empezar',landingHowTitle:'Cómo funciona',landingStep1T:'Elige los sitios',landingStep1D:'Busca en Google Maps. Valoración, precio, fotos — todo automático.',landingStep2T:'Elige las fechas',landingStep2D:'Añade fechas posibles. Todos votan. La app encuentra la mejor.',landingStep3T:'Comparte el código',landingStep4T:'Ask the AI',landingStep3D:'Un código, un link. WhatsApp, Telegram, email — tú eliges.',landingFeaturesTitle:'Todo lo que necesitas',landingF1:'Google Maps',landingF2:'Previsión del tiempo',landingF3:'Dress code',landingF4:'Dividir gastos',landingF5:'Encuestas y votación',landingF6:'Recordatorios por email',landingF7:'6 idiomas',landingF8:'Funciona en móvil',landingAITitle:'Conoce a queda AI',landingAISub:'Tu asistente personal de planes. Pide ideas de restaurantes, consejos de outfit, o ayuda organizando tu evento.',landingBottomTitle:'¿Listo para planear?',landingBottomSub:'Crea tu primer plan en 2 minutos.',landingFooter:'Planes en grupo, cero caos.',chatSubtitle:'Tu asistente de planes',chatWelcome:'¡Hola! Soy queda AI',chatWelcomeSub:'Pregúntame lo que quieras: ideas de restaurantes, consejos para tu plan, o cómo funciona la app.',chatSuggest1:'¿Restaurante para 8?',chatSuggest2:'¿Dress code para fiesta?',chatSuggest3:'¿Cómo comparto mi plan?',chatPlaceholder:'Pregunta algo...',chatError:'Algo salió mal. Inténtalo de nuevo.',
   },
   en:{
-    tagline:'Plans without chaos.',sub:'Dates, times, route, outfit, weather and payments in one code.',
+    tagline:'More plans, less chaos.',sub:'Say goodbye to endless chats.',
     create:'Create a plan →',myPlans:'👤 My plans',discover:'🔍 Discover',orJoin:'or join',codePh:'Plan code',go:'Go',notFound:'Code not found.',
-    howWorks:'How it works',s1:'Choose plan type',s2:'Add dates and route',s3:'Share — everyone marks when they can',s4:'Confirm and notify the group',
+    howWorks:'How it works',s1:'Create a plan',s2:'Share it',s3:'Skip the hassle',s4:'Actually meet',
     onboardingTitle:'Create your first plan',onboardingSub:'In 2 minutes. Share the code. Done.',
     back:'← Back',cont:'Continue →',
     basics:'Basics',datesStep:'Dates',routeStep:'Route',extrasStep:'Extras',
@@ -669,9 +669,9 @@ const T ={
     landingSignIn:'Sign in',landingBadge:'Free forever',landingHero1:'More plans,',landingHero2:'less chaos.',landingSub2:'Say goodbye to endless chats.',landingCTA2:'Get started',landingHowTitle:'How it works',landingStep1T:'Pick the spots',landingStep1D:'Search on Google Maps. Rating, price, photos — all automatic.',landingStep2T:'Choose the dates',landingStep2D:'Add possible dates. Everyone votes. The app finds the best one.',landingStep3T:'Share the code',landingStep4T:'Ask the AI',landingStep3D:'One code, one link. WhatsApp, Telegram, email — your choice.',landingFeaturesTitle:'Everything you need',landingF1:'Google Maps',landingF2:'Weather forecast',landingF3:'Dress code',landingF4:'Split expenses',landingF5:'Polls & voting',landingF6:'Email reminders',landingF7:'6 languages',landingF8:'Works on mobile',landingAITitle:'Meet queda AI',landingAISub:'Your personal planning assistant. Ask for restaurant ideas, dress code tips, or help organizing your event.',landingBottomTitle:'Ready to plan?',landingBottomSub:'Create your first plan in 2 minutes.',landingFooter:'Group plans, zero chaos.',chatSubtitle:'Your plan assistant',chatWelcome:'Hi! I\'m queda AI',chatWelcomeSub:'Ask me anything: restaurant ideas, plan tips, or how the app works.',chatSuggest1:'Restaurant for 8 people?',chatSuggest2:'Dress code for a party?',chatSuggest3:'How do I share my plan?',chatPlaceholder:'Ask something...',chatError:'Something went wrong. Try again.',
   },
   pt:{
-    tagline:'Planos sem caos.',sub:'Datas, horários, rota, look, tempo e pagamentos num só código.',
+    tagline:'Mais planos, menos caos.',sub:'Diz adeus aos chats intermináveis.',
     create:'Criar um plano →',myPlans:'👤 Os meus planos',discover:'🔍 Descobrir',orJoin:'ou junta-te',codePh:'Código do plano',go:'Ir',notFound:'Código não encontrado.',
-    howWorks:'Como funciona',s1:'Escolhe o tipo de plano',s2:'Adiciona datas e rota',s3:'Partilha — cada um marca quando pode',s4:'Confirma e avisa o grupo',
+    howWorks:'Como funciona',s1:'Cria um plano',s2:'Partilha',s3:'Evita a confusão',s4:'Encontram-se de verdade',
     onboardingTitle:'Cria o teu primeiro plano',onboardingSub:'Em 2 minutos. Partilha o código. Pronto.',
     back:'← Voltar',cont:'Continuar →',
     basics:'O básico',datesStep:'Datas',routeStep:'Rota',extrasStep:'Extras',
@@ -998,9 +998,9 @@ const T ={
     landingSignIn:'Entrar',landingBadge:'Grátis para sempre',landingHero1:'Mais planos,',landingHero2:'menos caos.',landingSub2:'Diz adeus aos chats intermináveis.',landingCTA2:'Começar',landingHowTitle:'Como funciona',landingStep1T:'Escolhe os locais',landingStep1D:'Pesquisa no Google Maps. Avaliação, preço, fotos — tudo automático.',landingStep2T:'Escolhe as datas',landingStep2D:'Adiciona datas possíveis. Todos votam. A app encontra a melhor.',landingStep3T:'Partilha o código',landingStep4T:'Ask the AI',landingStep3D:'Um código, um link. WhatsApp, Telegram, email — tu escolhes.',landingFeaturesTitle:'Tudo o que precisas',landingF1:'Google Maps',landingF2:'Previsão do tempo',landingF3:'Dress code',landingF4:'Dividir despesas',landingF5:'Sondagens e votação',landingF6:'Lembretes por email',landingF7:'6 idiomas',landingF8:'Funciona no telemóvel',landingAITitle:'Conhece o queda AI',landingAISub:'O teu assistente pessoal de planos. Pede ideias de restaurantes, dicas de outfit, ou ajuda a organizar o teu evento.',landingBottomTitle:'Pronto para planear?',landingBottomSub:'Cria o teu primeiro plano em 2 minutos.',landingFooter:'Planos em grupo, zero caos.',chatSubtitle:'O teu assistente de planos',chatWelcome:'Olá! Sou o queda AI',chatWelcomeSub:'Pergunta o que quiseres: ideias de restaurantes, dicas para o teu plano, ou como funciona a app.',chatSuggest1:'Restaurante para 8?',chatSuggest2:'Dress code para festa?',chatSuggest3:'Como partilho o meu plano?',chatPlaceholder:'Pergunta algo...',chatError:'Algo correu mal. Tenta de novo.',
   },
   fr:{
-    tagline:`Des plans sans chaos.`,sub:`Dates, horaires, itinéraire, tenue, météo et paiements en un code.`,
+    tagline:`Plus de plans, moins de chaos.`,sub:`Dis adieu aux chats interminables.`,
     create:`Créer un plan →`,myPlans:`👤 Mes plans`,discover:`🔍 Découvrir`,orJoin:`ou rejoins`,codePh:`Code du plan`,go:`Ok`,notFound:`Code introuvable.`,
-    howWorks:`Comment ça marche`,s1:`Choisis le type de plan`,s2:`Ajoute les dates et l'itinéraire`,s3:`Partage — chacun indique ses disponibilités`,s4:`Confirme et préviens le groupe`,
+    howWorks:`Comment ça marche`,s1:`Crée un plan`,s2:`Partage-le`,s3:`Évite le chaos`,s4:`Retrouvez-vous pour de vrai`,
     onboardingTitle:`Crée ton premier plan`,onboardingSub:`En 2 minutes. Partage le code. C'est fait.`,
     back:`← Retour`,cont:`Continuer →`,
     basics:`Les bases`,datesStep:`Dates`,routeStep:`Itinéraire`,extrasStep:`Extras`,
@@ -1337,9 +1337,9 @@ const T ={
     landingSignIn:'Connexion',landingBadge:'Gratuit pour toujours',landingHero1:'Plus de plans,',landingHero2:'moins de chaos.',landingSub2:'Dis adieu aux chats interminables.',landingCTA2:'Commencer',landingHowTitle:'Comment ça marche',landingStep1T:'Choisis les lieux',landingStep1D:'Cherche sur Google Maps. Avis, prix, photos — tout automatique.',landingStep2T:'Choisis les dates',landingStep2D:'Ajoute des dates possibles. Tout le monde vote. L\'appli trouve la meilleure.',landingStep3T:'Partage le code',landingStep4T:'Ask the AI',landingStep3D:'Un code, un lien. WhatsApp, Telegram, email — à toi de choisir.',landingFeaturesTitle:'Tout ce qu\'il te faut',landingF1:'Google Maps',landingF2:'Prévisions météo',landingF3:'Dress code',landingF4:'Partager les frais',landingF5:'Sondages et votes',landingF6:'Rappels par email',landingF7:'6 langues',landingF8:'Fonctionne sur mobile',landingAITitle:'Découvre queda AI',landingAISub:'Ton assistant personnel de plans. Demande des idées de restaurants, des conseils de tenue, ou de l\'aide pour organiser ton événement.',landingBottomTitle:'Prêt à planifier ?',landingBottomSub:'Crée ton premier plan en 2 minutes.',landingFooter:'Plans de groupe, zéro chaos.',chatSubtitle:'Ton assistant de plans',chatWelcome:'Salut ! Je suis queda AI',chatWelcomeSub:'Demande-moi ce que tu veux : idées de restaurants, conseils pour ton plan, ou comment fonctionne l\'appli.',chatSuggest1:'Restaurant pour 8 ?',chatSuggest2:'Dress code pour fête ?',chatSuggest3:'Comment partager mon plan ?',chatPlaceholder:'Pose une question...',chatError:'Quelque chose a mal tourné. Réessaie.',
   },
   de:{
-    tagline:'Pläne ohne Chaos.',sub:'Termine, Zeiten, Route, Outfit, Wetter und Zahlungen in einem Code.',
+    tagline:'Mehr Pläne, weniger Chaos.',sub:'Verabschiede dich von endlosen Chats.',
     create:'Plan erstellen →',myPlans:'👤 Meine Pläne',discover:'🔍 Entdecken',orJoin:'oder beitreten',codePh:'Plan-Code',go:'Los',notFound:'Code nicht gefunden.',
-    howWorks:'So funktioniert es',s1:'Wähle den Plantyp',s2:'Füge Termine und Route hinzu',s3:'Teile — jeder markiert seine Verfügbarkeit',s4:'Bestätige und benachrichtige die Gruppe',
+    howWorks:'So funktioniert es',s1:'Erstelle einen Plan',s2:'Teile ihn',s3:'Vermeide das Chaos',s4:'Trefft euch wirklich',
     onboardingTitle:'Erstelle deinen ersten Plan',onboardingSub:'In 2 Minuten. Teile den Code. Fertig.',
     back:'← Zurück',cont:'Weiter →',
     basics:'Grundlagen',datesStep:'Termine',routeStep:'Route',extrasStep:'Extras',
@@ -1666,9 +1666,9 @@ const T ={
     landingSignIn:'Anmelden',landingBadge:'Für immer kostenlos',landingHero1:'Mehr Pläne,',landingHero2:'weniger Chaos.',landingSub2:'Verabschiede dich von endlosen Chats.',landingCTA2:'Loslegen',landingHowTitle:'So funktioniert es',landingStep1T:'Wähle die Orte',landingStep1D:'Suche auf Google Maps. Bewertung, Preis, Fotos — alles automatisch.',landingStep2T:'Wähle die Termine',landingStep2D:'Füge mögliche Termine hinzu. Alle stimmen ab. Die App findet den besten.',landingStep3T:'Teile den Code',landingStep4T:'Ask the AI',landingStep3D:'Ein Code, ein Link. WhatsApp, Telegram, Email — du wählst.',landingFeaturesTitle:'Alles was du brauchst',landingF1:'Google Maps',landingF2:'Wettervorhersage',landingF3:'Dress Code',landingF4:'Kosten teilen',landingF5:'Umfragen und Abstimmung',landingF6:'E-Mail-Erinnerungen',landingF7:'6 Sprachen',landingF8:'Funktioniert auf dem Handy',landingAITitle:'Lerne queda AI kennen',landingAISub:'Dein persönlicher Planungsassistent. Frag nach Restaurant-Ideen, Outfit-Tipps oder Hilfe bei der Organisation deines Events.',landingBottomTitle:'Bereit zu planen?',landingBottomSub:'Erstelle deinen ersten Plan in 2 Minuten.',landingFooter:'Gruppenpläne, null Chaos.',chatSubtitle:'Dein Plan-Assistent',chatWelcome:'Hi! Ich bin queda AI',chatWelcomeSub:'Frag mich was du willst: Restaurant-Ideen, Plan-Tipps, oder wie die App funktioniert.',chatSuggest1:'Restaurant für 8?',chatSuggest2:'Dresscode für Party?',chatSuggest3:'Wie teile ich meinen Plan?',chatPlaceholder:'Frag etwas...',chatError:'Etwas ist schiefgelaufen. Versuch es nochmal.',
   },
   it:{
-    tagline:`Piani senza caos.`,sub:`Date, orari, percorso, outfit, meteo e pagamenti in un codice.`,
+    tagline:`Più piani, meno caos.`,sub:`Di addio alle chat infinite.`,
     create:`Crea un piano →`,myPlans:`👤 I miei piani`,discover:`🔍 Scopri`,orJoin:`o unisciti`,codePh:`Codice del piano`,go:`Vai`,notFound:`Codice non trovato.`,
-    howWorks:`Come funziona`,s1:`Scegli il tipo di piano`,s2:`Aggiungi date e percorso`,s3:`Condividi — ognuno segna quando può`,s4:`Conferma e avvisa il gruppo`,
+    howWorks:`Come funziona`,s1:`Crea un piano`,s2:`Condividilo`,s3:`Evita il caos`,s4:`Incontratevi davvero`,
     onboardingTitle:`Crea il tuo primo piano`,onboardingSub:`In 2 minuti. Condividi il codice. Fatto.`,
     back:`← Indietro`,cont:`Continua →`,
     basics:`Le basi`,datesStep:`Date`,routeStep:`Percorso`,extrasStep:`Extra`,
