@@ -32,12 +32,13 @@ export default function Landing({onGetStarted, c, lang, onLangChange}){
       </div>
 
       {/* 3 steps — compact */}
-      <div style={{display:'flex',gap:'12px',marginBottom:'32px'}}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'32px'}}>
         {[
           {emoji:'📍',label:t.landingStep1T||'Pick spots'},
           {emoji:'📅',label:t.landingStep2T||'Vote dates'},
           {emoji:'📨',label:t.landingStep3T||'Share code'},
-        ].map((s,i)=><div key={i} style={{flex:1,textAlign:'center',padding:'16px 8px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'14px'}}>
+          {emoji:'🤖',label:t.landingStep4T||'Ask AI'},
+        ].map((s,i)=><div key={i} style={{flex:1,minWidth:'calc(50% - 6px)',textAlign:'center',padding:'16px 8px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'14px'}}>
           <div style={{fontSize:'24px',marginBottom:'6px'}}>{s.emoji}</div>
           <div style={{fontSize:'13px',fontWeight:'600'}}>{s.label}</div>
         </div>)}
