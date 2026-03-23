@@ -13,7 +13,7 @@ export default function Profile({onBack,c,lang,authUser,profile,onUpdateProfile,
   const[newName,setNewName]=useState(profile?.name||'');
   const[newUsername,setNewUsername]=useState(profile?.username||'');
   const[gender,setGender]=useState(profile?.gender||'');
-  const[genderCustom,setGenderCustom]=useState(profile?.genderCustom||'');
+  const[genderCustom,setGenderCustom]=useState(profile?.gender_custom||profile?.genderCustom||'');
   const[birthdate,setBirthdate]=useState(profile?.birthdate||'');
   const[userCity,setUserCity]=useState(profile?.city||'');
   const[userLat,setUserLat]=useState(profile?.lat||null);
@@ -24,7 +24,7 @@ export default function Profile({onBack,c,lang,authUser,profile,onUpdateProfile,
     await onUpdateProfile({
       name:newName.trim(),
       username:newUsername.trim()||null,
-      gender,genderCustom:gender==='other'?genderCustom:'',
+      gender,gender_custom:gender==='other'?genderCustom:'',
       birthdate,city:userCity,lat:userLat,lon:userLon
     });
     setEditing(false);

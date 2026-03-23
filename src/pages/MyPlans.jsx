@@ -58,7 +58,7 @@ export default function MyPlans({onBack,onOpen,c,lang}){
       return(<div key={p.id} onClick={()=>{ls.set('q_seen_'+p.id,Date.now());onOpen(p.id);}} style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'16px',padding:'16px',marginBottom:'12px',cursor:'pointer',opacity:isPast(p.id)?0.6:1}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'8px'}}>
           <div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'11px',color:mc,letterSpacing:'.08em',textTransform:'uppercase'}}>queda.</div>
-          <button onClick={e=>{e.stopPropagation();setConfirm(p);}} style={{background:'none',border:'none',color:'#ff666640',cursor:'pointer',fontSize:'14px',padding:'0'}}>×</button>
+          <button onClick={e=>{e.stopPropagation();setConfirm(p);}} style={{background:'none',border:'1px solid #ff444430',borderRadius:'6px',color:'#ff6666',cursor:'pointer',fontSize:'13px',padding:'4px 8px'}}>×</button>
         </div>
         <div style={{textAlign:'center',marginBottom:'8px'}}>
           <div style={{fontFamily:'monospace',fontSize:'28px',fontWeight:'900',color:mc,letterSpacing:'.15em'}}>{p.id}</div>
