@@ -365,7 +365,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       {/* ── STEP 0: WHEN? ── */}
       {step===0&&<>
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{isEs?'¿Cuándo?':'When?'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{isEs?'Elige un día':'Pick a day'}</p>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{isEs?'Elige una fecha y una hora. Podrás añadir alternativas después.':'Pick one date and time. You can add alternatives later.'}</p>
         <CalendarPicker selected={selDates} onChange={d=>setSelDates(d.slice(-1))} c={c} lang={lang}/>
         {selDates.length>0&&<div style={{marginTop:'16px'}}>
           <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'8px'}}>{isEs?'¿A qué hora?':'What time?'}</div>
