@@ -54,6 +54,11 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   const[subStep,setSubStep]=useState(0);
   const[selDates,setSelDates]=useState([]);
   const[startTimes,setStartTimes]=useState(['']);
+  const[inlineResults,setInlineResults]=useState([]);
+  const inlineSearchRef=useRef(null);
+  const inlineMapRef=useRef(null);
+  const inlineMapObj=useRef(null);
+  const inlineMarkers=useRef([]);
   const[stops,setStops]=useState([emptyStop(1,'')]);
   const[mapTarget,setMapTarget]=useState(null); // {stopId, optionId}
   const[dressCode,setDressCode]=useState([]);const[dressNote,setDressNote]=useState('');
@@ -143,6 +148,84 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       ls.set('q_state',{screen:'share',planId:plan.id,isOrg:true});clearDraft();onCreated(plan);
     }catch(e){showErr(t.createError);}
     setSaving(false);
+  };
+
+  // Inline map for step 1
+  useEffect(()=>{
+    if(step!==1||!inlineMapRef.current||inlineMapObj.current)return;
+    const loadGM=()=>{if(window.__loadGoogleMaps)window.__loadGoogleMaps();return new Promise(r=>{if(window.google?.maps)return r();const ch=setInterval(()=>{if(window.google?.maps){clearInterval(ch);r();}},100);setTimeout(()=>clearInterval(ch),10000);});};
+    const mapDiv=document.createElement('div');
+    mapDiv.style.cssText='width:100%;height:100%;';
+    inlineMapRef.current.innerHTML='';
+    inlineMapRef.current.appendChild(mapDiv);
+    loadGM().then(async()=>{
+      await google.maps.importLibrary('maps');
+      const map=new google.maps.Map(mapDiv,{center:{lat:40.4168,lng:-3.7038},zoom:6,disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy'});
+      inlineMapObj.current=map;
+      // Click to select
+      map.addListener('click',e=>{
+        const lat=e.latLng.lat(),lng=e.latLng.lng();
+        const geocoder=new google.maps.Geocoder();
+        geocoder.geocode({location:{lat,lng}},(res,status)=>{
+          if(status==='OK'&&res[0]){
+            const r=res[0];
+            pickInlineResult({name:r.address_components?.[0]?.long_name||'',address:r.formatted_address||'',lat,lng,placeId:r.place_id});
+          }
+        });
+      });
+    });
+    return()=>{};
+  },[step]);
+
+  const inlineSearch=async(q)=>{
+    if(!q?.trim()||!window.google?.maps)return;
+    try{
+      const{Place}=await google.maps.importLibrary('places');
+      const{places}=await Place.searchByText({textQuery:q,fields:['displayName','formattedAddress','location','rating','userRatingCount','priceLevel','photos','placeId'],maxResultCount:5});
+      if(places?.length){setInlineResults(places.map(p=>({name:p.displayName||'',address:p.formattedAddress||'',lat:p.location?.lat(),lng:p.location?.lng(),rating:p.rating||null,ratingCount:p.userRatingCount||null,priceLevel:p.priceLevel??null,photo:p.photos?.[0]?.getURI?.({maxWidth:400})||null,placeId:p.id||null})));}
+      else{setInlineResults([]);}
+    }catch{
+      try{
+        const service=new google.maps.places.PlacesService(inlineMapObj.current||document.createElement('div'));
+        service.textSearch({query:q},(res,status)=>{
+          if(status==='OK'&&res)setInlineResults(res.slice(0,5).map(r=>({name:r.name||'',address:r.formatted_address||'',lat:r.geometry.location.lat(),lng:r.geometry.location.lng(),rating:r.rating||null,ratingCount:r.user_ratings_total||null,priceLevel:r.price_level??null,photo:r.photos?.[0]?.getUrl?.({maxWidth:400})||null,placeId:r.place_id||null})));
+          else setInlineResults([]);
+        });
+      }catch{setInlineResults([]);}
+    }
+  };
+
+  const pickInlineResult=async(r)=>{
+    setInlineResults([]);
+    if(inlineSearchRef.current)inlineSearchRef.current.value=r.name;
+    // Enrich with details
+    if(r.placeId){
+      try{
+        const{Place}=await google.maps.importLibrary('places');
+        const place=new Place({id:r.placeId});
+        await place.fetchFields({fields:['websiteURI','nationalPhoneNumber','regularOpeningHours','editorialSummary','googleMapsURI','types','dineIn','takeout','delivery','reservable','servesBeer','servesWine','outdoorSeating','goodForChildren','accessibilityOptions']});
+        r.website=place.websiteURI||null;r.phone=place.nationalPhoneNumber||null;
+        r.hours=place.regularOpeningHours?.weekdayDescriptions||null;
+        r.summary=place.editorialSummary||null;r.googleMapsURI=place.googleMapsURI||null;
+        r.types=place.types||[];r.dineIn=place.dineIn??null;r.takeout=place.takeout??null;
+        r.servesBeer=place.servesBeer??null;r.servesWine=place.servesWine??null;
+        r.outdoorSeating=place.outdoorSeating??null;r.wheelchair=place.accessibilityOptions?.wheelchairAccessibleEntrance??null;
+      }catch{}
+    }
+    // Add to stops
+    let targetStop=stops.find(s=>!(s.options||[]).some(o=>o.name));
+    if(!targetStop){targetStop=emptyStop(Date.now());setStops(p=>[...p,targetStop]);}
+    const optId=targetStop.options[0].id;
+    const fields=['name','address','lat','lng','placeId','rating','ratingCount','priceLevel','website','phone','hours','photo','summary','googleMapsURI','types','dineIn','takeout','delivery','reservable','servesBeer','servesWine','outdoorSeating','goodForChildren','wheelchair'];
+    setTimeout(()=>{fields.forEach(k=>{if(r[k]!==undefined&&r[k]!==null)updOption(targetStop.id,optId,k,r[k]);});},10);
+    // Zoom map and add marker
+    if(inlineMapObj.current&&r.lat&&r.lng){
+      inlineMapObj.current.setCenter({lat:r.lat,lng:r.lng});
+      inlineMapObj.current.setZoom(15);
+      const marker=new google.maps.Marker({position:{lat:r.lat,lng:r.lng},map:inlineMapObj.current,label:{text:String(stops.filter(s=>(s.options||[]).some(o=>o.name)).length+1),color:'#0A0A0A',fontWeight:'800'},icon:{path:google.maps.SymbolPath.CIRCLE,scale:14,fillColor:'#CDFF6C',fillOpacity:1,strokeColor:'#CDFF6C',strokeWeight:2}});
+      inlineMarkers.current.push(marker);
+    }
+    if(inlineSearchRef.current)inlineSearchRef.current.value='';
   };
 
   // Map modal init string
@@ -329,21 +412,31 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
           </div>;
         })}
 
-        {/* Inline map + search */}
+        {/* Inline map with search */}
         <div style={{marginBottom:'12px'}}>
           <div style={{fontSize:'13px',color:mc,fontWeight:'600',marginBottom:'6px'}}>
             {stops.filter(s=>(s.options||[]).some(o=>o.name)).length===0
               ?(isEs?'📍 Elige el primer lugar':'📍 Pick the first place')
               :(isEs?`📍 Lugar ${stops.filter(s=>(s.options||[]).some(o=>o.name)).length+1}`:`📍 Place ${stops.filter(s=>(s.options||[]).some(o=>o.name)).length+1}`)}
           </div>
-          <button onClick={()=>{
-            // Ensure there's an empty stop ready
-            const emptyS=stops.find(s=>!(s.options||[]).some(o=>o.name));
-            if(emptyS){setMapTarget({stopId:emptyS.id,optionId:emptyS.options[0].id});}
-            else{const ns=emptyStop(Date.now());setStops(p=>[...p,ns]);setTimeout(()=>setMapTarget({stopId:ns.id,optionId:ns.options[0].id}),50);}
-          }} style={{width:'100%',padding:'14px',background:c.CARD,border:`2px dashed ${mc}40`,borderRadius:'12px',cursor:'pointer',fontFamily:'inherit',fontSize:'14px',color:mc,fontWeight:'600',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}}>
-            🔍 {isEs?'Buscar en el mapa':'Search on map'}
-          </button>
+          {/* Search bar */}
+          <div style={{display:'flex',gap:'6px',marginBottom:'8px'}}>
+            <input ref={inlineSearchRef} defaultValue='' onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();inlineSearch(inlineSearchRef.current?.value);}}} placeholder={isEs?'Busca un sitio... (Enter)':'Search a place... (Enter)'} style={{flex:1,background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none'}}/>
+            <button onClick={()=>inlineSearch(inlineSearchRef.current?.value)} style={{background:mc,border:'none',borderRadius:'10px',padding:'10px 14px',color:'#0A0A0A',cursor:'pointer',fontWeight:'700',fontSize:'14px'}}>🔍</button>
+          </div>
+          {/* Search results */}
+          {inlineResults.length>0&&<div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',marginBottom:'8px',maxHeight:'200px',overflowY:'auto'}}>
+            {inlineResults.map((r,i)=><div key={i} onClick={()=>pickInlineResult(r)} style={{padding:'10px 14px',cursor:'pointer',borderBottom:i<inlineResults.length-1?`1px solid ${c.BD}`:'none'}} onMouseEnter={e=>e.currentTarget.style.background=c.CARD2} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+              <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
+                <div style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>{r.name}</div>
+                {r.rating&&<span style={{fontSize:'11px',color:mc}}>⭐{r.rating}</span>}
+                {r.priceLevel&&<span style={{fontSize:'11px',color:c.M2}}>{'€'.repeat(r.priceLevel)}</span>}
+              </div>
+              <div style={{fontSize:'12px',color:c.M2}}>{r.address}</div>
+            </div>)}
+          </div>}
+          {/* Map container */}
+          <div ref={inlineMapRef} style={{width:'100%',height:'250px',borderRadius:'12px',overflow:'hidden',border:`1px solid ${c.BD}`,background:c.CARD2}}/>
         </div>
 
         {/* Continue or done */}
