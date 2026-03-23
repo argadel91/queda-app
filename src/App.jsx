@@ -228,7 +228,7 @@ export default function App(){
             <span style={{fontSize:'10px',color:c.M}}>▾</span>
           </button>
           {avatarOpen&&<div style={{position:'absolute',right:0,top:'calc(100% + 4px)',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',boxShadow:'0 8px 24px rgba(0,0,0,.3)',zIndex:100,overflow:'hidden',minWidth:'150px'}}>
-            <button onClick={e=>{e.stopPropagation();nav('profile');setAvatarOpen(false);}} style={{display:'flex',alignItems:'center',gap:'8px',width:'100%',padding:'11px 14px',background:'transparent',border:'none',borderBottom:`1px solid ${c.BD}`,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',color:c.T,textAlign:'left'}}>👤 {T[lang]?.myPlansT||'Mi perfil'}</button>
+            <button onClick={e=>{e.stopPropagation();nav('profile');setAvatarOpen(false);}} style={{display:'flex',alignItems:'center',gap:'8px',width:'100%',padding:'11px 14px',background:'transparent',border:'none',borderBottom:`1px solid ${c.BD}`,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',color:c.T,textAlign:'left'}}>👤 {lang==='es'?'Mi perfil':'My profile'}</button>
             <button onClick={e=>{e.stopPropagation();handleSignOut();setAvatarOpen(false);}} style={{display:'flex',alignItems:'center',gap:'8px',width:'100%',padding:'11px 14px',background:'transparent',border:'none',cursor:'pointer',fontFamily:'inherit',fontSize:'13px',color:'#ef4444',textAlign:'left'}}>🚪 {T[lang]?.signOut||'Cerrar sesión'}</button>
           </div>}
         </div>}
