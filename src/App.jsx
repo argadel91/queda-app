@@ -234,7 +234,7 @@ export default function App(){
       </div>
     </div>
     {screen==='home'&&<Home onCreate={()=>nav('create')} onJoin={handleJoin} onProfile={()=>nav('profile')} onDiscover={()=>nav('discover')} c={c} lang={lang}/>}
-    {screen==='profile'&&<Profile onBack={()=>nav('home')} onOpen={handleFromProfile} c={c} lang={lang} authUser={authUser} profile={profile} onUpdateProfile={updateProfile} onSignOut={handleSignOut}/>}
+    {screen==='profile'&&<Profile onBack={()=>nav('home')} c={c} lang={lang} authUser={authUser} profile={profile} onUpdateProfile={updateProfile} onSignOut={handleSignOut}/>}
     {screen==='discover'&&<Discover onBack={()=>nav('home')} onJoin={handleDiscoverJoin} c={c} lang={lang} profile={profile}/>}
     {screen==='create'&&<Create onBack={()=>nav('home')} onCreated={p=>nav('share',p,true)} c={c} lang={lang} authUser={authUser} profile={profile}/>}
     {screen==='share'&&plan&&<Share plan={plan} onViewResults={()=>nav('results',plan,isOrg)} onBack={()=>nav('home')} c={c} lang={lang}/>}
