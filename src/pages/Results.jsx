@@ -19,7 +19,7 @@ import VenueInfo from '../components/VenueInfo.jsx'
 export default function Results({plan:ip,onBack,isOrg,c,lang}){
   const[plan,setPlan]=useState(ip);const t=T[lang];
   const mc=getMC(plan.mode,c);
-  const[tab,setTab]=useState('who');const[rs,setRs]=useState([]);const[ldg,setL]=useState(true);
+  const[tab,setTab]=useState('plan');const[rs,setRs]=useState([]);const[ldg,setL]=useState(true);
   const[conf,setConf]=useState(false);const[remSent,setRem]=useState(false);
   const[payModal,setPay]=useState(false);const[payAmt,setPayAmt]=useState(0);
   const[newRespAlert,setAlert]=useState(null);
@@ -108,7 +108,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
   const waConfirm=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`📌 *${plan.name}* — ${t.dateConfirmedMsg}\n\n🗓️ ${fmtDate(plan.confirmedDate,lang)}${plan.confirmedStartTime?' · 🕐 '+plan.confirmedStartTime:''}\n\n${url}`),'_blank');};
   const waRem=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`⏰ ${t.reminderMsg.replace('{name}',plan.name)}\n${url}`),'_blank');setRem(true);};
   const howL=v=>({car:t.car,moto:t.moto,transit:t.transit,taxi:t.taxi,walk:t.walk,bike:t.bike}[v]||v);
-  const TABS=['who','plan','alts','extras','tips'];
+  const TABS=['plan','alts','more'];
   const tlbl=k=>t.tabs[k]||k;
   return(<>
     {payModal&&<PayModal plan={plan} amount={payAmt} onClose={()=>setPay(false)} c={c} lang={lang}/>}
@@ -268,9 +268,11 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
   </div>)}
 </div>}
 
-      {/* WHO */}
-      {!ldg&&tab==='who'&&(total===0
-        ?<Card c={c} style={{textAlign:'center',padding:'32px'}}><div style={{fontSize:'36px',marginBottom:'12px'}}>⏳</div><div style={{color:c.T,fontWeight:'500',marginBottom:'6px'}}>{t.noResp}</div><div style={{color:c.M2,fontSize:'13px'}}>{t.noRespSub} <span style={{color:mc,fontWeight:'700'}}>{plan.id}</span></div></Card>
+      {/* PLAN tab = Route + budget + inline map + respondents */}
+      {!ldg&&tab==='plan'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><>
+        {/* Respondents summary (merged from WHO tab) */}
+        {total===0
+        ?<Card c={c} style={{textAlign:'center',padding:'32px',marginBottom:'14px'}}><div style={{fontSize:'36px',marginBottom:'12px'}}>⏳</div><div style={{color:c.T,fontWeight:'500',marginBottom:'6px'}}>{t.noResp}</div><div style={{color:c.M2,fontSize:'13px'}}>{t.noRespSub} <span style={{color:mc,fontWeight:'700'}}>{plan.id}</span></div></Card>
         :<>
           {best&&cntY(best.key)>0&&<div style={{background:`${mc}12`,border:`1px solid ${mc}35`,borderRadius:'14px',padding:'16px',marginBottom:'18px'}}>
             <div style={{display:'flex',gap:'14px',alignItems:'center',marginBottom:isOrgRef.current&&!plan.confirmedDate?'14px':'0'}}>
@@ -436,10 +438,9 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
               <div style={{fontSize:'13px',color:c.T}}>"{r.comment}"</div>
             </div>)}
           </Card>}
-        </>)}
-
-      {/* PLAN tab = Route + budget + inline map */}
-      {!ldg&&tab==='plan'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><>
+        </>}
+        <HR c={c}/>
+        {/* Route + budget + inline map */}
         {city&&(plan.confirmedDate||plan.dates?.[0])&&<a href={`https://www.google.com/search?q=weather+${encodeURIComponent(city)}+${plan.confirmedDate||plan.dates[0]}`} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:'4px',padding:'4px 10px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',textDecoration:'none',fontSize:'12px',color:c.M2,marginBottom:'10px'}}>🌤️ {t.weatherForecast||'Weather'} →</a>}
         {plan.dressCode&&(Array.isArray(plan.dressCode)?plan.dressCode.length>0:plan.dressCode)&&<span style={{display:'inline-flex',padding:'4px 10px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',fontSize:'12px',color:c.M2,marginBottom:'10px',marginLeft:'6px'}}>👗 {Array.isArray(plan.dressCode)?plan.dressCode.join(', '):plan.dressCode}</span>}
         {(plan.stops||[]).length===0&&<Card c={c} style={{textAlign:'center',padding:'28px'}}><div style={{fontSize:'32px',marginBottom:'8px'}}>📍</div><div style={{color:c.M2,fontSize:'14px'}}>{t.noStopsMsg}</div></Card>}
@@ -477,21 +478,13 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
         </Card>
       </div>}
 
-      {/* EXTRAS tab = Gift + Expenses + Pay + Plan card */}
-      {!ldg&&tab==='extras'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
-        {/* Empty state when no extras */}
-        {!plan.gift&&!plan.bring?.filter(b=>b.text||typeof b==='string').length&&!plan.dressCode&&budget===0&&!plan.confirmedDate&&<div style={{textAlign:'center',padding:'40px 24px',color:c.M2}}>
-          <div style={{fontSize:'32px',marginBottom:'12px'}}>🎁</div>
-          <div style={{fontSize:'14px'}}>{t.noExtrasConfigured}</div>
-          {isOrgRef.current&&<div style={{fontSize:'12px',marginTop:'8px',color:c.M}}>{t.addThemEditing}</div>}
-        </div>}
+      {/* MORE tab = Extras + Suggestions */}
+      {!ldg&&tab==='more'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
         {/* Outfit */}
         {plan.dressCode&&<Card c={c}>
           <Lbl c={c}>👗 Outfit</Lbl>
           <OutfitCard dressCode={plan.dressCode} dressNote={plan.dressNote} city={city} date={plan.confirmedDate||plan.dates?.[0]} mc={mc} c={c} lang={lang} t={t}/>
         </Card>}
-        {/* Expense splitter - always show for splitting costs */}
-        <ExpenseSplitter plan={plan} rs={rs||[]} mc={mc} c={c} lang={lang}/>
         {/* Gift */}
         {plan.gift&&<Card c={c} accent>
           <Lbl c={c}>{t.giftSec}</Lbl>
@@ -506,11 +499,21 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
           <Lbl c={c}>{t.bring}</Lbl>
           {plan.bring.filter(b=>b.text||typeof b==='string').map((b,i)=>{const txt=typeof b==='string'?b:b.text;return<div key={i} style={{display:'flex',alignItems:'center',gap:'10px',padding:'8px 0',borderBottom:i<plan.bring.filter(x=>x.text||typeof x==='string').length-1?`1px solid ${c.BD}`:'none',fontSize:'14px',color:c.T}}><div style={{width:'6px',height:'6px',borderRadius:'50%',background:mc,flexShrink:0}}/>{txt}</div>;})}
         </Card>}
+        {/* Poll results */}
+        {plan.poll?.q&&rs.some(r=>r.pollVote)&&<Card c={c}>
+          <Lbl c={c}>🗳️ {plan.poll.q}</Lbl>
+          {plan.poll.opts.filter(o=>o.trim()).map(o=>{const cnt=rs.filter(r=>r.pollVote===o).length;const pct=rs.length>0?Math.round(cnt/rs.length*100):0;return(<div key={o} style={{marginBottom:'8px'}}>
+            <div style={{display:'flex',justifyContent:'space-between',marginBottom:'3px'}}><span style={{fontSize:'13px',color:c.T}}>{o}</span><span style={{fontSize:'12px',color:mc,fontWeight:'600'}}>{cnt} ({pct}%)</span></div>
+            <div style={{height:'6px',background:c.BD,borderRadius:'3px',overflow:'hidden'}}><div style={{height:'100%',width:`${pct}%`,background:mc,borderRadius:'3px',transition:'width .5s'}}/></div>
+          </div>);})}
+        </Card>}
         {/* Pay */}
         {budget>0&&<Card c={c} style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
           <div><div style={{fontSize:'13px',color:c.M2}}>{t.totalPerPerson}</div><div style={{fontSize:'22px',fontWeight:'800',color:mc}}>{(budget+giftPer).toFixed(0)}€</div></div>
           <Btn onClick={()=>{setPayAmt((budget+giftPer).toFixed(2));setPay(true);}} c={c} style={{background:mc,color:'#0A0A0A'}}>{t.payArrow}</Btn>
         </Card>}
+        {/* Expense splitter */}
+        <ExpenseSplitter plan={plan} rs={rs||[]} mc={mc} c={c} lang={lang}/>
         {/* Plan share card */}
         {plan.confirmedDate&&<Card c={c}>
           <Lbl c={c}>{t.planCard}</Lbl>
@@ -524,20 +527,9 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
           </div>
           <div style={{fontSize:'12px',color:c.M2,textAlign:'center',marginTop:'8px'}}>{t.hintScreenshot}</div>
         </Card>}
-        {/* Suggested dates from guests */}
-        {isOrgRef.current&&rs.some(r=>r.altDate)&&<Card c={c} style={{border:'1px solid #f59e0b30',background:'#f59e0b06'}}>
-          <Lbl c={c}>📅 {t.datesSuggestedLbl}</Lbl>
-          {rs.filter(r=>r.altDate).map((r,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:i<rs.filter(x=>x.altDate).length-1?`1px solid ${c.BD}`:'none'}}>
-            <div><div style={{fontSize:'13px',color:c.T,fontWeight:'500',textTransform:'capitalize'}}>{fmtDate(r.altDate,lang)}</div>{r.altNote&&<div style={{fontSize:'12px',color:c.M2}}>{r.altNote}</div>}</div>
-            <span style={{fontSize:'12px',color:c.M2}}>— {r.name}</span>
-          </div>)}
-        </Card>}
-      </div></React.Suspense>}
-
-      {/* TIPS / SUGGESTIONS tab */}
-      {!ldg&&tab==='tips'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}>
+        {/* Suggestions */}
         <AfterPlanSuggestions plan={plan} c={c} lang={lang}/>
-      </React.Suspense>}
+      </div></React.Suspense>}
 
     </div>
   </>);

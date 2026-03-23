@@ -8,8 +8,6 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
   const[mode,setMode]=useState('login'); // login | register | reset | confirmEmail
   const[email,setEmail]=useState('');
   const[password,setPassword]=useState('');
-  const[name,setName]=useState('');
-  const[username,setUsername]=useState('');
   const[loading,setLoading]=useState(false);
   const[err,setErr]=useState('');
   const[msg,setMsg]=useState('');
@@ -19,7 +17,6 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
   const validate=()=>{
     if(!email.trim()||!email.includes('@')){setErr(t.authInvalidEmail);return false;}
     if(mode!=='reset'&&password.length<6){setErr(t.authPassMin);return false;}
-    if(mode==='register'&&!name.trim()){setErr(t.authEnterName);return false;}
     return true;
   };
 
@@ -60,13 +57,11 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
       }
       // If Supabase returned a session, user can enter directly (email confirmation disabled)
       if(data.session){
-        const prof={name:name.trim(),username:username.trim()||null,email:email.trim().toLowerCase(),lang,contacts:[]};
+        const prof={name:email.trim().toLowerCase().split('@')[0],email:email.trim().toLowerCase(),lang,contacts:[]};
         await saveProfile(data.user.id,prof);
         onAuth(data.user,prof);
         setTimeout(()=>window.location.reload(),100);
       }else{
-        // Email confirmation is required — save name for after confirmation
-        try{localStorage.setItem('q_reg_name',name.trim());localStorage.setItem('q_reg_username',username.trim());}catch{}
         setMode('confirmEmail');
       }
     }catch(e){
@@ -132,20 +127,6 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
       {/* Form */}
       <form onSubmit={e=>{e.preventDefault();mode==='reset'?handleReset():mode==='register'?handleRegister():handleLogin();}} style={{display:'flex',flexDirection:'column',gap:'12px'}}>
         {mode==='reset'&&<div style={{fontSize:'14px',color:c.M2,marginBottom:'4px'}}>{t.authResetInfo}</div>}
-
-        {mode==='register'&&<>
-          <div>
-            <div style={{fontSize:'13px',color:c.M,fontWeight:'600',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'5px'}}>{t.authNameLabel}</div>
-            <input id="name" name="name" autoComplete="name" value={name} onChange={e=>setName(e.target.value)} placeholder={t.authDisplayName} style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
-          </div>
-          <div>
-            <div style={{fontSize:'13px',color:c.M,fontWeight:'600',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'5px'}}>{t.authAliasLabel}</div>
-            <div style={{position:'relative'}}>
-              <span style={{position:'absolute',left:'14px',top:'50%',transform:'translateY(-50%)',color:c.M,fontSize:'15px',fontWeight:'600'}}>@</span>
-              <input id="username" name="username" autoComplete="username" value={username} onChange={e=>setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g,'').slice(0,20))} placeholder={t.authAliasPlaceholder} style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px 12px 30px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
-            </div>
-          </div>
-        </>}
 
         <div>
           <div style={{fontSize:'13px',color:c.M,fontWeight:'600',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'5px'}}>Email</div>

@@ -38,8 +38,6 @@ const waMsgs={
 export default function Share({plan,onViewResults,onBack,c,lang}){
   const t=T[lang];const mc=getMC(plan.mode,c);const[planState,setPlanState]=useState(plan);
   const[copied,setCopied]=useState(false);const[codeCopied,setCodeCopied]=useState(false);const[count,setCount]=useState(null);const[shareLang,setShareLang]=useState(lang);const[isShareOpen,setShareOpen]=useState(false);
-  const[pubFilter,setPubFilter]=useState({gender:'any',ageMin:'',ageMax:'',radius:''});
-  const[showFilters,setShowFilters]=useState(false);
   const url=location.href.split('?')[0]+'?code='+plan.id;
   const copy=()=>{navigator.clipboard?.writeText(url).catch(()=>{});setCopied(true);setTimeout(()=>setCopied(false),2000);};
   const copyCode=()=>{navigator.clipboard?.writeText(plan.id).catch(()=>{});setCodeCopied(true);setTimeout(()=>setCodeCopied(false),2000);};
@@ -89,66 +87,6 @@ export default function Share({plan,onViewResults,onBack,c,lang}){
         ].map((o,i)=><button key={i} onClick={o.fn} style={{width:'100%',padding:'13px 16px',background:o.bg,color:o.cl,border:'none',borderBottom:`1px solid ${c.BD}`,cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:'600',textAlign:'left'}}>{o.l}</button>)}
       </div>}
     </div>
-    <HR c={c}/>
-{!planState.isPublic?<div style={{padding:'16px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'14px',marginBottom:'10px'}}>
-  <div style={{fontSize:'13px',color:c.M2,marginBottom:'10px',textAlign:'center'}}>{t.noOneToShare}</div>
-  {!showFilters?<Btn onClick={()=>setShowFilters(true)} full sm c={c}>{t.makePublicBtn}</Btn>
-  :<div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
-    <div>
-      <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.categoryLabel||'Category'}</div>
-      <div style={{display:'flex',gap:'4px'}}>
-        {[{v:'social',l:'🎉 Social',sub:t.catSocialSub||'Everything else'},{v:'dating',l:'💘 '+(t.catDatingLabel||'Dating'),sub:t.catDatingSub||'Meet people'},{v:'professional',l:'💼 Pro',sub:t.catProSub||'Work & studies'}].map(o=>
-          <button key={o.v} onClick={()=>setPubFilter(f=>({...f,category:o.v}))} style={{flex:1,padding:'8px 4px',borderRadius:'10px',border:`1px solid ${(pubFilter.category||'social')===o.v?mc+'60':c.BD}`,background:(pubFilter.category||'social')===o.v?`${mc}15`:c.CARD2,cursor:'pointer',textAlign:'center'}}>
-            <div style={{fontSize:'12px',color:(pubFilter.category||'social')===o.v?mc:c.T,fontWeight:(pubFilter.category||'social')===o.v?'700':'400'}}>{o.l}</div>
-            <div style={{fontSize:'10px',color:c.M2,marginTop:'1px'}}>{o.sub}</div>
-          </button>
-        )}
-      </div>
-    </div>
-    <div>
-      <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterGender||'Who can join?'}</div>
-      <div style={{display:'flex',gap:'4px',flexWrap:'wrap'}}>
-        {[{v:'any',l:t.filterAny||'Anyone'},{v:'female',l:t.genderFemale||'Women'},{v:'male',l:t.genderMale||'Men'},{v:'other',l:t.genderOther||'Other'}].map(o=>{
-          const genders=pubFilter.gender||'any';const isAny=genders==='any';
-          const selected=o.v==='any'?isAny:!isAny&&(Array.isArray(genders)?genders.includes(o.v):genders===o.v);
-          return<button key={o.v} onClick={()=>{
-            if(o.v==='any'){setPubFilter(f=>({...f,gender:'any'}));}
-            else{let cur=pubFilter.gender;if(cur==='any'||!cur)cur=[];if(!Array.isArray(cur))cur=[cur];if(cur.includes(o.v))cur=cur.filter(x=>x!==o.v);else cur=[...cur,o.v];setPubFilter(f=>({...f,gender:cur.length===0||cur.length===3?'any':cur}));}
-          }} style={{padding:'6px 12px',borderRadius:'20px',border:`1px solid ${selected?mc+'60':c.BD}`,background:selected?`${mc}15`:c.CARD2,color:selected?mc:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:selected?'600':'400'}}>{o.l}</button>;
-        })}
-      </div>
-    </div>
-    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px'}}>
-      <div>
-        <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterAgeMin||'Min age'}</div>
-        <input type="number" min="15" max="100" value={pubFilter.ageMin} onChange={e=>{let v=parseInt(e.target.value)||'';if(v&&v<15)v=15;if(v&&v>100)v=100;setPubFilter(f=>({...f,ageMin:v}));}} placeholder="15" style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
-      </div>
-      <div>
-        <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterAgeMax||'Max age'}</div>
-        <input type="number" min="15" max="100" value={pubFilter.ageMax} onChange={e=>{let v=parseInt(e.target.value)||'';if(v&&v<15)v=15;if(v&&v>100)v=100;setPubFilter(f=>({...f,ageMax:v}));}} placeholder="100" style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
-      </div>
-    </div>
-    <div>
-      <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.filterRadius||'Max distance'}</div>
-      <div style={{display:'flex',gap:'4px',marginBottom:'6px'}}>
-        {[{v:'',l:t.filterNoLimit||'No limit'},{v:'online',l:'💻 Online'}].map(o=>
-          <button key={o.v} onClick={()=>setPubFilter(f=>({...f,radius:o.v,radiusKm:''}))} style={{flex:1,padding:'6px 10px',borderRadius:'20px',border:`1px solid ${pubFilter.radius===o.v?mc+'60':c.BD}`,background:pubFilter.radius===o.v?`${mc}15`:c.CARD2,color:pubFilter.radius===o.v?mc:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:pubFilter.radius===o.v?'600':'400'}}>{o.l}</button>
-        )}
-      </div>
-      {pubFilter.radius!=='online'&&pubFilter.radius!==''&&<>
-        <input type="range" min="1" max="100" value={pubFilter.radiusKm||50} onChange={e=>setPubFilter(f=>({...f,radius:'km',radiusKm:e.target.value}))} style={{width:'100%',accentColor:mc}}/>
-        <div style={{display:'flex',justifyContent:'space-between',fontSize:'11px',color:c.M2}}><span>1 km</span><span style={{color:mc,fontWeight:'700'}}>{pubFilter.radiusKm||50} km</span><span>100 km</span></div>
-      </>}
-      {(pubFilter.radius==='km'||(!pubFilter.radius&&pubFilter.radius!=='online'))&&<button onClick={()=>setPubFilter(f=>({...f,radius:'km'}))} style={{width:'100%',padding:'6px',background:'none',border:`1px dashed ${c.BD}`,borderRadius:'8px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'11px',marginTop:'4px'}}>{t.filterRadius||'Set distance'}</button>}
-    </div>
-    <Btn onClick={async()=>{const up={...planState,isPublic:true,pubFilter};await updatePlan(up);setPlanState(up);}} full sm c={c}>{t.publishBtn||'Publish'}</Btn>
-  </div>}
-  <div style={{fontSize:'11px',color:c.M,marginTop:'6px',textAlign:'center'}}>{t.makePublicHint}</div>
-</div>
-:<div style={{textAlign:'center',padding:'12px',background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'14px',marginBottom:'10px'}}>
-  <div style={{fontSize:'13px',color:mc,fontWeight:'600'}}>🌍 {t.planIsPublic}</div>
-  <button onClick={async()=>{const up={...planState,isPublic:false,pubFilter:null};await updatePlan(up);setPlanState(up);setShowFilters(false);}} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',marginTop:'4px',textDecoration:'underline'}}>{t.makePrivateBtn}</button>
-</div>}
     <div style={{height:'12px'}}/>
     <Btn onClick={onViewResults} v="secondary" full style={{padding:'14px'}} c={c}>{t.viewRes}</Btn>
   </div>);
