@@ -253,7 +253,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
           <Btn onClick={async()=>{
             const newId=genId();
             const dup={...plan,id:newId,dates:[],startTimes:[],confirmedDate:null,confirmedStartTime:null,isPublic:false,pubFilter:null,attendance:null,attendanceMarked:false,createdAt:new Date().toISOString()};
-            try{await savePlan(dup);addMyPlan(newId,dup.name,'organizer',dup.mode);navigator.clipboard?.writeText(newId);alert((t.planDuplicated||'Plan created!')+' '+newId);}catch{}
+            try{await savePlan(dup);addMyPlan(newId,dup.name,'organizer');navigator.clipboard?.writeText(newId);alert((t.planDuplicated||'Plan created!')+' '+newId);}catch{}
           }} c={c} accent={mc}>{t.repeatBtn||'Create again 🔄'}</Btn>
         </div>
       )}
@@ -460,7 +460,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
         </>}
         <HR c={c}/>
         {/* Route + budget + inline map */}
-        {city&&(plan.confirmedDate||plan.dates?.[0])&&<a href={`https://www.google.com/search?q=weather+${encodeURIComponent(city)}+${plan.confirmedDate||plan.dates[0]}`} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:'4px',padding:'4px 10px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',textDecoration:'none',fontSize:'12px',color:c.M2,marginBottom:'10px'}}>🌤️ {t.weatherForecast||'Weather'} →</a>}
+        {city&&(plan.confirmedDate||plan.dates?.[0])&&<a href={`https://www.google.com/search?q=weather+${encodeURIComponent(city)}+${plan.confirmedDate||plan.dates[0]}`} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:'4px',padding:'3px 8px',background:c.CARD2,borderRadius:'8px',textDecoration:'none',fontSize:'11px',color:c.M2,marginBottom:'8px'}}>🌤️ {city}</a>}
         {plan.dressCode&&(Array.isArray(plan.dressCode)?plan.dressCode.length>0:plan.dressCode)&&<span style={{display:'inline-flex',padding:'4px 10px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',fontSize:'12px',color:c.M2,marginBottom:'10px',marginLeft:'6px'}}>👗 {Array.isArray(plan.dressCode)?plan.dressCode.join(', '):plan.dressCode}</span>}
         {(plan.stops||[]).length===0&&<Card c={c} style={{textAlign:'center',padding:'28px'}}><div style={{fontSize:'32px',marginBottom:'8px'}}>📍</div><div style={{color:c.M2,fontSize:'14px'}}>{t.noStopsMsg}</div></Card>}
         {(plan.stops||[]).map((s,i)=>{const opt=s.options?.[0]||s;return<div key={s.id||i} style={{display:'flex',gap:'12px',marginBottom:'10px'}}>
@@ -473,11 +473,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
             <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'4px'}}>{opt.name||'—'}</div>
             {opt.address&&<div style={{fontSize:'12px',color:c.M2,marginBottom:'6px'}}>📍 {opt.address}</div>}
             <VenueInfo stop={opt} c={c} lang={lang}/>
-            <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginTop:'8px'}}>
-              {parseFloat(s.cost)>0&&<Badge color={mc}>{s.cost}€/pers.</Badge>}
-              {(opt.address||opt.name)&&<a href={`https://maps.google.com/?q=${encodeURIComponent((opt.name||'')+(opt.address?' '+opt.address:''))}`} target="_blank" rel="noreferrer" style={{fontSize:'12px',color:c.M2,textDecoration:'none',padding:'4px 10px',border:`1px solid ${c.BD}`,borderRadius:'8px'}}>Google Maps 🗺️</a>}
-              {s.link&&<a href={s.link.startsWith('http')?s.link:'https://'+s.link} target="_blank" rel="noreferrer" style={{fontSize:'12px',color:mc,textDecoration:'none',padding:'4px 10px',border:`1px solid ${mc}40`,borderRadius:'8px'}}>{t.bookLbl} ↗</a>}
-            </div>
+            {parseFloat(s.cost)>0&&<div style={{marginTop:'6px'}}><Badge color={mc}>{s.cost}€/pers.</Badge></div>}
             {isOrgRef.current&&<button onClick={()=>alert(lang==='es'?'Próximamente: añadir alternativas para esta parada':'Coming soon: add alternatives for this stop')} style={{marginTop:'8px',padding:'5px 10px',background:'none',border:`1px dashed ${c.BD}`,borderRadius:'8px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'11px',width:'100%'}}>+ {t.alternative||'Alternative'}</button>}
           </Card>
         </div>})}

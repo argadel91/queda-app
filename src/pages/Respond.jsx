@@ -62,7 +62,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
     const resp={name:name.trim(),avail,timePref,how:how==='other'?howOther:how,howOther,comment,role:guestRole,altDate:altDate||null,altNote:altNote||null,pollVote:pollVote||null,stopAttend:Object.keys(stopAttend).length>0?stopAttend:null,stopPrefs:Object.keys(stopPrefs).length>0?stopPrefs:null,changeLog,at:new Date().toISOString()};
     await saveResp(plan.id,name.trim(),resp);
     if(authUser)try{await db.from('responses').update({user_id:authUser.id}).eq('plan_id',plan.id).eq('name',name.trim());}catch{}
-    addMyPlan(plan.id,plan.name,'invited',plan.mode);
+    addMyPlan(plan.id,plan.name,'invited');
     ls.set(prevKey,resp);setSaving(false);setDone(true);
   };
   const budget=(plan.stops||[]).reduce((s,p2)=>s+(parseFloat(p2.cost)||0),0);
