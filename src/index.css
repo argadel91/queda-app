@@ -40,25 +40,3 @@ input, textarea, select, button {
 input[type=number]::-webkit-inner-spin-button {
   -webkit-appearance: none;
 }
-
-.map-wrap {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.75);
-  z-index: 200;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-
-.map-inner {
-  width: 100%;
-  max-width: 480px;
-  background: #141414;
-  border-radius: 24px 24px 0 0;
-  padding: 20px;
-  height: 88vh;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
