@@ -7,6 +7,7 @@ export default defineConfig({
     baseURL: 'http://localhost:4173',
     headless: true,
     screenshot: 'only-on-failure',
+    locale: 'en-GB',
   },
   webServer: {
     command: 'npm run preview',
