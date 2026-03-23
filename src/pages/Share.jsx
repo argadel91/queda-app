@@ -83,7 +83,6 @@ export default function Share({plan,onViewResults,onBack,c,lang}){
         {[
           {l:'WhatsApp',bg:'#25D366',cl:'#fff',fn:wa},
           {l:'Telegram',bg:'#0088cc',cl:'#fff',fn:()=>window.open('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(getMsg()),'_blank')},
-          {l:'SMS',bg:'transparent',cl:c.T,fn:()=>window.open('sms:?body='+encodeURIComponent(getMsg()))},
           {l:'Email',bg:'transparent',cl:c.T,fn:()=>window.open('mailto:?subject='+encodeURIComponent(plan.name||'queda.')+'&body='+encodeURIComponent(getMsg()))},
           {l:codeCopied?(t.codeCopied||'✓ Copied'):(t.copyCode||'Copy code'),bg:'transparent',cl:c.T,fn:copyCode},
           {l:copied?t.copied:(t.copyLink||'Copy link'),bg:'transparent',cl:c.T,fn:copy},
