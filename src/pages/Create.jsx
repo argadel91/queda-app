@@ -142,7 +142,8 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   const create=async()=>{
     setSaving(true);
     try{
-      const plan={id:genId(),name:name.trim()||null,desc:desc.trim()||null,organizer:profile?.name||org.trim()||'',orgRole:orgRole.trim()||null,dates:[...selDates].sort(),startTimes:startTimes.filter(t=>t),timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,poll:poll.q.trim()?poll:null,gift:giftOn?gift:null,bring:bring.filter(b=>b.text.trim()),payment,confirmedDate:null,isPublic,pubFilter:isPublic?pubFilter:null,deadline:hasDeadline&&deadline?deadline:null,lang,createdAt:new Date().toISOString()};
+      const cleanStops=stops.filter(s=>(s.options||[]).some(o=>o.name));
+      const plan={id:genId(),name:name.trim()||null,desc:desc.trim()||null,organizer:profile?.name||org.trim()||'',orgRole:orgRole.trim()||null,dates:[...selDates].sort(),startTimes:startTimes.filter(t=>t),timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,stops:cleanStops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,poll:poll.q.trim()?poll:null,gift:giftOn?gift:null,bring:bring.filter(b=>b.text.trim()),payment,confirmedDate:null,isPublic,pubFilter:isPublic?pubFilter:null,deadline:hasDeadline&&deadline?deadline:null,lang,createdAt:new Date().toISOString()};
       if(authUser)await savePlanWithUser(plan,authUser.id);else await savePlan(plan);
       addMyPlan(plan.id,plan.name,'organizer');
       ls.set('q_state',{screen:'share',planId:plan.id,isOrg:true});clearDraft();onCreated(plan);
