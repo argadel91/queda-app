@@ -7,18 +7,19 @@ import { saveProfile, loadProfile, loadPlan } from './lib/supabase.js'
 import { ls, getMyPlans } from './lib/storage.js'
 import { fmtDate, daysUntil, fmtShort } from './lib/utils.js'
 
-import AuthScreen from './pages/AuthScreen.jsx'
-import ResetPasswordScreen from './pages/ResetPasswordScreen.jsx'
 import Home from './pages/Home.jsx'
-import Create from './pages/Create.jsx'
-import Share from './pages/Share.jsx'
-import PlanPreview from './pages/PlanPreview.jsx'
-import Respond from './pages/Respond.jsx'
-import Results from './pages/Results.jsx'
-import Profile from './pages/Profile.jsx'
-import MyPlans from './pages/MyPlans.jsx'
-import Discover from './pages/Discover.jsx'
 import Landing from './pages/Landing.jsx'
+
+const AuthScreen = React.lazy(() => import('./pages/AuthScreen.jsx'))
+const ResetPasswordScreen = React.lazy(() => import('./pages/ResetPasswordScreen.jsx'))
+const Create = React.lazy(() => import('./pages/Create.jsx'))
+const Share = React.lazy(() => import('./pages/Share.jsx'))
+const PlanPreview = React.lazy(() => import('./pages/PlanPreview.jsx'))
+const Respond = React.lazy(() => import('./pages/Respond.jsx'))
+const Results = React.lazy(() => import('./pages/Results.jsx'))
+const Profile = React.lazy(() => import('./pages/Profile.jsx'))
+const MyPlans = React.lazy(() => import('./pages/MyPlans.jsx'))
+const Discover = React.lazy(() => import('./pages/Discover.jsx'))
 
 export default function App(){
   const[theme,setTheme]=useState(()=>ls.get('q_theme',null)||getSysTheme());
@@ -177,10 +178,11 @@ export default function App(){
   const mc=plan?.mode?getMC(plan.mode,c):c.A;
   const noNav=['home','create','profile','myplans','discover','preview'];
   if(authLoading)return(<div style={{minHeight:'100vh',background:c.BG,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'16px'}}><div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'28px',color:c.T}}>queda<span style={{color:c.A}}>.</span></div><div style={{width:'24px',height:'24px',border:`3px solid ${c.BD}`,borderTop:`3px solid ${c.A}`,borderRadius:'50%',animation:'spin 1s linear infinite'}}/></div>);
-  if(resetMode)return<ResetPasswordScreen onDone={()=>{setResetMode(false);authSignOut();}} c={c} lang={lang}/>;
+  const Fallback=()=><div style={{minHeight:'100vh',background:c.BG,display:'flex',alignItems:'center',justifyContent:'center'}}><div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'22px',color:c.T}}>queda<span style={{color:c.A}}>.</span></div></div>;
+  if(resetMode)return<React.Suspense fallback={<Fallback/>}><ResetPasswordScreen onDone={()=>{setResetMode(false);authSignOut();}} c={c} lang={lang}/></React.Suspense>;
   const hasCode=new URLSearchParams(location.search).get('code');
   if(!authUser){
-    if(showAuth)return<AuthScreen onAuth={handleAuth} c={c} lang={lang} onLangChange={l=>{setLang(l);ls.set('q_lang',l);}}/>
+    if(showAuth)return<React.Suspense fallback={<Fallback/>}><AuthScreen onAuth={handleAuth} c={c} lang={lang} onLangChange={l=>{setLang(l);ls.set('q_lang',l);}}/></React.Suspense>
     if(previewPlan)return<div style={{minHeight:'100vh',background:c.BG,color:c.T,fontFamily:"'DM Sans',system-ui,sans-serif"}}>
       <div style={{maxWidth:'420px',margin:'0 auto',padding:'40px 24px',textAlign:'center'}}>
         <div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'22px',marginBottom:'32px'}}>queda<span style={{color:c.A}}>.</span></div>
@@ -202,7 +204,7 @@ export default function App(){
     </div>;
     return<Landing onGetStarted={()=>setShowAuth(true)} c={c} lang={lang} onLangChange={l=>{setLang(l);ls.set('q_lang',l);}}/>
   }
-  return(<div style={{minHeight:'100vh',background:c.BG,color:c.T,fontFamily:"'DM Sans',system-ui,sans-serif"}} onClick={()=>{setLangOpen(false);setAvatarOpen(false);}}>
+  return(<React.Suspense fallback={<Fallback/>}><div style={{minHeight:'100vh',background:c.BG,color:c.T,fontFamily:"'DM Sans',system-ui,sans-serif"}} onClick={()=>{setLangOpen(false);setAvatarOpen(false);}}>
     {toast&&<div style={{position:'fixed',bottom:'24px',left:'50%',transform:'translateX(-50%)',background:toast.type==='success'?'#22c55e':toast.type==='info'?c.A:'#ef4444',color:toast.type==='info'?'#0A0A0A':'#fff',padding:'12px 20px',borderRadius:'30px',fontWeight:'600',fontSize:'13px',zIndex:300,boxShadow:'0 4px 20px rgba(0,0,0,.4)',whiteSpace:'nowrap',animation:'slideDown .3s ease'}}>{toast.type==='success'?'✓':toast.type==='info'?'ℹ':'⚠️'} {toast.msg}</div>}
     <div style={{borderBottom:`1px solid ${c.BD}`,padding:'14px 24px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,background:c.BG+'F0',backdropFilter:'blur(10px)',zIndex:10}}>
       <div onClick={()=>nav('home')} style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'22px',cursor:'pointer',color:c.T,letterSpacing:'-.02em'}}>queda<span style={{color:c.A}}>.</span></div>
@@ -250,5 +252,5 @@ export default function App(){
       <button onClick={async()=>{if(installPrompt){await installPrompt.prompt();setShowInstall(false);}}} style={{padding:'8px 16px',background:c.A,border:'none',borderRadius:'8px',color:'#0A0A0A',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',fontSize:'13px'}}>{T[lang]?.installBtn||'Install'}</button>
       <button onClick={()=>{setShowInstall(false);ls.set('q_install_dismissed',true);}} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'18px',padding:'4px'}}>×</button>
     </div>}
-  </div>);
+  </div></React.Suspense>);
 }
