@@ -27,6 +27,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
   const[editDesc,setEditDesc]=useState(ip.desc||'');
   const[attendance,setAttendance]=useState(ip.attendance||{});
   const[attStars,setAttStars]=useState({});
+  const[openSection,setOpenSection]=useState({});
   const[planRating,setPlanRating]=useState(0);
   const[ratingDone,setRatingDone]=useState(false);
   const isOrgRef=useRef(isOrg);
@@ -105,7 +106,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
   const waConfirm=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`📌 *${plan.name}* — ${t.dateConfirmedMsg}\n\n🗓️ ${fmtDate(plan.confirmedDate,lang)}${plan.confirmedStartTime?' · 🕐 '+plan.confirmedStartTime:''}\n\n${url}`),'_blank');};
   const waRem=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`⏰ ${t.reminderMsg.replace('{name}',plan.name)}\n${url}`),'_blank');setRem(true);};
   const howL=v=>({car:t.car,moto:t.moto,transit:t.transit,taxi:t.taxi,walk:t.walk,bike:t.bike}[v]||v);
-  const TABS=['plan','alts','insights','more'];
+  const TABS=['plan','alts','summary','more'];
   const tlbl=k=>t.tabs[k]||k;
   return(<>
     {payModal&&<PayModal plan={plan} amount={payAmt} onClose={()=>setPay(false)} c={c} lang={lang}/>}
@@ -390,17 +391,14 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
         </Card>}
       </div>}
 
-      {/* INSIGHTS tab = Vote analysis + per-person details + comments */}
-      {!ldg&&tab==='insights'&&<>
+      {/* SUMMARY tab = Ranking + collapsible vote bars, per-person, comments */}
+      {!ldg&&tab==='summary'&&<>
         {total===0?<Card c={c} style={{textAlign:'center',padding:'32px'}}>
           <div style={{fontSize:'36px',marginBottom:'10px'}}>📊</div>
           <div style={{color:c.T,fontWeight:'500',marginBottom:'6px'}}>{lang==='es'?'Aún no hay datos':'No data yet'}</div>
           <div style={{color:c.M2,fontSize:'13px'}}>{lang==='es'?'Cuando los invitados respondan, verás los datos aquí':'When invitees respond, you\'ll see the data here'}</div>
         </Card>
         :<>
-          {/* Explanation */}
-          <div style={{fontSize:'13px',color:c.M2,marginBottom:'14px',lineHeight:1.6}}>{lang==='es'?'Resumen de las respuestas. Los datos se actualizan en tiempo real.':'Summary of responses. Data updates in real time.'}</div>
-
           {/* Tie detection */}
           {best&&(()=>{
             const tiedSlots=slots.filter(s=>cntY(s.key)===cntY(best.key)&&cntY(s.key)>0);
@@ -418,116 +416,133 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
             </div>);
           })()}
 
-          {/* Vote bars per slot */}
-          {slots.map(s=>{const d=s.date;const key=s.key;const ny=cntY(key);const nm=cntM(key);const pct=(ny/mx)*100;const isBest=best&&key===best.key&&ny>0;const isConf=d===plan.confirmedDate;return(
-            <div key={key} style={{marginBottom:'12px'}}>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'5px'}}>
-                <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
-                  <span style={{fontSize:'13px',color:isConf||isBest?mc:c.T,fontWeight:isConf||isBest?'700':'400',textTransform:'capitalize'}}>{fmtShort(d,lang)}{s.startTime?' · '+s.startTime:''}</span>
-                  {isConf&&<span style={{fontSize:'10px',background:mc,color:'#0A0A0A',padding:'1px 7px',borderRadius:'20px',fontWeight:'800'}}>{t.CONFIRMED}</span>}
-                  {!isConf&&isBest&&<span>⭐</span>}
-                  {plan.autoConfirm&&!plan.confirmedDate&&<span style={{fontSize:'10px',background:'#f59e0b20',color:'#f59e0b',padding:'1px 7px',borderRadius:'20px',border:'1px solid #f59e0b40'}}>⚡ auto</span>}
-                </div>
-                <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
-                  <span style={{fontSize:'12px',color:'#22c55e',fontWeight:'600'}}>✅ {ny}</span>
-                  {nm>0&&<span style={{fontSize:'12px',color:'#f59e0b',fontWeight:'600'}}>🤔 {nm}</span>}
-                  {isOrgRef.current&&!plan.confirmedDate&&(!best||key!==best.key)&&(ny+nm)>0&&<button onClick={()=>confirmDate(s.date,s.startTime)} title={t.confirmDateTitle} style={{background:'none',border:'none',color:c.M2,fontSize:'11px',cursor:'pointer',fontFamily:'inherit',textDecoration:'underline'}}>{t.confirmSmall}</button>}
-                </div>
-              </div>
-              <div style={{height:'7px',background:c.BD,borderRadius:'4px',overflow:'hidden',position:'relative'}}>
-                <div style={{height:'100%',width:`${pct}%`,background:isConf||isBest?mc:'#22c55e',borderRadius:'4px',transition:'width .5s'}}/>
-                {nm>0&&<div style={{position:'absolute',left:`${pct}%`,top:0,height:'100%',width:`${(nm/total)*100}%`,background:'#f59e0b'}}/>}
-              </div>
-            </div>);})}
-
-          {/* Participation summary */}
-          {!plan.confirmedDate&&total>0&&plan.stops?.length>0&&(()=>{
-            const totalStops=plan.stops.length;
-            const dateScores=slots.map(s=>{
-              const yesRs=rs.filter(r=>r.avail?.[s.key]==='yes');
-              const people=yesRs.length;
-              const totalAtt=yesRs.reduce((sum,r)=>{
-                return sum+(plan.stops||[]).filter(st=>r.stopAttend?.[st.id]==='yes').length;
-              },0);
-              const maxAtt=people*totalStops;
-              const pct=maxAtt>0?Math.round(totalAtt/maxAtt*100):0;
-              return{d:s.date,startTime:s.startTime,key:s.key,people,totalAtt,maxAtt,pct};
-            }).filter(x=>x.people>0).sort((a,b)=>b.totalAtt-a.totalAtt||b.people-a.people);
-            if(dateScores.length===0)return null;
-            const best=dateScores[0];
-            const hasTie=dateScores.length>1&&dateScores[1].totalAtt===best.totalAtt;
-            return<Card c={c} style={{marginBottom:'14px'}}>
-              <Lbl c={c}>📊 {t.participationSummary||'Participation summary'}</Lbl>
-              {dateScores.map((ds,i)=>{
-                const isBest=i===0&&!hasTie;
-                return<div key={ds.d} style={{padding:'10px 0',borderBottom:i<dateScores.length-1?`1px solid ${c.BD}`:'none'}}>
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'6px'}}>
-                    <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
-                      {isBest&&<span>⭐</span>}
-                      <span style={{fontSize:'14px',color:isBest?mc:c.T,fontWeight:isBest?'700':'400',textTransform:'capitalize'}}>{fmtShort(ds.d,lang)}{ds.startTime?' · '+ds.startTime:''}</span>
-                    </div>
-                    <div style={{display:'flex',gap:'8px',fontSize:'12px'}}>
-                      <span style={{color:c.T,fontWeight:'600'}}>{ds.people} 👥</span>
-                      <span style={{color:mc,fontWeight:'600'}}>{ds.pct}%</span>
+          {/* Ranking with human explanations */}
+          {(()=>{
+            const genExplanation=(ds,allRs,stops,lng)=>{
+              const isEs=lng==='es';
+              const yesRs=allRs.filter(r=>r.avail?.[ds.key]==='yes');
+              const names=yesRs.map(r=>r.name);
+              const noNames=allRs.filter(r=>r.avail?.[ds.key]==='no').map(r=>r.name);
+              const maybeNames=allRs.filter(r=>r.avail?.[ds.key]==='maybe').map(r=>r.name);
+              let text=isEs
+                ?`${names.join(', ')} ${names.length===1?'puede':'pueden'} este día.`
+                :`${names.join(', ')} ${names.length===1?'can':'can'} make it.`;
+              if(noNames.length>0){
+                text+=isEs
+                  ?` ${noNames.join(', ')} no ${noNames.length===1?'puede':'pueden'}.`
+                  :` ${noNames.join(', ')} can't make it.`;
+              }
+              if(maybeNames.length>0){
+                text+=isEs
+                  ?` ${maybeNames.join(', ')} ${maybeNames.length===1?'está':'están'} pendiente${maybeNames.length===1?'':'s'}.`
+                  :` ${maybeNames.join(', ')} ${maybeNames.length===1?'is':'are'} maybe.`;
+              }
+              if(stops?.length>0){
+                const partial=yesRs.filter(r=>stops.some(s=>r.stopAttend?.[s.id]==='no'));
+                if(partial.length>0){
+                  const details=partial.map(r=>{
+                    const skipped=stops.filter(s=>r.stopAttend?.[s.id]==='no').map(s=>s.options?.[0]?.name||'stop').join(', ');
+                    return`${r.name} → ${skipped}`;
+                  }).join('; ');
+                  text+=isEs?` No a todo: ${details}.`:` Partial: ${details}.`;
+                }
+              }
+              return text;
+            };
+            const ranked=[...slots].sort((a,b)=>cntY(b.key)-cntY(a.key)||cntM(b.key)-cntM(a.key)).filter(s=>cntY(s.key)>0||cntM(s.key)>0);
+            if(ranked.length===0)return null;
+            return<div style={{marginBottom:'18px'}}>
+              {ranked.map((s,i)=>{
+                const ny=cntY(s.key);const nm=cntM(s.key);const pct=total>0?Math.round(ny/total*100):0;
+                const isBest=i===0;
+                const explanation=genExplanation(s,rs,plan.stops,lang);
+                return<div key={s.key} style={{padding:'14px',marginBottom:'8px',background:isBest?`${mc}12`:c.CARD,border:`1px solid ${isBest?mc+'35':c.BD}`,borderRadius:'12px'}}>
+                  <div style={{display:'flex',gap:'12px',alignItems:'flex-start'}}>
+                    <div style={{width:'28px',height:'28px',borderRadius:'50%',background:isBest?mc:`${c.M2}30`,color:isBest?'#0A0A0A':c.M2,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',fontWeight:'800',flexShrink:0}}>{i+1}</div>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'4px'}}>
+                        <span style={{fontSize:'14px',color:isBest?mc:c.T,fontWeight:isBest?'700':'500',textTransform:'capitalize'}}>{fmtShort(s.date,lang)}{s.startTime?' · '+s.startTime:''}</span>
+                        {isBest&&<span>⭐</span>}
+                      </div>
+                      <div style={{fontSize:'13px',color:c.M2,marginBottom:'6px'}}>👥 {ny}/{total} ({pct}%){nm>0?` · 🤔 ${nm}`:''}</div>
+                      <div style={{fontSize:'12px',color:c.M2,lineHeight:1.5,fontStyle:'italic'}}>{explanation}</div>
+                      {isOrgRef.current&&!plan.confirmedDate&&<button onClick={()=>confirmDate(s.date,s.startTime)} style={{marginTop:'8px',padding:'6px 14px',background:isBest?mc:c.CARD2,border:isBest?'none':`1px solid ${c.BD}`,borderRadius:'8px',color:isBest?'#0A0A0A':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:'700'}}>{t.confirmBtn||'Confirm'}</button>}
                     </div>
                   </div>
-                  <div style={{display:'flex',gap:'4px',flexWrap:'wrap'}}>
-                    {(plan.stops||[]).map((s,si)=>{
-                      const stopName=s.options?.[0]?.name||`${t.stop||'Stop'} ${si+1}`;
-                      const cnt=rs.filter(r=>r.avail?.[ds.key]==='yes'&&r.stopAttend?.[s.id]==='yes').length;
-                      const max=s.maxCapacity?parseInt(s.maxCapacity):null;
-                      const full=max&&cnt>=max;
-                      return<span key={s.id} style={{fontSize:'11px',padding:'3px 8px',borderRadius:'12px',background:full?'#ef444420':cnt>0?`${mc}15`:c.CARD2,color:full?'#ef4444':cnt>0?mc:c.M2,border:`1px solid ${full?'#ef444430':cnt>0?mc+'30':c.BD}`}}>
-                        {stopName}: {cnt}{max?`/${max}`:''}
-                      </span>;
-                    })}
-                  </div>
-                  {(()=>{
-                    const yesRs=rs.filter(r=>r.avail?.[ds.key]==='yes');
-                    const missing=(plan.stops||[]).flatMap(s=>{
-                      const stopName=s.options?.[0]?.name||`Stop ${(plan.stops||[]).indexOf(s)+1}`;
-                      return yesRs.filter(r=>r.stopAttend?.[s.id]==='no').map(r=>`${r.name} → ${stopName}`);
-                    });
-                    if(missing.length===0)return null;
-                    return<div style={{fontSize:'11px',color:c.M2,marginTop:'4px'}}>⚠️ {missing.join(', ')}</div>;
-                  })()}
                 </div>;
               })}
-              {hasTie&&<div style={{marginTop:'8px',padding:'8px 12px',background:'#f59e0b15',border:'1px solid #f59e0b30',borderRadius:'8px',fontSize:'12px',color:'#f59e0b'}}>⚠️ {t.tiedDates}</div>}
-            </Card>;
+            </div>;
           })()}
 
-          {/* Per person details */}
-          <Card c={c}>
-            <Lbl c={c}>{t.detailPerPerson}</Lbl>
-            {rs.map((r,i)=><div key={i} style={{paddingBottom:'12px',marginBottom:'12px',borderBottom:i<rs.length-1?`1px solid ${c.BD}`:'none'}}>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'5px'}}>
-                <div><span style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>{r.name}</span>{r.role&&<span style={{fontSize:'11px',color:c.M2,marginLeft:'6px'}}>· {r.role}</span>}{r.how&&<span style={{fontSize:'12px',color:c.M2,marginLeft:'6px'}}>· {howL(r.how)}</span>}</div>
-                <div style={{display:'flex',gap:'6px',alignItems:'center'}}>
-                  {r.changeLog?.length>0&&(()=>{const last=r.changeLog[0];const recent=last&&(Date.now()-new Date(last.at).getTime())<3600000;return<span title={t.editedTimes.replace('{n}',r.changeLog.length)} style={{fontSize:'11px',color:recent?'#f59e0b':c.M2,fontWeight:recent?'700':'400'}}>✏️{recent?' nuevo':''}</span>;})()}
-                </div>
-              </div>
-              {r.comment&&<div style={{fontSize:'13px',color:c.M2,fontStyle:'italic',marginBottom:'6px',padding:'6px 10px',background:c.CARD2,borderRadius:'8px'}}>"{r.comment}"</div>}
-              <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
-                {slots.map(s=>{const v=r.avail?.[s.key];const vc={yes:'#22c55e',maybe:'#f59e0b'};const vi={yes:'✅',maybe:'🤔'};return(v==='yes'||v==='maybe')?<span key={s.key} style={{fontSize:'11px',padding:'3px 9px',borderRadius:'20px',background:`${vc[v]}20`,color:vc[v],border:`1px solid ${vc[v]}30`,textTransform:'capitalize'}}>{vi[v]} {fmtShort(s.date,lang)}{s.startTime?' · '+s.startTime:''}</span>:null;})}
-              </div>
-              {r.stopAttend&&plan.stops?.length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:'4px',marginTop:'4px'}}>
-                {(plan.stops||[]).map((st,si)=>{const v=r.stopAttend?.[st.id];if(!v)return null;const sName=st.options?.[0]?.name||`${t.stop||'Stop'} ${si+1}`;const vc={yes:'#22c55e',no:'#ef4444',maybe:'#f59e0b'};const vi={yes:'✅',no:'❌',maybe:'🤔'};return<span key={st.id} style={{fontSize:'10px',padding:'2px 7px',borderRadius:'12px',background:`${vc[v]||c.CARD2}15`,color:vc[v]||c.M2,border:`1px solid ${(vc[v]||c.BD)}30`}}>{vi[v]||'?'} {sName}</span>;})}
-              </div>}
-              {r.stopPrefs&&plan.stops?.length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:'4px',marginTop:'4px'}}>
-                {(plan.stops||[]).flatMap((st,si)=>(st.options||[]).filter((opt)=>r.stopPrefs?.[st.id]===opt.id||r.stopPrefs?.[st.id+'_'+opt.id]).map((opt)=><span key={st.id+'_'+opt.id} style={{fontSize:'10px',padding:'2px 7px',borderRadius:'12px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`}}>⭐ {opt.name||`${t.stop||'Stop'} ${si+1}`}</span>))}
-              </div>}
-            </div>)}
-          </Card>
+          {/* Collapsible: Votaciones */}
+          <div style={{marginBottom:'10px'}}>
+            <button onClick={()=>setOpenSection(p=>({...p,votes:!p.votes}))} style={{width:'100%',padding:'12px 14px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:openSection.votes?'10px 10px 0 0':'10px',cursor:'pointer',display:'flex',justifyContent:'space-between',alignItems:'center',fontFamily:'inherit'}}>
+              <span style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>{lang==='es'?'Votaciones':'Votes'}</span>
+              <span style={{color:c.M2}}>{openSection.votes?'▾':'▸'}</span>
+            </button>
+            {openSection.votes&&<div style={{padding:'14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderTop:'none',borderRadius:'0 0 10px 10px'}}>
+              {slots.map(s=>{const d=s.date;const key=s.key;const ny=cntY(key);const nm=cntM(key);const pct=(ny/mx)*100;const isBest=best&&key===best.key&&ny>0;const isConf=d===plan.confirmedDate;return(
+                <div key={key} style={{marginBottom:'12px'}}>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'5px'}}>
+                    <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
+                      <span style={{fontSize:'13px',color:isConf||isBest?mc:c.T,fontWeight:isConf||isBest?'700':'400',textTransform:'capitalize'}}>{fmtShort(d,lang)}{s.startTime?' · '+s.startTime:''}</span>
+                      {isConf&&<span style={{fontSize:'10px',background:mc,color:'#0A0A0A',padding:'1px 7px',borderRadius:'20px',fontWeight:'800'}}>{t.CONFIRMED}</span>}
+                      {!isConf&&isBest&&<span>⭐</span>}
+                    </div>
+                    <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
+                      <span style={{fontSize:'12px',color:'#22c55e',fontWeight:'600'}}>✅ {ny}</span>
+                      {nm>0&&<span style={{fontSize:'12px',color:'#f59e0b',fontWeight:'600'}}>🤔 {nm}</span>}
+                    </div>
+                  </div>
+                  <div style={{height:'7px',background:c.BD,borderRadius:'4px',overflow:'hidden',position:'relative'}}>
+                    <div style={{height:'100%',width:`${pct}%`,background:isConf||isBest?mc:'#22c55e',borderRadius:'4px',transition:'width .5s'}}/>
+                    {nm>0&&<div style={{position:'absolute',left:`${pct}%`,top:0,height:'100%',width:`${(nm/total)*100}%`,background:'#f59e0b'}}/>}
+                  </div>
+                </div>);})}
+            </div>}
+          </div>
 
-          {/* Comments */}
-          {rs.some(r=>r.comment)&&<Card c={c}>
-            <Lbl c={c}>💬 {t.comments}</Lbl>
-            {rs.filter(r=>r.comment).map((r,i)=><div key={i} style={{marginBottom:'10px',paddingBottom:'10px',borderBottom:i<rs.filter(x=>x.comment).length-1?`1px solid ${c.BD}`:'none'}}>
-              <div style={{fontSize:'12px',color:mc,fontWeight:'600',marginBottom:'3px'}}>{r.name}</div>
-              <div style={{fontSize:'13px',color:c.T}}>"{r.comment}"</div>
-            </div>)}
-          </Card>}
+          {/* Collapsible: Detalles por persona */}
+          <div style={{marginBottom:'10px'}}>
+            <button onClick={()=>setOpenSection(p=>({...p,people:!p.people}))} style={{width:'100%',padding:'12px 14px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:openSection.people?'10px 10px 0 0':'10px',cursor:'pointer',display:'flex',justifyContent:'space-between',alignItems:'center',fontFamily:'inherit'}}>
+              <span style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>{t.detailPerPerson||(lang==='es'?'Detalles por persona':'Per-person details')}</span>
+              <span style={{color:c.M2}}>{openSection.people?'▾':'▸'}</span>
+            </button>
+            {openSection.people&&<div style={{padding:'14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderTop:'none',borderRadius:'0 0 10px 10px'}}>
+              {rs.map((r,i)=><div key={i} style={{paddingBottom:'12px',marginBottom:'12px',borderBottom:i<rs.length-1?`1px solid ${c.BD}`:'none'}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'5px'}}>
+                  <div><span style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>{r.name}</span>{r.role&&<span style={{fontSize:'11px',color:c.M2,marginLeft:'6px'}}>· {r.role}</span>}{r.how&&<span style={{fontSize:'12px',color:c.M2,marginLeft:'6px'}}>· {howL(r.how)}</span>}</div>
+                  <div style={{display:'flex',gap:'6px',alignItems:'center'}}>
+                    {r.changeLog?.length>0&&(()=>{const last=r.changeLog[0];const recent=last&&(Date.now()-new Date(last.at).getTime())<3600000;return<span title={t.editedTimes.replace('{n}',r.changeLog.length)} style={{fontSize:'11px',color:recent?'#f59e0b':c.M2,fontWeight:recent?'700':'400'}}>✏️{recent?' nuevo':''}</span>;})()}
+                  </div>
+                </div>
+                {r.comment&&<div style={{fontSize:'13px',color:c.M2,fontStyle:'italic',marginBottom:'6px',padding:'6px 10px',background:c.CARD,borderRadius:'8px'}}>"{r.comment}"</div>}
+                <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
+                  {slots.map(s=>{const v=r.avail?.[s.key];const vc={yes:'#22c55e',maybe:'#f59e0b'};const vi={yes:'✅',maybe:'🤔'};return(v==='yes'||v==='maybe')?<span key={s.key} style={{fontSize:'11px',padding:'3px 9px',borderRadius:'20px',background:`${vc[v]}20`,color:vc[v],border:`1px solid ${vc[v]}30`,textTransform:'capitalize'}}>{vi[v]} {fmtShort(s.date,lang)}{s.startTime?' · '+s.startTime:''}</span>:null;})}
+                </div>
+                {r.stopAttend&&plan.stops?.length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:'4px',marginTop:'4px'}}>
+                  {(plan.stops||[]).map((st,si)=>{const v=r.stopAttend?.[st.id];if(!v)return null;const sName=st.options?.[0]?.name||`${t.stop||'Stop'} ${si+1}`;const vc={yes:'#22c55e',no:'#ef4444',maybe:'#f59e0b'};const vi={yes:'✅',no:'❌',maybe:'🤔'};return<span key={st.id} style={{fontSize:'10px',padding:'2px 7px',borderRadius:'12px',background:`${vc[v]||c.CARD2}15`,color:vc[v]||c.M2,border:`1px solid ${(vc[v]||c.BD)}30`}}>{vi[v]||'?'} {sName}</span>;})}
+                </div>}
+                {r.stopPrefs&&plan.stops?.length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:'4px',marginTop:'4px'}}>
+                  {(plan.stops||[]).flatMap((st,si)=>(st.options||[]).filter((opt)=>r.stopPrefs?.[st.id]===opt.id||r.stopPrefs?.[st.id+'_'+opt.id]).map((opt)=><span key={st.id+'_'+opt.id} style={{fontSize:'10px',padding:'2px 7px',borderRadius:'12px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`}}>⭐ {opt.name||`${t.stop||'Stop'} ${si+1}`}</span>))}
+                </div>}
+              </div>)}
+            </div>}
+          </div>
+
+          {/* Collapsible: Comentarios */}
+          {rs.some(r=>r.comment)&&<div style={{marginBottom:'10px'}}>
+            <button onClick={()=>setOpenSection(p=>({...p,comments:!p.comments}))} style={{width:'100%',padding:'12px 14px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:openSection.comments?'10px 10px 0 0':'10px',cursor:'pointer',display:'flex',justifyContent:'space-between',alignItems:'center',fontFamily:'inherit'}}>
+              <span style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>💬 {t.comments||(lang==='es'?'Comentarios':'Comments')}</span>
+              <span style={{color:c.M2}}>{openSection.comments?'▾':'▸'}</span>
+            </button>
+            {openSection.comments&&<div style={{padding:'14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderTop:'none',borderRadius:'0 0 10px 10px'}}>
+              {rs.filter(r=>r.comment).map((r,i)=><div key={i} style={{marginBottom:'10px',paddingBottom:'10px',borderBottom:i<rs.filter(x=>x.comment).length-1?`1px solid ${c.BD}`:'none'}}>
+                <div style={{fontSize:'12px',color:mc,fontWeight:'600',marginBottom:'3px'}}>{r.name}</div>
+                <div style={{fontSize:'13px',color:c.T}}>"{r.comment}"</div>
+              </div>)}
+            </div>}
+          </div>}
 
           {/* Poll results */}
           {plan.poll?.q&&rs.some(r=>r.pollVote)&&<Card c={c}>
