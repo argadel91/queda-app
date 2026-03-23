@@ -75,7 +75,7 @@ const T ={
     yourRole:'Tu rol',guestRole:'Tu rol',
     suggestedRoles:'Roles sugeridos',addRolePh:'Añadir rol...',rolesHint:'Opcional. Los invitados elegirán de aquí o escribirán el suyo.',
     yourRoleLbl:'Tu rol',optionalLbl:'opcional',otherRolePh:'O escribe el tuyo...',yourRolePh:'Ej: Manager, Alumno, Cliente...',
-    noOneToShare:'¿No tienes a quién enviarlo?',makePublicBtn:'Publicar en Discover',makePublicHint:'Cualquier usuario de queda. podrá encontrar y unirse a tu plan',
+    noOneToShare:'¿No tienes a quién enviarlo? ¡Compártelo con el mundo!',makePublicBtn:'Publicar en Discover',makePublicHint:'Cualquier usuario de queda. dentro de tus rangos podrá encontrar y unirse a tu plan',
     planIsPublic:'Plan público en Discover',makePrivateBtn:'Hacer privado',
     privateNote:'🔒 Tu información no se comparte hasta que acepten.',
     onb:[
@@ -410,7 +410,7 @@ const T ={
     yourRole:'Your role',guestRole:'Your role',
     suggestedRoles:'Suggested roles',addRolePh:'Add a role...',rolesHint:'Optional. Guests will choose from these or type their own.',
     yourRoleLbl:'Your role',optionalLbl:'optional',otherRolePh:'Or type your own...',yourRolePh:'e.g. Manager, Student, Client...',
-    noOneToShare:'Don\'t have anyone to share with?',makePublicBtn:'Make it public on Discover',makePublicHint:'Anyone on queda. can find and join your plan',
+    noOneToShare:'Don\'t have anyone to share with? Share it with the world!',makePublicBtn:'Make it public on Discover',makePublicHint:'Any queda. user within your filters can find and join your plan',
     planIsPublic:'Plan is public on Discover',makePrivateBtn:'Make private',
     privateNote:'🔒 Your info is not shared until they accept.',
     onb:[
@@ -731,7 +731,7 @@ const T ={
     roles:['Organizador','Cliente','Fornecedor','Funcionário','Aluno','Professor'],yourRole:'O teu papel',guestRole:'O teu papel',
     suggestedRoles:'Papéis sugeridos',addRolePh:'Adicionar papel...',rolesHint:'Opcional. Os convidados escolherão daqui ou escreverão o seu.',
     yourRoleLbl:'O teu papel',optionalLbl:'opcional',otherRolePh:'Ou escreve o teu...',yourRolePh:'Ex: Manager, Aluno, Cliente...',
-    noOneToShare:'Não tens a quem enviar?',makePublicBtn:'Publicar no Discover',makePublicHint:'Qualquer utilizador do queda. pode encontrar e juntar-se ao teu plano',
+    noOneToShare:'Não tens a quem enviar? Partilha com o mundo!',makePublicBtn:'Publicar no Discover',makePublicHint:'Qualquer utilizador do queda. dentro dos teus filtros pode encontrar e juntar-se',
     planIsPublic:'Plano público no Discover',makePrivateBtn:'Tornar privado',
     privateNote:'🔒 A tua informação não é partilhada até aceitarem.',
     onb:[{e:'👥',t:'Escolhe o tipo de plano',d:'Social para amigos, Íntimo para encontros, Profissional para trabalho.'},{e:'📅',t:'Propõe datas e horários',d:'Seleciona a cidade e vários dias possíveis. Cada convidado marca Sim, Talvez ou Não.'},{e:'🔗',t:'Partilha com um link',d:'Envia o link pelo WhatsApp. Sem apps adicionais.'},{e:'✅',t:'Confirma e pronto',d:'Quando tiveres respostas, confirma a data. O grupo recebe o aviso.'}],
@@ -1063,7 +1063,7 @@ const T ={
     roles:[`Organisateur`,`Client`,`Prestataire`,`Employé`,`Étudiant`,`Professeur`],yourRole:`Ton rôle`,guestRole:`Ton rôle`,
     suggestedRoles:`Rôles suggérés`,addRolePh:`Ajouter un rôle...`,rolesHint:`Optionnel. Les invités choisiront parmi ceux-ci ou écriront le leur.`,
     yourRoleLbl:`Ton rôle`,optionalLbl:`optionnel`,otherRolePh:`Ou écris le tien...`,yourRolePh:`Ex : Manager, Étudiant, Client...`,
-    noOneToShare:`Personne à qui l'envoyer ?`,makePublicBtn:`Publier sur Discover`,makePublicHint:`N'importe qui sur queda. pourra trouver et rejoindre ton plan`,
+    noOneToShare:`Personne à qui l'envoyer ? Partage avec le monde !`,makePublicBtn:`Publier sur Discover`,makePublicHint:`Tout utilisateur de queda. dans tes filtres pourra trouver et rejoindre ton plan`,
     planIsPublic:`Plan public sur Discover`,makePrivateBtn:`Rendre privé`,
     privateNote:`🔒 Tes infos ne sont pas partagées avant acceptation.`,
     onb:[
@@ -1399,7 +1399,7 @@ const T ={
     roles:['Organisator','Kunde','Anbieter','Mitarbeiter','Schüler','Lehrer'],yourRole:'Deine Rolle',guestRole:'Deine Rolle',
     suggestedRoles:'Vorgeschlagene Rollen',addRolePh:'Rolle hinzufügen...',rolesHint:'Optional. Gäste wählen daraus oder geben ihre eigene ein.',
     yourRoleLbl:'Deine Rolle',optionalLbl:'optional',otherRolePh:'Oder eigene eingeben...',yourRolePh:'z.B. Manager, Schüler, Kunde...',
-    noOneToShare:'Niemanden zum Teilen?',makePublicBtn:'Auf Discover veröffentlichen',makePublicHint:'Jeder auf queda. kann deinen Plan finden und beitreten',
+    noOneToShare:'Niemanden zum Teilen? Teile mit der Welt!',makePublicBtn:'Auf Discover veröffentlichen',makePublicHint:'Jeder queda. Nutzer innerhalb deiner Filter kann deinen Plan finden und beitreten',
     planIsPublic:'Plan öffentlich auf Discover',makePrivateBtn:'Privat machen',
     privateNote:'🔒 Deine Daten werden erst nach Annahme geteilt.',
     onb:[{e:'👥',t:'Wähle deinen Plantyp',d:'Sozial für Freunde, Intim für Dates, Professionell für die Arbeit.'},{e:'📅',t:'Schlage Termine vor',d:'Wähle die Stadt und mehrere mögliche Tage. Jeder Gast markiert Ja, Vielleicht oder Nein.'},{e:'🔗',t:'Per Link teilen',d:'Sende den Link per WhatsApp. Keine zusätzlichen Apps nötig.'},{e:'✅',t:'Bestätigen und fertig',d:'Wenn du Antworten hast bestätige den Termin. Die Gruppe wird benachrichtigt.'}],
@@ -1733,7 +1733,7 @@ const T ={
     roles:[`Organizzatore`,`Cliente`,`Fornitore`,`Dipendente`,`Studente`,`Insegnante`],yourRole:`Il tuo ruolo`,guestRole:`Il tuo ruolo`,
     suggestedRoles:`Ruoli suggeriti`,addRolePh:`Aggiungi ruolo...`,rolesHint:`Opzionale. Gli invitati sceglieranno da qui o scriveranno il proprio.`,
     yourRoleLbl:`Il tuo ruolo`,optionalLbl:`opzionale`,otherRolePh:`O scrivi il tuo...`,yourRolePh:`Es: Manager, Studente, Cliente...`,
-    noOneToShare:`Non hai nessuno a cui inviarlo?`,makePublicBtn:`Pubblica su Discover`,makePublicHint:`Chiunque su queda. potrà trovare e unirsi al tuo piano`,
+    noOneToShare:`Non hai nessuno a cui inviarlo? Condividi con il mondo!`,makePublicBtn:`Pubblica su Discover`,makePublicHint:`Qualsiasi utente di queda. nei tuoi filtri potrà trovare e unirsi al tuo piano`,
     planIsPublic:`Piano pubblico su Discover`,makePrivateBtn:`Rendi privato`,
     privateNote:`🔒 Le tue informazioni non vengono condivise fino all'accettazione.`,
     onb:[
