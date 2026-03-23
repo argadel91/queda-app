@@ -1,4 +1,4 @@
-export const BAD_WORDS = ['FUCK','SHIT','CUNT','COCK','DICK','PUTA','MIER','CONO','JODE','CULO','PENE','POLLA','NAZI','KKKK']
+const BAD_WORDS = ['FUCK','SHIT','CUNT','COCK','DICK','PUTA','MIER','CONO','JODE','CULO','PENE','POLLA','NAZI','KKKK']
 export const genId = () => { let id; do { id = Math.random().toString(36).substring(2,7).toUpperCase() } while (BAD_WORDS.some(w => id.includes(w))); return id }
 export const toISO = d => d.toISOString().split('T')[0]
 export const dayStart = () => { const d = new Date(); d.setHours(0,0,0,0); return d }

@@ -90,5 +90,3 @@ export default function Share({plan,onViewResults,onBack,c,lang}){
     <Btn onClick={onViewResults} v="secondary" full style={{padding:'14px'}} c={c}>{t.viewRes}</Btn>
   </div>);
 }
-
-// ─── PERSONALISED LINK ───────────────────────────────

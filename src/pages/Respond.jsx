@@ -242,4 +242,3 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
 }
 
 
-// ─── ACCOMMODATION + AFTER PLAN SUGGESTIONS ──────────

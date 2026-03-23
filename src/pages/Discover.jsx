@@ -75,5 +75,3 @@ export default function Discover({onBack,onJoin,c,lang,profile}){
     </Card>})}
   </div>);
 }
-
-// ─── CREATE ───────────────────────────────────────────
