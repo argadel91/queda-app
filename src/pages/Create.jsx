@@ -3,7 +3,7 @@ import T from '../constants/translations.js'
 import { savePlan, savePlanWithUser, showErr } from '../lib/supabase.js'
 import { ls, addMyPlan } from '../lib/storage.js'
 import { genId, fmtShort } from '../lib/utils.js'
-import { Btn, Lbl, Inp, Back, Stepper } from '../components/ui.jsx'
+import { Btn, Lbl, Back, Stepper } from '../components/ui.jsx'
 import CalendarPicker from '../components/CalendarPicker.jsx'
 import MapModal from '../components/MapModal.jsx'
 import CityInput from '../components/CityInput.jsx'
@@ -36,7 +36,6 @@ const emptyStop = (id, suggestedStart) => ({
 export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   const t=T[lang];const mc=c.A;
   const[step,setStep]=useState(0);
-  const[name,setName]=useState('');
   const[org,setOrg]=useState(profile?.name||ls.get('q_myname',''));
   const[selDates,setSelDates]=useState([]);
   const[startTimes,setStartTimes]=useState(['']);
@@ -72,7 +71,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   // Restore draft on mount
   useEffect(()=>{
     const d=ls.get(draftKey,null);if(!d)return;
-    if(d.name)setName(d.name);if(d.org)setOrg(d.org);
+    if(d.org)setOrg(d.org);
     if(d.selDates)setSelDates(d.selDates);
     if(d.startTimes)setStartTimes(d.startTimes);
     if(d.stops)setStops(d.stops);if(d.step)setStep(d.step);
@@ -80,7 +79,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   },[]);// eslint-disable-line react-hooks/exhaustive-deps
 
   // Save draft helper
-  const saveDraft=(s)=>ls.set(draftKey,{name,org,selDates,startTimes,stops,step:s!==undefined?s:step});
+  const saveDraft=(s)=>ls.set(draftKey,{org,selDates,startTimes,stops,step:s!==undefined?s:step});
   // Auto-save every 30s
   useEffect(()=>{const id=setInterval(()=>saveDraft(),30000);return()=>clearInterval(id);});
   const clearDraft=()=>{try{localStorage.removeItem(draftKey)}catch{}};
@@ -134,13 +133,13 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   const remOption=(stopId,optId)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.filter(o=>o.id!==optId)}:s));
   const updOption=(stopId,optionId,key,value)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.map(o=>o.id===optionId?{...o,[key]:value}:o)}:s));
 
-  const stepLabels=[t.whenTitle||'When?',t.whereTitle||'Where?',t.nameTitle||'Name'];
+  const stepLabels=[t.whenTitle||'When?',t.whereTitle||'Where?'];
 
   const create=async()=>{
     setSaving(true);
     try{
       const cleanStops=stops.filter(s=>(s.options||[]).some(o=>o.name));
-      const plan={id:genId(),name:name.trim()||null,desc:null,organizer:profile?.name||org.trim()||'',dates:[...selDates].sort(),startTimes:startTimes.filter(t=>t),timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,stops:cleanStops,confirmedDate:null,isPublic:false,lang,createdAt:new Date().toISOString()};
+      const plan={id:genId(),name:null,desc:null,organizer:profile?.name||org.trim()||'',dates:[...selDates].sort(),startTimes:startTimes.filter(t=>t),timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,stops:cleanStops,confirmedDate:null,isPublic:false,lang,createdAt:new Date().toISOString()};
       if(authUser)await savePlanWithUser(plan,authUser.id);else await savePlan(plan);
       addMyPlan(plan.id,plan.name,'organizer');
       ls.set('q_state',{screen:'share',planId:plan.id,isOrg:true});clearDraft();onCreated(plan);
@@ -346,20 +345,14 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
           <div ref={inlineMapRef} style={{width:'100%',height:'250px',borderRadius:'12px',overflow:'hidden',border:`1px solid ${c.BD}`,background:c.CARD2}}/>
         </div>}
 
-        {/* Place selected — show continue */}
+        {/* Place selected — create directly */}
         {stops.some(s=>(s.options||[]).some(o=>o.name))&&<>
-          <div style={{fontSize:'12px',color:c.M,textAlign:'center',marginBottom:'8px'}}>{lang==='es'?'Podrás añadir más puntos, alternativas y detalles después de crear el plan.':'You can add more points, alternatives and details after creating the plan.'}</div>
-          <Btn onClick={()=>changeStep(2)} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn>
+          <div style={{fontSize:'12px',color:c.M,textAlign:'center',marginBottom:'8px'}}>{lang==='es'?'Podrás añadir más puntos, nombre y detalles después.':'You can add more points, name and details later.'}</div>
+          <Btn onClick={create} disabled={saving} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?(lang==='es'?'Creando...':'Creating...'):(lang==='es'?'Crear plan 🎉':'Create plan 🎉')}</Btn>
         </>}
       </>}
 
       {/* ── STEP 2: NAME (optional) ── */}
-      {step===2&&<>
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{t.nameQ||'Name?'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{t.nameSub||"Give your plan a name. If not, it'll be saved by code."}</p>
-        <Inp value={name} onChange={setName} placeholder={t.namePh||'e.g. Birthday dinner, Valencia trip...'} c={c}/>
-        <div style={{marginTop:'20px'}}><Btn onClick={create} disabled={saving} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?(t.creatingBtn||'Creating...'):(t.createBtn)}</Btn></div>
-      </>}
 
       {/* ── STEP 0: WHEN? ── */}
       {step===0&&<>
