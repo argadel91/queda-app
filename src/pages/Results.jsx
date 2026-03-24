@@ -144,50 +144,63 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
     </div>}
     {editMode&&<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:200,display:'flex',alignItems:'flex-end',justifyContent:'center'}} onClick={()=>setEditMode(false)}>
       <div onClick={e=>e.stopPropagation()} className="fade-in" style={{background:c.CARD,borderRadius:'20px 20px 0 0',padding:'24px',width:'100%',maxWidth:'420px',maxHeight:'85vh',overflowY:'auto'}}>
-        <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>{t.editPlan||'Edit plan'}</div>
-
-        {/* Name + Description */}
-        <div style={{marginBottom:'12px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.editNameLbl}</div><input value={editName} onChange={e=>setEditName(e.target.value)} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/></div>
-        <div style={{marginBottom:'16px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.editDescLbl}</div><textarea value={editDesc} onChange={e=>setEditDesc(e.target.value)} rows={2} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box',resize:'vertical'}}/></div>
-
-        {/* Dates */}
-        <div style={{marginBottom:'16px'}}>
-          <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>📅 {t.editDatesLbl} ({(plan.dates||[]).length}/3)</div>
-          <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'8px'}}>
-            {(plan.dates||[]).map(d=><span key={d} style={{fontSize:'12px',padding:'4px 10px',borderRadius:'20px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`,display:'flex',alignItems:'center',gap:'4px'}}>{fmtShort(d,lang)}<button onClick={async()=>{if((plan.dates||[]).length<=1)return;const up={...plan,dates:plan.dates.filter(x=>x!==d)};await updatePlan(up);setPlan(up);}} style={{background:'none',border:'none',color:mc,cursor:'pointer',fontSize:'12px',padding:'0 0 0 2px'}}>×</button></span>)}
+        {/* Edit title/description */}
+        {editMode===true&&<>
+          <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>{t.editPlan||'Edit plan'}</div>
+          <div style={{marginBottom:'12px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.editNameLbl}</div><input value={editName} onChange={e=>setEditName(e.target.value)} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/></div>
+          <div style={{marginBottom:'16px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.editDescLbl}</div><textarea value={editDesc} onChange={e=>setEditDesc(e.target.value)} rows={2} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box',resize:'vertical'}}/></div>
+          {/* Dates */}
+          <div style={{marginBottom:'12px'}}>
+            <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>📅 {t.editDatesLbl} ({(plan.dates||[]).length}/3)</div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'8px'}}>
+              {(plan.dates||[]).map(d=><span key={d} style={{fontSize:'12px',padding:'4px 10px',borderRadius:'20px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`,display:'flex',alignItems:'center',gap:'4px'}}>{fmtShort(d,lang)}<button onClick={async()=>{if((plan.dates||[]).length<=1)return;const up={...plan,dates:plan.dates.filter(x=>x!==d)};await updatePlan(up);setPlan(up);}} style={{background:'none',border:'none',color:mc,cursor:'pointer',fontSize:'12px',padding:'0 0 0 2px'}}>×</button></span>)}
+            </div>
+            {(plan.dates||[]).length<3&&<input type="date" min={new Date().toISOString().split('T')[0]} onChange={async e=>{if(!e.target.value||(plan.dates||[]).includes(e.target.value))return;const up={...plan,dates:[...(plan.dates||[]),e.target.value].sort()};await updatePlan(up);setPlan(up);e.target.value='';}} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
           </div>
-          {(plan.dates||[]).length<3&&<input type="date" min={new Date().toISOString().split('T')[0]} onChange={async e=>{if(!e.target.value||(plan.dates||[]).includes(e.target.value))return;const up={...plan,dates:[...(plan.dates||[]),e.target.value].sort()};await updatePlan(up);setPlan(up);e.target.value='';}} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
-        </div>
-
-        {/* Times */}
-        <div style={{marginBottom:'16px'}}>
-          <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>🕐 {t.editTimesLbl} ({(plan.startTimes||[]).filter(Boolean).length}/3)</div>
-          <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'8px'}}>
-            {(plan.startTimes||[]).filter(Boolean).map(t2=><span key={t2} style={{fontSize:'12px',padding:'4px 10px',borderRadius:'20px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`,display:'flex',alignItems:'center',gap:'4px'}}>{fmtTime(t2)}<button onClick={async()=>{const up={...plan,startTimes:plan.startTimes.filter(x=>x!==t2)};await updatePlan(up);setPlan(up);}} style={{background:'none',border:'none',color:mc,cursor:'pointer',fontSize:'12px',padding:'0 0 0 2px'}}>×</button></span>)}
+          {/* Times */}
+          <div style={{marginBottom:'16px'}}>
+            <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>🕐 {t.editTimesLbl} ({(plan.startTimes||[]).filter(Boolean).length}/3)</div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'8px'}}>
+              {(plan.startTimes||[]).filter(Boolean).map(t2=><span key={t2} style={{fontSize:'12px',padding:'4px 10px',borderRadius:'20px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`,display:'flex',alignItems:'center',gap:'4px'}}>{fmtTime(t2)}<button onClick={async()=>{const up={...plan,startTimes:plan.startTimes.filter(x=>x!==t2)};await updatePlan(up);setPlan(up);}} style={{background:'none',border:'none',color:mc,cursor:'pointer',fontSize:'12px',padding:'0 0 0 2px'}}>×</button></span>)}
+            </div>
+            {(plan.startTimes||[]).filter(Boolean).length<3&&<input type="time" onChange={async e=>{if(!e.target.value||(plan.startTimes||[]).includes(e.target.value))return;const up={...plan,startTimes:[...(plan.startTimes||[]),e.target.value]};await updatePlan(up);setPlan(up);e.target.value='';}} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
           </div>
-          {(plan.startTimes||[]).filter(Boolean).length<3&&<input type="time" onChange={async e=>{if(!e.target.value||(plan.startTimes||[]).includes(e.target.value))return;const up={...plan,startTimes:[...(plan.startTimes||[]),e.target.value]};await updatePlan(up);setPlan(up);e.target.value='';}} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
-        </div>
+          <div style={{display:'flex',gap:'8px'}}>
+            <button onClick={()=>setEditMode(false)} style={{flex:1,padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontWeight:'600',fontSize:'14px'}}>{t.cancel||'Cancel'}</button>
+            <button onClick={async()=>{const up={...plan,name:editName.trim()||plan.name,desc:editDesc.trim()||null};await updatePlan(up);setPlan(up);setEditMode(false);}} style={{flex:1,padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.saveLbl||'Save'}</button>
+          </div>
+        </>}
 
-        {/* Points */}
-        <div style={{marginBottom:'16px'}}>
-          <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>📍 {t.editPointsLbl} ({(plan.stops||[]).filter(s=>(s.options?.[0]?.name||s.name)).length})</div>
-          {(plan.stops||[]).filter(s=>(s.options?.[0]?.name||s.name)).map((s,i)=>{
-            const opt=s.options?.[0]||s;
-            return<div key={s.id||i} style={{display:'flex',alignItems:'center',gap:'8px',padding:'8px 10px',background:c.CARD2,borderRadius:'8px',marginBottom:'6px'}}>
-              <span style={{fontSize:'12px',fontWeight:'800',color:mc}}>{i+1}</span>
-              <span style={{flex:1,fontSize:'13px',color:c.T,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{opt.name}</span>
-              {s.meetingPoint&&<span style={{fontSize:'10px',color:'#f59e0b'}}>📍M</span>}
-              {s.minAttendees&&<span style={{fontSize:'10px',color:c.M2}}>👥{s.minAttendees}+</span>}
-            </div>;
-          })}
-          <div style={{fontSize:'11px',color:c.M2,marginTop:'4px'}}>{t.editHintMsg}</div>
-        </div>
-
-        {/* Save / Cancel */}
-        <div style={{display:'flex',gap:'8px'}}>
-          <button onClick={()=>setEditMode(false)} style={{flex:1,padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontWeight:'600',fontSize:'14px'}}>{t.cancel||'Cancel'}</button>
-          <button onClick={async()=>{const up={...plan,name:editName.trim()||plan.name,desc:editDesc.trim()||null};await updatePlan(up);setPlan(up);setEditMode(false);}} style={{flex:1,padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.saveLbl||'Save'}</button>
-        </div>
+        {/* Edit specific point */}
+        {typeof editMode==='string'&&editMode.startsWith('stop_')&&(()=>{
+          const stopId=editMode.replace('stop_','');
+          const s=(plan.stops||[]).find(x=>x.id==stopId||String(x.id)===stopId);
+          if(!s)return null;
+          const opt=s.options?.[0]||s;
+          const si=(plan.stops||[]).indexOf(s);
+          return<>
+            <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>📍 {opt.name||`${si+1}`}</div>
+            {/* Full venue details */}
+            {opt.address&&<div style={{fontSize:'13px',color:c.M2,marginBottom:'8px'}}>📍 {opt.address}</div>}
+            {opt.photo&&<img src={opt.photo} alt="" style={{width:'100%',height:'120px',objectFit:'cover',borderRadius:'10px',marginBottom:'10px'}}/>}
+            <VenueInfo stop={opt} c={c} lang={lang}/>
+            {opt.googleMapsURI&&<a href={opt.googleMapsURI} target="_blank" rel="noreferrer" style={{display:'inline-block',marginTop:'6px',marginBottom:'10px',fontSize:'12px',color:mc,textDecoration:'none'}}>Google Maps ↗</a>}
+            {s.meetingPoint&&<div style={{fontSize:'12px',color:mc,background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'8px',padding:'8px 12px',marginBottom:'10px'}}>📍 {t.meetingPointLbl2||'Meeting point'}: {s.meetingPoint}{s.meetingMinsBefore?` (${s.meetingMinsBefore} min ${t.beforeLbl})`:''}</div>}
+            {/* Dates + times of the plan */}
+            <div style={{marginTop:'10px',paddingTop:'10px',borderTop:`1px solid ${c.BD}`}}>
+              <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>📅 {t.editDatesLbl}</div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'6px'}}>
+                {(plan.dates||[]).map(d=><span key={d} style={{fontSize:'12px',padding:'3px 10px',borderRadius:'20px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`,textTransform:'capitalize'}}>{fmtShort(d,lang)}</span>)}
+              </div>
+              {(plan.startTimes||[]).filter(Boolean).length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:'6px'}}>
+                {(plan.startTimes||[]).filter(Boolean).map(t2=><span key={t2} style={{fontSize:'12px',padding:'3px 10px',borderRadius:'20px',background:c.CARD2,color:c.M2,border:`1px solid ${c.BD}`}}>🕐 {fmtTime(t2)}</span>)}
+              </div>}
+            </div>
+            <div style={{marginTop:'16px'}}>
+              <button onClick={()=>setEditMode(false)} style={{width:'100%',padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontWeight:'600',fontSize:'14px'}}>{t.backBtn||'Back'}</button>
+            </div>
+          </>;
+        })()}
       </div>
     </div>}
     {newRespAlert&&<div style={{position:'fixed',top:'70px',left:'50%',transform:'translateX(-50%)',background:mc,color:'#0A0A0A',padding:'10px 18px',borderRadius:'30px',fontWeight:'700',fontSize:'13px',zIndex:200,boxShadow:'0 4px 20px rgba(0,0,0,.4)',whiteSpace:'nowrap',animation:'slideDown .3s ease'}}>💬 {`${t.newRespFrom.replace('{name}',newRespAlert)}`}</div>}
