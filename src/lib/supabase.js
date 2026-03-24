@@ -15,13 +15,13 @@ export const showErr = msg => { if (_toastFn) _toastFn(msg); }
 // Plans
 export const savePlan = async p => {
   try { await db.from('plans').upsert({ id: p.id, data: p, is_public: !!p.isPublic }) }
-  catch (e) { showErr('Error guardando el plan.'); throw e }
+  catch (e) { showErr('⚠️ Error saving plan'); throw e }
 }
 export const savePlanWithUser = async (p, uid) => {
   try { await db.from('plans').upsert({ id: p.id, data: p, is_public: !!p.isPublic, user_id: uid }) }
   catch (e) {
     try { await db.from('plans').upsert({ id: p.id, data: p, is_public: !!p.isPublic }) }
-    catch (e2) { showErr('Error guardando el plan.'); throw e2 }
+    catch (e2) { showErr('⚠️ Error saving plan'); throw e2 }
   }
 }
 export const loadPlan = async id => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import T from '../constants/translations.js'
 import { db, updatePlan, loadResps, saveResp, savePlan } from '../lib/supabase.js'
 import { ls, addMyPlan } from '../lib/storage.js'

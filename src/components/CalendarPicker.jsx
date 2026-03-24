@@ -8,7 +8,7 @@ export default function CalendarPicker({selected,onChange,c,lang,max:maxDates=3}
   const[vy,setVy]=useState(now.getFullYear());const[vm,setVm]=useState(now.getMonth());
   const[limitMsg,setLimitMsg]=useState(false);
   const days=new Date(vy,vm+1,0).getDate();const first=(new Date(vy,vm,1).getDay()+6)%7;
-  const dl=lang==='en'?['M','T','W','T','F','S','S']:['L','M','X','J','V','S','D'];
+  const dl=({es:['L','M','X','J','V','S','D'],en:['M','T','W','T','F','S','S'],pt:['S','T','Q','Q','S','S','D'],fr:['L','M','M','J','V','S','D'],de:['M','D','M','D','F','S','S'],it:['L','M','M','G','V','S','D']})[lang]||['M','T','W','T','F','S','S'];
   const prev=()=>{const p=vm===0?new Date(vy-1,11,1):new Date(vy,vm-1,1);if(p<new Date(now.getFullYear(),now.getMonth(),1))return;if(vm===0){setVy(y=>y-1);setVm(11);}else setVm(m=>m-1);};
   const next=()=>{const n=new Date(vy,vm+1,1);if(n<=max){if(vm===11){setVy(y=>y+1);setVm(0);}else setVm(m=>m+1);}};
   const tog=iso=>{
