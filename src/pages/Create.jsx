@@ -3,10 +3,9 @@ import T from '../constants/translations.js'
 import { savePlan, savePlanWithUser, showErr } from '../lib/supabase.js'
 import { ls, addMyPlan } from '../lib/storage.js'
 import { genId, fmtShort } from '../lib/utils.js'
-import { Btn, Lbl, Back, Stepper } from '../components/ui.jsx'
+import { Btn, Back, Stepper } from '../components/ui.jsx'
 import CalendarPicker from '../components/CalendarPicker.jsx'
 import MapModal from '../components/MapModal.jsx'
-import CityInput from '../components/CityInput.jsx'
 import { getCityTz } from '../constants/weather.js'
 import ClockPicker from '../components/ClockPicker.jsx'
 
@@ -127,9 +126,6 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       return remaining;
     });
   };
-  const updStop=(id,k,v)=>setStops(p=>p.map(s=>s.id===id?{...s,[k]:v}:s));
-  const addOption=(stopId)=>setStops(p=>p.map(s=>s.id===stopId&&s.options.length<3?{...s,options:[...s.options,emptyOption()]}:s));
-  const remOption=(stopId,optId)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.filter(o=>o.id!==optId)}:s));
   const updOption=(stopId,optionId,key,value)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.map(o=>o.id===optionId?{...o,[key]:value}:o)}:s));
 
   const stepLabels=['📅','🕐','📍','✓'];
@@ -245,32 +241,6 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
     const fields = ['name','address','lat','lng','placeId','rating','ratingCount','priceLevel','website','phone','hours','isOpen','googleMapsURI','photo','summary','types','dineIn','takeout','delivery','reservable','servesBeer','servesWine','outdoorSeating','goodForChildren','wheelchair'];
     fields.forEach(k => { if(sel[k] !== undefined && sel[k] !== null) updOption(stopId, optionId, k, sel[k]); });
     setMapTarget(null);
-  };
-
-  const chipStyle = (active) => ({
-    padding:'7px 14px',borderRadius:'20px',border:`1px solid ${active?mc+'50':c.BD}`,
-    background:active?`${mc}15`:c.CARD,color:active?mc:c.T,cursor:'pointer',
-    fontFamily:'inherit',fontSize:'12px',fontWeight:active?'700':'400',whiteSpace:'nowrap'
-  });
-
-  // Venue card for an option
-  const VenueCard = ({opt}) => {
-    if(!opt.rating && !opt.photo) return null;
-    return <div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 12px',marginTop:'6px'}}>
-      {opt.photo&&<img src={opt.photo} alt={opt.name} style={{width:'100%',height:'100px',objectFit:'cover',borderRadius:'6px',marginBottom:'6px'}}/>}
-      <div style={{display:'flex',flexWrap:'wrap',gap:'4px',fontSize:'11px'}}>
-        {opt.rating&&<span style={{padding:'2px 8px',borderRadius:'12px',background:`${mc}15`,color:mc,fontWeight:'700'}}>⭐ {opt.rating}{opt.ratingCount?` (${opt.ratingCount})`:''}</span>}
-        {opt.priceLevel&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>{'€'.repeat(opt.priceLevel)}</span>}
-        {opt.isOpen===true&&<span style={{padding:'2px 8px',borderRadius:'12px',background:'#22c55e20',color:'#22c55e'}}>Open</span>}
-        {opt.isOpen===false&&<span style={{padding:'2px 8px',borderRadius:'12px',background:'#ef444420',color:'#ef4444'}}>Closed</span>}
-        {opt.outdoorSeating&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>🌤️</span>}
-        {opt.servesBeer&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>🍺</span>}
-        {opt.servesWine&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>🍷</span>}
-        {opt.wheelchair&&<span style={{padding:'2px 8px',borderRadius:'12px',background:c.CARD2,color:c.M2}}>♿</span>}
-        {opt.types?.length>0&&(()=>{const TYPE_ICONS={restaurant:'🍽️',bar:'🍸',cafe:'☕',bakery:'🥐',night_club:'🪩',gym:'💪',park:'🌳',museum:'🏛️',hotel:'🏨',store:'🏪',school:'🏫',university:'🎓'};const main=opt.types.find(t=>TYPE_ICONS[t]);return main?<span style={{padding:'2px 8px',borderRadius:'12px',background:`${mc}10`,color:mc,fontWeight:'600'}}>{TYPE_ICONS[main]} {main.replace(/_/g,' ')}</span>:null;})()}
-      </div>
-      {opt.summary&&<div style={{fontSize:'11px',color:c.M2,fontStyle:'italic',marginTop:'4px'}}>"{opt.summary}"</div>}
-    </div>;
   };
 
   // Done screen

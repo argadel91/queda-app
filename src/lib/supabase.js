@@ -32,12 +32,6 @@ export const updatePlan = async p => {
   try { const{error}=await db.from('plans').update({ data: p, is_public: !!p.isPublic }).eq('id', p.id);if(error)throw error; }
   catch(e) { showErr('Error updating plan.'); }
 }
-export const loadPublicPlans = async () => {
-  try {
-    const { data } = await db.from('plans').select('data').eq('is_public', true).order('created_at', { ascending: false }).limit(40)
-    return (data || []).map(r => r.data)
-  } catch { return [] }
-}
 
 // Responses
 export const saveResp = async (planId, name, resp) => {
