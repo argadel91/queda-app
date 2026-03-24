@@ -39,11 +39,13 @@ export default function RouteMap({stops,c}){
       mapRef.current=map;
 
       const bounds=new google.maps.LatLngBounds();
-      valid.forEach((s,i)=>{
+      let venueIdx=0;
+      valid.forEach((s)=>{
         const pos={lat:s.lat,lng:s.lng};
         bounds.extend(pos);
         const isMp=s.isMeetingPoint;
-        const marker=new google.maps.Marker({position:pos,map,label:{text:isMp?'📍':String(i+1),color:isMp?'#fff':'#0A0A0A',fontWeight:'800',fontSize:isMp?'14px':'12px'},icon:{path:google.maps.SymbolPath.CIRCLE,scale:isMp?12:16,fillColor:isMp?'#f59e0b':'#CDFF6C',fillOpacity:1,strokeColor:isMp?'#d97706':'#9ABF50',strokeWeight:2},title:s.name||''});
+        if(!isMp)venueIdx++;
+        const marker=new google.maps.Marker({position:pos,map,label:{text:isMp?'M':String(venueIdx),color:isMp?'#fff':'#0A0A0A',fontWeight:'800',fontSize:'12px'},icon:{path:google.maps.SymbolPath.CIRCLE,scale:isMp?12:16,fillColor:isMp?'#f59e0b':'#CDFF6C',fillOpacity:1,strokeColor:isMp?'#d97706':'#9ABF50',strokeWeight:2},title:s.name||''});
         markersRef.current.push(marker);
       });
 
