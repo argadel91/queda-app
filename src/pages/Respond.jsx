@@ -18,13 +18,8 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
   const[saving,setSaving]=useState(false);const[done,setDone]=useState(false);const[err,setErr]=useState('');
   const[rStep,setRStep]=useState(0);
   const[pollVote,setPollVote]=useState(prev?.pollVote||null);
-  const[stopAttend,setStopAttend]=useState(prev?.stopAttend||{});
 
   useEffect(()=>{if(name.trim())ls.set('q_myname',name.trim());},[name]);
-
-  const AVCOL={yes:'#22c55e',no:'#ef4444'};
-  const AVICON={yes:'✅',no:'❌'};
-  const AVLBL={yes:t.avYes,no:t.avNo};
 
   const stops=(plan.stops||[]).filter(s=>(s.options?.[0]?.name||s.name));
   const hasStops=stops.length>0;
@@ -74,8 +69,6 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
     addMyPlan(plan.id,plan.name,'invited');
     ls.set(prevKey,resp);setSaving(false);setDone(true);
   };
-
-  const budget=(plan.stops||[]).reduce((s,p2)=>s+(parseFloat(p2.cost)||0),0);
 
   // Done screen
   if(done){

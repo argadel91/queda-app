@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import T from '../constants/translations.js'
-import { Btn, Lbl, Back } from '../components/ui.jsx'
+import { Btn, Back } from '../components/ui.jsx'
 
 const FLAGS={es:'🇪🇸',en:'🇬🇧',pt:'🇵🇹',fr:'🇫🇷',de:'🇩🇪',it:'🇮🇹'};
 const LANG_NAMES={es:'Español',en:'English',pt:'Português',fr:'Français',de:'Deutsch',it:'Italiano'};

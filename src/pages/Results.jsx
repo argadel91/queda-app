@@ -94,7 +94,6 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
   }).map(s=>s.id));
   const firstActiveStop=(plan.stops||[]).find(s=>!cancelledStops.has(s.id));
   const giftPer=plan.gift?.price?parseFloat(plan.gift.price):0;
-  const fs=plan.stops?.find(s=>(s.options?.[0]?.lat&&s.options?.[0]?.lng)||(s.lat&&s.lng));
   const city=(()=>{
     if(plan.city&&!/^\d/.test(plan.city))return plan.city;
     const addr=plan.stops?.flatMap(s=>s.options||[]).find(o=>o?.address)?.address||plan.cityFull||'';
@@ -106,7 +105,6 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
   const confirmDate=async(d,st)=>{setConf(true);const up={...plan,confirmedDate:d,confirmedStartTime:st||''};await updatePlan(up);setPlan(up);setConf(false);};
   const waConfirm=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`📌 *${plan.name}* — ${t.dateConfirmedMsg}\n\n🗓️ ${fmtDate(plan.confirmedDate,lang)}${plan.confirmedStartTime?' · 🕐 '+fmtTime(plan.confirmedStartTime):''}\n\n${url}`),'_blank');};
   const waRem=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`⏰ ${t.reminderMsg.replace('{name}',plan.name)}\n${url}`),'_blank');setRem(true);};
-  const howL=v=>({car:t.car,moto:t.moto,transit:t.transit,taxi:t.taxi,walk:t.walk,bike:t.bike}[v]||v);
   const TABS=['plan','summary'];
   const tlbl=k=>t.tabs[k]||k;
   const shareUrl=location.href.split('?')[0]+'?code='+plan.id;

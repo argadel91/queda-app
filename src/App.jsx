@@ -47,8 +47,6 @@ export default function App(){
   useEffect(()=>{setToastFn((msg,type='error')=>{setToast({msg,type});setTimeout(()=>setToast(null),4000);});},[]);
   useEffect(()=>{const handler=e=>{e.preventDefault();setInstallPrompt(e);if(!ls.get('q_install_dismissed',false))setShowInstall(true);};window.addEventListener('beforeinstallprompt',handler);return()=>window.removeEventListener('beforeinstallprompt',handler);},[]);
   const tgTheme=()=>setTheme(t=>{const n=t==='dark'?'light':'dark';applyTheme(n);ls.set('q_theme',n);return n;});
-  const LANGS=['es','en','pt','fr','de','it'];
-  const LANG_FLAGS={es:'🇪🇸',en:'🇬🇧',pt:'🇵🇹',fr:'🇫🇷',de:'🇩🇪',it:'🇮🇹'};
 
   // Auth: check session on load + listen for changes
   useEffect(()=>{
