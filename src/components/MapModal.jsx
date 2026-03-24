@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
-import T from '../constants/translations.js'
+import React, { useEffect, useRef } from 'react'
 
 const loadGM = () => {
   if (window.__loadGoogleMaps) window.__loadGoogleMaps()

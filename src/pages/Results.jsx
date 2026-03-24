@@ -4,7 +4,6 @@ import { db, updatePlan, loadResps, saveResp, savePlan } from '../lib/supabase.j
 import { ls, addMyPlan } from '../lib/storage.js'
 import { daysUntil, fmtDate, fmtShort, fmtTime, genId } from '../lib/utils.js'
 import { Btn, Card, Lbl, Badge, Back, HR } from '../components/ui.jsx'
-const ExpenseSplitter = React.lazy(() => import('../components/ExpenseSplitter.jsx'))
 import PostPlanSurvey from '../components/PostPlanSurvey.jsx'
 import { generateICS } from '../lib/ics.js'
 const RouteMap = React.lazy(() => import('../components/RouteMap.jsx'))

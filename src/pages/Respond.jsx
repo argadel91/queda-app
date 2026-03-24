@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import T from '../constants/translations.js'
-import { saveResp, loadResps, db } from '../lib/supabase.js'
+import { saveResp, db } from '../lib/supabase.js'
 import { ls, addMyPlan } from '../lib/storage.js'
 import { fmtDate, fmtTime } from '../lib/utils.js'
-import { Btn, Lbl, Inp, Txa, HR, Back, Stepper } from '../components/ui.jsx'
+import { Btn, Lbl, Inp, Txa, Back, Stepper } from '../components/ui.jsx'
 
 export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,authUser,profile}){
   const pLang=appLang;const t=T[pLang];

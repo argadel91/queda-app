@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import T from '../constants/translations.js'
-import CityInput from '../components/CityInput.jsx'
 import { Btn, Lbl, Back } from '../components/ui.jsx'
 
 const FLAGS={es:'🇪🇸',en:'🇬🇧',pt:'🇵🇹',fr:'🇫🇷',de:'🇩🇪',it:'🇮🇹'};
@@ -12,25 +11,11 @@ export default function Profile({onBack,c,lang,authUser,profile,onUpdateProfile,
   const[editing,setEditing]=useState(false);
   const[newName,setNewName]=useState(profile?.name||'');
   const[newUsername,setNewUsername]=useState(profile?.username||'');
-  const[gender,setGender]=useState(profile?.gender||'');
-  const[genderCustom,setGenderCustom]=useState(profile?.gender_custom||profile?.genderCustom||'');
-  const[birthdate,setBirthdate]=useState(profile?.birthdate||'');
-  const[userCity,setUserCity]=useState(profile?.city||'');
-  const[userLat,setUserLat]=useState(profile?.lat||null);
-  const[userLon,setUserLon]=useState(profile?.lon||null);
-
   const save=async()=>{
     if(!newName.trim())return;
-    await onUpdateProfile({
-      name:newName.trim(),
-      username:newUsername.trim()||null,
-      gender,gender_custom:gender==='other'?genderCustom:'',
-      birthdate,city:userCity,lat:userLat,lon:userLon
-    });
+    await onUpdateProfile({name:newName.trim(),username:newUsername.trim()||null});
     setEditing(false);
   };
-
-  const age=birthdate?Math.floor((Date.now()-new Date(birthdate).getTime())/31557600000):null;
 
   return(<div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
     <Back onClick={onBack} label={t.back} c={c}/>
