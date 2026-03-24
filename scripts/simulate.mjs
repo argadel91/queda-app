@@ -1,8 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 
+// Anon client for auth operations
 const db = createClient(
   'https://gxkdibhfzjkjxuuhuwfv.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4a2RpYmhmempranh1dWh1d2Z2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MzI2MzksImV4cCI6MjA4OTUwODYzOX0.mjxrUTzVjCverPfyKORYuArcq-j07B_kfm6j3MLWev4'
+)
+// Service role client to bypass RLS for user_plans
+const admin = createClient(
+  'https://gxkdibhfzjkjxuuhuwfv.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4a2RpYmhmempranh1dWh1d2Z2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzkzMjYzOSwiZXhwIjoyMDg5NTA4NjM5fQ.jpRlr_cRNJfq104dZrFxgZktp2PQGSInIbrHoQ6tuwY'
 )
 
 const NAMES = ['Ana', 'Carlos', 'Lucía', 'Pedro', 'María', 'Javi', 'Elena', 'Diego']
@@ -43,7 +49,7 @@ async function createPlan(bot, planData) {
     createdAt: new Date().toISOString()
   }
   await db.from('plans').upsert({ id: plan.id, data: plan, user_id: bot.id })
-  await db.from('user_plans').upsert({ user_id: bot.id, plan_id: plan.id, role: 'organizer' })
+  await admin.from('user_plans').upsert({ user_id: bot.id, plan_id: plan.id, role: 'organizer' })
   console.log(`  ✓ Plan "${plan.name}" → ${plan.id}`)
   return plan
 }
@@ -93,7 +99,7 @@ async function respond(bot, plan) {
   }
 
   await db.from('responses').insert({ plan_id: plan.id, name: bot.name, data: resp })
-  await db.from('user_plans').upsert({ user_id: bot.id, plan_id: plan.id, role: 'invited' })
+  await admin.from('user_plans').upsert({ user_id: bot.id, plan_id: plan.id, role: 'invited' })
 
   const yesCount = Object.values(avail).filter(v => v === 'yes').length
   const noCount = Object.values(avail).filter(v => v === 'no').length
