@@ -55,6 +55,19 @@ export default function App(){
 
   // Auth: check session on load + listen for changes
   useEffect(()=>{
+    // PKCE callback: exchange auth code for session
+    if(window.location.pathname==='/auth/callback'){
+      const params=new URLSearchParams(window.location.search);
+      if(params.get('code')){
+        db.auth.exchangeCodeForSession(params.get('code')).then(()=>{
+          window.history.replaceState(null,'','/');
+        }).catch(()=>{
+          window.history.replaceState(null,'','/');
+        });
+      } else {
+        window.history.replaceState(null,'','/');
+      }
+    }
     // Timeout safety - if Supabase doesn't respond in 5s, show login
     const timeout=setTimeout(()=>setAuthLoading(false),5000);
     getSession().then(async session=>{
@@ -76,9 +89,9 @@ export default function App(){
       setAuthLoading(false);
     });
     const{data:{subscription}}=db.auth.onAuthStateChange((event,session)=>{
-      // Clear auth tokens from URL hash
+      // Clear auth tokens from URL (legacy implicit flow)
       if(window.location.hash&&(window.location.hash.includes('access_token')||window.location.hash.includes('type=recovery'))){
-        window.history.replaceState(null,'',window.location.pathname+window.location.search);
+        window.history.replaceState(null,'','/');
       }
       // Password recovery - show reset form, don't log in
       if(event==='PASSWORD_RECOVERY'){

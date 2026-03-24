@@ -18,7 +18,7 @@ export const authSignInWithProvider = async (provider) => {
   const { data, error } = await db.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: window.location.origin + window.location.pathname
+      redirectTo: window.location.origin + '/auth/callback'
     }
   })
   return { data, error }
@@ -26,7 +26,7 @@ export const authSignInWithProvider = async (provider) => {
 
 export const authResetPassword = async email => {
   const { error } = await db.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + window.location.pathname
+    redirectTo: window.location.origin + '/auth/callback'
   })
   return { error }
 }
