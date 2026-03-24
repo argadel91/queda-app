@@ -151,14 +151,17 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   // Inline map for step 2 (place)
   useEffect(()=>{
     if(step!==2||!inlineMapRef.current||inlineMapObj.current)return;
+    // Wait a tick for DOM to be ready
+    const timer=setTimeout(()=>{
+    if(!inlineMapRef.current)return;
     const loadGM=()=>{if(window.__loadGoogleMaps)window.__loadGoogleMaps();return new Promise(r=>{if(window.google?.maps)return r();const ch=setInterval(()=>{if(window.google?.maps){clearInterval(ch);r();}},100);setTimeout(()=>clearInterval(ch),10000);});};
     const mapDiv=document.createElement('div');
-    mapDiv.style.cssText='width:100%;height:100%;';
+    mapDiv.style.cssText='width:100%;height:100%;min-height:250px;';
     inlineMapRef.current.innerHTML='';
     inlineMapRef.current.appendChild(mapDiv);
     loadGM().then(async()=>{
       await google.maps.importLibrary('maps');
-      const map=new google.maps.Map(mapDiv,{center:{lat:40.4168,lng:-3.7038},zoom:6,disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy'});
+      const map=new google.maps.Map(mapDiv,{center:{lat:40.4168,lng:-3.7038},zoom:6,disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy',backgroundColor:'#1A1A1A'});
       inlineMapObj.current=map;
       // Click to select
       map.addListener('click',e=>{
@@ -172,7 +175,8 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
         });
       });
     });
-    return()=>{};
+    },100);
+    return()=>{clearTimeout(timer);};
   },[step]);
 
   const inlineSearch=async(q)=>{
