@@ -16,7 +16,6 @@ export default function RouteMap({stops,c}){
   const mapRef=useRef(null);
   const markersRef=useRef([]);
   const polyRef=useRef(null);
-  const dirRendererRef=useRef(null);
   const valid=stops.filter(s=>s.lat&&s.lng);
 
   useEffect(()=>{
@@ -98,7 +97,6 @@ export default function RouteMap({stops,c}){
       markersRef.current.forEach(m=>{if(m.map)m.map=null;});
       markersRef.current=[];
       if(polyRef.current){polyRef.current.setMap(null);polyRef.current=null;}
-      if(dirRendererRef.current){dirRendererRef.current.setMap(null);dirRendererRef.current=null;}
       if(mapDiv.parentNode)mapDiv.parentNode.removeChild(mapDiv);
     };
   },[stops]);

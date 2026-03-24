@@ -1,16 +1,9 @@
 // ─── CITY → TIMEZONE ─────────────────────────────────
 export const CITY_TZ={madrid:'Europe/Madrid',barcelona:'Europe/Madrid',sevilla:'Europe/Madrid',valencia:'Europe/Madrid',bilbao:'Europe/Madrid',malaga:'Europe/Madrid',london:'Europe/London',manchester:'Europe/London',paris:'Europe/Paris',berlin:'Europe/Berlin',munich:'Europe/Berlin',rome:'Europe/Rome',milan:'Europe/Rome',amsterdam:'Europe/Amsterdam',lisbon:'Europe/Lisbon',porto:'Europe/Lisbon','new york':'America/New_York','los angeles':'America/Los_Angeles',chicago:'America/Chicago','mexico city':'America/Mexico_City','buenos aires':'America/Argentina/Buenos_Aires','sao paulo':'America/Sao_Paulo',dubai:'Asia/Dubai',tokyo:'Asia/Tokyo',sydney:'Australia/Sydney'};
-export const TZS=[{label:'Madrid/Barcelona (CET)',tz:'Europe/Madrid'},{label:'London (GMT)',tz:'Europe/London'},{label:'Paris/Berlin (CET)',tz:'Europe/Paris'},{label:'New York (ET)',tz:'America/New_York'},{label:'Los Angeles (PT)',tz:'America/Los_Angeles'},{label:'Mexico City',tz:'America/Mexico_City'},{label:'Buenos Aires',tz:'America/Argentina/Buenos_Aires'},{label:'Dubai',tz:'Asia/Dubai'},{label:'Tokyo (JST)',tz:'Asia/Tokyo'},{label:'Sydney',tz:'Australia/Sydney'}];
 export const getCityTz=city=>{if(!city)return'Europe/Madrid';const l=city.toLowerCase();for(const[k,v]of Object.entries(CITY_TZ)){if(l.includes(k))return v;}return'Europe/Madrid';};
-export const getTzLabel=tz=>{const f=TZS.find(x=>x.tz===tz);return f?f.label:tz;};
-export const getGMTOffset=tz=>{try{const now=new Date();const fmt=new Intl.DateTimeFormat('en',{timeZone:tz,timeZoneName:'short'});const parts=fmt.formatToParts(now);const tzName=parts.find(p=>p.type==='timeZoneName')?.value||'';return tzName;}catch{return '';}};
-export const getUserTz=()=>{try{return Intl.DateTimeFormat().resolvedOptions().timeZone;}catch{return null;}};
 
-// ─── WEATHER DATA ────────────────────────────────────
-export const WX={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',51:'🌦️',61:'🌧️',63:'🌧️',80:'🌧️',95:'⛈️'};
-export const WX_ES={0:'Despejado',1:'Casi despejado',2:'Parcialmente nublado',3:'Nublado',45:'Niebla',51:'Llovizna',61:'Lluvia ligera',63:'Lluvia',80:'Chubascos',95:'Tormenta'};
-export const WX_EN={0:'Clear',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Fog',51:'Drizzle',61:'Light rain',63:'Rain',80:'Showers',95:'Thunderstorm'};
-export const weatherAdvice=(code,max,min,rain,lang)=>{
+// ─── WEATHER ADVICE ─────────────────────────────────
+const weatherAdvice=(code,max,min,rain,lang)=>{
 const W={
 storm:{es:'🌧️ Chubasquero obligatorio. Paraguas.',en:'🌧️ Waterproof jacket essential. Umbrella.',pt:'🌧️ Impermeável obrigatório. Guarda-chuva.',fr:'🌧️ Imperméable obligatoire. Parapluie.',de:'🌧️ Regenjacke Pflicht. Regenschirm.',it:'🌧️ Impermeabile obbligatorio. Ombrello.'},
 stormT:{es:'🚇 Taxi o metro. Sin bici ni moto.',en:'🚇 Taxi or metro. No cycling or motorbike.',pt:'🚇 Táxi ou metro. Sem bici nem mota.',fr:'🚇 Taxi ou métro. Pas de vélo ni moto.',de:'🚇 Taxi oder U-Bahn. Kein Fahrrad oder Motorrad.',it:'🚇 Taxi o metro. Niente bici né moto.'},

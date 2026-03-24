@@ -36,9 +36,9 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
   const stopYesCount=(sid)=>(stopCounts[sid]||0);
   const multiStops=(plan.stops||[]).filter(s=>s.options&&s.options.length>1);
   useEffect(()=>{if(name.trim())ls.set('q_myname',name.trim());},[name]);
-  const AVCOL={yes:'#22c55e',maybe:'#f59e0b',no:'#ef4444'};
-  const AVICON={yes:'✅',maybe:'🤔',no:'❌'};
-  const AVLBL={yes:t.avYes,maybe:t.avMaybe,no:t.avNo};
+  const AVCOL={yes:'#22c55e',no:'#ef4444'};
+  const AVICON={yes:'✅',no:'❌'};
+  const AVLBL={yes:t.avYes,no:t.avNo};
   const calcEnd=(start,dur)=>{
     if(!start||!dur)return start||'';
     const[h,m]=start.split(':').map(Number);
@@ -54,7 +54,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
   };
   const submit=async()=>{
     if(!name.trim())return;
-    if(Object.keys(avail).length===0){setErr(t.markAtLeastOne);return;}
+    if(!Object.values(avail).some(v=>v==='yes')){setErr(t.markAtLeastOne);return;}
     setSaving(true);
     const changeLog=[...(prev?.changeLog||[])];
     if(prev)changeLog.unshift({at:new Date().toISOString(),desc:t.respUpdated});
@@ -106,17 +106,11 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
         {/* DATE + START TIME VOTING */}
     <div style={{marginBottom:'20px'}}>
       <Lbl c={c}>{t.whenCanYou||'When can you?'}</Lbl>
-      {/* Explanation card */}
-      <div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',marginBottom:'12px',fontSize:'12px',lineHeight:1.8}}>
-        <div><span style={{fontWeight:'700'}}>✅ {t.avYes?.replace(/[✅]\s?/,'')}</span> — {t.votingExplainYes}</div>
-        <div><span style={{fontWeight:'700'}}>❌ {t.avNo?.replace(/[❌]\s?/,'')}</span> — {t.votingExplainNo}</div>
-        <div><span style={{fontWeight:'700'}}>🤔 {t.avMaybe?.replace(/[🤔]\s?/,'')}</span> — {t.votingExplainMaybe}</div>
-      </div>
-      {/* Mini tutorial - first time */}
-      <div style={{background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'10px',padding:'10px 14px',marginBottom:'12px',fontSize:'12px',color:mc}}>
-        1️⃣ {t.tutStep1||'Pick which days + times work for you'}
-        <br/>2️⃣ {t.tutStep2||'Choose which stops you\'ll attend'}
-        <br/>3️⃣ {t.tutStep3||'Done — the app finds the best option'}
+      {/* Legend strip */}
+      <div style={{display:'flex',gap:'16px',marginBottom:'12px',fontSize:'12px',color:c.M2}}>
+        <span>✅ = {t.avYes?.replace(/[✅]\s?/,'')}</span>
+        <span>❌ = {t.avNo?.replace(/[❌]\s?/,'')}</span>
+        <span style={{color:c.M}}>— = {t.noResponse||'No response'}</span>
       </div>
       {(plan.dates||[]).map(d=>{
         const hasStartTimes=plan.startTimes?.length>0&&plan.startTimes.some(st2=>st2);
@@ -144,7 +138,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
                 </div>}
               </div>}
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'1px',background:c.BD}}>
-                {['yes','maybe','no'].map(v=><button key={v} onClick={()=>{setErr('');setAvail(p=>({...p,[key]:p[key]===v?undefined:v}));}} style={{padding:'10px 6px',background:val===v?AVCOL[v]+'25':c.CARD,color:val===v?AVCOL[v]:c.M2,cursor:'pointer',border:'none',fontFamily:'inherit',fontSize:'12px',fontWeight:val===v?'700':'400'}}>{AVICON[v]}<br/><span style={{fontSize:'10px'}}>{AVLBL[v].replace(/[✅🤔❌]\s?/,'')}</span></button>)}
+                {['yes','no'].map(v=><button key={v} onClick={()=>{setErr('');setAvail(p=>({...p,[key]:p[key]===v?undefined:v}));}} style={{padding:'10px 12px',background:val===v?AVCOL[v]+'25':c.CARD,color:val===v?AVCOL[v]:c.M2,cursor:'pointer',border:'none',fontFamily:'inherit',fontSize:'13px',fontWeight:val===v?'700':'400',borderRadius:'8px'}}>{AVICON[v]} {AVLBL[v].replace(/[✅❌]\s?/,'')}</button>)}
               </div>
             </div>;
           })}

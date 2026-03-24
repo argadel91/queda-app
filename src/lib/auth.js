@@ -1,4 +1,4 @@
-import { db, loadProfile, saveProfile } from './supabase.js'
+import { db } from './supabase.js'
 
 export const authSignUp = async (email, password) => {
   const { data, error } = await db.auth.signUp({ email, password })
@@ -34,18 +34,4 @@ export const authResetPassword = async email => {
 export const getSession = async () => {
   const { data } = await db.auth.getSession()
   return data?.session || null
-}
-
-export const getOrCreateProfile = async (user, lang = 'es') => {
-  let prof = await loadProfile(user.id)
-  if (!prof) {
-    prof = {
-      name: user.email.split('@')[0],
-      email: user.email,
-      lang,
-      contacts: []
-    }
-    await saveProfile(user.id, prof)
-  }
-  return prof
 }

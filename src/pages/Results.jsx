@@ -4,11 +4,8 @@ import { db, updatePlan, loadResps, saveResp, savePlan } from '../lib/supabase.j
 import { ls, addMyPlan } from '../lib/storage.js'
 import { daysUntil, fmtDate, fmtShort, genId } from '../lib/utils.js'
 import { Btn, Card, Lbl, Badge, Back, HR } from '../components/ui.jsx'
-import OutfitCard from '../components/OutfitCard.jsx'
 const ExpenseSplitter = React.lazy(() => import('../components/ExpenseSplitter.jsx'))
 import PostPlanSurvey from '../components/PostPlanSurvey.jsx'
-const AfterPlanSuggestions = React.lazy(() => import('../components/AfterPlanSuggestions.jsx'))
-import PayModal from '../components/PayModal.jsx'
 import { generateICS } from '../lib/ics.js'
 const RouteMap = React.lazy(() => import('../components/RouteMap.jsx'))
 import VenueInfo from '../components/VenueInfo.jsx'
@@ -18,7 +15,6 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
   const mc=c.A;
   const[tab,setTab]=useState('plan');const[rs,setRs]=useState([]);const[ldg,setL]=useState(true);
   const[conf,setConf]=useState(false);const[remSent,setRem]=useState(false);
-  const[payModal,setPay]=useState(false);const[payAmt,setPayAmt]=useState(0);
   const[newRespAlert,setAlert]=useState(null);
   const[autoConfirmPending,setAutoConfirmPending]=useState(null);
   const[editMode,setEditMode]=useState(false);
@@ -67,7 +63,8 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
   useEffect(()=>{
     if(plan.deadline&&!plan.confirmedDate&&new Date(plan.deadline)<new Date()){
       const cntYFn=key=>rs.filter(r=>r.avail?.[key]==='yes').length;
-      const scoreFn=key=>cntYFn(key)*1000+(rs.filter(r=>r.avail?.[key]==='maybe').length);
+      const cntNFn=key=>rs.filter(r=>r.avail?.[key]==='no').length;
+      const scoreFn=key=>cntYFn(key)-cntNFn(key);
       const bestSlot=rs.length>0&&slots.length>0?slots.reduce((b,s)=>scoreFn(s.key)>scoreFn(b.key)?s:b,slots[0]):null;
       if(bestSlot&&cntYFn(bestSlot.key)>0&&isOrgRef.current){
         confirmDate(bestSlot.date,bestSlot.startTime);
@@ -85,8 +82,8 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
     });
   });
   const cntY=key=>rs.filter(r=>r.avail?.[key]==='yes').length;
-  const cntM=key=>rs.filter(r=>r.avail?.[key]==='maybe').length;
-  const score=key=>cntY(key)*1000+cntM(key);
+  const cntN=key=>rs.filter(r=>r.avail?.[key]==='no').length;
+  const score=key=>cntY(key)-cntN(key);
   const mx=Math.max(...slots.map(s=>cntY(s.key)),1);
   const best=total>0?slots.reduce((b,s)=>score(s.key)>score(b.key)?s:b,slots[0]):null;
   const budget=(plan.stops||[]).reduce((s,p2)=>s+(parseFloat(p2.cost)||0),0);
@@ -107,7 +104,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
   const TABS=['plan','alts','summary','more'];
   const tlbl=k=>t.tabs[k]||k;
   return(<>
-    {payModal&&<PayModal plan={plan} amount={payAmt} onClose={()=>setPay(false)} c={c} lang={lang}/>}
+
     {autoConfirmPending&&<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setAutoConfirmPending(null)}>
       <div onClick={e=>e.stopPropagation()} style={{background:c.CARD,border:`1px solid ${mc}40`,borderRadius:'16px',padding:'24px',width:'100%',maxWidth:'340px',textAlign:'center'}}>
         <div style={{fontSize:'32px',marginBottom:'12px'}}>⚡</div>
@@ -161,12 +158,11 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
       </div>}
       {/* Smart summary for organizer */}
       {isOrgRef.current&&!ldg&&total>0&&!plan.confirmedDate&&(()=>{
-        const topDate=best;const topY=topDate?cntY(topDate.key):0;const topM=topDate?cntM(topDate.key):0;
+        const topDate=best;const topY=topDate?cntY(topDate.key):0;const topN=topDate?cntN(topDate.key):0;
         const noResp=slots.length>0?rs.filter(r=>!slots.some(s=>r.avail?.[s.key]==='yes'||r.avail?.[s.key]==='no')).length:0;
-        const awaiting=slots.length>0?0:0; // placeholder
         if(!topDate||topY===0)return null;
         const topLbl=fmtShort(topDate.date,lang)+(topDate.startTime?' · '+topDate.startTime:'');
-        const msg=t.summaryMsg?t.summaryMsg(topY,total,topLbl,topM,noResp):`${topY} of ${total} can make ${topLbl}${topM>0?` · ${topM} maybe`:''}${noResp>0?` · ${noResp} yet to respond`:''}.`;
+        const msg=t.summaryMsg?t.summaryMsg(topY,total,topLbl,topN,noResp):`${topY} of ${total} can make ${topLbl}${topN>0?` · ${topN} no`:''}${noResp>0?` · ${noResp} yet to respond`:''}.`;
         return(<div style={{background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'12px',padding:'12px 16px',marginBottom:'14px',display:'flex',justifyContent:'space-between',alignItems:'center',gap:'10px'}}>
           <div style={{fontSize:'14px',color:c.T,fontWeight:'500',lineHeight:1.4}}>{msg}</div>
           <Btn onClick={()=>confirmDate(topDate.date,topDate.startTime)} disabled={conf} sm c={c} accent={mc} style={{flexShrink:0,fontSize:'12px',padding:'8px 12px'}}>{conf?'...':t.confirmBtn2}</Btn>
@@ -215,7 +211,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
           <div style={{display:'flex',gap:'4px',marginBottom:'12px',justifyContent:'center'}}>
             {[1,2,3,4,5].map(s=><button key={s} onClick={()=>setPlanRating(s)} style={{background:'none',border:'none',cursor:'pointer',fontSize:'28px',color:planRating>=s?'#f59e0b':'#555',padding:'4px'}}>{planRating>=s?'★':'☆'}</button>)}
           </div>
-          {planRating>0&&<Btn onClick={async()=>{const me=rs.find(r=>r.name===ls.get('q_myname',''));if(me){await saveResp({...me,planRating});} setRatingDone(true);}} full sm c={c} accent={mc}>{t.ratePlan}</Btn>}
+          {planRating>0&&<Btn onClick={async()=>{const me=rs.find(r=>r.name===ls.get('q_myname',''));if(me){await saveResp(plan.id,me.name,{...me,planRating});} setRatingDone(true);}} full sm c={c} accent={mc}>{t.ratePlan}</Btn>}
         </Card>
       )}
       {ratingDone&&plan.confirmedDate&&daysUntil(plan.confirmedDate)<0&&(
@@ -295,7 +291,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
               <div><div style={{fontSize:'11px',color:mc,fontWeight:'700',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:'2px'}}>{t.bestOpt}</div>
                 <div style={{fontSize:'15px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtDate(best.date,lang)}{best.startTime?' · '+best.startTime:''}</div>
                 {plan.times?.[best.date]?.length>0&&<div style={{fontSize:'12px',color:c.M2}}>{plan.times[best.date].join(', ')}</div>}
-                <div style={{fontSize:'13px',color:c.M2}}>✅ {cntY(best.key)}/{total}{cntM(best.key)>0?` · 🤔 ${cntM(best.key)}`:''}</div>
+                <div style={{fontSize:'13px',color:c.M2}}>✅ {cntY(best.key)}/{total}{cntN(best.key)>0?` · ❌ ${cntN(best.key)}`:''}</div>
               </div>
             </div>
             {isOrgRef.current&&!plan.confirmedDate&&<Btn onClick={()=>confirmDate(best.date,best.startTime)} disabled={conf} full sm c={c} accent={mc}>{conf?t.confirming:t.confirmThis}</Btn>}
@@ -376,7 +372,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
         :<>
           {/* Tie detection */}
           {best&&(()=>{
-            const tiedSlots=slots.filter(s=>cntY(s.key)===cntY(best.key)&&cntY(s.key)>0);
+            const tiedSlots=slots.filter(s=>score(s.key)===score(best.key)&&cntY(s.key)>0);
             const hasTie=tiedSlots.length>1&&!plan.confirmedDate;
             if(!hasTie||!isOrgRef.current)return null;
             return(<div style={{background:'#f59e0b10',border:'1px solid #f59e0b40',borderRadius:'14px',padding:'16px',marginBottom:'18px'}}>
@@ -398,7 +394,6 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
               const yesRs=allRs.filter(r=>r.avail?.[ds.key]==='yes');
               const names=yesRs.map(r=>r.name);
               const noNames=allRs.filter(r=>r.avail?.[ds.key]==='no').map(r=>r.name);
-              const maybeNames=allRs.filter(r=>r.avail?.[ds.key]==='maybe').map(r=>r.name);
               let text=isEs
                 ?`${names.join(', ')} ${names.length===1?'puede':'pueden'} este día.`
                 :`${names.join(', ')} ${names.length===1?'can':'can'} make it.`;
@@ -406,11 +401,6 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
                 text+=isEs
                   ?` ${noNames.join(', ')} no ${noNames.length===1?'puede':'pueden'}.`
                   :` ${noNames.join(', ')} can't make it.`;
-              }
-              if(maybeNames.length>0){
-                text+=isEs
-                  ?` ${maybeNames.join(', ')} ${maybeNames.length===1?'está':'están'} pendiente${maybeNames.length===1?'':'s'}.`
-                  :` ${maybeNames.join(', ')} ${maybeNames.length===1?'is':'are'} maybe.`;
               }
               if(stops?.length>0){
                 const partial=yesRs.filter(r=>stops.some(s=>r.stopAttend?.[s.id]==='no'));
@@ -424,11 +414,11 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
               }
               return text;
             };
-            const ranked=[...slots].sort((a,b)=>cntY(b.key)-cntY(a.key)||cntM(b.key)-cntM(a.key)).filter(s=>cntY(s.key)>0||cntM(s.key)>0);
+            const ranked=[...slots].sort((a,b)=>score(b.key)-score(a.key)).filter(s=>cntY(s.key)>0);
             if(ranked.length===0)return null;
             return<div style={{marginBottom:'18px'}}>
               {ranked.map((s,i)=>{
-                const ny=cntY(s.key);const nm=cntM(s.key);const pct=total>0?Math.round(ny/total*100):0;
+                const ny=cntY(s.key);const nn=cntN(s.key);const pct=total>0?Math.round(ny/total*100):0;
                 const isBest=i===0;
                 const explanation=genExplanation(s,rs,plan.stops,lang);
                 return<div key={s.key} style={{padding:'14px',marginBottom:'8px',background:isBest?`${mc}12`:c.CARD,border:`1px solid ${isBest?mc+'35':c.BD}`,borderRadius:'12px'}}>
@@ -493,10 +483,10 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
                 </div>
                 {r.comment&&<div style={{fontSize:'13px',color:c.M2,fontStyle:'italic',marginBottom:'6px',padding:'6px 10px',background:c.CARD,borderRadius:'8px'}}>"{r.comment}"</div>}
                 <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
-                  {slots.map(s=>{const v=r.avail?.[s.key];const vc={yes:'#22c55e',maybe:'#f59e0b'};const vi={yes:'✅',maybe:'🤔'};return(v==='yes'||v==='maybe')?<span key={s.key} style={{fontSize:'11px',padding:'3px 9px',borderRadius:'20px',background:`${vc[v]}20`,color:vc[v],border:`1px solid ${vc[v]}30`,textTransform:'capitalize'}}>{vi[v]} {fmtShort(s.date,lang)}{s.startTime?' · '+s.startTime:''}</span>:null;})}
+                  {slots.map(s=>{const v=r.avail?.[s.key];const vc={yes:'#22c55e',no:'#ef4444'};const vi={yes:'✅',no:'❌'};return(v==='yes'||v==='no')?<span key={s.key} style={{fontSize:'11px',padding:'3px 9px',borderRadius:'20px',background:`${vc[v]}20`,color:vc[v],border:`1px solid ${vc[v]}30`}}>{vi[v]} {fmtShort(s.date,lang)}{s.startTime?' · '+s.startTime:''}</span>:null;})}
                 </div>
                 {r.stopAttend&&plan.stops?.length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:'4px',marginTop:'4px'}}>
-                  {(plan.stops||[]).map((st,si)=>{const v=r.stopAttend?.[st.id];if(!v)return null;const sName=st.options?.[0]?.name||`${t.stop||'Stop'} ${si+1}`;const vc={yes:'#22c55e',no:'#ef4444',maybe:'#f59e0b'};const vi={yes:'✅',no:'❌',maybe:'🤔'};return<span key={st.id} style={{fontSize:'10px',padding:'2px 7px',borderRadius:'12px',background:`${vc[v]||c.CARD2}15`,color:vc[v]||c.M2,border:`1px solid ${(vc[v]||c.BD)}30`}}>{vi[v]||'?'} {sName}</span>;})}
+                  {(plan.stops||[]).map((st,si)=>{const v=r.stopAttend?.[st.id];if(!v)return null;const sName=st.options?.[0]?.name||`${si+1}`;const vc={yes:'#22c55e',no:'#ef4444'};const vi={yes:'✅',no:'❌'};return<span key={st.id} style={{fontSize:'10px',padding:'2px 7px',borderRadius:'12px',background:`${vc[v]||c.CARD2}15`,color:vc[v]||c.M2,border:`1px solid ${(vc[v]||c.BD)}30`}}>{vi[v]||'?'} {sName}</span>;})}
                 </div>}
                 {r.stopPrefs&&plan.stops?.length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:'4px',marginTop:'4px'}}>
                   {(plan.stops||[]).flatMap((st,si)=>(st.options||[]).filter((opt)=>r.stopPrefs?.[st.id]===opt.id||r.stopPrefs?.[st.id+'_'+opt.id]).map((opt)=><span key={st.id+'_'+opt.id} style={{fontSize:'10px',padding:'2px 7px',borderRadius:'12px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`}}>⭐ {opt.name||`${t.stop||'Stop'} ${si+1}`}</span>))}
@@ -541,11 +531,6 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
 
       {/* MORE tab = Extras + Suggestions */}
       {!ldg&&tab==='more'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
-        {/* Outfit */}
-        {plan.dressCode&&<Card c={c}>
-          <Lbl c={c}>👗 Outfit</Lbl>
-          <OutfitCard dressCode={plan.dressCode} dressNote={plan.dressNote} city={city} date={plan.confirmedDate||plan.dates?.[0]} mc={mc} c={c} lang={lang} t={t}/>
-        </Card>}
         {/* Gift */}
         {plan.gift&&<Card c={c} accent>
           <Lbl c={c}>{t.giftSec}</Lbl>
@@ -553,7 +538,6 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
           {plan.gift.price&&<><div style={{display:'flex',justifyContent:'space-between',marginBottom:'8px'}}><span style={{color:c.M2,fontSize:'14px'}}>{t.totalPrice}</span><span style={{color:mc,fontWeight:'700',fontSize:'18px'}}>{plan.gift.price}€</span></div>
           {total>0&&<div style={{display:'flex',justifyContent:'space-between',marginBottom:'12px'}}><span style={{color:c.M2,fontSize:'14px'}}>{t.perOf} ({total})</span><span style={{color:mc,fontWeight:'700'}}>{(parseFloat(plan.gift.price)/total).toFixed(2)}€</span></div>}</>}
           {plan.gift.link&&<a href={plan.gift.link.startsWith('http')?plan.gift.link:'https://'+plan.gift.link} target="_blank" rel="noreferrer" style={{display:'block',textAlign:'center',padding:'10px',background:`${mc}20`,border:`1px solid ${mc}50`,borderRadius:'10px',color:mc,textDecoration:'none',fontSize:'14px',fontWeight:'600',marginBottom:'10px'}}>{t.seeGift}</a>}
-          <Btn onClick={()=>{setPayAmt((budget+giftPer).toFixed(2));setPay(true);}} full style={{padding:'13px'}} c={c}>💳 {t.payTitle}</Btn>
         </Card>}
         {/* Bring list */}
         {plan.bring?.filter(b=>b.text||typeof b==='string').length>0&&<Card c={c}>
@@ -567,11 +551,6 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
             <div style={{display:'flex',justifyContent:'space-between',marginBottom:'3px'}}><span style={{fontSize:'13px',color:c.T}}>{o}</span><span style={{fontSize:'12px',color:mc,fontWeight:'600'}}>{cnt} ({pct}%)</span></div>
             <div style={{height:'6px',background:c.BD,borderRadius:'3px',overflow:'hidden'}}><div style={{height:'100%',width:`${pct}%`,background:mc,borderRadius:'3px',transition:'width .5s'}}/></div>
           </div>);})}
-        </Card>}
-        {/* Pay */}
-        {budget>0&&<Card c={c} style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-          <div><div style={{fontSize:'13px',color:c.M2}}>{t.totalPerPerson}</div><div style={{fontSize:'22px',fontWeight:'800',color:mc}}>{(budget+giftPer).toFixed(0)}€</div></div>
-          <Btn onClick={()=>{setPayAmt((budget+giftPer).toFixed(2));setPay(true);}} c={c} style={{background:mc,color:'#0A0A0A'}}>{t.payArrow}</Btn>
         </Card>}
         {/* Expense splitter */}
         <ExpenseSplitter plan={plan} rs={rs||[]} mc={mc} c={c} lang={lang}/>
@@ -588,8 +567,6 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
           </div>
           <div style={{fontSize:'12px',color:c.M2,textAlign:'center',marginTop:'8px'}}>{t.hintScreenshot}</div>
         </Card>}
-        {/* Suggestions */}
-        <AfterPlanSuggestions plan={plan} c={c} lang={lang}/>
       </div></React.Suspense>}
 
     </div>

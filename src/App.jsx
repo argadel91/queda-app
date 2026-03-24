@@ -2,10 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react'
 import T from './constants/translations.js'
 import { C, getSysTheme, applyTheme } from './constants/theme.js'
 import { db, setToastFn } from './lib/supabase.js'
-import { authSignOut, getSession, getOrCreateProfile } from './lib/auth.js'
+import { authSignOut, getSession } from './lib/auth.js'
 import { saveProfile, loadProfile, loadPlan } from './lib/supabase.js'
-import { ls, getMyPlans } from './lib/storage.js'
-import { fmtDate, daysUntil, fmtShort } from './lib/utils.js'
+import { ls, getMyPlans, syncMyPlans } from './lib/storage.js'
 
 import Home from './pages/Home.jsx'
 import Landing from './pages/Landing.jsx'
@@ -19,7 +18,6 @@ const Respond = React.lazy(() => import('./pages/Respond.jsx'))
 const Results = React.lazy(() => import('./pages/Results.jsx'))
 const Profile = React.lazy(() => import('./pages/Profile.jsx'))
 const MyPlans = React.lazy(() => import('./pages/MyPlans.jsx'))
-const Discover = React.lazy(() => import('./pages/Discover.jsx'))
 
 export default function App(){
   const[theme,setTheme]=useState(()=>ls.get('q_theme',null)||getSysTheme());
@@ -82,6 +80,7 @@ export default function App(){
         setAuthUser(session.user);
         setProfile(prof);
         if(prof?.lang)setLang(prof.lang);
+        syncMyPlans(session.user.id).catch(()=>{});
       }
       setAuthLoading(false);
     }).catch(e=>{
@@ -111,6 +110,7 @@ export default function App(){
           const savedLang=ls.get('q_lang',null);
           if(savedLang)setLang(savedLang);
           else if(prof?.lang)setLang(prof.lang);
+          syncMyPlans(session.user.id).catch(()=>{});
           setAuthLoading(false);
         }).catch(e=>{
           setAuthUser(session.user);
@@ -187,9 +187,9 @@ export default function App(){
   const nav=(s,p=null,org=false)=>{setScreen(s);if(p)setPlan(p);if(!p&&s==='home'){setPlan(null);setIsOrg(false);}else setIsOrg(org);if(s!=='home')ls.set('q_state',{screen:s,planId:p?.id||plan?.id,isOrg:org});else ls.set('q_state',{});};
   const handleJoin=async code=>{const p=await loadPlan(code);if(p){setPlan(p);setIsOrg(false);setScreen('preview');ls.set('q_state',{screen:'preview',planId:p.id,isOrg:false});return true;}return false;};
   const handleFromProfile=async id=>{const p=await loadPlan(id);if(p){const mine=getMyPlans().find(x=>x.id===id);nav('results',p,mine?.role==='organizer');}};
-  const handleDiscoverJoin=async id=>{const p=await loadPlan(id);if(p){setPlan(p);setIsOrg(false);setScreen('preview');}};
+
   const mc=c.A;
-  const noNav=['home','create','profile','myplans','discover','preview'];
+  const noNav=['home','create','profile','myplans','preview'];
   if(authLoading)return(<div style={{minHeight:'100vh',background:c.BG,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'16px'}}><div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'28px',color:c.T}}>queda<span style={{color:c.A}}>.</span></div><div style={{width:'24px',height:'24px',border:`3px solid ${c.BD}`,borderTop:`3px solid ${c.A}`,borderRadius:'50%',animation:'spin 1s linear infinite'}}/></div>);
   const Fallback=()=><div style={{minHeight:'100vh',background:c.BG,display:'flex',alignItems:'center',justifyContent:'center'}}><div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'22px',color:c.T}}>queda<span style={{color:c.A}}>.</span></div></div>;
   if(resetMode)return<React.Suspense fallback={<Fallback/>}><ResetPasswordScreen onDone={()=>{setResetMode(false);authSignOut();}} c={c} lang={lang}/></React.Suspense>;
@@ -231,7 +231,7 @@ export default function App(){
           </button>
           {avatarOpen&&<div style={{position:'absolute',right:0,top:'calc(100% + 4px)',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',boxShadow:'0 8px 24px rgba(0,0,0,.3)',zIndex:100,overflow:'hidden',minWidth:'150px'}}>
             <button onClick={e=>{e.stopPropagation();nav('profile');setAvatarOpen(false);}} style={{display:'flex',alignItems:'center',gap:'8px',width:'100%',padding:'11px 14px',background:'transparent',border:'none',borderBottom:`1px solid ${c.BD}`,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',color:c.T,textAlign:'left'}}>👤 {T[lang]?.myProfile||'My profile'}</button>
-            <button onClick={e=>{e.stopPropagation();nav('discover');setAvatarOpen(false);}} style={{display:'flex',alignItems:'center',gap:'8px',width:'100%',padding:'11px 14px',background:'transparent',border:'none',borderBottom:`1px solid ${c.BD}`,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',color:c.T,textAlign:'left'}}>{T[lang]?.discover||'🔍 Discover'}</button>
+
             <button onClick={e=>{e.stopPropagation();handleSignOut();setAvatarOpen(false);}} style={{display:'flex',alignItems:'center',gap:'8px',width:'100%',padding:'11px 14px',background:'transparent',border:'none',cursor:'pointer',fontFamily:'inherit',fontSize:'13px',color:'#ef4444',textAlign:'left'}}>🚪 {T[lang]?.signOut||'Cerrar sesión'}</button>
           </div>}
         </div>}
@@ -240,7 +240,7 @@ export default function App(){
     {screen==='home'&&<Home onCreate={()=>nav('create')} onJoin={handleJoin} onProfile={()=>nav('myplans')} c={c} lang={lang}/>}
     {screen==='profile'&&<Profile onBack={()=>nav('home')} c={c} lang={lang} authUser={authUser} profile={profile} onUpdateProfile={updateProfile} onSignOut={handleSignOut} onLangChange={l=>{setLang(l);ls.set('q_lang',l);if(authUser)saveProfile(authUser.id,{...profile,lang:l}).catch(()=>{});}} onThemeToggle={tgTheme} theme={theme}/>}
     {screen==='myplans'&&<MyPlans onBack={()=>nav('home')} onOpen={handleFromProfile} c={c} lang={lang}/>}
-    {screen==='discover'&&<Discover onBack={()=>nav('home')} onJoin={handleDiscoverJoin} c={c} lang={lang} profile={profile}/>}
+
     {screen==='create'&&<Create onBack={()=>nav('home')} onCreated={p=>nav('share',p,true)} c={c} lang={lang} authUser={authUser} profile={profile}/>}
     {screen==='share'&&plan&&<Share plan={plan} onViewResults={()=>nav('results',plan,isOrg)} onBack={()=>nav('home')} c={c} lang={lang}/>}
     {screen==='preview'&&plan&&<PlanPreview plan={plan} onRespond={()=>nav('respond',plan,false)} onBack={()=>nav('home')} c={c} lang={lang}/>}
