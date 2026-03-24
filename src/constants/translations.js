@@ -267,7 +267,7 @@ const T ={
     leaveConfirm:'Leave this plan?',leaveWarn:'Will only remove from your list.',
     cancel:'Cancel',del:'Delete',leave:'Leave',
     comments:'Comments',
-    tabs:{plan:'📍 Plan',alts:'📅 Alternatives',summary:'📊 Resumen',more:'💡 More'},
+    tabs:{plan:'📍 Plan',alts:'📅 Alternatives',summary:'📊 Summary',more:'💡 More'},
     alternativeDates:'Alternative dates',alternativeDatesHint:'Coming soon — add alternative dates and times for your plan.',
     discoverT:'Discover',discoverS:'Public plans open to everyone.',noPublic:'No public plans at the moment.',joinPlan:'Join →',
     yourRoleLbl:'Your role',optionalLbl:'optional',otherRolePh:'Or type your own...',yourRolePh:'e.g. Manager, Student, Client...',
