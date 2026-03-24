@@ -221,16 +221,16 @@ export default function App(){
       <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
         {/* Language selector — always visible */}
         <div style={{position:'relative'}} onClick={e=>e.stopPropagation()}>
-          <button onClick={()=>setLangOpen(o=>!o)} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 8px',cursor:'pointer',fontSize:'14px',color:c.T,fontFamily:'inherit'}}>{({es:'🇪🇸',en:'🇬🇧',pt:'🇵🇹',fr:'🇫🇷',de:'🇩🇪',it:'🇮🇹'})[lang]}</button>
+          <button title={T[lang]?.tipLang} onClick={()=>setLangOpen(o=>!o)} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 8px',cursor:'pointer',fontSize:'14px',color:c.T,fontFamily:'inherit'}}>{({es:'🇪🇸',en:'🇬🇧',pt:'🇵🇹',fr:'🇫🇷',de:'🇩🇪',it:'🇮🇹'})[lang]}</button>
           {langOpen&&<div style={{position:'absolute',right:0,top:'calc(100% + 4px)',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',boxShadow:'0 8px 24px rgba(0,0,0,.3)',zIndex:100,overflow:'hidden'}}>
             {['es','en','pt','fr','de','it'].map(l=><button key={l} onClick={()=>{setLang(l);ls.set('q_lang',l);if(authUser)saveProfile(authUser.id,{...profile,lang:l}).catch(()=>{});setLangOpen(false);}} style={{display:'flex',alignItems:'center',gap:'8px',width:'100%',padding:'10px 14px',background:l===lang?`${c.A}15`:'transparent',border:'none',borderBottom:`1px solid ${c.BD}`,cursor:'pointer',fontSize:'13px',color:l===lang?c.A:c.T,fontWeight:l===lang?'700':'400',fontFamily:'inherit'}}>{({es:'🇪🇸',en:'🇬🇧',pt:'🇵🇹',fr:'🇫🇷',de:'🇩🇪',it:'🇮🇹'})[l]}</button>)}
           </div>}
         </div>
-        <button onClick={tgTheme} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 8px',cursor:'pointer',fontSize:'14px',color:c.T,fontFamily:'inherit'}}>{theme==='dark'?'☀️':'🌙'}</button>
-        {screen!=='home'&&<button onClick={()=>nav('home')} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 10px',cursor:'pointer',fontSize:'12px',color:c.T,fontFamily:'inherit',fontWeight:'600'}}>🏠</button>}
+        <button title={T[lang]?.tipTheme} onClick={tgTheme} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 8px',cursor:'pointer',fontSize:'14px',color:c.T,fontFamily:'inherit'}}>{theme==='dark'?'☀️':'🌙'}</button>
+        {screen!=='home'&&<button title={T[lang]?.tipHome} onClick={()=>nav('home')} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 10px',cursor:'pointer',fontSize:'12px',color:c.T,fontFamily:'inherit',fontWeight:'600'}}>🏠</button>}
         {plan&&!noNav.includes(screen)&&<span style={{color:mc,fontWeight:'800',fontSize:'12px',letterSpacing:'.1em'}}>{plan.id}</span>}
         {authUser&&<div style={{position:'relative'}} onClick={e=>e.stopPropagation()}>
-          <button onClick={e=>{e.stopPropagation();setAvatarOpen(o=>!o);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 10px',cursor:'pointer',fontSize:'13px',color:c.T,fontFamily:'inherit',fontWeight:'500',display:'flex',alignItems:'center',gap:'5px'}}>
+          <button title={T[lang]?.tipProfile} onClick={e=>{e.stopPropagation();setAvatarOpen(o=>!o);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 10px',cursor:'pointer',fontSize:'13px',color:c.T,fontFamily:'inherit',fontWeight:'500',display:'flex',alignItems:'center',gap:'5px'}}>
             <span style={{width:'22px',height:'22px',borderRadius:'50%',background:c.A,color:'#0A0A0A',display:'inline-flex',alignItems:'center',justifyContent:'center',fontSize:'11px',fontWeight:'800',flexShrink:0}}>{(profile?.name||authUser.email||'?')[0].toUpperCase()}</span>
             <span style={{maxWidth:'80px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{profile?.name||authUser.email}</span>
             <span style={{fontSize:'10px',color:c.M}}>▾</span>
