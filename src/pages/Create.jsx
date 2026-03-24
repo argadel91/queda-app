@@ -85,7 +85,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   const clearDraft=()=>{try{localStorage.removeItem(draftKey)}catch{}};
   const discardDraft=()=>{clearDraft();setDraftRestored(false);window.location.reload();};
   // Save on step change
-  const changeStep=(s)=>{saveDraft(s);setStep(s);};
+  const changeStep=(s)=>{saveDraft(s);if(s!==2){inlineMapObj.current=null;}setStep(s);};
 
   // Stop helpers
   const addStop=()=>{
