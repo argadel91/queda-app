@@ -27,10 +27,11 @@ export default function ClockPicker({value,onChange,c}){
     {open&&<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:300,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setOpen(false)}>
       <div onClick={e=>e.stopPropagation()} style={{background:c?.CARD||'#1A1A1A',borderRadius:'20px',padding:'24px',width:'100%',maxWidth:'300px'}}>
         {/* Display */}
-        <div style={{display:'flex',justifyContent:'center',gap:'4px',marginBottom:'20px'}}>
+        <div style={{display:'flex',justifyContent:'center',alignItems:'center',gap:'4px',marginBottom:'20px'}}>
           <button onClick={()=>setMode('hour')} style={{fontSize:'36px',fontWeight:'800',fontFamily:'monospace',background:'none',border:'none',color:mode==='hour'?c?.A||'#CDFF6C':c?.M||'#666',cursor:'pointer',padding:'4px 8px',borderRadius:'8px'}}>{selH!==null?fmt(selH):'--'}</button>
           <span style={{fontSize:'36px',fontWeight:'800',color:c?.M||'#666'}}>:</span>
           <button onClick={()=>setMode('min')} style={{fontSize:'36px',fontWeight:'800',fontFamily:'monospace',background:'none',border:'none',color:mode==='min'?c?.A||'#CDFF6C':c?.M||'#666',cursor:'pointer',padding:'4px 8px',borderRadius:'8px'}}>{fmt(selM)}</button>
+          {selH!==null&&<span style={{fontSize:'14px',color:c?.M2||'#888',marginLeft:'8px',fontWeight:'600'}}>{(selH%12||12)}:{fmt(selM)} {selH>=12?'PM':'AM'}</span>}
         </div>
 
         {/* Clock face */}
