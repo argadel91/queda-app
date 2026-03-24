@@ -10,7 +10,7 @@ import { generateICS } from '../lib/ics.js'
 const RouteMap = React.lazy(() => import('../components/RouteMap.jsx'))
 import VenueInfo from '../components/VenueInfo.jsx'
 
-export default function Results({plan:ip,onBack,isOrg,c,lang}){
+export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseShare}){
   const[plan,setPlan]=useState(ip);const t=T[lang];
   const mc=c.A;
   const[tab,setTab]=useState('plan');const[rs,setRs]=useState([]);const[ldg,setL]=useState(true);
@@ -103,7 +103,27 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
   const howL=v=>({car:t.car,moto:t.moto,transit:t.transit,taxi:t.taxi,walk:t.walk,bike:t.bike}[v]||v);
   const TABS=['plan','alts','summary','more'];
   const tlbl=k=>t.tabs[k]||k;
+  const shareUrl=location.href.split('?')[0]+'?code='+plan.id;
+  const copyShare=()=>{navigator.clipboard?.writeText(shareUrl).catch(()=>{});};
+  const waShare=()=>window.open('https://wa.me/?text='+encodeURIComponent(`${plan.name||'queda.'}\n${shareUrl}`),'_blank');
+
   return(<>
+    {/* Share modal */}
+    {showShare&&<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:200,display:'flex',alignItems:'flex-end',justifyContent:'center'}} onClick={onCloseShare}>
+      <div onClick={e=>e.stopPropagation()} className="fade-in" style={{background:c.CARD,borderRadius:'20px 20px 0 0',padding:'24px',width:'100%',maxWidth:'420px'}}>
+        <div style={{textAlign:'center',marginBottom:'20px'}}>
+          <div style={{fontSize:'40px',marginBottom:'8px'}}>🎉</div>
+          <div style={{fontSize:'20px',fontWeight:'800',color:c.T,fontFamily:"'Syne',serif"}}>{t.planCreated}</div>
+          <div style={{fontFamily:'monospace',fontSize:'36px',fontWeight:'900',color:mc,letterSpacing:'.15em',margin:'12px 0'}}>{plan.id}</div>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
+          <button onClick={waShare} style={{padding:'14px',background:'#25D366',color:'#fff',border:'none',borderRadius:'12px',fontSize:'15px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>WhatsApp</button>
+          <button onClick={()=>window.open('https://t.me/share/url?url='+encodeURIComponent(shareUrl),'_blank')} style={{padding:'14px',background:'#0088cc',color:'#fff',border:'none',borderRadius:'12px',fontSize:'15px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>Telegram</button>
+          <button onClick={()=>{copyShare();}} style={{padding:'14px',background:c.CARD2,color:c.T,border:`1px solid ${c.BD}`,borderRadius:'12px',fontSize:'15px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>{t.copyLink||'Copy link'} 🔗</button>
+          <button onClick={onCloseShare} style={{padding:'14px',background:mc,color:'#0A0A0A',border:'none',borderRadius:'12px',fontSize:'15px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',marginTop:'4px'}}>{t.viewRes||'View results'} →</button>
+        </div>
+      </div>
+    </div>}
 
     {autoConfirmPending&&<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setAutoConfirmPending(null)}>
       <div onClick={e=>e.stopPropagation()} style={{background:c.CARD,border:`1px solid ${mc}40`,borderRadius:'16px',padding:'24px',width:'100%',maxWidth:'340px',textAlign:'center'}}>

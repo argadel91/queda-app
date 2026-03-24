@@ -12,7 +12,6 @@ import Landing from './pages/Landing.jsx'
 const AuthScreen = React.lazy(() => import('./pages/AuthScreen.jsx'))
 const ResetPasswordScreen = React.lazy(() => import('./pages/ResetPasswordScreen.jsx'))
 const Create = React.lazy(() => import('./pages/Create.jsx'))
-const Share = React.lazy(() => import('./pages/Share.jsx'))
 const PlanPreview = React.lazy(() => import('./pages/PlanPreview.jsx'))
 const Respond = React.lazy(() => import('./pages/Respond.jsx'))
 const Results = React.lazy(() => import('./pages/Results.jsx'))
@@ -33,6 +32,7 @@ export default function App(){
   const[isOrg,setIsOrg]=useState(false);
 
   const[toast,setToast]=useState(null);
+  const[showShareModal,setShowShareModal]=useState(false);
   const[langOpen,setLangOpen]=useState(false);
   const[avatarOpen,setAvatarOpen]=useState(false);
   const[installPrompt,setInstallPrompt]=useState(null);
@@ -241,11 +241,10 @@ export default function App(){
     {screen==='profile'&&<Profile onBack={()=>nav('home')} c={c} lang={lang} authUser={authUser} profile={profile} onUpdateProfile={updateProfile} onSignOut={handleSignOut} onLangChange={l=>{setLang(l);ls.set('q_lang',l);if(authUser)saveProfile(authUser.id,{...profile,lang:l}).catch(()=>{});}} onThemeToggle={tgTheme} theme={theme}/>}
     {screen==='myplans'&&<MyPlans onBack={()=>nav('home')} onOpen={handleFromProfile} c={c} lang={lang}/>}
 
-    {screen==='create'&&<Create onBack={()=>nav('home')} onCreated={p=>nav('share',p,true)} c={c} lang={lang} authUser={authUser} profile={profile}/>}
-    {screen==='share'&&plan&&<Share plan={plan} onViewResults={()=>nav('results',plan,isOrg)} onBack={()=>nav('home')} c={c} lang={lang}/>}
+    {screen==='create'&&<Create onBack={()=>nav('home')} onCreated={p=>{setShowShareModal(true);nav('results',p,true);}} c={c} lang={lang} authUser={authUser} profile={profile}/>}
     {screen==='preview'&&plan&&<PlanPreview plan={plan} onRespond={()=>nav('respond',plan,false)} onBack={()=>nav('home')} c={c} lang={lang}/>}
     {screen==='respond'&&plan&&<Respond plan={plan} onBack={()=>nav('preview',plan,false)} onDone={()=>nav('results',plan,false)} onCreateOwn={()=>nav('create')} c={c} lang={lang} authUser={authUser} profile={profile}/>}
-    {screen==='results'&&plan&&<Results plan={plan} onBack={()=>nav('home')} isOrg={isOrg} c={c} lang={lang}/>}
+    {screen==='results'&&plan&&<Results plan={plan} onBack={()=>nav('home')} isOrg={isOrg} c={c} lang={lang} showShare={showShareModal} onCloseShare={()=>setShowShareModal(false)}/>}
     {showInstall&&<div style={{position:'fixed',bottom:'0',left:'0',right:'0',background:c.CARD,borderTop:`1px solid ${c.BD}`,padding:'14px 20px',display:'flex',alignItems:'center',gap:'12px',zIndex:50}}>
       <div style={{flex:1}}>
         <div style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>{T[lang]?.installApp||'Install queda.'}</div>
