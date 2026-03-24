@@ -160,7 +160,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
     inlineMapRef.current.innerHTML='';
     inlineMapRef.current.appendChild(mapDiv);
     loadGM().then(async()=>{
-      await google.maps.importLibrary('maps');
+      if(google.maps.importLibrary)await google.maps.importLibrary('maps');
       const map=new google.maps.Map(mapDiv,{center:{lat:40.4168,lng:-3.7038},zoom:6,disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy',backgroundColor:'#1A1A1A'});
       inlineMapObj.current=map;
       // Click to select
@@ -182,7 +182,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   const inlineSearch=async(q)=>{
     if(!q?.trim()||!window.google?.maps)return;
     try{
-      const{Place}=await google.maps.importLibrary('places');
+      if(google.maps.importLibrary)await google.maps.importLibrary('places');const{Place}=google.maps.places;
       const{places}=await Place.searchByText({textQuery:q,fields:['displayName','formattedAddress','location','rating','userRatingCount','priceLevel','photos','placeId'],maxResultCount:5});
       if(places?.length){setInlineResults(places.map(p=>({name:p.displayName||'',address:p.formattedAddress||'',lat:p.location?.lat(),lng:p.location?.lng(),rating:p.rating||null,ratingCount:p.userRatingCount||null,priceLevel:p.priceLevel??null,photo:p.photos?.[0]?.getURI?.({maxWidth:400})||null,placeId:p.id||null})));}
       else{setInlineResults([]);}
@@ -203,7 +203,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
     // Enrich with details
     if(r.placeId){
       try{
-        const{Place}=await google.maps.importLibrary('places');
+        if(google.maps.importLibrary)await google.maps.importLibrary('places');const{Place}=google.maps.places;
         const place=new Place({id:r.placeId});
         await place.fetchFields({fields:['websiteURI','nationalPhoneNumber','regularOpeningHours','editorialSummary','googleMapsURI','types','dineIn','takeout','delivery','reservable','servesBeer','servesWine','outdoorSeating','goodForChildren','accessibilityOptions']});
         r.website=place.websiteURI||null;r.phone=place.nationalPhoneNumber||null;

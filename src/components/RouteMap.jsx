@@ -30,8 +30,8 @@ export default function RouteMap({stops,c}){
 
     loadGM().then(async()=>{
       if(cancelled)return;
-      await google.maps.importLibrary('maps');
-      await google.maps.importLibrary('geometry');
+      if(google.maps.importLibrary)await google.maps.importLibrary('maps');
+      if(google.maps.importLibrary)await google.maps.importLibrary('geometry');
 
       const map=new google.maps.Map(mapDiv,{
         disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy'

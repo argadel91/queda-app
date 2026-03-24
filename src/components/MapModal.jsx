@@ -92,8 +92,8 @@ const initOverlay = async () => {
   _overlay.appendChild(selBar)
 
   await loadGM()
-  await google.maps.importLibrary('maps')
-  await google.maps.importLibrary('places')
+  if(google.maps.importLibrary)await google.maps.importLibrary('maps')
+  if(google.maps.importLibrary)await google.maps.importLibrary('places')
 
   _map = new google.maps.Map(_mapDiv, {
     center: { lat: 40.4168, lng: -3.7038 },
@@ -121,7 +121,7 @@ const initOverlay = async () => {
     const q = input.value?.trim()
     if (!q) return
     try {
-      const { Place } = await google.maps.importLibrary('places')
+      if(google.maps.importLibrary)await google.maps.importLibrary('places');const { Place } = google.maps.places
       const allFields = ['displayName','formattedAddress','location','rating','userRatingCount','priceLevel','websiteURI','nationalPhoneNumber','regularOpeningHours','editorialSummary','googleMapsURI','types','businessStatus','photos','dineIn','takeout','delivery','reservable','servesBreakfast','servesLunch','servesDinner','servesBeer','servesWine','outdoorSeating','goodForChildren','accessibilityOptions']
       const { places } = await Place.searchByText({ textQuery: q, fields: allFields, maxResultCount: 6 })
       showResults(places?.map(p => extractPlace(p)) || [])
@@ -189,7 +189,7 @@ let _pendingSel = null
 const enrichPlace = async (sel) => {
   if (!sel.placeId) return sel
   try {
-    const { Place } = await google.maps.importLibrary('places')
+    if(google.maps.importLibrary)await google.maps.importLibrary('places');const { Place } = google.maps.places
     const place = new Place({ id: sel.placeId })
     await place.fetchFields({ fields: ['displayName','websiteURI','nationalPhoneNumber','regularOpeningHours','priceLevel','rating','userRatingCount','photos','editorialSummary','googleMapsURI','dineIn','takeout','delivery','reservable','servesBreakfast','servesLunch','servesDinner','servesBeer','servesWine','outdoorSeating','goodForChildren','accessibilityOptions'] })
     sel.website = place.websiteURI || null

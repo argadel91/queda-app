@@ -11,7 +11,8 @@ const getPlacesLib = async () => {
       setTimeout(() => clearInterval(check), 10000)
     })
   }
-  return google.maps.importLibrary('places')
+  if(google.maps.importLibrary)return google.maps.importLibrary('places')
+  return Promise.resolve()
 }
 
 export default function CityInput({value,onChange,onSelect,placeholder,c}){
