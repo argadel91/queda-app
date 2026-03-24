@@ -133,7 +133,8 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   const remOption=(stopId,optId)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.filter(o=>o.id!==optId)}:s));
   const updOption=(stopId,optionId,key,value)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.map(o=>o.id===optionId?{...o,[key]:value}:o)}:s));
 
-  const stepLabels=[t.whenTitle||'When?',t.whereTitle||'Where?'];
+  const stepLabels=['📅','🕐','📍','✓'];
+  const[created,setCreated]=useState(null);
 
   const create=async()=>{
     setSaving(true);
@@ -142,7 +143,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       const plan={id:genId(),name:null,desc:null,organizer:profile?.name||org.trim()||'',dates:[...selDates].sort(),startTimes:startTimes.filter(t=>t),timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,stops:cleanStops,confirmedDate:null,isPublic:false,lang,createdAt:new Date().toISOString()};
       if(authUser)await savePlanWithUser(plan,authUser.id);else await savePlan(plan);
       addMyPlan(plan.id,plan.name,'organizer');
-      ls.set('q_state',{screen:'share',planId:plan.id,isOrg:true});clearDraft();onCreated(plan);
+      clearDraft();setCreated(plan);
     }catch(e){showErr(t.createError);}
     setSaving(false);
   };
@@ -268,6 +269,21 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
     </div>;
   };
 
+  // Done screen
+  if(created){
+    return<div style={{padding:'60px 24px',maxWidth:'420px',margin:'0 auto',textAlign:'center'}}>
+      <div style={{fontSize:'64px',marginBottom:'16px'}}>🎉</div>
+      <h2 style={{fontFamily:"'Syne',serif",fontSize:'28px',fontWeight:'800',color:mc,marginBottom:'8px'}}>{lang==='es'?'¡Plan creado!':'Plan created!'}</h2>
+      <div style={{fontFamily:'monospace',fontSize:'40px',fontWeight:'900',color:mc,letterSpacing:'.15em',margin:'16px 0'}}>{created.id}</div>
+      <p style={{color:c.M2,fontSize:'14px',marginBottom:'28px'}}>{lang==='es'?'Comparte el código con tu grupo. Visita tu plan para editar, añadir detalles y ver resultados.':'Share the code with your group. Visit your plan to edit, add details and see results.'}</p>
+      <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
+        <Btn onClick={()=>onCreated(created)} full style={{padding:'14px'}} c={c} accent={mc}>{lang==='es'?'Revisa tu plan →':'Review your plan →'}</Btn>
+        <Btn onClick={()=>{setCreated(null);setStep(0);setSelDates([]);setStartTimes(['']);setStops([emptyStop(1,'')]);}} v="secondary" full style={{padding:'14px'}} c={c}>{lang==='es'?'Crear otro plan':'Create another plan'}</Btn>
+        <button onClick={onBack} style={{padding:'12px',background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'14px'}}>🏠 {lang==='es'?'Menú principal':'Home'}</button>
+      </div>
+    </div>;
+  }
+
   return(<>
     <MapModal visible={mapTarget!==null} onSelect={handleMapSelect} onClose={()=>setMapTarget(null)} c={c} lang={lang} init={mapInit}/>
     <div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
@@ -278,41 +294,32 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
           <button onClick={()=>setDraftRestored(false)} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'16px',lineHeight:1}}>x</button>
         </div>
       </div>}
-      <Back onClick={step===0?onBack:()=>changeStep(0)} label={t.back} c={c}/>
+      <Back onClick={step===0?onBack:()=>changeStep(step-1)} label={t.back} c={c}/>
       <Stepper cur={step} labels={stepLabels} c={c} accent={mc}/>
 
-      {/* ── INVITATION CARD — live preview ── */}
-      <div style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'20px',padding:'16px 14px',textAlign:'center',marginBottom:'20px',transition:'all .3s ease'}}>
-        <div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'11px',color:mc,letterSpacing:'.1em',textTransform:'uppercase',marginBottom:'8px'}}>queda.</div>
-        <div style={{fontSize:'12px',color:c.M2,marginBottom:'2px'}}>{t.organizedBy||'By'}: <strong style={{color:c.T}}>{profile?.name||'—'}</strong></div>
-        {/* Date + time */}
-        {selDates[0]&&<div style={{marginTop:'8px',fontSize:'14px',color:mc,fontWeight:'600',textTransform:'capitalize'}}>{fmtShort(selDates[0],lang)}{startTimes[0]?' · '+startTimes[0]:''}</div>}
-        {/* Stops */}
-        {stops.some(s=>(s.options||[]).some(o=>o.name))&&<div style={{marginTop:'8px',borderTop:`1px solid ${mc}20`,paddingTop:'8px'}}>
-          {stops.filter(s=>(s.options||[]).some(o=>o.name)).map((s,i)=>{
-            const endTime=calcEndTime(s.startTime,s.duration);
-            return<div key={s.id} style={{marginBottom:'6px'}}>
-              {(s.options||[]).filter(o=>o.name).map((opt,oi)=><div key={opt.id} style={{display:'flex',alignItems:'center',gap:'5px',justifyContent:'center',fontSize:'11px',color:c.M2,marginBottom:'1px'}}>
-                {oi===0?<span style={{color:mc,fontWeight:'700'}}>{i+1}.</span>:<span style={{color:c.M,fontSize:'10px',marginLeft:'14px'}}>↳ o:</span>}
-                {opt.photo&&<img src={opt.photo} alt="" style={{width:'16px',height:'16px',borderRadius:'3px',objectFit:'cover'}}/>}
-                <span style={{color:oi===0?c.T:c.M2}}>{opt.name}</span>
-                {opt.rating&&<span style={{color:mc,fontSize:'10px'}}>⭐{opt.rating}</span>}
-              </div>)}
-              {s.startTime&&<div style={{fontSize:'10px',color:c.M,textAlign:'center'}}>🕐 {s.startTime}{endTime?`–${endTime}`:''}{s.duration?` (${s.duration})`:''}</div>}
-            </div>;})}
-        </div>}
-        {/* Empty state */}
-        {selDates.length===0&&!stops.some(s=>(s.options||[]).some(o=>o.name))&&<div style={{fontSize:'14px',color:c.BD,fontStyle:'italic',padding:'8px 0'}}>{t.planPreviewEmpty||'Your plan will appear here...'}</div>}
-      </div>
+      {/* ── STEP 0: DATE ── */}
+      {step===0&&<div className="fade-in">
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>📅 {lang==='es'?'Elige una fecha':'Pick a date'}</h2>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{lang==='es'?'Podrás añadir más fechas después.':'You can add more dates later.'}</p>
+        <CalendarPicker selected={selDates} onChange={d=>setSelDates(d.slice(-1))} c={c} lang={lang} max={1}/>
+        <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(1)} disabled={selDates.length<1} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{lang==='es'?'Siguiente →':'Next →'}</Btn></div>
+      </div>}
 
+      {/* ── STEP 1: TIME ── */}
+      {step===1&&<div className="fade-in">
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>🕐 {lang==='es'?'Elige una hora':'Pick a time'}</h2>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{lang==='es'?'Podrás añadir más horarios después.':'You can add more times later.'}</p>
+        <ClockPicker value={startTimes[0]||''} onChange={v=>setStartTimes([v])} c={c}/>
+        <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(2)} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{lang==='es'?'Siguiente →':'Next →'}</Btn></div>
+      </div>}
 
-      {/* ── STEP 1: WHERE? — inline map ── */}
-      {step===1&&<>
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{t.whereTitle||'Where?'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'10px'}}>{lang==='es'?'Elige un lugar. Podrás añadir más puntos después.':'Pick a place. You can add more points later.'}</p>
+      {/* ── STEP 2: PLACE ── */}
+      {step===2&&<div className="fade-in">
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>📍 {lang==='es'?'Elige un lugar':'Pick a place'}</h2>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'10px'}}>{lang==='es'?'Podrás añadir más puntos después.':'You can add more points later.'}</p>
 
         {/* Selected place */}
-        {stops.filter(s=>(s.options||[]).some(o=>o.name)).map((s,i)=>{
+        {stops.filter(s=>(s.options||[]).some(o=>o.name)).map((s)=>{
           const opt=(s.options||[])[0]||{};
           return<div key={s.id} style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px',background:c.CARD,border:`1px solid ${mc}30`,borderRadius:'12px',marginBottom:'8px'}}>
             {opt.photo&&<img src={opt.photo} alt="" style={{width:'44px',height:'44px',borderRadius:'10px',objectFit:'cover',flexShrink:0}}/>}
@@ -325,9 +332,8 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
           </div>;
         })}
 
-        {/* Inline map with search — only if no place yet */}
+        {/* Map search — only if no place yet */}
         {!stops.some(s=>(s.options||[]).some(o=>o.name))&&<div style={{marginBottom:'12px'}}>
-          <div style={{fontSize:'13px',color:mc,fontWeight:'600',marginBottom:'6px'}}>{lang==='es'?'📍 Elige el lugar':'📍 Pick the place'}</div>
           <div style={{display:'flex',gap:'6px',marginBottom:'8px'}}>
             <input ref={inlineSearchRef} defaultValue='' onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();inlineSearch(inlineSearchRef.current?.value);}}} placeholder={t.searchPlacePh||'Search a place... (Enter)'} style={{flex:1,background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none'}}/>
             <button onClick={()=>inlineSearch(inlineSearchRef.current?.value)} style={{background:mc,border:'none',borderRadius:'10px',padding:'10px 14px',color:'#0A0A0A',cursor:'pointer',fontWeight:'700',fontSize:'14px'}}>🔍</button>
@@ -345,26 +351,21 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
           <div ref={inlineMapRef} style={{width:'100%',height:'250px',borderRadius:'12px',overflow:'hidden',border:`1px solid ${c.BD}`,background:c.CARD2}}/>
         </div>}
 
-        {/* Place selected — create directly */}
-        {stops.some(s=>(s.options||[]).some(o=>o.name))&&<>
-          <div style={{fontSize:'12px',color:c.M,textAlign:'center',marginBottom:'8px'}}>{lang==='es'?'Podrás añadir más puntos, nombre y detalles después.':'You can add more points, name and details later.'}</div>
-          <Btn onClick={create} disabled={saving} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?(lang==='es'?'Creando...':'Creating...'):(lang==='es'?'Crear plan 🎉':'Create plan 🎉')}</Btn>
-        </>}
-      </>}
+        {/* Place selected — go to confirm */}
+        {stops.some(s=>(s.options||[]).some(o=>o.name))&&<Btn onClick={()=>changeStep(3)} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{lang==='es'?'Siguiente →':'Next →'}</Btn>}
+      </div>}
 
-      {/* ── STEP 2: NAME (optional) ── */}
-
-      {/* ── STEP 0: WHEN? ── */}
-      {step===0&&<>
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{t.whenTitle||'When?'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{lang==='es'?'Elige una fecha y hora. Podrás añadir alternativas más tarde.':'Pick a date and time. You can add alternatives later.'}</p>
-        <CalendarPicker selected={selDates} onChange={d=>setSelDates(d.slice(-1))} c={c} lang={lang} max={1}/>
-        {selDates.length>0&&<div style={{marginTop:'16px'}}>
-          <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'8px'}}>{t.whatTime||'What time?'}</div>
-          <ClockPicker value={startTimes[0]||''} onChange={v=>setStartTimes([v])} c={c}/>
-        </div>}
-        <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(1)} disabled={selDates.length<1} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
-      </>}
+      {/* ── STEP 3: CONFIRM ── */}
+      {step===3&&<div className="fade-in" style={{textAlign:'center'}}>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'12px'}}>{lang==='es'?'¿Listo?':'Ready?'}</h2>
+        <div style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'20px',padding:'20px 16px',marginBottom:'16px'}}>
+          <div style={{fontSize:'14px',color:mc,fontWeight:'600',textTransform:'capitalize',marginBottom:'4px'}}>{fmtShort(selDates[0],lang)}{startTimes[0]?' · '+startTimes[0]:''}</div>
+          {(()=>{const opt=stops.find(s=>(s.options||[]).some(o=>o.name))?.options?.[0];return opt?<div style={{fontSize:'16px',color:c.T,fontWeight:'700'}}>{opt.name}</div>:null;})()}
+          <div style={{fontSize:'12px',color:c.M2,marginTop:'4px'}}>@ {profile?.name||org}</div>
+        </div>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'20px'}}>{lang==='es'?'Estás a punto de crear tu plan. Luego podrás editarlo, añadir más fechas, puntos y detalles.':'You\'re about to create your plan. You can edit it, add more dates, points and details later.'}</p>
+        <Btn onClick={create} disabled={saving} full style={{padding:'16px',fontSize:'16px',background:mc,color:'#0A0A0A'}} c={c}>{saving?(lang==='es'?'Creando...':'Creating...'):(lang==='es'?'Crear plan 🎉':'Create plan 🎉')}</Btn>
+      </div>}
 
       {/* ── STEP 3: EXTRAS ── */}
       {false&&(()=>{
