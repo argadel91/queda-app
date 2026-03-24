@@ -367,22 +367,30 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
           <div style={{color:c.M2,fontSize:'13px'}}>{lang==='es'?'Cuando los invitados respondan, verás los datos aquí':'When invitees respond, you\'ll see the data here'}</div>
         </Card>
         :<>
-          {/* Best date / confirmed plan */}
-          {(plan.confirmedDate||best&&cntY(best.key)>0)&&(()=>{
-            const isConfirmed=!!plan.confirmedDate;
-            const showDate=isConfirmed?plan.confirmedDate:best.date;
-            const showTime=isConfirmed?plan.confirmedStartTime:best.startTime;
-            const showKey=isConfirmed?(slots.find(s=>s.date===plan.confirmedDate)?.key||plan.confirmedDate):(best?.key);
-            const ny=showKey?cntY(showKey):0;const nn=showKey?cntN(showKey):0;
+          {/* Confirmed plan OR best/tied options */}
+          {plan.confirmedDate&&(()=>{
+            const showKey=slots.find(s=>s.date===plan.confirmedDate)?.key||plan.confirmedDate;
+            const ny=cntY(showKey);
             return<div style={{background:`${mc}12`,border:`1px solid ${mc}35`,borderRadius:'14px',padding:'16px',marginBottom:'14px'}}>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <div style={{fontSize:'11px',color:mc,fontWeight:'700',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'4px'}}>📌 {lang==='es'?'Plan elegido':'Chosen plan'}</div>
+              <div style={{fontSize:'16px',color:c.T,fontWeight:'700',textTransform:'capitalize'}}>{fmtShort(plan.confirmedDate,lang)}{plan.confirmedStartTime?' · '+plan.confirmedStartTime:''}</div>
+              <div style={{fontSize:'13px',color:c.M2,marginTop:'2px'}}>👥 {ny}/{total} {lang==='es'?'asistencia':'attendance'}</div>
+            </div>;
+          })()}
+          {!plan.confirmedDate&&best&&cntY(best.key)>0&&(()=>{
+            const bestScore=score(best.key);
+            const tied=slots.filter(s=>score(s.key)===bestScore&&cntY(s.key)>0);
+            const isTie=tied.length>1;
+            return<div style={{background:isTie?'#f59e0b10':`${mc}12`,border:`1px solid ${isTie?'#f59e0b40':mc+'35'}`,borderRadius:'14px',padding:'16px',marginBottom:'14px'}}>
+              <div style={{fontSize:'11px',color:isTie?'#f59e0b':mc,fontWeight:'700',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'8px'}}>{isTie?(lang==='es'?`⚖️ Empate — ${tied.length} opciones`:`⚖️ Tie — ${tied.length} options`):'⭐ '+(lang==='es'?'Mejor opción':'Best option')}</div>
+              {(isTie?tied:[best]).map(s=><div key={s.key} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 0',borderBottom:isTie?`1px solid ${c.BD}20`:'none'}}>
                 <div>
-                  <div style={{fontSize:'11px',color:mc,fontWeight:'700',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'4px'}}>{isConfirmed?(lang==='es'?'📌 Plan elegido':'📌 Chosen plan'):'⭐ '+(lang==='es'?'Mejor opción':'Best option')}</div>
-                  <div style={{fontSize:'16px',color:c.T,fontWeight:'700',textTransform:'capitalize'}}>{fmtShort(showDate,lang)}{showTime?' · '+showTime:''}</div>
-                  <div style={{fontSize:'13px',color:c.M2,marginTop:'2px'}}>👥 {ny}/{total} {lang==='es'?'asistencia':'attendance'}</div>
+                  <div style={{fontSize:'15px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtShort(s.date,lang)}{s.startTime?' · '+s.startTime:''}</div>
+                  <div style={{fontSize:'12px',color:c.M2}}>👥 {cntY(s.key)}/{total} {lang==='es'?'asistencia':'attendance'}</div>
                 </div>
-                {isOrgRef.current&&!isConfirmed&&<button onClick={()=>confirmDate(best.date,best.startTime)} style={{padding:'10px 18px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'13px'}}>{t.confirmBtn||'Confirm'}</button>}
-              </div>
+                {isOrgRef.current&&<button onClick={()=>confirmDate(s.date,s.startTime)} style={{padding:'8px 14px',background:isTie?'#f59e0b':mc,border:'none',borderRadius:'8px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'12px'}}>{t.confirmBtn||'Elegir'}</button>}
+              </div>)}
+              {isTie&&isOrgRef.current&&<div style={{fontSize:'12px',color:c.M2,marginTop:'8px'}}>{lang==='es'?'Elige una para confirmar el plan':'Pick one to confirm the plan'}</div>}
             </div>;
           })()}
 
