@@ -425,27 +425,49 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
             const genExplanation=(ds,allRs,stops,lng)=>{
               const isEs=lng==='es';
               const yesRs=allRs.filter(r=>r.avail?.[ds.key]==='yes');
-              const names=yesRs.map(r=>r.name);
-              const noNames=allRs.filter(r=>r.avail?.[ds.key]==='no').map(r=>r.name);
-              let text=isEs
-                ?`${names.join(', ')} ${names.length===1?'puede':'pueden'} este día.`
-                :`${names.join(', ')} ${names.length===1?'can':'can'} make it.`;
-              if(noNames.length>0){
-                text+=isEs
-                  ?` ${noNames.join(', ')} no ${noNames.length===1?'puede':'pueden'}.`
-                  :` ${noNames.join(', ')} can't make it.`;
+              const noRs=allRs.filter(r=>r.avail?.[ds.key]==='no');
+              const noResponseRs=allRs.filter(r=>!r.avail?.[ds.key]);
+              const lines=[];
+              // Full attendees (yes to date AND all stops)
+              const fullAttend=yesRs.filter(r=>!stops?.some(s=>r.stopAttend?.[s.id]==='no'));
+              const partialAttend=yesRs.filter(r=>stops?.some(s=>r.stopAttend?.[s.id]==='no'));
+              if(fullAttend.length>0){
+                lines.push(isEs
+                  ?`✅ Van a todo: ${fullAttend.map(r=>r.name).join(', ')}`
+                  :`✅ Going to all: ${fullAttend.map(r=>r.name).join(', ')}`);
               }
+              if(partialAttend.length>0){
+                partialAttend.forEach(r=>{
+                  const going=stops.filter(s=>r.stopAttend?.[s.id]!=='no').map((s,si)=>s.options?.[0]?.name||`${si+1}`);
+                  lines.push(isEs
+                    ?`🟡 ${r.name} se une en: ${going.join(', ')}`
+                    :`🟡 ${r.name} joins at: ${going.join(', ')}`);
+                });
+              }
+              if(noRs.length>0){
+                lines.push(isEs
+                  ?`❌ No pueden: ${noRs.map(r=>r.name).join(', ')}`
+                  :`❌ Can't make it: ${noRs.map(r=>r.name).join(', ')}`);
+              }
+              if(noResponseRs.length>0){
+                lines.push(isEs
+                  ?`⏳ Sin respuesta: ${noResponseRs.map(r=>r.name).join(', ')}`
+                  :`⏳ No response: ${noResponseRs.map(r=>r.name).join(', ')}`);
+              }
+              // Check cancelled stops
               if(stops?.length>0){
-                const partial=yesRs.filter(r=>stops.some(s=>r.stopAttend?.[s.id]==='no'));
-                if(partial.length>0){
-                  const details=partial.map(r=>{
-                    const skipped=stops.filter(s=>r.stopAttend?.[s.id]==='no').map(s=>s.options?.[0]?.name||'stop').join(', ');
-                    return`${r.name} → ${skipped}`;
-                  }).join('; ');
-                  text+=isEs?` No a todo: ${details}.`:` Partial: ${details}.`;
-                }
+                stops.forEach((s,si)=>{
+                  const min=parseInt(s.minAttendees);
+                  const yesCount=allRs.filter(r=>r.stopAttend?.[s.id]==='yes').length;
+                  if(min>0&&yesCount<min){
+                    const sName=s.options?.[0]?.name||`${si+1}`;
+                    lines.push(isEs
+                      ?`⚠️ ${sName} cancelado (${yesCount}/${min} mínimo)`
+                      :`⚠️ ${sName} cancelled (${yesCount}/${min} minimum)`);
+                  }
+                });
               }
-              return text;
+              return lines.join('\n');
             };
             const ranked=[...slots].sort((a,b)=>score(b.key)-score(a.key)).filter(s=>cntY(s.key)>0);
             if(ranked.length===0)return null;
@@ -463,7 +485,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
                         {isBest&&<span>⭐</span>}
                       </div>
                       <div style={{fontSize:'13px',color:c.M2,marginBottom:'6px'}}>👥 {ny}/{total} ({pct}%){nn>0?` · ❌ ${nn}`:''}</div>
-                      <div style={{fontSize:'12px',color:c.M2,lineHeight:1.5,fontStyle:'italic'}}>{explanation}</div>
+                      <div style={{fontSize:'12px',color:c.M2,lineHeight:1.8}}>{explanation.split('\n').map((line,li)=><div key={li}>{line}</div>)}</div>
                       {isOrgRef.current&&!plan.confirmedDate&&<button onClick={()=>confirmDate(s.date,s.startTime)} style={{marginTop:'8px',padding:'6px 14px',background:isBest?mc:c.CARD2,border:isBest?'none':`1px solid ${c.BD}`,borderRadius:'8px',color:isBest?'#0A0A0A':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:'700'}}>{t.confirmBtn||'Confirm'}</button>}
                     </div>
                   </div>
@@ -528,19 +550,6 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
             </div>}
           </div>
 
-          {/* Collapsible: Comentarios */}
-          {rs.some(r=>r.comment)&&<div style={{marginBottom:'10px'}}>
-            <button onClick={()=>setOpenSection(p=>({...p,comments:!p.comments}))} style={{width:'100%',padding:'12px 14px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:openSection.comments?'10px 10px 0 0':'10px',cursor:'pointer',display:'flex',justifyContent:'space-between',alignItems:'center',fontFamily:'inherit'}}>
-              <span style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>💬 {t.comments||(lang==='es'?'Comentarios':'Comments')}</span>
-              <span style={{color:c.M2}}>{openSection.comments?'▾':'▸'}</span>
-            </button>
-            {openSection.comments&&<div style={{padding:'14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderTop:'none',borderRadius:'0 0 10px 10px'}}>
-              {rs.filter(r=>r.comment).map((r,i)=><div key={i} style={{marginBottom:'10px',paddingBottom:'10px',borderBottom:i<rs.filter(x=>x.comment).length-1?`1px solid ${c.BD}`:'none'}}>
-                <div style={{fontSize:'12px',color:mc,fontWeight:'600',marginBottom:'3px'}}>{r.name}</div>
-                <div style={{fontSize:'13px',color:c.T}}>"{r.comment}"</div>
-              </div>)}
-            </div>}
-          </div>}
 
           {/* Poll results */}
           {plan.poll?.q&&rs.some(r=>r.pollVote)&&<Card c={c}>

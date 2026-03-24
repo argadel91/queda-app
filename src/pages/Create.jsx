@@ -121,7 +121,27 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
     }
     setStops(p=>[...p,emptyStop(Date.now(),suggested)]);
   };
-  const remStop=id=>setStops(p=>p.filter(s=>s.id!==id));
+  const remStop=id=>{
+    // Clear all markers and re-add remaining
+    inlineMarkers.current.forEach(m=>m.setMap(null));
+    inlineMarkers.current=[];
+    setStops(p=>{
+      const remaining=p.filter(s=>s.id!==id);
+      // Re-add markers for remaining stops
+      setTimeout(()=>{
+        let idx=0;
+        remaining.forEach(s=>{
+          const o=(s.options||[])[0];
+          if(o?.lat&&o?.lng&&inlineMapObj.current){
+            idx++;
+            const marker=new google.maps.Marker({position:{lat:o.lat,lng:o.lng},map:inlineMapObj.current,label:{text:String(idx),color:'#0A0A0A',fontWeight:'800'},icon:{path:google.maps.SymbolPath.CIRCLE,scale:14,fillColor:'#CDFF6C',fillOpacity:1,strokeColor:'#CDFF6C',strokeWeight:2}});
+            inlineMarkers.current.push(marker);
+          }
+        });
+      },50);
+      return remaining;
+    });
+  };
   const updStop=(id,k,v)=>setStops(p=>p.map(s=>s.id===id?{...s,[k]:v}:s));
   const addOption=(stopId)=>setStops(p=>p.map(s=>s.id===stopId&&s.options.length<3?{...s,options:[...s.options,emptyOption()]}:s));
   const remOption=(stopId,optId)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.filter(o=>o.id!==optId)}:s));
@@ -342,15 +362,26 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
               <div>
                 <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>📍 {t.meetingPointLbl||'Meeting point'}</div>
                 <div style={{display:'flex',gap:'6px'}}>
-                  <input value={s.meetingPoint||''} onChange={e=>updStop(s.id,'meetingPoint',e.target.value)} placeholder={t.meetingPointPh||'Where to meet before (search or type)'} style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
-                  <button onClick={()=>{if(!inlineMapObj.current)return;const mp=s.meetingPoint;if(!mp)return;const svc=new google.maps.places.PlacesService(inlineMapObj.current);svc.textSearch({query:mp,location:opt.lat&&opt.lng?{lat:opt.lat,lng:opt.lng}:undefined,radius:2000},(res,st)=>{if(st==='OK'&&res[0]){updStop(s.id,'meetingPoint',res[0].name);updStop(s.id,'meetingPointLat',res[0].geometry.location.lat());updStop(s.id,'meetingPointLng',res[0].geometry.location.lng());}});}} style={{background:mc,border:'none',borderRadius:'8px',padding:'8px 10px',color:'#0A0A0A',cursor:'pointer',fontSize:'13px',flexShrink:0}}>🔍</button>
+                  <input value={s._mpQuery||s.meetingPoint||''} onChange={e=>updStop(s.id,'_mpQuery',e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();const q=s._mpQuery||s.meetingPoint;if(!q||!inlineMapObj.current)return;const svc=new google.maps.places.PlacesService(inlineMapObj.current);svc.textSearch({query:q,location:opt.lat&&opt.lng?{lat:opt.lat,lng:opt.lng}:undefined,radius:2000},(res,st2)=>{if(st2==='OK')updStop(s.id,'_mpResults',res.slice(0,5).map(r=>({name:r.name,address:r.formatted_address,lat:r.geometry.location.lat(),lng:r.geometry.location.lng()})));});}}} placeholder={t.meetingPointPh||'Search meeting point... (Enter)'} style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+                  <button onClick={()=>{const q=s._mpQuery||s.meetingPoint;if(!q||!inlineMapObj.current)return;const svc=new google.maps.places.PlacesService(inlineMapObj.current);svc.textSearch({query:q,location:opt.lat&&opt.lng?{lat:opt.lat,lng:opt.lng}:undefined,radius:2000},(res,st2)=>{if(st2==='OK')updStop(s.id,'_mpResults',res.slice(0,5).map(r=>({name:r.name,address:r.formatted_address,lat:r.geometry.location.lat(),lng:r.geometry.location.lng()})));});}} style={{background:mc,border:'none',borderRadius:'8px',padding:'8px 10px',color:'#0A0A0A',cursor:'pointer',fontSize:'13px',flexShrink:0}}>🔍</button>
                 </div>
-                {s.meetingPoint&&<div style={{display:'flex',gap:'8px',marginTop:'6px'}}>
-                  <input type="number" value={s.meetingMinsBefore||''} onChange={e=>updStop(s.id,'meetingMinsBefore',e.target.value)} placeholder="15" style={{width:'80px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none'}}/>
-                  <span style={{fontSize:'12px',color:c.M2,alignSelf:'center'}}>{t.minsBefore||'min before'}</span>
+                {s._mpResults?.length>0&&<div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',marginTop:'4px',maxHeight:'150px',overflowY:'auto'}}>
+                  {s._mpResults.map((r,ri)=><div key={ri} onClick={()=>{updStop(s.id,'meetingPoint',r.name);updStop(s.id,'meetingPointLat',r.lat);updStop(s.id,'meetingPointLng',r.lng);updStop(s.id,'_mpResults',[]);updStop(s.id,'_mpQuery','');}} style={{padding:'8px 12px',cursor:'pointer',borderBottom:ri<s._mpResults.length-1?`1px solid ${c.BD}`:'none',fontSize:'13px'}} onMouseEnter={e=>e.currentTarget.style.background=c.CARD} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                    <div style={{color:c.T,fontWeight:'500'}}>{r.name}</div>
+                    <div style={{fontSize:'11px',color:c.M2}}>{r.address}</div>
+                  </div>)}
+                </div>}
+                {s.meetingPoint&&!s._mpResults?.length&&<div style={{marginTop:'6px'}}>
+                  <div style={{fontSize:'12px',color:mc,marginBottom:'4px'}}>✓ {s.meetingPoint}</div>
+                  <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
+                    <input type="number" value={s.meetingMinsBefore||''} onChange={e=>updStop(s.id,'meetingMinsBefore',e.target.value)} placeholder="15" style={{width:'80px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none'}}/>
+                    <span style={{fontSize:'12px',color:c.M2}}>{t.minsBefore||'min before'}</span>
+                    <button onClick={()=>{updStop(s.id,'meetingPoint','');updStop(s.id,'meetingPointLat',null);updStop(s.id,'meetingPointLng',null);}} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'14px',marginLeft:'auto'}}>×</button>
+                  </div>
                 </div>}
               </div>
-              {/* Capacity */}
+              <div style={{height:'1px',background:c.BD}}/>
+              {/* Capacity — for this venue */}
               <div>
                 <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>👥 {lang==='es'?'Aforo':'Capacity'}</div>
                 <div style={{display:'flex',gap:'8px'}}>
