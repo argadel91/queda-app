@@ -46,7 +46,7 @@ test('plan preview shows for shared links', async ({ page }) => {
   // Use a non-existent code - should still show auth or landing
   await page.goto('/?code=XXXXX')
   // Should attempt to load plan, then show auth
-  await expect(page.locator('text=queda.')).toBeVisible({ timeout: 5000 })
+  await expect(page.locator('text=queda.').first()).toBeVisible({ timeout: 5000 })
 })
 
 // ─── BUILD CHECK ────────────────────────────────────
@@ -63,7 +63,7 @@ test('no console errors on landing', async ({ page }) => {
 test('page loads within 5 seconds', async ({ page }) => {
   const start = Date.now()
   await page.goto('/')
-  await expect(page.locator('text=queda.')).toBeVisible()
+  await expect(page.locator('text=queda.').first()).toBeVisible()
   const loadTime = Date.now() - start
   expect(loadTime).toBeLessThan(5000)
 })
@@ -72,7 +72,7 @@ test('page loads within 5 seconds', async ({ page }) => {
 test('works on mobile viewport', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
   await page.goto('/')
-  await expect(page.locator('text=queda.')).toBeVisible()
+  await expect(page.locator('text=queda.').first()).toBeVisible()
   await expect(page.locator('text=Get started')).toBeVisible()
 })
 
