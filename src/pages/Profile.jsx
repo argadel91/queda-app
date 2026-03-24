@@ -48,12 +48,6 @@ export default function Profile({onBack,c,lang,authUser,profile,onUpdateProfile,
           </div>
         </div>
 
-        <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'6px'}}>
-          {gender&&<span style={{fontSize:'13px',padding:'4px 12px',background:`${c.A}15`,border:`1px solid ${c.A}30`,borderRadius:'20px',color:c.A}}>{gender==='other'?genderCustom||t.genderOther:gender==='male'?(t.genderMale||'Man'):(t.genderFemale||'Woman')}</span>}
-          {age&&<span style={{fontSize:'13px',padding:'4px 12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'20px',color:c.T}}>{age} {t.yearsOld||'years'}</span>}
-          {userCity&&<span style={{fontSize:'13px',padding:'4px 12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'20px',color:c.T}}>📍 {userCity}</span>}
-        </div>
-        {(!gender||!birthdate||!userCity)&&<div style={{fontSize:'11px',color:c.M2,marginBottom:'12px'}}>{t.completeDiscoverHint||'Complete your gender, age and location so people can find you on Discover.'}</div>}
 
         {/* Language */}
         <div style={{marginBottom:'12px'}}>
@@ -84,25 +78,6 @@ export default function Profile({onBack,c,lang,authUser,profile,onUpdateProfile,
               <input value={newUsername} onChange={e=>setNewUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g,'').slice(0,20))} placeholder="username" style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none'}}/>
             </div>
             <div style={{fontSize:'11px',color:c.M2,marginTop:'4px'}}>{t.usernameHint||'So others can find you.'}</div>
-          </div>
-          <div style={{height:'1px',background:c.BD,margin:'4px 0'}}/>
-          <div style={{fontSize:'12px',color:c.M2,marginBottom:'-4px'}}>{t.optionalDiscoverHint||'Optional — useful for public plans on Discover'}</div>
-          <div>
-            <div style={{fontSize:'13px',color:c.M,marginBottom:'4px'}}>{t.birthdateLbl||'Date of birth'}</div>
-            <input type="date" value={birthdate} onChange={e=>setBirthdate(e.target.value)} max={new Date().toISOString().split('T')[0]} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
-          </div>
-          <div>
-            <div style={{fontSize:'13px',color:c.M,marginBottom:'4px'}}>{t.genderLbl||'Gender'} <span style={{color:c.M2,fontSize:'11px'}}>({t.optionalWord||'optional'})</span></div>
-            <div style={{display:'flex',gap:'6px'}}>
-              {[{v:'female',l:t.genderFemale||'Woman'},{v:'male',l:t.genderMale||'Man'},{v:'other',l:t.genderOther||'Other'}].map(o=>
-                <button key={o.v} onClick={()=>setGender(gender===o.v?'':o.v)} style={{flex:1,padding:'10px 6px',borderRadius:'10px',border:`1px solid ${gender===o.v?c.A+'60':c.BD}`,background:gender===o.v?`${c.A}15`:c.CARD,color:gender===o.v?c.A:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:gender===o.v?'700':'400'}}>{o.l}</button>
-              )}
-            </div>
-            {gender==='other'&&<input value={genderCustom} onChange={e=>setGenderCustom(e.target.value)} placeholder={t.genderCustomPh||'How do you identify?'} style={{marginTop:'6px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
-          </div>
-          <div>
-            <div style={{fontSize:'13px',color:c.M,marginBottom:'4px'}}>{t.locationLbl||'Location'} <span style={{color:c.M2,fontSize:'11px'}}>({t.optionalWord||'optional'})</span></div>
-            <CityInput value={userCity} onChange={setUserCity} onSelect={d=>{setUserCity(d.city||d.label);setUserLat(d.lat);setUserLon(d.lon);}} placeholder={t.yourCityPh||'Your city...'} c={c}/>
           </div>
           <div style={{display:'flex',gap:'8px',marginTop:'4px'}}>
             <button onClick={()=>setEditing(false)} style={{flex:1,padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontWeight:'600',fontSize:'14px'}}>{t.cancel||'Cancel'}</button>

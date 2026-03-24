@@ -337,21 +337,43 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
               <button onClick={()=>updStop(s.id,'_expanded',!s._expanded)} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'12px',padding:'4px'}}>{s._expanded?'▾':'⚙️'}</button>
               <button onClick={()=>remStop(s.id)} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'16px',flexShrink:0}}>×</button>
             </div>
-            {s._expanded&&<div style={{padding:'8px 12px 12px',borderTop:`1px solid ${c.BD}`,display:'flex',flexDirection:'column',gap:'8px'}}>
+            {s._expanded&&<div style={{padding:'8px 12px 12px',borderTop:`1px solid ${c.BD}`,display:'flex',flexDirection:'column',gap:'10px'}}>
+              {/* Meeting point */}
               <div>
-                <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>{t.meetingPointLbl||'Meeting point'}</div>
-                <input value={s.meetingPoint||''} onChange={e=>updStop(s.id,'meetingPoint',e.target.value)} placeholder={t.meetingPointPh||'Where to meet before'} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
-              </div>
-              <div style={{display:'flex',gap:'8px'}}>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>{t.minsBefore||'Minutes before'}</div>
-                  <input type="number" value={s.meetingMinsBefore||''} onChange={e=>updStop(s.id,'meetingMinsBefore',e.target.value)} placeholder="15" style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+                <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>📍 {t.meetingPointLbl||'Meeting point'}</div>
+                <div style={{display:'flex',gap:'6px'}}>
+                  <input value={s.meetingPoint||''} onChange={e=>updStop(s.id,'meetingPoint',e.target.value)} placeholder={t.meetingPointPh||'Where to meet before (search or type)'} style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+                  <button onClick={()=>{if(!inlineMapObj.current)return;const mp=s.meetingPoint;if(!mp)return;const svc=new google.maps.places.PlacesService(inlineMapObj.current);svc.textSearch({query:mp,location:opt.lat&&opt.lng?{lat:opt.lat,lng:opt.lng}:undefined,radius:2000},(res,st)=>{if(st==='OK'&&res[0]){updStop(s.id,'meetingPoint',res[0].name);updStop(s.id,'meetingPointLat',res[0].geometry.location.lat());updStop(s.id,'meetingPointLng',res[0].geometry.location.lng());}});}} style={{background:mc,border:'none',borderRadius:'8px',padding:'8px 10px',color:'#0A0A0A',cursor:'pointer',fontSize:'13px',flexShrink:0}}>🔍</button>
                 </div>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>{t.minAttendeesLbl||'Min. people'}</div>
-                  <input type="number" value={s.minAttendees||''} onChange={e=>updStop(s.id,'minAttendees',e.target.value)} placeholder="0" style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+                {s.meetingPoint&&<div style={{display:'flex',gap:'8px',marginTop:'6px'}}>
+                  <input type="number" value={s.meetingMinsBefore||''} onChange={e=>updStop(s.id,'meetingMinsBefore',e.target.value)} placeholder="15" style={{width:'80px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none'}}/>
+                  <span style={{fontSize:'12px',color:c.M2,alignSelf:'center'}}>{t.minsBefore||'min before'}</span>
+                </div>}
+              </div>
+              {/* Capacity */}
+              <div>
+                <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>👥 {lang==='es'?'Aforo':'Capacity'}</div>
+                <div style={{display:'flex',gap:'8px'}}>
+                  <div style={{flex:1}}>
+                    <input type="number" value={s.minAttendees||''} onChange={e=>updStop(s.id,'minAttendees',e.target.value)} placeholder={lang==='es'?'Mín':'Min'} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+                  </div>
+                  <div style={{flex:1}}>
+                    <input type="number" value={s.maxCapacity||''} onChange={e=>updStop(s.id,'maxCapacity',e.target.value)} placeholder={lang==='es'?'Máx':'Max'} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+                  </div>
+                </div>
+                <div style={{fontSize:'11px',color:c.M,marginTop:'4px',lineHeight:1.5}}>
+                  {s.minAttendees?`⚠️ ${lang==='es'?`Si no llegan ${s.minAttendees}, este punto se cancela automáticamente`:`If fewer than ${s.minAttendees} attend, this point is auto-cancelled`}`:''}
+                  {s.minAttendees&&s.maxCapacity?' · ':''}
+                  {s.maxCapacity?`🔒 ${lang==='es'?`Máximo ${s.maxCapacity} personas`:`Maximum ${s.maxCapacity} people`}`:''}
                 </div>
               </div>
+              {/* Transport from previous */}
+              {i>0&&<div>
+                <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>🚗 {lang==='es'?'Cómo llegar desde el punto anterior':'How to get here from previous point'}</div>
+                <div style={{display:'flex',gap:'4px',flexWrap:'wrap'}}>
+                  {[{k:'walk',l:'🚶'},{k:'car',l:'🚗'},{k:'transit',l:'🚇'},{k:'bike',l:'🚲'},{k:'taxi',l:'🚕'}].map(tr=><button key={tr.k} onClick={()=>updStop(s.id,'transport',s.transport===tr.k?'':tr.k)} style={{padding:'6px 10px',borderRadius:'8px',border:`1px solid ${s.transport===tr.k?mc+'60':c.BD}`,background:s.transport===tr.k?`${mc}15`:c.CARD,cursor:'pointer',fontSize:'16px'}}>{tr.l}</button>)}
+                </div>
+              </div>}
             </div>}
           </div>;
         })}

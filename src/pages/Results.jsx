@@ -124,9 +124,11 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
           <div style={{fontFamily:'monospace',fontSize:'36px',fontWeight:'900',color:mc,letterSpacing:'.15em',margin:'12px 0'}}>{plan.id}</div>
         </div>
         <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
-          <button onClick={waShare} style={{padding:'14px',background:'#25D366',color:'#fff',border:'none',borderRadius:'12px',fontSize:'15px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>WhatsApp</button>
-          <button onClick={()=>window.open('https://t.me/share/url?url='+encodeURIComponent(shareUrl),'_blank')} style={{padding:'14px',background:'#0088cc',color:'#fff',border:'none',borderRadius:'12px',fontSize:'15px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>Telegram</button>
-          <button onClick={()=>{copyShare();}} style={{padding:'14px',background:c.CARD2,color:c.T,border:`1px solid ${c.BD}`,borderRadius:'12px',fontSize:'15px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>{t.copyLink||'Copy link'} 🔗</button>
+          <div style={{display:'flex',gap:'8px'}}>
+            <button onClick={waShare} style={{flex:1,padding:'14px',background:'#25D366',color:'#fff',border:'none',borderRadius:'12px',fontSize:'14px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>WhatsApp</button>
+            <button onClick={()=>window.open('https://t.me/share/url?url='+encodeURIComponent(shareUrl),'_blank')} style={{flex:1,padding:'14px',background:'#0088cc',color:'#fff',border:'none',borderRadius:'12px',fontSize:'14px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>Telegram</button>
+            <button onClick={()=>{copyShare();}} style={{flex:1,padding:'14px',background:c.CARD2,color:c.T,border:`1px solid ${c.BD}`,borderRadius:'12px',fontSize:'14px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>🔗</button>
+          </div>
           <button onClick={onCloseShare} style={{padding:'14px',background:mc,color:'#0A0A0A',border:'none',borderRadius:'12px',fontSize:'15px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit',marginTop:'4px'}}>{t.viewRes||'View results'} →</button>
         </div>
       </div>
@@ -337,7 +339,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
         {(plan.stops||[]).map((s,i)=>{const opt=s.options?.[0]||s;const isCancelled=cancelledStops.has(s.id);return<div key={s.id||i} style={{display:'flex',gap:'12px',marginBottom:'10px',opacity:isCancelled?.4:1}}>
           <div style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
             <div style={{width:'28px',height:'28px',borderRadius:'50%',background:isCancelled?c.CARD2:`${mc}20`,border:`1.5px solid ${isCancelled?c.BD:mc+'60'}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',fontWeight:'800',color:isCancelled?c.M:mc,flexShrink:0,textDecoration:isCancelled?'line-through':'none'}}>{i+1}</div>
-            {i<plan.stops.length-1&&<div style={{width:'2px',flex:1,background:c.BD,margin:'4px 0'}}/>}
+            {i<plan.stops.length-1&&<>{plan.stops[i+1]?.transport&&<div style={{fontSize:'12px',margin:'4px 0'}}>{({walk:'🚶',car:'🚗',transit:'🚇',bike:'🚲',taxi:'🚕'})[plan.stops[i+1].transport]||'·'}</div>}<div style={{width:'2px',flex:1,background:c.BD,margin:'2px 0'}}/></>}
           </div>
           <Card c={c} style={{flex:1,marginBottom:0}}>
             {isCancelled&&<div style={{fontSize:'11px',color:'#f59e0b',fontWeight:'600',marginBottom:'4px'}}>⚠️ {lang==='es'?'Cancelado — mínimo no alcanzado':'Cancelled — minimum not reached'}</div>}

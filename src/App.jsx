@@ -219,7 +219,7 @@ export default function App(){
   return(<React.Suspense fallback={<Fallback/>}><div style={{minHeight:'100vh',background:c.BG,color:c.T,fontFamily:"'DM Sans',system-ui,sans-serif"}} onClick={()=>{setLangOpen(false);setAvatarOpen(false);}}>
     {toast&&<div style={{position:'fixed',bottom:'24px',left:'50%',transform:'translateX(-50%)',background:toast.type==='success'?'#22c55e':toast.type==='info'?c.A:'#ef4444',color:toast.type==='info'?'#0A0A0A':'#fff',padding:'12px 20px',borderRadius:'30px',fontWeight:'600',fontSize:'13px',zIndex:300,boxShadow:'0 4px 20px rgba(0,0,0,.4)',whiteSpace:'nowrap',animation:'slideDown .3s ease'}}>{toast.type==='success'?'✓':toast.type==='info'?'ℹ':'⚠️'} {toast.msg}</div>}
     <div style={{borderBottom:`1px solid ${c.BD}`,padding:'14px 24px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,background:c.BG+'F0',backdropFilter:'blur(10px)',zIndex:10}}>
-      <div onClick={()=>nav('home')} style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'22px',cursor:'pointer',color:c.T,letterSpacing:'-.02em'}}>queda<span style={{color:c.A}}>.</span></div>
+      <div onClick={()=>nav('home')} style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'22px',cursor:'pointer',color:c.T,letterSpacing:'-.02em',display:'flex',alignItems:'center',gap:'8px'}}>{screen!=='home'&&<span style={{fontSize:'18px'}}>🏠</span>}queda<span style={{color:c.A}}>.</span></div>
       <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
         {plan&&!noNav.includes(screen)&&<span style={{color:mc,fontWeight:'800',fontSize:'12px',letterSpacing:'.1em'}}>{plan.id}</span>}
         {authUser&&<div style={{position:'relative'}} onClick={e=>e.stopPropagation()}>
