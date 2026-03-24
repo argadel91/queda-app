@@ -29,7 +29,7 @@ export default function CalendarPicker({selected,onChange,c,lang,max:maxDates=3}
       {Array.from({length:first}).map((_,i)=><div key={'e'+i}/>)}
       {Array.from({length:days}).map((_,i)=>{const date=new Date(vy,vm,i+1);const iso=toISO(date);const dis=date<now||date>max;const sel=selected.includes(iso);return<div key={i} onClick={()=>!dis&&tog(iso)} style={{textAlign:'center',padding:'7px 2px',borderRadius:'8px',fontSize:'13px',cursor:dis?'default':'pointer',background:sel?c.A:dis?'transparent':c.CARD,color:sel?'#0A0A0A':dis?c.BD:c.T,fontWeight:sel?'700':'400',border:sel?'none':`1px solid ${dis?'transparent':c.BD}`}}>{i+1}</div>;})}
     </div>
-    {limitMsg&&<div style={{marginTop:'8px',fontSize:'12px',color:'#f59e0b',textAlign:'center',fontWeight:'600'}}>{lang==='es'?`Máximo ${maxDates} fechas`:`Maximum ${maxDates} dates`}</div>}
+    {limitMsg&&<div style={{marginTop:'8px',fontSize:'12px',color:'#f59e0b',textAlign:'center',fontWeight:'600'}}>{T[lang]?.maxDatesMsg?T[lang].maxDatesMsg(maxDates):`Max ${maxDates}`}</div>}
     {selected.length>0&&<div style={{marginTop:'10px',display:'flex',flexWrap:'wrap',gap:'4px'}}>
       {selected.sort().map(d=><span key={d} onClick={()=>tog(d)} style={{padding:'3px 8px',background:`${c.A}20`,color:c.A,border:`1px solid ${c.A}40`,borderRadius:'20px',cursor:'pointer',fontSize:'11px',fontWeight:'600',textTransform:'capitalize'}}>{fmtShort(d,lang)} ×</span>)}
     </div>}

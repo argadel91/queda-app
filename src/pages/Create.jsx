@@ -272,21 +272,21 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   // Done screen
   if(created){
     const shareUrl=location.href.split('?')[0]+'?code='+created.id;
-    const shareText=lang==='es'?`¡Únete a mi plan! ${shareUrl}`:`Join my plan! ${shareUrl}`;
+    const shareText=`${t.shareJoinText} ${shareUrl}`;
     return<div style={{padding:'48px 24px',maxWidth:'420px',margin:'0 auto',textAlign:'center'}}>
       <div style={{fontSize:'64px',marginBottom:'16px'}}>🎉</div>
-      <h2 style={{fontFamily:"'Syne',serif",fontSize:'28px',fontWeight:'800',color:mc,marginBottom:'8px'}}>{lang==='es'?'¡Plan creado!':'Plan created!'}</h2>
+      <h2 style={{fontFamily:"'Syne',serif",fontSize:'28px',fontWeight:'800',color:mc,marginBottom:'8px'}}>{t.planCreatedTitle}</h2>
       <div style={{fontFamily:'monospace',fontSize:'40px',fontWeight:'900',color:mc,letterSpacing:'.15em',margin:'16px 0'}}>{created.id}</div>
-      <p style={{color:c.M2,fontSize:'14px',marginBottom:'24px'}}>{lang==='es'?'Comparte el código para que tu grupo se una. Luego podrás editar, añadir y compartir lo que necesites.':'Share the code so your group can join. You can edit, add and share whatever you need later.'}</p>
+      <p style={{color:c.M2,fontSize:'14px',marginBottom:'24px'}}>{t.shareCodeMsg}</p>
       <div style={{display:'flex',gap:'8px',marginBottom:'20px'}}>
         <button onClick={()=>window.open('https://wa.me/?text='+encodeURIComponent(shareText),'_blank')} style={{flex:1,padding:'14px',background:'#25D366',color:'#fff',border:'none',borderRadius:'12px',fontSize:'14px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>WhatsApp</button>
         <button onClick={()=>window.open('https://t.me/share/url?url='+encodeURIComponent(shareUrl)+'&text='+encodeURIComponent(shareText),'_blank')} style={{flex:1,padding:'14px',background:'#0088cc',color:'#fff',border:'none',borderRadius:'12px',fontSize:'14px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>Telegram</button>
         <button onClick={()=>{navigator.clipboard?.writeText(shareUrl);}} style={{flex:1,padding:'14px',background:c.CARD2,color:c.T,border:`1px solid ${c.BD}`,borderRadius:'12px',fontSize:'14px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>🔗</button>
       </div>
       <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
-        <Btn onClick={()=>onCreated(created)} full style={{padding:'14px'}} c={c} accent={mc}>{lang==='es'?'Revisa tu plan →':'Review your plan →'}</Btn>
-        <Btn onClick={()=>{setCreated(null);setStep(0);setSelDates([]);setStartTimes(['']);setStops([emptyStop(1,'')]);}} v="secondary" full style={{padding:'14px'}} c={c}>{lang==='es'?'Crear otro plan':'Create another plan'}</Btn>
-        <button onClick={onBack} style={{padding:'12px',background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'14px'}}>🏠 {lang==='es'?'Menú principal':'Home'}</button>
+        <Btn onClick={()=>onCreated(created)} full style={{padding:'14px'}} c={c} accent={mc}>{t.reviewPlan}</Btn>
+        <Btn onClick={()=>{setCreated(null);setStep(0);setSelDates([]);setStartTimes(['']);setStops([emptyStop(1,'')]);}} v="secondary" full style={{padding:'14px'}} c={c}>{t.createAnother}</Btn>
+        <button onClick={onBack} style={{padding:'12px',background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'14px'}}>🏠 {t.homeBtn}</button>
       </div>
     </div>;
   }
@@ -306,29 +306,29 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
 
       {/* ── STEP 0: DATE ── */}
       {step===0&&<div className="fade-in">
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>📅 {lang==='es'?'Elige solo una fecha':'Pick just one date'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{lang==='es'?'No te preocupes, luego podrás añadir o editar más fechas.':'Don\'t worry, you can add or edit more dates later.'}</p>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>📅 {t.pickOneDate}</h2>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{t.dontWorryDates}</p>
         <CalendarPicker selected={selDates} onChange={d=>setSelDates(d.slice(-1))} c={c} lang={lang} max={1}/>
-        <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(1)} disabled={selDates.length<1} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{lang==='es'?'Siguiente →':'Next →'}</Btn></div>
+        <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(1)} disabled={selDates.length<1} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.nextBtn}</Btn></div>
       </div>}
 
       {/* ── STEP 1: TIME ── */}
       {step===1&&<div className="fade-in">
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>🕐 {lang==='es'?'Elige solo una hora':'Pick just one time'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{lang==='es'?'No te preocupes, luego podrás añadir o editar más horas.':'Don\'t worry, you can add or edit more times later.'}</p>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>🕐 {t.pickOneTime}</h2>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{t.dontWorryTimes}</p>
         <ClockPicker value={startTimes[0]||''} onChange={v=>setStartTimes([v])} c={c}/>
-        <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(2)} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{lang==='es'?'Siguiente →':'Next →'}</Btn></div>
+        <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(2)} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.nextBtn}</Btn></div>
       </div>}
 
       {/* ── STEP 2: PLACE ── */}
       {step===2&&<div className="fade-in">
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>📍 {lang==='es'?'Elige solo un lugar':'Pick just one place'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'10px'}}>{lang==='es'?'No te preocupes, luego podrás añadir o editar más puntos.':'Don\'t worry, you can add or edit more points later.'}</p>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>📍 {t.pickOnePlace}</h2>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'10px'}}>{t.dontWorryPoints}</p>
 
         {/* Online / Physical toggle */}
         {!stops.some(s=>(s.options||[]).some(o=>o.name))&&<div style={{display:'flex',gap:'8px',marginBottom:'12px'}}>
           <button onClick={()=>{const ns=emptyStop(Date.now());ns.options[0].name='Online';ns.options[0].address='💻';setStops(p=>[...p,ns]);}} style={{flex:1,padding:'14px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',cursor:'pointer',fontFamily:'inherit',fontSize:'14px',color:c.T,fontWeight:'500',textAlign:'center'}}>💻 Online</button>
-          <div style={{flex:1,padding:'14px',background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'12px',fontSize:'14px',color:mc,fontWeight:'600',textAlign:'center'}}>📍 {lang==='es'?'Lugar físico':'Physical'}</div>
+          <div style={{flex:1,padding:'14px',background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'12px',fontSize:'14px',color:mc,fontWeight:'600',textAlign:'center'}}>📍 {t.physicalPlace}</div>
         </div>}
 
         {/* Selected place */}
@@ -365,19 +365,19 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
         </div>}
 
         {/* Place selected — go to confirm */}
-        {stops.some(s=>(s.options||[]).some(o=>o.name))&&<Btn onClick={()=>changeStep(3)} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{lang==='es'?'Siguiente →':'Next →'}</Btn>}
+        {stops.some(s=>(s.options||[]).some(o=>o.name))&&<Btn onClick={()=>changeStep(3)} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.nextBtn}</Btn>}
       </div>}
 
       {/* ── STEP 3: CONFIRM ── */}
       {step===3&&<div className="fade-in" style={{textAlign:'center'}}>
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'12px'}}>{lang==='es'?'¿Listo?':'Ready?'}</h2>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'12px'}}>{t.readyQ}</h2>
         <div style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'20px',padding:'20px 16px',marginBottom:'16px'}}>
           <div style={{fontSize:'14px',color:mc,fontWeight:'600',textTransform:'capitalize',marginBottom:'4px'}}>{fmtShort(selDates[0],lang)}{startTimes[0]?' · '+startTimes[0]:''}</div>
           {(()=>{const opt=stops.find(s=>(s.options||[]).some(o=>o.name))?.options?.[0];return opt?<div style={{fontSize:'16px',color:c.T,fontWeight:'700'}}>{opt.name}</div>:null;})()}
           <div style={{fontSize:'12px',color:c.M2,marginTop:'4px'}}>@ {profile?.name||org}</div>
         </div>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'20px'}}>{lang==='es'?'Estás a punto de crear tu plan. Luego podrás editar, añadir y compartir lo que necesites.':'You\'re about to create your plan. You can edit, add and share whatever you need later.'}</p>
-        <Btn onClick={create} disabled={saving} full style={{padding:'16px',fontSize:'16px',background:mc,color:'#0A0A0A'}} c={c}>{saving?(lang==='es'?'Creando...':'Creating...'):(lang==='es'?'Crear plan 🎉':'Create plan 🎉')}</Btn>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'20px'}}>{t.aboutToCreate}</p>
+        <Btn onClick={create} disabled={saving} full style={{padding:'16px',fontSize:'16px',background:mc,color:'#0A0A0A'}} c={c}>{saving?(t.creatingPlan):(t.createPlanBtn)}</Btn>
       </div>}
 
       {/* ── STEP 3: EXTRAS ── */}

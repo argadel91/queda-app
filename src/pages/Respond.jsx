@@ -97,8 +97,8 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
 
   // Step labels
   const stepLabels=hasStops
-    ?[pLang==='es'?'Nombre':'Name',...stops.map((_,i)=>`${i+1}`),pLang==='es'?'Enviar':'Send']
-    :[pLang==='es'?'Fechas':'Dates',pLang==='es'?'Enviar':'Send'];
+    ?[t.stepName,...stops.map((_,i)=>`${i+1}`),t.stepSend]
+    :[t.stepDates,t.stepSend];
   const lastStep=stepLabels.length-1;
 
   // Vote key helper for per-point voting
@@ -123,7 +123,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
 
       {!hasStops&&<>
         <Lbl c={c}>{t.whenCanYou||'When can you?'}</Lbl>
-        <div style={{fontSize:'11px',color:c.M,marginBottom:'10px'}}>{pLang==='es'?'Toca las fechas a las que puedes ir':'Tap the dates you can attend'}</div>
+        <div style={{fontSize:'11px',color:c.M,marginBottom:'10px'}}>{t.tapDates}</div>
         {dates.map(d=>{
           const timesForDate=hasStartTimes?times:[''];
           const dateKeys=timesForDate.map(t2=>t2?`${d}_${t2}`:d);
@@ -157,10 +157,10 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
 
       {err&&<div style={{color:'#ef4444',fontSize:'13px',marginBottom:'10px'}}>{err}</div>}
       <Btn onClick={()=>{
-        if(!name.trim()){setErr(pLang==='es'?'Escribe tu nombre':'Enter your name');return;}
+        if(!name.trim()){setErr(t.enterYourName);return;}
         if(!hasStops&&!Object.values(avail).some(v=>v==='yes')){setErr(t.markAtLeastOne);return;}
         setErr('');setRStep(1);
-      }} full style={{padding:'14px'}} c={c} accent={mc}>{pLang==='es'?'Siguiente':'Next'} →</Btn>
+      }} full style={{padding:'14px'}} c={c} accent={mc}>{t.nextBtn?.replace(' →','')} →</Btn>
     </>}
 
     {/* ── STEPS 1..N: One per point ── */}
@@ -180,7 +180,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
           </div>
           {opt.photo&&<img src={opt.photo} alt="" style={{width:'48px',height:'48px',borderRadius:'10px',objectFit:'cover',flexShrink:0}}/>}
         </div>
-        {stop.meetingPoint&&<div style={{fontSize:'12px',color:mc,background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'8px',padding:'8px 12px',marginBottom:'12px'}}>📍 {pLang==='es'?'Punto de encuentro':'Meeting point'}: {stop.meetingPoint}{stop.meetingMinsBefore?` (${stop.meetingMinsBefore} min ${pLang==='es'?'antes':'before'})`:''}</div>}
+        {stop.meetingPoint&&<div style={{fontSize:'12px',color:mc,background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'8px',padding:'8px 12px',marginBottom:'12px'}}>📍 {t.meetingPointLbl2}: {stop.meetingPoint}{stop.meetingMinsBefore?` (${stop.meetingMinsBefore} min ${t.beforeLbl})`:''}</div>}
 
         {/* Mini static map */}
         {opt.lat&&opt.lng&&(()=>{
@@ -190,8 +190,8 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
           return key?<img src={`https://maps.googleapis.com/maps/api/staticmap?size=400x150&scale=2&maptype=roadmap&${markers}${mpMarkers}&key=${key}`} alt="map" style={{width:'100%',height:'120px',objectFit:'cover',borderRadius:'10px',border:`1px solid ${c.BD}`,marginBottom:'12px'}}/>:null;
         })()}
 
-        <Lbl c={c}>{pLang==='es'?'¿Cuándo puedes ir aquí?':'When can you go here?'}</Lbl>
-        <div style={{fontSize:'11px',color:c.M,marginBottom:'10px'}}>{pLang==='es'?'Toca una fecha para marcar que puedes. Toca los horarios disponibles.':'Tap a date to mark you can go. Tap available times.'}</div>
+        <Lbl c={c}>{t.whenCanGoHere}</Lbl>
+        <div style={{fontSize:'11px',color:c.M,marginBottom:'10px'}}>{t.tapDateInstruction}</div>
         {dates.map(d=>{
           const timesForDate=hasStartTimes?times:[''];
           const dateKeys=timesForDate.map(t2=>voteKey(stop.id,{date:d,time:t2,key:t2?`${d}_${t2}`:d}));
@@ -214,7 +214,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
             }} style={{width:'100%',padding:'12px 14px',borderRadius:expanded&&hasStartTimes?'10px 10px 0 0':'10px',border:`1px solid ${anyYes?'#22c55e50':c.BD}`,background:anyYes?'#22c55e18':c.CARD2,color:anyYes?'#22c55e':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:anyYes?'700':'500',textAlign:'left',textTransform:'capitalize',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
               <span>{fmtDate(d,pLang)}</span>
               {!hasStartTimes&&<span style={{fontSize:'16px'}}>{anyYes?'✓':'○'}</span>}
-              {hasStartTimes&&<span style={{fontSize:'12px',color:c.M2}}>{anyYes?`${dateKeys.filter(k=>avail[k]==='yes').length} ${pLang==='es'?'horarios':'times'}`:expanded?'▾':'▸'}</span>}
+              {hasStartTimes&&<span style={{fontSize:'12px',color:c.M2}}>{anyYes?`${dateKeys.filter(k=>avail[k]==='yes').length} ${t.timesLbl}`:expanded?'▾':'▸'}</span>}
             </button>
             {hasStartTimes&&expanded&&<div style={{border:`1px solid ${anyYes?'#22c55e30':c.BD}`,borderTop:'none',borderRadius:'0 0 10px 10px',overflow:'hidden'}}>
               {times.map(t2=>{
@@ -231,7 +231,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
 
         {/* Option preference if multiple options */}
         {stop.options?.length>1&&<div style={{marginTop:'12px'}}>
-          <Lbl c={c}>{pLang==='es'?'¿Qué opción prefieres?':'Which option do you prefer?'}</Lbl>
+          <Lbl c={c}>{t.whichOptionPref}</Lbl>
           <div style={{display:'flex',flexWrap:'wrap',gap:'6px'}}>
             {stop.options.map((o,oi)=>{
               const sel=avail[`pref_${stop.id}`]===o.id;
@@ -242,7 +242,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
 
         <div style={{display:'flex',gap:'8px',marginTop:'16px'}}>
           <button onClick={()=>setRStep(rStep-1)} style={{flex:1,padding:'14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:'600'}}>←</button>
-          <Btn onClick={()=>setRStep(rStep+1)} full style={{flex:3,padding:'14px'}} c={c} accent={mc}>{si<stops.length-1?(pLang==='es'?`Punto ${si+2}`:`Point ${si+2}`):(pLang==='es'?'Finalizar':'Finish')} →</Btn>
+          <Btn onClick={()=>setRStep(rStep+1)} full style={{flex:3,padding:'14px'}} c={c} accent={mc}>{si<stops.length-1?(`${t.pointN} ${si+2}`):(t.finishBtn)} →</Btn>
         </div>
       </div>;
     })}
@@ -270,7 +270,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
 
       {err&&<div style={{color:'#ef4444',fontSize:'13px',padding:'8px 12px',background:'#ef444410',borderRadius:'8px',border:'1px solid #ef444430',marginBottom:'10px'}}>{err}</div>}
       <Btn onClick={submit} disabled={!name.trim()||saving} full style={{padding:'15px',fontSize:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?t.saving:t.saveAvail}</Btn>
-      <button onClick={()=>setRStep(rStep-1)} style={{width:'100%',padding:'10px',background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',marginTop:'8px'}}>← {pLang==='es'?'Atrás':'Back'}</button>
+      <button onClick={()=>setRStep(rStep-1)} style={{width:'100%',padding:'10px',background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',marginTop:'8px'}}>← {t.backBtn}</button>
     </>}
   </div>);
 }
