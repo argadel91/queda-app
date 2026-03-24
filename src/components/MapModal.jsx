@@ -163,9 +163,23 @@ const showResults = (items) => {
     row.style.cssText = 'padding:12px 16px;cursor:pointer;border-bottom:1px solid #2A2A2A;'
     row.onmouseenter = () => { row.style.background = '#1C1C1C' }
     row.onmouseleave = () => { row.style.background = 'transparent' }
-    const ratingHtml = r.rating ? `<span style="color:#CDFF6C;font-weight:700">⭐ ${r.rating}</span>${r.ratingCount ? ` <span style="color:#666">(${r.ratingCount})</span>` : ''}` : ''
-    const priceHtml = r.priceLevel ? ` · ${'€'.repeat(r.priceLevel)}` : ''
-    row.innerHTML = `<div style="font-size:14px;color:#F0EBE1;font-weight:500">${r.name}</div><div style="font-size:12px;color:#888">${r.address}</div>${ratingHtml || priceHtml ? `<div style="font-size:11px;margin-top:2px">${ratingHtml}${priceHtml}</div>` : ''}`
+    const nameDiv = document.createElement('div')
+    nameDiv.style.cssText = 'font-size:14px;color:#F0EBE1;font-weight:500'
+    nameDiv.textContent = r.name
+    const addrDiv = document.createElement('div')
+    addrDiv.style.cssText = 'font-size:12px;color:#888'
+    addrDiv.textContent = r.address
+    row.appendChild(nameDiv)
+    row.appendChild(addrDiv)
+    if (r.rating || r.priceLevel) {
+      const metaDiv = document.createElement('div')
+      metaDiv.style.cssText = 'font-size:11px;margin-top:2px'
+      let meta = r.rating ? `⭐ ${r.rating}` : ''
+      if (r.ratingCount) meta += ` (${r.ratingCount})`
+      if (r.priceLevel) meta += ` · ${'€'.repeat(r.priceLevel)}`
+      metaDiv.textContent = meta
+      row.appendChild(metaDiv)
+    }
     row.onclick = () => { selectPlace(r); document.getElementById('gmap-input').value = r.name; document.getElementById('gmap-results').style.display = 'none' }
     el.appendChild(row)
   })
@@ -211,10 +225,27 @@ const selectPlace = (sel) => {
   const bar = document.getElementById('gmap-selbar')
   if (bar) {
     bar.style.display = 'flex'
-    const rInfo = sel.rating ? `⭐ ${sel.rating}${sel.ratingCount ? ` (${sel.ratingCount})` : ''}` : ''
-    const pInfo = sel.priceLevel ? ' · ' + '€'.repeat(sel.priceLevel) : ''
-    const oInfo = sel.isOpen !== null ? (sel.isOpen ? ' · <span style="color:#22c55e">Open</span>' : ' · <span style="color:#ef4444">Closed</span>') : ''
-    bar.innerHTML = `<div style="flex:1;min-width:0"><div style="font-size:14px;color:#F0EBE1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sel.name}</div><div style="font-size:12px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sel.address}</div>${rInfo || pInfo || oInfo ? `<div style="font-size:11px;color:#888;margin-top:2px">${rInfo}${pInfo}${oInfo}</div>` : ''}</div>`
+    const wrap = document.createElement('div')
+    wrap.style.cssText = 'flex:1;min-width:0'
+    const nameEl = document.createElement('div')
+    nameEl.style.cssText = 'font-size:14px;color:#F0EBE1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'
+    nameEl.textContent = sel.name
+    const addrEl = document.createElement('div')
+    addrEl.style.cssText = 'font-size:12px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'
+    addrEl.textContent = sel.address
+    wrap.appendChild(nameEl)
+    wrap.appendChild(addrEl)
+    let meta = sel.rating ? `⭐ ${sel.rating}${sel.ratingCount ? ` (${sel.ratingCount})` : ''}` : ''
+    if (sel.priceLevel) meta += (meta ? ' · ' : '') + '€'.repeat(sel.priceLevel)
+    if (sel.isOpen !== null) meta += (meta ? ' · ' : '') + (sel.isOpen ? 'Open' : 'Closed')
+    if (meta) {
+      const metaEl = document.createElement('div')
+      metaEl.style.cssText = 'font-size:11px;color:#888;margin-top:2px'
+      metaEl.textContent = meta
+      wrap.appendChild(metaEl)
+    }
+    bar.innerHTML = ''
+    bar.appendChild(wrap)
     const btn = document.createElement('button')
     btn.textContent = 'Select'
     btn.style.cssText = 'padding:10px 18px;background:#CDFF6C;color:#0A0A0A;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;flex-shrink:0;'
