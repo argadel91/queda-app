@@ -4,24 +4,16 @@ import T from '../constants/translations.js'
 export default function Landing({onGetStarted, c, lang, onLangChange}){
   const t=T[lang];
   const FLAGS={es:'🇪🇸',en:'🇬🇧',pt:'🇵🇹',fr:'🇫🇷',de:'🇩🇪',it:'🇮🇹'};
-  const LANGS=['es','en','pt','fr','de','it'];
+  const LANGS=['es','en'];
   const[langOpen,setLangOpen]=useState(false);
 
   const hero={
-    es:['Crea tu plan','en menos de 1 minuto.','Nunca fue tan fácil quedar.'],
-    en:['Create your plan','in less than 1 minute.','Meeting up was never this easy.'],
-    pt:['Cria o teu plano','em menos de 1 minuto.','Nunca foi tão fácil combinar.'],
-    fr:['Crée ton plan','en moins d\'1 minute.','Se retrouver n\'a jamais été si simple.'],
-    de:['Erstelle deinen Plan','in unter 1 Minute.','Sich verabreden war nie so einfach.'],
-    it:['Crea il tuo piano','in meno di 1 minuto.','Incontrarsi non è mai stato così facile.']
+    es:['Crea tu plan','en menos de 1 minuto.'],
+    en:['Create your plan','in less than 1 minute.'],
   };
   const steps={
     es:[{e:'📅',l:'Elige una fecha'},{e:'🕐',l:'Elige una hora'},{e:'📍',l:'Elige un lugar'},{e:'📨',l:'Comparte el código'}],
     en:[{e:'📅',l:'Pick a date'},{e:'🕐',l:'Pick a time'},{e:'📍',l:'Pick a place'},{e:'📨',l:'Share the code'}],
-    pt:[{e:'📅',l:'Escolhe uma data'},{e:'🕐',l:'Escolhe uma hora'},{e:'📍',l:'Escolhe um local'},{e:'📨',l:'Partilha o código'}],
-    fr:[{e:'📅',l:'Choisis une date'},{e:'🕐',l:'Choisis une heure'},{e:'📍',l:'Choisis un lieu'},{e:'📨',l:'Partage le code'}],
-    de:[{e:'📅',l:'Wähle ein Datum'},{e:'🕐',l:'Wähle eine Uhrzeit'},{e:'📍',l:'Wähle einen Ort'},{e:'📨',l:'Teile den Code'}],
-    it:[{e:'📅',l:'Scegli una data'},{e:'🕐',l:'Scegli un orario'},{e:'📍',l:'Scegli un luogo'},{e:'📨',l:'Condividi il codice'}]
   };
   const h=hero[lang]||hero.en;
   const st=steps[lang]||steps.en;

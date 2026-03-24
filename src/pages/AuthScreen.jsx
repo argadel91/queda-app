@@ -92,7 +92,7 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
             {FLAGS[lang]} <span style={{fontSize:'11px'}}>{lang.toUpperCase()}</span> <span style={{fontSize:'10px',color:c.M}}>▾</span>
           </button>
           {langMenuOpen&&<div style={{position:'absolute',right:0,top:'calc(100% + 4px)',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',boxShadow:'0 8px 24px rgba(0,0,0,.3)',zIndex:100,overflow:'hidden',minWidth:'130px'}}>
-            {['es','en','pt','fr','de','it'].map(l=><button key={l} onClick={()=>{onLangChange(l);setLangMenuOpen(false);}} style={{display:'flex',alignItems:'center',gap:'8px',width:'100%',padding:'10px 14px',background:l===lang?`${c.A}15`:'transparent',border:'none',borderBottom:`1px solid ${c.BD}`,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',color:l===lang?c.A:c.T,fontWeight:l===lang?'700':'400',textAlign:'left'}}>
+            {['es','en'].map(l=><button key={l} onClick={()=>{onLangChange(l);setLangMenuOpen(false);}} style={{display:'flex',alignItems:'center',gap:'8px',width:'100%',padding:'10px 14px',background:l===lang?`${c.A}15`:'transparent',border:'none',borderBottom:`1px solid ${c.BD}`,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',color:l===lang?c.A:c.T,fontWeight:l===lang?'700':'400',textAlign:'left'}}>
               <span>{FLAGS[l]}</span><span>{LANG_NAMES[l]}</span>
               {l===lang&&<span style={{marginLeft:'auto',color:c.A}}>✓</span>}
             </button>)}
