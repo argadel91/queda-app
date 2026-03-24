@@ -18,7 +18,8 @@ window.__loadGoogleMaps = () => {
   if (!gmKey) return
   window.__gmKey = gmKey
   const s = document.createElement('script')
-  s.src = `https://maps.googleapis.com/maps/api/js?key=${gmKey}&loading=async&libraries=places&v=weekly`
+  const lang = localStorage.getItem('q_lang') ? JSON.parse(localStorage.getItem('q_lang')) : (navigator.language||'en').slice(0,2)
+  s.src = `https://maps.googleapis.com/maps/api/js?key=${gmKey}&loading=async&libraries=places,geometry&v=weekly&language=${lang}`
   s.async = true
   document.head.appendChild(s)
 }

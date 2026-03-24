@@ -187,7 +187,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
           const markers=`markers=color:0xCDFF6C%7Clabel:${si+1}%7C${opt.lat},${opt.lng}`;
           const mpMarkers=stop.meetingPointLat&&stop.meetingPointLng?`&markers=color:0xf59e0b%7Clabel:M%7C${stop.meetingPointLat},${stop.meetingPointLng}`:'';
           const key=window.__gmKey||'';
-          return key?<img src={`https://maps.googleapis.com/maps/api/staticmap?size=400x150&scale=2&maptype=roadmap&${markers}${mpMarkers}&key=${key}`} alt="map" style={{width:'100%',height:'120px',objectFit:'cover',borderRadius:'10px',border:`1px solid ${c.BD}`,marginBottom:'12px'}}/>:null;
+          return key?<img src={`https://maps.googleapis.com/maps/api/staticmap?size=400x150&scale=2&maptype=roadmap&${markers}${mpMarkers}&language=${pLang}&key=${key}`} alt="map" style={{width:'100%',height:'120px',objectFit:'cover',borderRadius:'10px',border:`1px solid ${c.BD}`,marginBottom:'12px'}}/>:null;
         })()}
 
         <Lbl c={c}>{t.whenCanGoHere}</Lbl>
