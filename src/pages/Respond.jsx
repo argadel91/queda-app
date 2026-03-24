@@ -123,17 +123,34 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
 
       {!hasStops&&<>
         <Lbl c={c}>{t.whenCanYou||'When can you?'}</Lbl>
-        <div style={{display:'flex',gap:'16px',marginBottom:'12px',fontSize:'12px',color:c.M2}}>
-          <span>✅ = {t.avYes?.replace(/[✅]\s?/,'')}</span>
-          <span>❌ = {t.avNo?.replace(/[❌]\s?/,'')}</span>
-        </div>
-        {dateSlots.map(ds=>{
-          const val=avail[ds.key];
-          return<div key={ds.key} style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'8px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px'}}>
-            <div style={{flex:1,fontSize:'13px',color:c.T,textTransform:'capitalize'}}>{fmtDate(ds.date,pLang)}{ds.time?' · '+ds.time:''}</div>
-            <div style={{display:'flex',gap:'4px'}}>
-              {['yes','no'].map(v=><button key={v} onClick={()=>setAvail(p=>({...p,[ds.key]:p[ds.key]===v?undefined:v}))} style={{padding:'8px 12px',background:val===v?AVCOL[v]+'25':c.CARD,color:val===v?AVCOL[v]:c.M2,cursor:'pointer',border:'none',fontFamily:'inherit',fontSize:'13px',fontWeight:val===v?'700':'400',borderRadius:'8px'}}>{AVICON[v]}</button>)}
-            </div>
+        <div style={{fontSize:'11px',color:c.M,marginBottom:'10px'}}>{pLang==='es'?'Toca las fechas a las que puedes ir':'Tap the dates you can attend'}</div>
+        {dates.map(d=>{
+          const timesForDate=hasStartTimes?times:[''];
+          const dateKeys=timesForDate.map(t2=>t2?`${d}_${t2}`:d);
+          const anyYes=dateKeys.some(k=>avail[k]==='yes');
+          const expanded=anyYes||avail[`_exp_${d}`];
+          return<div key={d} style={{marginBottom:'8px'}}>
+            <button onClick={()=>{
+              if(!hasStartTimes){
+                setAvail(p=>({...p,[d]:p[d]==='yes'?undefined:'yes'}));
+              } else {
+                if(anyYes){setAvail(p=>{const n={...p};dateKeys.forEach(k=>{delete n[k];});delete n[`_exp_${d}`];return n;});}
+                else{setAvail(p=>({...p,[`_exp_${d}`]:true}));}
+              }
+            }} style={{width:'100%',padding:'12px 14px',borderRadius:expanded&&hasStartTimes?'10px 10px 0 0':'10px',border:`1px solid ${anyYes?'#22c55e50':c.BD}`,background:anyYes?'#22c55e18':c.CARD2,color:anyYes?'#22c55e':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:anyYes?'700':'500',textAlign:'left',textTransform:'capitalize',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <span>{fmtDate(d,pLang)}</span>
+              {!hasStartTimes&&<span style={{fontSize:'16px'}}>{anyYes?'✓':'○'}</span>}
+              {hasStartTimes&&<span style={{fontSize:'12px',color:c.M2}}>{anyYes?`${dateKeys.filter(k=>avail[k]==='yes').length}`:expanded?'▾':'▸'}</span>}
+            </button>
+            {hasStartTimes&&expanded&&<div style={{border:`1px solid ${anyYes?'#22c55e30':c.BD}`,borderTop:'none',borderRadius:'0 0 10px 10px',overflow:'hidden'}}>
+              {times.map(t2=>{
+                const key=`${d}_${t2}`;const sel=avail[key]==='yes';
+                return<button key={key} onClick={()=>setAvail(p=>({...p,[key]:p[key]==='yes'?undefined:'yes'}))} style={{width:'100%',padding:'10px 14px',background:sel?'#22c55e18':c.CARD,borderBottom:`1px solid ${c.BD}20`,cursor:'pointer',border:'none',fontFamily:'inherit',fontSize:'13px',color:sel?'#22c55e':c.M2,fontWeight:sel?'700':'400',textAlign:'left',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                  <span>🕐 {t2}</span>
+                  <span style={{fontSize:'16px'}}>{sel?'✓':'○'}</span>
+                </button>;
+              })}
+            </div>}
           </div>;
         })}
       </>}
@@ -166,14 +183,41 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
         {stop.meetingPoint&&<div style={{fontSize:'12px',color:mc,background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'8px',padding:'8px 12px',marginBottom:'12px'}}>📍 {pLang==='es'?'Punto de encuentro':'Meeting point'}: {stop.meetingPoint}{stop.meetingMinsBefore?` (${stop.meetingMinsBefore} min ${pLang==='es'?'antes':'before'})`:''}</div>}
 
         <Lbl c={c}>{pLang==='es'?'¿Cuándo puedes ir aquí?':'When can you go here?'}</Lbl>
-        {dateSlots.map(ds=>{
-          const key=voteKey(stop.id,ds);
-          const val=avail[key];
-          return<div key={key} style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'8px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px'}}>
-            <div style={{flex:1,fontSize:'13px',color:c.T,textTransform:'capitalize'}}>{fmtDate(ds.date,pLang)}{ds.time?' · '+ds.time:''}</div>
-            <div style={{display:'flex',gap:'4px'}}>
-              {['yes','no'].map(v=><button key={v} onClick={()=>{setErr('');setAvail(p=>({...p,[key]:p[key]===v?undefined:v}));}} style={{padding:'8px 12px',background:val===v?AVCOL[v]+'25':c.CARD,color:val===v?AVCOL[v]:c.M2,cursor:'pointer',border:'none',fontFamily:'inherit',fontSize:'13px',fontWeight:val===v?'700':'400',borderRadius:'8px'}}>{AVICON[v]}</button>)}
-            </div>
+        <div style={{fontSize:'11px',color:c.M,marginBottom:'10px'}}>{pLang==='es'?'Toca una fecha para marcar que puedes. Toca los horarios disponibles.':'Tap a date to mark you can go. Tap available times.'}</div>
+        {dates.map(d=>{
+          const timesForDate=hasStartTimes?times:[''];
+          const dateKeys=timesForDate.map(t2=>voteKey(stop.id,{date:d,time:t2,key:t2?`${d}_${t2}`:d}));
+          const anyYes=dateKeys.some(k=>avail[k]==='yes');
+          const expanded=anyYes||avail[`_exp_${stop.id}_${d}`];
+          return<div key={d} style={{marginBottom:'8px'}}>
+            <button onClick={()=>{
+              if(!hasStartTimes){
+                const k=voteKey(stop.id,{date:d,time:'',key:d});
+                setAvail(p=>({...p,[k]:p[k]==='yes'?undefined:'yes'}));
+              } else {
+                if(anyYes){
+                  // Deselect all times for this date
+                  setAvail(p=>{const n={...p};dateKeys.forEach(k=>{delete n[k];});delete n[`_exp_${stop.id}_${d}`];return n;});
+                } else {
+                  // Expand to show times
+                  setAvail(p=>({...p,[`_exp_${stop.id}_${d}`]:true}));
+                }
+              }
+            }} style={{width:'100%',padding:'12px 14px',borderRadius:expanded&&hasStartTimes?'10px 10px 0 0':'10px',border:`1px solid ${anyYes?'#22c55e50':c.BD}`,background:anyYes?'#22c55e18':c.CARD2,color:anyYes?'#22c55e':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:anyYes?'700':'500',textAlign:'left',textTransform:'capitalize',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <span>{fmtDate(d,pLang)}</span>
+              {!hasStartTimes&&<span style={{fontSize:'16px'}}>{anyYes?'✓':'○'}</span>}
+              {hasStartTimes&&<span style={{fontSize:'12px',color:c.M2}}>{anyYes?`${dateKeys.filter(k=>avail[k]==='yes').length} ${pLang==='es'?'horarios':'times'}`:expanded?'▾':'▸'}</span>}
+            </button>
+            {hasStartTimes&&expanded&&<div style={{border:`1px solid ${anyYes?'#22c55e30':c.BD}`,borderTop:'none',borderRadius:'0 0 10px 10px',overflow:'hidden'}}>
+              {times.map(t2=>{
+                const key=voteKey(stop.id,{date:d,time:t2,key:`${d}_${t2}`});
+                const sel=avail[key]==='yes';
+                return<button key={key} onClick={()=>{setErr('');setAvail(p=>({...p,[key]:p[key]==='yes'?undefined:'yes'}));}} style={{width:'100%',padding:'10px 14px',background:sel?'#22c55e18':c.CARD,borderBottom:`1px solid ${c.BD}20`,cursor:'pointer',border:'none',fontFamily:'inherit',fontSize:'13px',color:sel?'#22c55e':c.M2,fontWeight:sel?'700':'400',textAlign:'left',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                  <span>🕐 {t2}</span>
+                  <span style={{fontSize:'16px'}}>{sel?'✓':'○'}</span>
+                </button>;
+              })}
+            </div>}
           </div>;
         })}
 

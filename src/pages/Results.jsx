@@ -320,7 +320,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
               <div><div style={{fontSize:'11px',color:mc,fontWeight:'700',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:'2px'}}>{t.bestOpt}</div>
                 <div style={{fontSize:'15px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtDate(best.date,lang)}{best.startTime?' · '+best.startTime:''}</div>
                 {plan.times?.[best.date]?.length>0&&<div style={{fontSize:'12px',color:c.M2}}>{plan.times[best.date].join(', ')}</div>}
-                <div style={{fontSize:'13px',color:c.M2}}>✅ {cntY(best.key)}/{total}{cntN(best.key)>0?` · ❌ ${cntN(best.key)}`:''}</div>
+                <div style={{fontSize:'13px',color:c.M2}}>👥 {cntY(best.key)}/{total}</div>
               </div>
             </div>
             {isOrgRef.current&&!plan.confirmedDate&&<Btn onClick={()=>confirmDate(best.date,best.startTime)} disabled={conf} full sm c={c} accent={mc}>{conf?t.confirming:t.confirmThis}</Btn>}
@@ -355,7 +355,15 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
           {giftPer>0&&<div style={{display:'flex',justifyContent:'space-between',padding:'12px 16px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',marginBottom:'8px'}}><span style={{color:c.M2,fontSize:'14px'}}>+ {t.giftLbl}</span><span style={{color:c.T,fontWeight:'600'}}>{giftPer.toFixed(0)}€</span></div>}
           <div style={{display:'flex',justifyContent:'space-between',padding:'14px 16px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px'}}><span style={{color:c.T,fontWeight:'700'}}>{t.totalLbl}</span><span style={{color:mc,fontSize:'18px',fontWeight:'800'}}>{(budget+giftPer).toFixed(0)}€</span></div>
         </>}
-        {plan.stops?.some(s=>(s.options?.[0]?.lat&&s.options?.[0]?.lng)||(s.lat&&s.lng))&&<><HR c={c}/><RouteMap stops={(plan.stops||[]).map(s=>{const o=s.options?.[0]||s;return{...s,lat:o.lat||s.lat,lng:o.lng||s.lng,name:o.name||s.name,address:o.address||s.address,placeId:o.placeId||s.placeId||null};})} c={c}/></>}
+        {plan.stops?.some(s=>(s.options?.[0]?.lat&&s.options?.[0]?.lng)||(s.lat&&s.lng))&&<><HR c={c}/><RouteMap stops={(plan.stops||[]).flatMap(s=>{
+          const o=s.options?.[0]||s;
+          const pts=[];
+          if(s.meetingPoint&&s.meetingPointLat&&s.meetingPointLng){
+            pts.push({lat:s.meetingPointLat,lng:s.meetingPointLng,name:'📍 '+s.meetingPoint,isMeetingPoint:true});
+          }
+          pts.push({...s,lat:o.lat||s.lat,lng:o.lng||s.lng,name:o.name||s.name,address:o.address||s.address,placeId:o.placeId||s.placeId||null});
+          return pts;
+        })} c={c}/></>}
       </></React.Suspense>}
 
       {/* ALTS tab = Alternative dates */}

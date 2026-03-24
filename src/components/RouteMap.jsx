@@ -42,7 +42,8 @@ export default function RouteMap({stops,c}){
       valid.forEach((s,i)=>{
         const pos={lat:s.lat,lng:s.lng};
         bounds.extend(pos);
-        const marker=new google.maps.Marker({position:pos,map,label:{text:String(i+1),color:'#0A0A0A',fontWeight:'800',fontSize:'12px'},icon:{path:google.maps.SymbolPath.CIRCLE,scale:16,fillColor:'#CDFF6C',fillOpacity:1,strokeColor:'#9ABF50',strokeWeight:2}});
+        const isMp=s.isMeetingPoint;
+        const marker=new google.maps.Marker({position:pos,map,label:{text:isMp?'📍':String(i+1),color:isMp?'#fff':'#0A0A0A',fontWeight:'800',fontSize:isMp?'14px':'12px'},icon:{path:google.maps.SymbolPath.CIRCLE,scale:isMp?12:16,fillColor:isMp?'#f59e0b':'#CDFF6C',fillOpacity:1,strokeColor:isMp?'#d97706':'#9ABF50',strokeWeight:2},title:s.name||''});
         markersRef.current.push(marker);
       });
 
