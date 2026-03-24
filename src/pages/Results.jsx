@@ -420,7 +420,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
                   </div>
                   {expanded&&<div style={{padding:'8px 14px 12px',borderTop:`1px solid ${c.BD}`,fontSize:'13px'}}>
                     {r.comment&&<div style={{color:c.M2,fontStyle:'italic',marginBottom:'8px',padding:'6px 10px',background:c.CARD2,borderRadius:'8px'}}>"{r.comment}"</div>}
-                    {plan.confirmedDate&&(plan.stops||[]).length>0
+                    {(plan.stops||[]).filter(s=>(s.options?.[0]?.name||s.name)).length>0
                       ?<div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
                         {(plan.stops||[]).filter(s=>(s.options?.[0]?.name||s.name)).map((s,si)=>{
                           const v=r.stopAttend?.[s.id];const sName=s.options?.[0]?.name||`${si+1}`;
