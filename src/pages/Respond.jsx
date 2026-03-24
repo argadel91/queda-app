@@ -101,7 +101,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
     {plan.confirmedDate&&<div style={{background:`${mc}15`,border:`1px solid ${mc}50`,borderRadius:'12px',padding:'12px 14px',marginBottom:'16px',display:'flex',gap:'10px',alignItems:'center'}}><span style={{fontSize:'18px'}}>📌</span><div><div style={{fontSize:'11px',color:mc,fontWeight:'700',textTransform:'uppercase',letterSpacing:'.06em'}}>{t.confirmedDate}</div><div style={{fontSize:'14px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,pLang)}</div></div></div>}
     {plan.desc&&<p style={{fontSize:'14px',color:c.T,lineHeight:1.7,marginBottom:'16px',padding:'12px 14px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px'}}>{plan.desc}</p>}
     {budget>0&&<div style={{background:`${mc}0D`,border:`1px solid ${mc}30`,borderRadius:'10px',padding:'12px 16px',marginBottom:'16px',display:'flex',justifyContent:'space-between'}}><span style={{color:c.M2,fontSize:'13px'}}>{t.estPer||'Estimado'}</span><span style={{color:mc,fontWeight:'700'}}>{budget.toFixed(0)}€</span></div>}
-    <Stepper cur={rStep} labels={hasStops?[lang==='es'?'Fechas':'Dates',lang==='es'?'Puntos':'Points',lang==='es'?'Enviar':'Send']:[lang==='es'?'Fechas':'Dates',lang==='es'?'Enviar':'Send']} c={c} accent={mc}/>
+    <Stepper cur={rStep} labels={hasStops?[pLang==='es'?'Fechas':'Dates',pLang==='es'?'Puntos':'Points',pLang==='es'?'Enviar':'Send']:[pLang==='es'?'Fechas':'Dates',pLang==='es'?'Enviar':'Send']} c={c} accent={mc}/>
     {rStep===0&&<><div style={{marginBottom:'14px'}}><Lbl c={c}>{t.yourName}</Lbl><Inp value={name} onChange={v=>{setName(v);ls.set('q_myname',v);}} placeholder={t.yourNamePh} c={c}/></div>
     {plan.customRoles?.length>0&&<div style={{marginBottom:'14px'}}>
       <Lbl c={c}>{t.yourRoleLbl||'Your role'} <span style={{fontWeight:'400',textTransform:'none',fontSize:'11px'}}>({t.optionalLbl||'optional'})</span></Lbl>
@@ -160,7 +160,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
       {altDate&&<input value={altNote||''} onChange={e=>setAltNote(e.target.value)} placeholder={t.optionalNote} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'12px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
     </div>}
     {err&&<div style={{color:'#ef4444',fontSize:'13px',marginBottom:'10px'}}>{err}</div>}
-    <Btn onClick={()=>{if(!name.trim()){setErr(lang==='es'?'Escribe tu nombre':'Enter your name');return;}if(!Object.values(avail).some(v=>v==='yes')){setErr(t.markAtLeastOne);return;}setErr('');setRStep(1);}} full style={{padding:'14px'}} c={c} accent={mc}>{lang==='es'?'Siguiente':'Next'} →</Btn>
+    <Btn onClick={()=>{if(!name.trim()){setErr(pLang==='es'?'Escribe tu nombre':'Enter your name');return;}if(!Object.values(avail).some(v=>v==='yes')){setErr(t.markAtLeastOne);return;}setErr('');setRStep(1);}} full style={{padding:'14px'}} c={c} accent={mc}>{pLang==='es'?'Siguiente':'Next'} →</Btn>
     </>}
 
     {rStep===1&&hasStops&&<>
@@ -217,8 +217,8 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
         </div>);
       })}
     </div>}
-    <Btn onClick={()=>setRStep(hasStops?2:1)} full style={{padding:'14px'}} c={c} accent={mc}>{lang==='es'?'Siguiente':'Next'} →</Btn>
-    <button onClick={()=>setRStep(0)} style={{width:'100%',padding:'10px',background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',marginTop:'8px'}}>← {lang==='es'?'Atrás':'Back'}</button>
+    <Btn onClick={()=>setRStep(hasStops?2:1)} full style={{padding:'14px'}} c={c} accent={mc}>{pLang==='es'?'Siguiente':'Next'} →</Btn>
+    <button onClick={()=>setRStep(0)} style={{width:'100%',padding:'10px',background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',marginTop:'8px'}}>← {pLang==='es'?'Atrás':'Back'}</button>
     </>}
 
     {rStep===(hasStops?2:1)&&<>
@@ -249,7 +249,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
 
     {err&&<div style={{color:'#ef4444',fontSize:'13px',padding:'8px 12px',background:'#ef444410',borderRadius:'8px',border:'1px solid #ef444430',marginBottom:'10px'}}>{err}</div>}
     <Btn onClick={submit} disabled={!name.trim()||saving} full style={{padding:'15px',fontSize:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?t.saving:t.saveAvail}</Btn>
-    <button onClick={()=>setRStep(hasStops?1:0)} style={{width:'100%',padding:'10px',background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',marginTop:'8px'}}>← {lang==='es'?'Atrás':'Back'}</button>
+    <button onClick={()=>setRStep(hasStops?1:0)} style={{width:'100%',padding:'10px',background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',marginTop:'8px'}}>← {pLang==='es'?'Atrás':'Back'}</button>
     </>}
   </div>);
 }
