@@ -8,6 +8,7 @@ import CalendarPicker from '../components/CalendarPicker.jsx'
 import MapModal from '../components/MapModal.jsx'
 import CityInput from '../components/CityInput.jsx'
 import { getCityTz } from '../constants/weather.js'
+import ClockPicker from '../components/ClockPicker.jsx'
 
 
 const calcEndTime = (start, duration) => {
@@ -469,8 +470,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
         {selDates.length>0&&<div style={{marginTop:'16px'}}>
           <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'8px'}}>{t.whatTime||'What time?'}</div>
           {startTimes.map((st,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'8px'}}>
-            <input type="time" value={st||''} onChange={e=>{const n=[...startTimes];n[i]=e.target.value;setStartTimes(n);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',flex:1}}/>
-            {st&&<span style={{fontSize:'14px',color:c.M2,fontWeight:'500',flexShrink:0}}>{(()=>{const[h,m]=(st||'').split(':').map(Number);if(isNaN(h))return'';const ampm=h>=12?'PM':'AM';const h12=h%12||12;return`${h12}:${String(m).padStart(2,'0')} ${ampm}`;})()}</span>}
+            <div style={{flex:1}}><ClockPicker value={st} onChange={v=>{const n=[...startTimes];n[i]=v;setStartTimes(n);}} c={c}/></div>
             {startTimes.length>1&&<button onClick={()=>setStartTimes(p=>p.filter((_,j)=>j!==i))} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'16px',padding:'4px'}}>×</button>}
           </div>)}
           {startTimes.length<3&&startTimes[startTimes.length-1]&&<button onClick={()=>setStartTimes(p=>[...p,''])} style={{background:'none',border:`1px dashed ${c.BD}`,borderRadius:'10px',padding:'10px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',width:'100%'}}>+ {t.addTime||'Add time option'}</button>}
