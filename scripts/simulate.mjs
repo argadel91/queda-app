@@ -68,33 +68,60 @@ async function respond(bot, plan) {
     }
   }
 
-  // Each bot votes randomly but at least one yes
+  // Bot personality: enthusiastic, busy, or flaky
+  const personality = rand(['enthusiastic', 'enthusiastic', 'busy', 'busy', 'partial', 'flaky'])
+
   let hasYes = false
-  for (const key of slots) {
-    const r = Math.random()
-    if (r < 0.5) { avail[key] = 'yes'; hasYes = true }
-    else if (r < 0.8) { avail[key] = 'no' }
-    // else: no response (blank)
+  if (personality === 'enthusiastic') {
+    // Says yes to most things
+    for (const key of slots) {
+      if (Math.random() < 0.8) { avail[key] = 'yes'; hasYes = true }
+      // else: blank (not no — enthusiastic people don't say no)
+    }
+  } else if (personality === 'busy') {
+    // Can only make 1-2 slots
+    const yesCount = Math.ceil(Math.random() * 2)
+    const shuffled = [...slots].sort(() => Math.random() - 0.5)
+    shuffled.forEach((key, i) => {
+      if (i < yesCount) { avail[key] = 'yes'; hasYes = true }
+      else avail[key] = 'no'
+    })
+  } else if (personality === 'partial') {
+    // Yes to about half
+    for (const key of slots) {
+      if (Math.random() < 0.5) { avail[key] = 'yes'; hasYes = true }
+      else avail[key] = 'no'
+    }
+  } else {
+    // Flaky: says no to everything
+    for (const key of slots) avail[key] = 'no'
   }
-  if (!hasYes && slots.length > 0) avail[slots[0]] = 'yes'
+  if (!hasYes && slots.length > 0 && personality !== 'flaky') avail[slots[0]] = 'yes'
 
+  // Stop attendance coherent with date votes
   const stopAttend = {}
+  const dateHasYes = Object.values(avail).some(v => v === 'yes')
   for (const s of (plan.stops || [])) {
-    stopAttend[s.id] = Math.random() < 0.7 ? 'yes' : 'no'
+    if (!dateHasYes) { stopAttend[s.id] = 'no'; continue }
+    if (personality === 'enthusiastic') stopAttend[s.id] = 'yes'
+    else if (personality === 'flaky') stopAttend[s.id] = 'no'
+    else stopAttend[s.id] = Math.random() < 0.75 ? 'yes' : 'no'
   }
 
-  const comments = [
-    '¡Vamos! 🎉', 'Yo me apunto', 'Llego un poco tarde pero voy',
-    'Solo puedo a esa hora', 'Perfecto para mí', '¿Alguien lleva coche?',
-    'Yo llevo postre', 'Me encanta el plan', ''
-  ]
+  // Comments coherent with personality
+  const commentsMap = {
+    enthusiastic: ['¡Vamos! 🎉', 'Me encanta el plan', 'Yo llevo postre', 'Perfecto para mí', '¡Qué ganas!', ''],
+    busy: ['Solo puedo a esa hora', 'Llego un poco tarde pero voy', 'Salgo del trabajo y voy directo', 'Intentaré llegar a tiempo', ''],
+    partial: ['¿Alguien lleva coche?', 'A lo mejor me uno más tarde', 'Depende de cómo vaya el día', ''],
+    flaky: ['No puedo esa semana 😕', 'Lo siento, me pilla mal', 'Pasadlo bien sin mí', 'A ver si la próxima']
+  }
 
   const resp = {
     name: bot.name,
     avail,
     stopAttend: Object.keys(stopAttend).length > 0 ? stopAttend : null,
-    comment: rand(comments),
-    how: rand(['car', 'transit', 'walk', 'bike', '']),
+    comment: rand(commentsMap[personality]),
+    how: personality === 'flaky' ? '' : rand(['car', 'transit', 'walk', 'bike']),
     at: new Date().toISOString()
   }
 
