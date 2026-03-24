@@ -462,7 +462,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
                 return<div key={i} style={{marginBottom:'6px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',overflow:'hidden'}}>
                   <div onClick={()=>setOpenSection(p=>({...p,['p_'+i]:!p['p_'+i]}))} style={{display:'flex',alignItems:'center',gap:'10px',padding:'10px 14px',cursor:'pointer'}}>
                     <div style={{width:'8px',height:'8px',borderRadius:'50%',background:yes?'#22c55e':r.avail&&Object.values(r.avail).some(v=>v==='no')?'#ef4444':c.M,flexShrink:0}}/>
-                    <span style={{flex:1,fontSize:'14px',color:yes?c.T:c.M2,fontWeight:yes?'600':'400'}}>{r.name}</span>
+                    <span style={{flex:1,fontSize:'14px',color:yes?c.T:c.M2,fontWeight:yes?'600':'400'}}>{r.name}{r.username?<span style={{fontSize:'11px',color:c.M,marginLeft:'4px'}}>@{r.username}</span>:''}</span>
                     {r.comment&&<span style={{fontSize:'11px',color:c.M}}>💬</span>}
                     {r.how&&<span style={{fontSize:'12px'}}>{({car:'🚗',moto:'🏍️',transit:'🚇',taxi:'🚕',walk:'🚶',bike:'🚲'})[r.how]||''}</span>}
                     <span style={{fontSize:'11px',color:c.M2}}>{expanded?'▾':'▸'}</span>
