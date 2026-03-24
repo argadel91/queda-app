@@ -16,6 +16,7 @@ window.__loadGoogleMaps = () => {
   window.__gmLoading = true
   const gmKey = import.meta.env.VITE_GOOGLE_MAPS_KEY || ''
   if (!gmKey) return
+  window.__gmKey = gmKey
   const s = document.createElement('script')
   s.src = `https://maps.googleapis.com/maps/api/js?key=${gmKey}&loading=async&libraries=places&v=weekly`
   s.async = true

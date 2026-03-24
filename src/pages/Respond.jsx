@@ -182,6 +182,14 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
         </div>
         {stop.meetingPoint&&<div style={{fontSize:'12px',color:mc,background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'8px',padding:'8px 12px',marginBottom:'12px'}}>📍 {pLang==='es'?'Punto de encuentro':'Meeting point'}: {stop.meetingPoint}{stop.meetingMinsBefore?` (${stop.meetingMinsBefore} min ${pLang==='es'?'antes':'before'})`:''}</div>}
 
+        {/* Mini static map */}
+        {opt.lat&&opt.lng&&(()=>{
+          const markers=`markers=color:0xCDFF6C%7Clabel:${si+1}%7C${opt.lat},${opt.lng}`;
+          const mpMarkers=stop.meetingPointLat&&stop.meetingPointLng?`&markers=color:0xf59e0b%7Clabel:M%7C${stop.meetingPointLat},${stop.meetingPointLng}`:'';
+          const key=window.__gmKey||'';
+          return key?<img src={`https://maps.googleapis.com/maps/api/staticmap?size=400x150&scale=2&maptype=roadmap&${markers}${mpMarkers}&key=${key}`} alt="map" style={{width:'100%',height:'120px',objectFit:'cover',borderRadius:'10px',border:`1px solid ${c.BD}`,marginBottom:'12px'}}/>:null;
+        })()}
+
         <Lbl c={c}>{pLang==='es'?'¿Cuándo puedes ir aquí?':'When can you go here?'}</Lbl>
         <div style={{fontSize:'11px',color:c.M,marginBottom:'10px'}}>{pLang==='es'?'Toca una fecha para marcar que puedes. Toca los horarios disponibles.':'Tap a date to mark you can go. Tap available times.'}</div>
         {dates.map(d=>{
