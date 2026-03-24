@@ -367,17 +367,24 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
           <div style={{color:c.M2,fontSize:'13px'}}>{lang==='es'?'Cuando los invitados respondan, verás los datos aquí':'When invitees respond, you\'ll see the data here'}</div>
         </Card>
         :<>
-          {/* Best date + confirm */}
-          {best&&cntY(best.key)>0&&<div style={{background:`${mc}12`,border:`1px solid ${mc}35`,borderRadius:'14px',padding:'16px',marginBottom:'14px'}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-              <div>
-                <div style={{fontSize:'11px',color:mc,fontWeight:'700',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'4px'}}>⭐ {lang==='es'?'Mejor opción':'Best option'}</div>
-                <div style={{fontSize:'16px',color:c.T,fontWeight:'700',textTransform:'capitalize'}}>{fmtShort(best.date,lang)}{best.startTime?' · '+best.startTime:''}</div>
-                <div style={{fontSize:'13px',color:c.M2,marginTop:'2px'}}>✅ {cntY(best.key)}/{total} · ❌ {cntN(best.key)}</div>
+          {/* Best date / confirmed plan */}
+          {(plan.confirmedDate||best&&cntY(best.key)>0)&&(()=>{
+            const isConfirmed=!!plan.confirmedDate;
+            const showDate=isConfirmed?plan.confirmedDate:best.date;
+            const showTime=isConfirmed?plan.confirmedStartTime:best.startTime;
+            const showKey=isConfirmed?(slots.find(s=>s.date===plan.confirmedDate)?.key||plan.confirmedDate):(best?.key);
+            const ny=showKey?cntY(showKey):0;const nn=showKey?cntN(showKey):0;
+            return<div style={{background:`${mc}12`,border:`1px solid ${mc}35`,borderRadius:'14px',padding:'16px',marginBottom:'14px'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                <div>
+                  <div style={{fontSize:'11px',color:mc,fontWeight:'700',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'4px'}}>{isConfirmed?(lang==='es'?'📌 Plan elegido':'📌 Chosen plan'):'⭐ '+(lang==='es'?'Mejor opción':'Best option')}</div>
+                  <div style={{fontSize:'16px',color:c.T,fontWeight:'700',textTransform:'capitalize'}}>{fmtShort(showDate,lang)}{showTime?' · '+showTime:''}</div>
+                  <div style={{fontSize:'13px',color:c.M2,marginTop:'2px'}}>👥 {ny}/{total} {lang==='es'?'asistencia':'attendance'}</div>
+                </div>
+                {isOrgRef.current&&!isConfirmed&&<button onClick={()=>confirmDate(best.date,best.startTime)} style={{padding:'10px 18px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'13px'}}>{t.confirmBtn||'Confirm'}</button>}
               </div>
-              {isOrgRef.current&&!plan.confirmedDate&&<button onClick={()=>confirmDate(best.date,best.startTime)} style={{padding:'10px 18px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'13px'}}>{t.confirmBtn||'Confirm'}</button>}
-            </div>
-          </div>}
+            </div>;
+          })()}
 
           {/* Cancelled stops info */}
           {cancelledStops.size>0&&<div style={{background:'#f59e0b10',border:'1px solid #f59e0b30',borderRadius:'10px',padding:'10px 14px',marginBottom:'12px',fontSize:'12px',color:'#f59e0b'}}>
@@ -413,9 +420,17 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
                   </div>
                   {expanded&&<div style={{padding:'8px 14px 12px',borderTop:`1px solid ${c.BD}`,fontSize:'13px'}}>
                     {r.comment&&<div style={{color:c.M2,fontStyle:'italic',marginBottom:'8px',padding:'6px 10px',background:c.CARD2,borderRadius:'8px'}}>"{r.comment}"</div>}
-                    <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
-                      {slots.map(s=>{const v=r.avail?.[s.key];return<span key={s.key} style={{fontSize:'11px',padding:'3px 9px',borderRadius:'20px',background:v==='yes'?'#22c55e20':v==='no'?'#ef444420':`${c.M}10`,color:v==='yes'?'#22c55e':v==='no'?'#ef4444':c.M,border:`1px solid ${v==='yes'?'#22c55e30':v==='no'?'#ef444430':c.BD}`,textTransform:'capitalize'}}>{v==='yes'?'✓':'✗'} {fmtShort(s.date,lang)}{s.startTime?' '+s.startTime:''}</span>;})}
-                    </div>
+                    {plan.confirmedDate&&(plan.stops||[]).length>0
+                      ?<div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
+                        {(plan.stops||[]).filter(s=>(s.options?.[0]?.name||s.name)).map((s,si)=>{
+                          const v=r.stopAttend?.[s.id];const sName=s.options?.[0]?.name||`${si+1}`;
+                          const cancelled=cancelledStops.has(s.id);
+                          return<span key={s.id} style={{fontSize:'11px',padding:'3px 9px',borderRadius:'20px',background:cancelled?`${c.M}10`:v==='yes'?'#22c55e20':v==='no'?'#ef444420':`${c.M}10`,color:cancelled?c.M:v==='yes'?'#22c55e':v==='no'?'#ef4444':c.M,border:`1px solid ${cancelled?c.BD:v==='yes'?'#22c55e30':v==='no'?'#ef444430':c.BD}`,textDecoration:cancelled?'line-through':'none'}}>{cancelled?'—':v==='yes'?'✓':v==='no'?'✗':'·'} {sName}</span>;
+                        })}
+                      </div>
+                      :<div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
+                        {slots.map(s=>{const v=r.avail?.[s.key];return<span key={s.key} style={{fontSize:'11px',padding:'3px 9px',borderRadius:'20px',background:v==='yes'?'#22c55e20':v==='no'?'#ef444420':`${c.M}10`,color:v==='yes'?'#22c55e':v==='no'?'#ef4444':c.M,border:`1px solid ${v==='yes'?'#22c55e30':v==='no'?'#ef444430':c.BD}`,textTransform:'capitalize'}}>{v==='yes'?'✓':'✗'} {fmtShort(s.date,lang)}{s.startTime?' '+s.startTime:''}</span>;})}
+                      </div>}
                   </div>}
                 </div>;
               })}
@@ -438,7 +453,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
                 </div>
                 <div style={{textAlign:'right',flexShrink:0}}>
                   <div style={{fontSize:'13px',fontWeight:'700',color:isBest?mc:c.T}}>👥 {ny}/{total}</div>
-                  <div style={{fontSize:'11px',color:c.M2}}>{pct}%</div>
+                  <div style={{fontSize:'11px',color:c.M2}}>{pct}% {lang==='es'?'asistencia':'attendance'}</div>
                 </div>
                 {isOrgRef.current&&!plan.confirmedDate&&ny>0&&<button onClick={()=>confirmDate(s.date,s.startTime)} style={{padding:'4px 10px',background:isBest?mc:c.CARD2,border:isBest?'none':`1px solid ${c.BD}`,borderRadius:'6px',color:isBest?'#0A0A0A':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'11px',fontWeight:'600',flexShrink:0}}>{t.confirmBtn||'✓'}</button>}
               </div>;
