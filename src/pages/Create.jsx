@@ -36,13 +36,8 @@ const emptyStop = (id, suggestedStart) => ({
 export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   const t=T[lang];const mc=c.A;
   const[step,setStep]=useState(0);
-  const[name,setName]=useState('');const[desc,setDesc]=useState('');
+  const[name,setName]=useState('');
   const[org,setOrg]=useState(profile?.name||ls.get('q_myname',''));
-  const[orgRole,setOrgRole]=useState('');
-  const[isPublic,setIsPublic]=useState(false);
-  const[pubFilter,setPubFilter]=useState({gender:'any',ageMin:'',ageMax:'',radius:''});
-  const[deadline,setDeadline]=useState('');
-  const[hasDeadline,setHasDeadline]=useState(false);
   const[selDates,setSelDates]=useState([]);
   const[startTimes,setStartTimes]=useState(['']);
   const[inlineResults,setInlineResults]=useState([]);
@@ -51,17 +46,10 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   const inlineMapObj=useRef(null);
   const inlineMarkers=useRef([]);
   const[stops,setStops]=useState([emptyStop(1,'')]);
-  const[mapTarget,setMapTarget]=useState(null); // {stopId, optionId}
-  const[dressCode,setDressCode]=useState([]);const[dressNote,setDressNote]=useState('');
-  const[autoConfirm,setAutoConfirm]=useState(false);const[autoConfirmN,setAutoConfirmN]=useState(3);
-  const[surpriseMode,setSurprise]=useState(false);
-  const[poll,setPoll]=useState({q:'',opts:['','']});
-  const[giftOn,setGiftOn]=useState(false);const[gift,setGift]=useState({name:'',link:'',price:'',stripeLink:''});
-  const[bring,setBring]=useState([{id:1,text:''}]);
-  const[payment,setPayment]=useState({bizumPhone:'',paypalUser:'',revolutUser:''});
+  const[mapTarget,setMapTarget]=useState(null);
   const[saving,setSaving]=useState(false);
-  const[openSections,setOpenSections]=useState({dress:true});
   const[draftRestored,setDraftRestored]=useState(false);
+  const[openSections,setOpenSections]=useState({});
   const draftKey='q_draft';
 
   // Auto-deduce city from first stop with coordinates
@@ -84,23 +72,15 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   // Restore draft on mount
   useEffect(()=>{
     const d=ls.get(draftKey,null);if(!d)return;
-    if(d.name)setName(d.name);if(d.desc)setDesc(d.desc);if(d.org)setOrg(d.org);
-    if(d.orgRole)setOrgRole(d.orgRole);
-    if(d.isPublic!==undefined)setIsPublic(d.isPublic);if(d.pubFilter)setPubFilter(d.pubFilter);
-    if(d.deadline)setDeadline(d.deadline);if(d.hasDeadline!==undefined)setHasDeadline(d.hasDeadline);
+    if(d.name)setName(d.name);if(d.org)setOrg(d.org);
     if(d.selDates)setSelDates(d.selDates);
     if(d.startTimes)setStartTimes(d.startTimes);
-    if(d.stops)setStops(d.stops);if(d.dressCode!==undefined)setDressCode(Array.isArray(d.dressCode)?d.dressCode:d.dressCode?[d.dressCode]:[]);if(d.dressNote)setDressNote(d.dressNote);
-    if(d.autoConfirm!==undefined)setAutoConfirm(d.autoConfirm);if(d.autoConfirmN!==undefined)setAutoConfirmN(d.autoConfirmN);
-    if(d.surpriseMode!==undefined)setSurprise(d.surpriseMode);
-    if(d.poll)setPoll(d.poll);
-    if(d.giftOn!==undefined)setGiftOn(d.giftOn);if(d.gift)setGift(d.gift);if(d.bring)setBring(d.bring);
-    if(d.payment)setPayment(d.payment);if(d.step)setStep(d.step);
+    if(d.stops)setStops(d.stops);if(d.step)setStep(d.step);
     setDraftRestored(true);
   },[]);// eslint-disable-line react-hooks/exhaustive-deps
 
   // Save draft helper
-  const saveDraft=(s)=>ls.set(draftKey,{name,desc,org,orgRole,isPublic,pubFilter,deadline,hasDeadline,selDates,startTimes,stops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,poll,giftOn,gift,bring,payment,step:s!==undefined?s:step});
+  const saveDraft=(s)=>ls.set(draftKey,{name,org,selDates,startTimes,stops,step:s!==undefined?s:step});
   // Auto-save every 30s
   useEffect(()=>{const id=setInterval(()=>saveDraft(),30000);return()=>clearInterval(id);});
   const clearDraft=()=>{try{localStorage.removeItem(draftKey)}catch{}};
@@ -160,7 +140,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
     setSaving(true);
     try{
       const cleanStops=stops.filter(s=>(s.options||[]).some(o=>o.name));
-      const plan={id:genId(),name:name.trim()||null,desc:desc.trim()||null,organizer:profile?.name||org.trim()||'',orgRole:orgRole.trim()||null,dates:[...selDates].sort(),startTimes:startTimes.filter(t=>t),timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,stops:cleanStops,dressCode,dressNote,autoConfirm,autoConfirmN,surpriseMode,poll:poll.q.trim()?poll:null,gift:giftOn?gift:null,bring:bring.filter(b=>b.text.trim()),payment,confirmedDate:null,isPublic,pubFilter:isPublic?pubFilter:null,deadline:hasDeadline&&deadline?deadline:null,lang,createdAt:new Date().toISOString()};
+      const plan={id:genId(),name:name.trim()||null,desc:null,organizer:profile?.name||org.trim()||'',dates:[...selDates].sort(),startTimes:startTimes.filter(t=>t),timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,stops:cleanStops,confirmedDate:null,isPublic:false,lang,createdAt:new Date().toISOString()};
       if(authUser)await savePlanWithUser(plan,authUser.id);else await savePlan(plan);
       addMyPlan(plan.id,plan.name,'organizer');
       ls.set('q_state',{screen:'share',planId:plan.id,isOrg:true});clearDraft();onCreated(plan);
@@ -330,110 +310,29 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       {/* ── STEP 1: WHERE? — inline map ── */}
       {step===1&&<>
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{t.whereTitle||'Where?'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'10px'}}>{t.whereSub||'Pick a place. You can edit or add alternatives later.'}</p>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'10px'}}>{lang==='es'?'Elige un lugar. Podrás añadir más puntos después.':'Pick a place. You can add more points later.'}</p>
 
-        {/* Online toggle */}
-        <button onClick={()=>{
-          const isOnline=stops.some(s=>(s.options||[]).some(o=>o.name==='Online'));
-          if(!isOnline){
-            const ns=emptyStop(Date.now());
-            ns.options[0].name='Online';
-            ns.options[0].address='💻';
-            setStops(p=>[...p,ns]);
-          }
-        }} style={{width:'100%',padding:'10px',background:stops.some(s=>(s.options||[]).some(o=>o.name==='Online'))?`${mc}15`:c.CARD,border:`1px solid ${stops.some(s=>(s.options||[]).some(o=>o.name==='Online'))?mc+'50':c.BD}`,borderRadius:'10px',cursor:'pointer',fontFamily:'inherit',fontSize:'13px',color:stops.some(s=>(s.options||[]).some(o=>o.name==='Online'))?mc:c.M2,fontWeight:stops.some(s=>(s.options||[]).some(o=>o.name==='Online'))?'700':'400',marginBottom:'10px'}}>💻 {lang==='es'?'Es online (sin lugar físico)':'It\'s online (no physical location)'}</button>
-
-        {/* Selected places */}
+        {/* Selected place */}
         {stops.filter(s=>(s.options||[]).some(o=>o.name)).map((s,i)=>{
           const opt=(s.options||[])[0]||{};
-          if(opt.name==='Online')return<div key={s.id} style={{padding:'10px 12px',background:c.CARD,border:`1px solid ${mc}30`,borderRadius:'12px',marginBottom:'8px'}}>
-            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'6px'}}>
-              <span style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>💻 Online</span>
-              <button onClick={()=>remStop(s.id)} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'16px'}}>×</button>
+          return<div key={s.id} style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px',background:c.CARD,border:`1px solid ${mc}30`,borderRadius:'12px',marginBottom:'8px'}}>
+            {opt.photo&&<img src={opt.photo} alt="" style={{width:'44px',height:'44px',borderRadius:'10px',objectFit:'cover',flexShrink:0}}/>}
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:'15px',color:c.T,fontWeight:'600',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{opt.name}</div>
+              {opt.address&&<div style={{fontSize:'12px',color:c.M2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>📍 {opt.address}</div>}
+              {opt.rating&&<div style={{fontSize:'11px',color:c.M2}}>⭐{opt.rating}{opt.priceLevel?' · '+'€'.repeat(opt.priceLevel):''}</div>}
             </div>
-            <input value={opt.website||''} onChange={e=>updOption(s.id,opt.id,'website',e.target.value)} placeholder={lang==='es'?'Link o detalles (Zoom, Meet, Discord...)':'Link or details (Zoom, Meet, Discord...)'} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
-          </div>;
-          return<div key={s.id} style={{background:c.CARD,border:`1px solid ${mc}30`,borderRadius:'12px',marginBottom:'8px',overflow:'hidden'}}>
-            <div style={{display:'flex',alignItems:'center',gap:'10px',padding:'10px 12px'}}>
-              <div style={{width:'24px',height:'24px',borderRadius:'50%',background:`${mc}25`,border:`1px solid ${mc}50`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',fontWeight:'800',color:mc,flexShrink:0}}>{i+1}</div>
-              {opt.photo&&<img src={opt.photo} alt="" style={{width:'36px',height:'36px',borderRadius:'8px',objectFit:'cover',flexShrink:0}}/>}
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{fontSize:'14px',color:c.T,fontWeight:'600',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{opt.name}</div>
-                {opt.rating&&<div style={{fontSize:'11px',color:c.M2}}>⭐{opt.rating}{opt.priceLevel?' · '+'€'.repeat(opt.priceLevel):''}</div>}
-              </div>
-              <button onClick={()=>updStop(s.id,'_expanded',!s._expanded)} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'12px',padding:'4px'}}>{s._expanded?'▾':'⚙️'}</button>
-              <button onClick={()=>remStop(s.id)} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'16px',flexShrink:0}}>×</button>
-            </div>
-            {s._expanded&&<div style={{padding:'8px 12px 12px',borderTop:`1px solid ${c.BD}`,display:'flex',flexDirection:'column',gap:'10px'}}>
-              {/* Meeting point */}
-              <div>
-                <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>📍 {t.meetingPointLbl||'Meeting point'}</div>
-                <div style={{display:'flex',gap:'6px'}}>
-                  <input value={s._mpQuery||s.meetingPoint||''} onChange={e=>updStop(s.id,'_mpQuery',e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();const q=s._mpQuery||s.meetingPoint;if(!q||!inlineMapObj.current)return;const svc=new google.maps.places.PlacesService(inlineMapObj.current);svc.textSearch({query:q,location:opt.lat&&opt.lng?{lat:opt.lat,lng:opt.lng}:undefined,radius:2000},(res,st2)=>{if(st2==='OK')updStop(s.id,'_mpResults',res.slice(0,5).map(r=>({name:r.name,address:r.formatted_address,lat:r.geometry.location.lat(),lng:r.geometry.location.lng()})));});}}} placeholder={t.meetingPointPh||'Search meeting point... (Enter)'} style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
-                  <button onClick={()=>{const q=s._mpQuery||s.meetingPoint;if(!q||!inlineMapObj.current)return;const svc=new google.maps.places.PlacesService(inlineMapObj.current);svc.textSearch({query:q,location:opt.lat&&opt.lng?{lat:opt.lat,lng:opt.lng}:undefined,radius:2000},(res,st2)=>{if(st2==='OK')updStop(s.id,'_mpResults',res.slice(0,5).map(r=>({name:r.name,address:r.formatted_address,lat:r.geometry.location.lat(),lng:r.geometry.location.lng()})));});}} style={{background:mc,border:'none',borderRadius:'8px',padding:'8px 10px',color:'#0A0A0A',cursor:'pointer',fontSize:'13px',flexShrink:0}}>🔍</button>
-                </div>
-                {s._mpResults?.length>0&&<div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',marginTop:'4px',maxHeight:'150px',overflowY:'auto'}}>
-                  {s._mpResults.map((r,ri)=><div key={ri} onClick={()=>{updStop(s.id,'meetingPoint',r.name);updStop(s.id,'meetingPointLat',r.lat);updStop(s.id,'meetingPointLng',r.lng);updStop(s.id,'_mpResults',[]);updStop(s.id,'_mpQuery','');
-                    if(inlineMapObj.current&&r.lat&&r.lng){
-                      const mpMarker=new google.maps.Marker({position:{lat:r.lat,lng:r.lng},map:inlineMapObj.current,label:{text:'📍',fontSize:'14px'},icon:{path:google.maps.SymbolPath.CIRCLE,scale:12,fillColor:'#f59e0b',fillOpacity:1,strokeColor:'#d97706',strokeWeight:2},title:'Meeting: '+r.name});
-                      inlineMarkers.current.push(mpMarker);
-                    }
-                  }} style={{padding:'8px 12px',cursor:'pointer',borderBottom:ri<s._mpResults.length-1?`1px solid ${c.BD}`:'none',fontSize:'13px'}} onMouseEnter={e=>e.currentTarget.style.background=c.CARD} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
-                    <div style={{color:c.T,fontWeight:'500'}}>{r.name}</div>
-                    <div style={{fontSize:'11px',color:c.M2}}>{r.address}</div>
-                  </div>)}
-                </div>}
-                {s.meetingPoint&&!s._mpResults?.length&&<div style={{marginTop:'6px'}}>
-                  <div style={{fontSize:'12px',color:mc,marginBottom:'4px'}}>✓ {s.meetingPoint}</div>
-                  <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
-                    <input type="number" value={s.meetingMinsBefore||''} onChange={e=>updStop(s.id,'meetingMinsBefore',e.target.value)} placeholder="15" style={{width:'80px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none'}}/>
-                    <span style={{fontSize:'12px',color:c.M2}}>{t.minsBefore||'min before'}</span>
-                    <button onClick={()=>{updStop(s.id,'meetingPoint','');updStop(s.id,'meetingPointLat',null);updStop(s.id,'meetingPointLng',null);}} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'14px',marginLeft:'auto'}}>×</button>
-                  </div>
-                </div>}
-              </div>
-              <div style={{height:'1px',background:c.BD}}/>
-              {/* Capacity — for this venue */}
-              <div>
-                <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>👥 {lang==='es'?'Aforo':'Capacity'}</div>
-                <div style={{display:'flex',gap:'8px'}}>
-                  <div style={{flex:1}}>
-                    <input type="number" value={s.minAttendees||''} onChange={e=>updStop(s.id,'minAttendees',e.target.value)} placeholder={lang==='es'?'Mín':'Min'} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
-                  </div>
-                  <div style={{flex:1}}>
-                    <input type="number" value={s.maxCapacity||''} onChange={e=>updStop(s.id,'maxCapacity',e.target.value)} placeholder={lang==='es'?'Máx':'Max'} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
-                  </div>
-                </div>
-                <div style={{fontSize:'11px',color:c.M,marginTop:'4px',lineHeight:1.5}}>
-                  {s.minAttendees?`⚠️ ${lang==='es'?`Si no llegan ${s.minAttendees}, este punto se cancela automáticamente`:`If fewer than ${s.minAttendees} attend, this point is auto-cancelled`}`:''}
-                  {s.minAttendees&&s.maxCapacity?' · ':''}
-                  {s.maxCapacity?`🔒 ${lang==='es'?`Máximo ${s.maxCapacity} personas`:`Maximum ${s.maxCapacity} people`}`:''}
-                </div>
-              </div>
-              {/* Transport from previous */}
-              {i>0&&<div>
-                <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>🚗 {lang==='es'?'Cómo llegar desde el punto anterior':'How to get here from previous point'}</div>
-                <div style={{display:'flex',gap:'4px',flexWrap:'wrap'}}>
-                  {[{k:'walk',l:'🚶'},{k:'car',l:'🚗'},{k:'transit',l:'🚇'},{k:'bike',l:'🚲'},{k:'taxi',l:'🚕'}].map(tr=><button key={tr.k} onClick={()=>updStop(s.id,'transport',s.transport===tr.k?'':tr.k)} style={{padding:'6px 10px',borderRadius:'8px',border:`1px solid ${s.transport===tr.k?mc+'60':c.BD}`,background:s.transport===tr.k?`${mc}15`:c.CARD,cursor:'pointer',fontSize:'16px'}}>{tr.l}</button>)}
-                </div>
-              </div>}
-            </div>}
+            <button onClick={()=>remStop(s.id)} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'18px',flexShrink:0,padding:'4px'}}>×</button>
           </div>;
         })}
 
-        {/* Inline map with search */}
-        <div style={{marginBottom:'12px'}}>
-          <div style={{fontSize:'13px',color:mc,fontWeight:'600',marginBottom:'6px'}}>
-            {stops.filter(s=>(s.options||[]).some(o=>o.name)).length===0
-              ?(t.pickFirstPlace||'📍 Pick the first place')
-              :`📍 ${t.placeN||'Place'} ${stops.filter(s=>(s.options||[]).some(o=>o.name)).length+1}`}
-          </div>
-          {/* Search bar */}
+        {/* Inline map with search — only if no place yet */}
+        {!stops.some(s=>(s.options||[]).some(o=>o.name))&&<div style={{marginBottom:'12px'}}>
+          <div style={{fontSize:'13px',color:mc,fontWeight:'600',marginBottom:'6px'}}>{lang==='es'?'📍 Elige el lugar':'📍 Pick the place'}</div>
           <div style={{display:'flex',gap:'6px',marginBottom:'8px'}}>
             <input ref={inlineSearchRef} defaultValue='' onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();inlineSearch(inlineSearchRef.current?.value);}}} placeholder={t.searchPlacePh||'Search a place... (Enter)'} style={{flex:1,background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none'}}/>
             <button onClick={()=>inlineSearch(inlineSearchRef.current?.value)} style={{background:mc,border:'none',borderRadius:'10px',padding:'10px 14px',color:'#0A0A0A',cursor:'pointer',fontWeight:'700',fontSize:'14px'}}>🔍</button>
           </div>
-          {/* Search results */}
           {inlineResults.length>0&&<div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',marginBottom:'8px',maxHeight:'200px',overflowY:'auto'}}>
             {inlineResults.map((r,i)=><div key={i} onClick={()=>pickInlineResult(r)} style={{padding:'10px 14px',cursor:'pointer',borderBottom:i<inlineResults.length-1?`1px solid ${c.BD}`:'none'}} onMouseEnter={e=>e.currentTarget.style.background=c.CARD2} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
               <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
@@ -444,13 +343,13 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
               <div style={{fontSize:'12px',color:c.M2}}>{r.address}</div>
             </div>)}
           </div>}
-          {/* Map container */}
           <div ref={inlineMapRef} style={{width:'100%',height:'250px',borderRadius:'12px',overflow:'hidden',border:`1px solid ${c.BD}`,background:c.CARD2}}/>
-        </div>
+        </div>}
 
-        {/* Continue or done */}
+        {/* Place selected — show continue */}
         {stops.some(s=>(s.options||[]).some(o=>o.name))&&<>
-          <div style={{marginTop:'10px'}}><Btn onClick={()=>changeStep(2)} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
+          <div style={{fontSize:'12px',color:c.M,textAlign:'center',marginBottom:'8px'}}>{lang==='es'?'Podrás añadir más puntos, alternativas y detalles después de crear el plan.':'You can add more points, alternatives and details after creating the plan.'}</div>
+          <Btn onClick={()=>changeStep(2)} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn>
         </>}
       </>}
 
@@ -465,21 +364,17 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       {/* ── STEP 0: WHEN? ── */}
       {step===0&&<>
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{t.whenTitle||'When?'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{t.whenSub||'Pick one date and time. You can add alternatives later.'}</p>
-        <CalendarPicker selected={selDates} onChange={d=>setSelDates(d.slice(-3))} c={c} lang={lang} max={3}/>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{lang==='es'?'Elige una fecha y hora. Podrás añadir alternativas más tarde.':'Pick a date and time. You can add alternatives later.'}</p>
+        <CalendarPicker selected={selDates} onChange={d=>setSelDates(d.slice(-1))} c={c} lang={lang} max={1}/>
         {selDates.length>0&&<div style={{marginTop:'16px'}}>
           <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'8px'}}>{t.whatTime||'What time?'}</div>
-          {startTimes.map((st,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'8px'}}>
-            <div style={{flex:1}}><ClockPicker value={st} onChange={v=>{const n=[...startTimes];n[i]=v;setStartTimes(n);}} c={c}/></div>
-            {startTimes.length>1&&<button onClick={()=>setStartTimes(p=>p.filter((_,j)=>j!==i))} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'16px',padding:'4px'}}>×</button>}
-          </div>)}
-          {startTimes.length<3&&startTimes[startTimes.length-1]&&<button onClick={()=>setStartTimes(p=>[...p,''])} style={{background:'none',border:`1px dashed ${c.BD}`,borderRadius:'10px',padding:'10px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',width:'100%'}}>+ {t.addTime||'Add time option'}</button>}
+          <ClockPicker value={startTimes[0]||''} onChange={v=>setStartTimes([v])} c={c}/>
         </div>}
         <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(1)} disabled={selDates.length<1} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
       </>}
 
       {/* ── STEP 3: EXTRAS ── */}
-      {step===3&&(()=>{
+      {false&&(()=>{
         const togSec=id=>setOpenSections(p=>({...p,[id]:!p[id]}));
         const Sec=({id,icon,label,hasData,children})=>{const open=!!openSections[id];return<div style={{marginBottom:'12px'}}>
           <div onClick={()=>togSec(id)} style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px 16px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:open?'12px 12px 0 0':'12px',cursor:'pointer',userSelect:'none'}}>
