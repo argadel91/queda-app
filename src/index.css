@@ -40,3 +40,34 @@ input, textarea, select, button {
 input[type=number]::-webkit-inner-spin-button {
   -webkit-appearance: none;
 }
+
+/* Button press feedback */
+button:active {
+  transform: scale(0.97);
+  transition: transform 0.1s;
+}
+
+/* Toast animation */
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.toast {
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Step transitions */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.25s ease-out;
+}
+
+/* Safe area for phones with home indicator */
+.safe-bottom {
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
