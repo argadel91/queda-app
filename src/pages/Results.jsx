@@ -390,66 +390,57 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
             })}
           </div>}
 
-          {/* Visual attendance grid */}
+          {/* People list — sorted by attendance */}
           {(()=>{
-            const stops=plan.stops||[];
-            const hasStops=stops.filter(s=>(s.options?.[0]?.name||s.name)).length>0;
-            // Score each person: count green points
-            const scored=rs.map(r=>{
-              const greenCount=hasStops?stops.filter(s=>r.stopAttend?.[s.id]==='yes'||(!r.stopAttend?.[s.id]&&r.avail&&Object.values(r.avail).some(v=>v==='yes'))).length:0;
-              const hasAnyYes=r.avail&&Object.values(r.avail).some(v=>v==='yes');
-              return{...r,greenCount,hasAnyYes};
+            const hasAnyYes=r2=>r2.avail&&Object.values(r2.avail).some(v=>v==='yes');
+            const yesSlots=r2=>Object.values(r2.avail||{}).filter(v=>v==='yes').length;
+            const sorted=[...rs].sort((a,b)=>{
+              if(hasAnyYes(a)&&!hasAnyYes(b))return-1;if(!hasAnyYes(a)&&hasAnyYes(b))return 1;
+              return yesSlots(b)-yesSlots(a);
             });
-            // Also add people who haven't responded (from no-response)
-            // Sort: most green first, then partial, then all red, then no response
-            const sorted=[...scored].sort((a,b)=>{
-              if(a.hasAnyYes&&!b.hasAnyYes)return-1;if(!a.hasAnyYes&&b.hasAnyYes)return 1;
-              return b.greenCount-a.greenCount;
-            });
-            const stopNames=stops.filter(s=>(s.options?.[0]?.name||s.name)).map((s,i)=>({id:s.id,name:s.options?.[0]?.name||`${i+1}`,short:(s.options?.[0]?.name||`${i+1}`).slice(0,8)}));
             return<div style={{marginBottom:'14px'}}>
-              {/* Header row with point names */}
-              {hasStops&&stopNames.length>0&&<div style={{display:'flex',gap:'4px',marginBottom:'8px',paddingLeft:'100px'}}>
-                {stopNames.map((sn,i)=><div key={sn.id} style={{flex:1,textAlign:'center',fontSize:'10px',color:c.M2,fontWeight:'600',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:'60px'}}>{sn.short}</div>)}
-              </div>}
-              {/* Person rows */}
-              {sorted.map((r,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:'8px',padding:'8px 0',borderBottom:`1px solid ${c.BD}20`}}>
-                <div style={{width:'92px',flexShrink:0,overflow:'hidden'}}>
-                  <div style={{fontSize:'13px',color:r.hasAnyYes?c.T:c.M2,fontWeight:r.hasAnyYes?'600':'400',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.name}</div>
-                  {r.comment&&<div style={{fontSize:'10px',color:c.M,fontStyle:'italic',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>"{r.comment}"</div>}
-                </div>
-                {hasStops&&stopNames.length>0?<div style={{display:'flex',gap:'4px',flex:1}}>
-                  {stops.filter(s=>(s.options?.[0]?.name||s.name)).map(s=>{
-                    const v=r.stopAttend?.[s.id];
-                    const cancelled=cancelledStops.has(s.id);
-                    const bg=cancelled?`${c.M}20`:v==='yes'?'#22c55e30':v==='no'?'#ef444430':`${c.M}10`;
-                    const clr=cancelled?c.M:v==='yes'?'#22c55e':v==='no'?'#ef4444':c.M;
-                    const icon=cancelled?'—':v==='yes'?'✓':v==='no'?'✗':'·';
-                    return<div key={s.id} style={{flex:1,maxWidth:'60px',textAlign:'center',padding:'6px 2px',borderRadius:'6px',background:bg,color:clr,fontSize:'12px',fontWeight:'700'}}>{icon}</div>;
-                  })}
-                </div>
-                :<div style={{flex:1,display:'flex',gap:'4px'}}>
-                  {r.hasAnyYes
-                    ?<span style={{fontSize:'12px',color:'#22c55e',fontWeight:'600'}}>✅ {lang==='es'?'Confirmado':'Confirmed'}</span>
-                    :<span style={{fontSize:'12px',color:c.M}}>⏳ {lang==='es'?'Sin respuesta':'No response'}</span>}
-                </div>}
-                {r.how&&<span style={{fontSize:'12px',flexShrink:0}}>{({car:'🚗',moto:'🏍️',transit:'🚇',taxi:'🚕',walk:'🚶',bike:'🚲'})[r.how]||''}</span>}
-              </div>)}
+              <div style={{fontSize:'12px',color:c.M2,fontWeight:'600',marginBottom:'10px'}}>👥 {total} {lang==='es'?'respuestas':'responses'}</div>
+              {sorted.map((r,i)=>{
+                const yes=hasAnyYes(r);
+                const expanded=openSection['p_'+i];
+                return<div key={i} style={{marginBottom:'6px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',overflow:'hidden'}}>
+                  <div onClick={()=>setOpenSection(p=>({...p,['p_'+i]:!p['p_'+i]}))} style={{display:'flex',alignItems:'center',gap:'10px',padding:'10px 14px',cursor:'pointer'}}>
+                    <div style={{width:'8px',height:'8px',borderRadius:'50%',background:yes?'#22c55e':r.avail&&Object.values(r.avail).some(v=>v==='no')?'#ef4444':c.M,flexShrink:0}}/>
+                    <span style={{flex:1,fontSize:'14px',color:yes?c.T:c.M2,fontWeight:yes?'600':'400'}}>{r.name}</span>
+                    {r.comment&&<span style={{fontSize:'11px',color:c.M}}>💬</span>}
+                    {r.how&&<span style={{fontSize:'12px'}}>{({car:'🚗',moto:'🏍️',transit:'🚇',taxi:'🚕',walk:'🚶',bike:'🚲'})[r.how]||''}</span>}
+                    <span style={{fontSize:'11px',color:c.M2}}>{expanded?'▾':'▸'}</span>
+                  </div>
+                  {expanded&&<div style={{padding:'8px 14px 12px',borderTop:`1px solid ${c.BD}`,fontSize:'13px'}}>
+                    {r.comment&&<div style={{color:c.M2,fontStyle:'italic',marginBottom:'8px',padding:'6px 10px',background:c.CARD2,borderRadius:'8px'}}>"{r.comment}"</div>}
+                    <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
+                      {slots.map(s=>{const v=r.avail?.[s.key];return<span key={s.key} style={{fontSize:'11px',padding:'3px 9px',borderRadius:'20px',background:v==='yes'?'#22c55e20':v==='no'?'#ef444420':`${c.M}10`,color:v==='yes'?'#22c55e':v==='no'?'#ef4444':c.M,border:`1px solid ${v==='yes'?'#22c55e30':v==='no'?'#ef444430':c.BD}`,textTransform:'capitalize'}}>{v==='yes'?'✓':'✗'} {fmtShort(s.date,lang)}{s.startTime?' '+s.startTime:''}</span>;})}
+                    </div>
+                  </div>}
+                </div>;
+              })}
             </div>;
           })()}
 
-          {/* Other date options for organizer */}
+          {/* Ranking: all date options best to worst */}
           {slots.length>1&&<div style={{marginBottom:'14px'}}>
-            <div style={{fontSize:'12px',color:c.M2,fontWeight:'600',marginBottom:'8px'}}>{lang==='es'?'Otras opciones de fecha':'Other date options'}</div>
-            {[...slots].sort((a,b)=>score(b.key)-score(a.key)).filter(s=>!best||s.key!==best.key).map(s=>{
-              const ny=cntY(s.key);const nn=cntN(s.key);
-              return<div key={s.key} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 12px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',marginBottom:'6px'}}>
-                <span style={{fontSize:'13px',color:c.T,textTransform:'capitalize'}}>{fmtShort(s.date,lang)}{s.startTime?' · '+s.startTime:''}</span>
-                <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
-                  <span style={{fontSize:'12px',color:'#22c55e'}}>✅ {ny}</span>
-                  {nn>0&&<span style={{fontSize:'12px',color:'#ef4444'}}>❌ {nn}</span>}
-                  {isOrgRef.current&&!plan.confirmedDate&&ny>0&&<button onClick={()=>confirmDate(s.date,s.startTime)} style={{padding:'4px 10px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'6px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'11px',fontWeight:'600'}}>{t.confirmBtn||'Confirm'}</button>}
+            <div style={{fontSize:'12px',color:c.M2,fontWeight:'600',marginBottom:'8px'}}>{lang==='es'?'Ranking de fechas':'Date ranking'}</div>
+            {[...slots].sort((a,b)=>score(b.key)-score(a.key)).map((s,i)=>{
+              const ny=cntY(s.key);const nn=cntN(s.key);const pct=total>0?Math.round(ny/total*100):0;
+              const isBest=best&&s.key===best.key;
+              return<div key={s.key} style={{display:'flex',alignItems:'center',gap:'10px',padding:'10px 12px',background:isBest?`${mc}10`:c.CARD,border:`1px solid ${isBest?mc+'30':c.BD}`,borderRadius:'10px',marginBottom:'6px'}}>
+                <span style={{fontSize:'14px',width:'20px',textAlign:'center'}}>{i===0?'⭐':i+1}</span>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:'13px',color:isBest?mc:c.T,fontWeight:isBest?'700':'500',textTransform:'capitalize'}}>{fmtShort(s.date,lang)}{s.startTime?' · '+s.startTime:''}</div>
+                  <div style={{height:'4px',background:c.BD,borderRadius:'2px',marginTop:'4px',overflow:'hidden'}}>
+                    <div style={{height:'100%',width:`${pct}%`,background:isBest?mc:'#22c55e',borderRadius:'2px'}}/>
+                  </div>
                 </div>
+                <div style={{textAlign:'right',flexShrink:0}}>
+                  <div style={{fontSize:'13px',fontWeight:'700',color:isBest?mc:c.T}}>👥 {ny}/{total}</div>
+                  <div style={{fontSize:'11px',color:c.M2}}>{pct}%</div>
+                </div>
+                {isOrgRef.current&&!plan.confirmedDate&&ny>0&&<button onClick={()=>confirmDate(s.date,s.startTime)} style={{padding:'4px 10px',background:isBest?mc:c.CARD2,border:isBest?'none':`1px solid ${c.BD}`,borderRadius:'6px',color:isBest?'#0A0A0A':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'11px',fontWeight:'600',flexShrink:0}}>{t.confirmBtn||'✓'}</button>}
               </div>;
             })}
           </div>}

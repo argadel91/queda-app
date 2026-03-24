@@ -19,7 +19,6 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
   const[guestRole,setGuestRole]=useState(prev?.role||'');
   const[saving,setSaving]=useState(false);const[done,setDone]=useState(false);const[err,setErr]=useState('');
   const[rStep,setRStep]=useState(0);
-  const hasStops=(plan.stops||[]).filter(s=>(s.options?.[0]?.name||s.name)).length>0;
   const[altDate,setAltDate]=useState('');const[altNote,setAltNote]=useState('');
   const[pollVote,setPollVote]=useState(prev?.pollVote||null);
   const[stopAttend,setStopAttend]=useState(prev?.stopAttend||{});
@@ -75,12 +74,9 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
     <div style={{fontSize:'64px',marginBottom:'20px'}}>{'🎉'}</div>
     <h2 style={{fontFamily:"'Syne',serif",fontSize:'28px',fontWeight:'800',color:mc,marginBottom:'10px'}}>{t.savedTitle}</h2>
     <p style={{color:c.M2,marginBottom:'20px'}}>{t.savedSub}</p>
+    <Btn onClick={onDone} full style={{padding:'14px',marginBottom:'10px'}} c={c} accent={mc}>{t.viewRes||'View results'} →</Btn>
     {plan.organizer&&<a href={`https://wa.me/?text=${encodeURIComponent(waOrgText)}`} target="_blank" rel="noreferrer" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',padding:'13px 20px',background:'#25D366',borderRadius:'12px',color:'#fff',textDecoration:'none',fontWeight:'700',fontSize:'14px',marginBottom:'16px'}}>💬 {`${t.notifyTo} ${plan.organizer}`}</a>}
-    <div style={{background:`${mc}0D`,border:`1px solid ${mc}30`,borderRadius:'14px',padding:'20px'}}>
-      <div style={{fontSize:'15px',fontWeight:'600',color:c.T,marginBottom:'6px'}}>{t.viralQ}</div>
-      <div style={{fontSize:'13px',color:c.M2,marginBottom:'14px'}}>{t.viralSub}</div>
-      <Btn onClick={onCreateOwn} style={{padding:'11px 24px',background:mc,color:'#0A0A0A'}} c={c}>{t.viralBtn}</Btn>
-    </div>
+    <Btn onClick={onCreateOwn} v="secondary" full style={{padding:'12px'}} c={c}>{t.viralBtn}</Btn>
     <div style={{textAlign:'center',padding:'20px 0',fontSize:'12px',color:c.M}}>
       <span style={{fontFamily:"'Syne',serif",fontWeight:'800'}}>queda<span style={{color:c.A}}>.</span></span> — {t.landingFooter||'Group plans, zero chaos.'}
     </div>
@@ -101,7 +97,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
     {plan.confirmedDate&&<div style={{background:`${mc}15`,border:`1px solid ${mc}50`,borderRadius:'12px',padding:'12px 14px',marginBottom:'16px',display:'flex',gap:'10px',alignItems:'center'}}><span style={{fontSize:'18px'}}>📌</span><div><div style={{fontSize:'11px',color:mc,fontWeight:'700',textTransform:'uppercase',letterSpacing:'.06em'}}>{t.confirmedDate}</div><div style={{fontSize:'14px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,pLang)}</div></div></div>}
     {plan.desc&&<p style={{fontSize:'14px',color:c.T,lineHeight:1.7,marginBottom:'16px',padding:'12px 14px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px'}}>{plan.desc}</p>}
     {budget>0&&<div style={{background:`${mc}0D`,border:`1px solid ${mc}30`,borderRadius:'10px',padding:'12px 16px',marginBottom:'16px',display:'flex',justifyContent:'space-between'}}><span style={{color:c.M2,fontSize:'13px'}}>{t.estPer||'Estimado'}</span><span style={{color:mc,fontWeight:'700'}}>{budget.toFixed(0)}€</span></div>}
-    <Stepper cur={rStep} labels={hasStops?[pLang==='es'?'Fechas':'Dates',pLang==='es'?'Puntos':'Points',pLang==='es'?'Enviar':'Send']:[pLang==='es'?'Fechas':'Dates',pLang==='es'?'Enviar':'Send']} c={c} accent={mc}/>
+    <Stepper cur={rStep} labels={[pLang==='es'?'Fechas':'Dates',pLang==='es'?'Enviar':'Send']} c={c} accent={mc}/>
     {rStep===0&&<><div style={{marginBottom:'14px'}}><Lbl c={c}>{t.yourName}</Lbl><Inp value={name} onChange={v=>{setName(v);ls.set('q_myname',v);}} placeholder={t.yourNamePh} c={c}/></div>
     {plan.customRoles?.length>0&&<div style={{marginBottom:'14px'}}>
       <Lbl c={c}>{t.yourRoleLbl||'Your role'} <span style={{fontWeight:'400',textTransform:'none',fontSize:'11px'}}>({t.optionalLbl||'optional'})</span></Lbl>
@@ -163,7 +159,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
     <Btn onClick={()=>{if(!name.trim()){setErr(pLang==='es'?'Escribe tu nombre':'Enter your name');return;}if(!Object.values(avail).some(v=>v==='yes')){setErr(t.markAtLeastOne);return;}setErr('');setRStep(1);}} full style={{padding:'14px'}} c={c} accent={mc}>{pLang==='es'?'Siguiente':'Next'} →</Btn>
     </>}
 
-    {rStep===1&&hasStops&&<>
+    {false&&<>
     {/* STOP OPTION VOTING */}
     {multiStops.length>0&&<div style={{marginBottom:'16px'}}>
       <Lbl c={c}>🗺️ {t.chooseOption}</Lbl>
@@ -217,11 +213,9 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
         </div>);
       })}
     </div>}
-    <Btn onClick={()=>setRStep(hasStops?2:1)} full style={{padding:'14px'}} c={c} accent={mc}>{pLang==='es'?'Siguiente':'Next'} →</Btn>
-    <button onClick={()=>setRStep(0)} style={{width:'100%',padding:'10px',background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',marginTop:'8px'}}>← {pLang==='es'?'Atrás':'Back'}</button>
     </>}
 
-    {rStep===(hasStops?2:1)&&<>
+    {rStep===1&&<>
     <div style={{marginBottom:'14px'}}>
       <Lbl c={c}>{t.howGet} <span style={{fontWeight:'400',textTransform:'none',fontSize:'11px'}}>{t.howOpt}</span></Lbl>
       <select value={how} onChange={e=>setHow(e.target.value)} style={{background:c.CARD,border:`1px solid ${c.BD}`,color:how?c.T:c.M,fontSize:'14px',padding:'12px 14px',borderRadius:'10px',width:'100%',fontFamily:'inherit',marginBottom:how==='other'?'8px':'0'}}>
@@ -249,7 +243,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
 
     {err&&<div style={{color:'#ef4444',fontSize:'13px',padding:'8px 12px',background:'#ef444410',borderRadius:'8px',border:'1px solid #ef444430',marginBottom:'10px'}}>{err}</div>}
     <Btn onClick={submit} disabled={!name.trim()||saving} full style={{padding:'15px',fontSize:'15px',background:mc,color:'#0A0A0A'}} c={c}>{saving?t.saving:t.saveAvail}</Btn>
-    <button onClick={()=>setRStep(hasStops?1:0)} style={{width:'100%',padding:'10px',background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',marginTop:'8px'}}>← {pLang==='es'?'Atrás':'Back'}</button>
+    <button onClick={()=>setRStep(0)} style={{width:'100%',padding:'10px',background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',marginTop:'8px'}}>← {pLang==='es'?'Atrás':'Back'}</button>
     </>}
   </div>);
 }
