@@ -489,7 +489,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang}){
                   {(plan.stops||[]).map((st,si)=>{const v=r.stopAttend?.[st.id];if(!v)return null;const sName=st.options?.[0]?.name||`${si+1}`;const vc={yes:'#22c55e',no:'#ef4444'};const vi={yes:'✅',no:'❌'};return<span key={st.id} style={{fontSize:'10px',padding:'2px 7px',borderRadius:'12px',background:`${vc[v]||c.CARD2}15`,color:vc[v]||c.M2,border:`1px solid ${(vc[v]||c.BD)}30`}}>{vi[v]||'?'} {sName}</span>;})}
                 </div>}
                 {r.stopPrefs&&plan.stops?.length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:'4px',marginTop:'4px'}}>
-                  {(plan.stops||[]).flatMap((st,si)=>(st.options||[]).filter((opt)=>r.stopPrefs?.[st.id]===opt.id||r.stopPrefs?.[st.id+'_'+opt.id]).map((opt)=><span key={st.id+'_'+opt.id} style={{fontSize:'10px',padding:'2px 7px',borderRadius:'12px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`}}>⭐ {opt.name||`${t.stop||'Stop'} ${si+1}`}</span>))}
+                  {(plan.stops||[]).flatMap((st,si)=>(st.options||[]).filter((opt)=>r.stopPrefs?.[st.id]===opt.id||r.stopPrefs?.[st.id+'_'+opt.id]).map((opt)=><span key={st.id+'_'+opt.id} style={{fontSize:'10px',padding:'2px 7px',borderRadius:'12px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`}}>⭐ {opt.name||`${si+1}`}</span>))}
                 </div>}
               </div>)}
             </div>}

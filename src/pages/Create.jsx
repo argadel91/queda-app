@@ -29,7 +29,7 @@ const emptyOption = () => ({
 
 const emptyStop = (id, suggestedStart) => ({
   id, options: [emptyOption()], startTime: suggestedStart || '', duration: '', tolerance: '', notes: '',
-  maxCapacity: '', orgAttends: true,
+  maxCapacity: '', orgAttends: true, meetingPoint: '', meetingMinsBefore: '', minAttendees: '',
 });
 
 export default function Create({onBack,onCreated,c,lang,authUser,profile}){
@@ -123,7 +123,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   };
   const remStop=id=>setStops(p=>p.filter(s=>s.id!==id));
   const updStop=(id,k,v)=>setStops(p=>p.map(s=>s.id===id?{...s,[k]:v}:s));
-  const addOption=(stopId)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:[...s.options,emptyOption()]}:s));
+  const addOption=(stopId)=>setStops(p=>p.map(s=>s.id===stopId&&s.options.length<3?{...s,options:[...s.options,emptyOption()]}:s));
   const remOption=(stopId,optId)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.filter(o=>o.id!==optId)}:s));
   const updOption=(stopId,optionId,key,value)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.map(o=>o.id===optionId?{...o,[key]:value}:o)}:s));
 
@@ -382,13 +382,15 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       {step===0&&<>
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{t.whenTitle||'When?'}</h2>
         <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{t.whenSub||'Pick one date and time. You can add alternatives later.'}</p>
-        <CalendarPicker selected={selDates} onChange={d=>setSelDates(d.slice(-1))} c={c} lang={lang}/>
+        <CalendarPicker selected={selDates} onChange={d=>setSelDates(d.slice(-3))} c={c} lang={lang} max={3}/>
         {selDates.length>0&&<div style={{marginTop:'16px'}}>
-          <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'8px'}}>{t.whatTime||'What time? (24h)'}</div>
-          <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
-            <input type="time" value={startTimes[0]||''} onChange={e=>{const n=[...startTimes];n[0]=e.target.value;setStartTimes(n);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',flex:1}}/>
-            {startTimes[0]&&<span style={{fontSize:'14px',color:c.M2,fontWeight:'500',flexShrink:0}}>{(()=>{const[h,m]=(startTimes[0]||'').split(':').map(Number);if(isNaN(h))return'';const ampm=h>=12?'PM':'AM';const h12=h%12||12;return`${h12}:${String(m).padStart(2,'0')} ${ampm}`;})()}</span>}
-          </div>
+          <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'8px'}}>{t.whatTime||'What time?'}</div>
+          {startTimes.map((st,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'8px'}}>
+            <input type="time" value={st||''} onChange={e=>{const n=[...startTimes];n[i]=e.target.value;setStartTimes(n);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',flex:1}}/>
+            {st&&<span style={{fontSize:'14px',color:c.M2,fontWeight:'500',flexShrink:0}}>{(()=>{const[h,m]=(st||'').split(':').map(Number);if(isNaN(h))return'';const ampm=h>=12?'PM':'AM';const h12=h%12||12;return`${h12}:${String(m).padStart(2,'0')} ${ampm}`;})()}</span>}
+            {startTimes.length>1&&<button onClick={()=>setStartTimes(p=>p.filter((_,j)=>j!==i))} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'16px',padding:'4px'}}>×</button>}
+          </div>)}
+          {startTimes.length<3&&startTimes[startTimes.length-1]&&<button onClick={()=>setStartTimes(p=>[...p,''])} style={{background:'none',border:`1px dashed ${c.BD}`,borderRadius:'10px',padding:'10px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',width:'100%'}}>+ {t.addTime||'Add time option'}</button>}
         </div>}
         <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(1)} disabled={selDates.length<1} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.cont}</Btn></div>
       </>}
