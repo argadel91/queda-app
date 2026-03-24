@@ -134,6 +134,12 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
           const o=(s.options||[])[0];
           if(o?.lat&&o?.lng&&inlineMapObj.current){
             idx++;
+            // Meeting point marker (orange)
+            if(s.meetingPointLat&&s.meetingPointLng){
+              const mpM=new google.maps.Marker({position:{lat:s.meetingPointLat,lng:s.meetingPointLng},map:inlineMapObj.current,label:{text:'📍',fontSize:'14px'},icon:{path:google.maps.SymbolPath.CIRCLE,scale:12,fillColor:'#f59e0b',fillOpacity:1,strokeColor:'#d97706',strokeWeight:2},title:'Meeting: '+(s.meetingPoint||'')});
+              inlineMarkers.current.push(mpM);
+            }
+            // Venue marker (green)
             const marker=new google.maps.Marker({position:{lat:o.lat,lng:o.lng},map:inlineMapObj.current,label:{text:String(idx),color:'#0A0A0A',fontWeight:'800'},icon:{path:google.maps.SymbolPath.CIRCLE,scale:14,fillColor:'#CDFF6C',fillOpacity:1,strokeColor:'#CDFF6C',strokeWeight:2}});
             inlineMarkers.current.push(marker);
           }
@@ -366,7 +372,12 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
                   <button onClick={()=>{const q=s._mpQuery||s.meetingPoint;if(!q||!inlineMapObj.current)return;const svc=new google.maps.places.PlacesService(inlineMapObj.current);svc.textSearch({query:q,location:opt.lat&&opt.lng?{lat:opt.lat,lng:opt.lng}:undefined,radius:2000},(res,st2)=>{if(st2==='OK')updStop(s.id,'_mpResults',res.slice(0,5).map(r=>({name:r.name,address:r.formatted_address,lat:r.geometry.location.lat(),lng:r.geometry.location.lng()})));});}} style={{background:mc,border:'none',borderRadius:'8px',padding:'8px 10px',color:'#0A0A0A',cursor:'pointer',fontSize:'13px',flexShrink:0}}>🔍</button>
                 </div>
                 {s._mpResults?.length>0&&<div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',marginTop:'4px',maxHeight:'150px',overflowY:'auto'}}>
-                  {s._mpResults.map((r,ri)=><div key={ri} onClick={()=>{updStop(s.id,'meetingPoint',r.name);updStop(s.id,'meetingPointLat',r.lat);updStop(s.id,'meetingPointLng',r.lng);updStop(s.id,'_mpResults',[]);updStop(s.id,'_mpQuery','');}} style={{padding:'8px 12px',cursor:'pointer',borderBottom:ri<s._mpResults.length-1?`1px solid ${c.BD}`:'none',fontSize:'13px'}} onMouseEnter={e=>e.currentTarget.style.background=c.CARD} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                  {s._mpResults.map((r,ri)=><div key={ri} onClick={()=>{updStop(s.id,'meetingPoint',r.name);updStop(s.id,'meetingPointLat',r.lat);updStop(s.id,'meetingPointLng',r.lng);updStop(s.id,'_mpResults',[]);updStop(s.id,'_mpQuery','');
+                    if(inlineMapObj.current&&r.lat&&r.lng){
+                      const mpMarker=new google.maps.Marker({position:{lat:r.lat,lng:r.lng},map:inlineMapObj.current,label:{text:'📍',fontSize:'14px'},icon:{path:google.maps.SymbolPath.CIRCLE,scale:12,fillColor:'#f59e0b',fillOpacity:1,strokeColor:'#d97706',strokeWeight:2},title:'Meeting: '+r.name});
+                      inlineMarkers.current.push(mpMarker);
+                    }
+                  }} style={{padding:'8px 12px',cursor:'pointer',borderBottom:ri<s._mpResults.length-1?`1px solid ${c.BD}`:'none',fontSize:'13px'}} onMouseEnter={e=>e.currentTarget.style.background=c.CARD} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
                     <div style={{color:c.T,fontWeight:'500'}}>{r.name}</div>
                     <div style={{fontSize:'11px',color:c.M2}}>{r.address}</div>
                   </div>)}
