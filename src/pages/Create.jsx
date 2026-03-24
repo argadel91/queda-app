@@ -246,6 +246,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   };
 
   // Done screen
+  const[shareOpen,setShareOpen]=useState(false);
   if(created){
     const shareUrl=location.href.split('?')[0]+'?code='+created.id;
     const shareText=`${t.shareJoinText} ${shareUrl}`;
@@ -253,15 +254,18 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       <div style={{fontSize:'64px',marginBottom:'16px'}}>🎉</div>
       <h2 style={{fontFamily:"'Syne',serif",fontSize:'28px',fontWeight:'800',color:mc,marginBottom:'8px'}}>{t.planCreatedTitle}</h2>
       <div style={{fontFamily:'monospace',fontSize:'40px',fontWeight:'900',color:mc,letterSpacing:'.15em',margin:'16px 0'}}>{created.id}</div>
-      <p style={{color:c.M2,fontSize:'14px',marginBottom:'24px'}}>{t.shareCodeMsg}</p>
-      <div style={{display:'flex',gap:'8px',marginBottom:'20px'}}>
-        <button onClick={()=>window.open('https://wa.me/?text='+encodeURIComponent(shareText),'_blank')} style={{flex:1,padding:'14px',background:'#25D366',color:'#fff',border:'none',borderRadius:'12px',fontSize:'14px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>WhatsApp</button>
-        <button onClick={()=>window.open('https://t.me/share/url?url='+encodeURIComponent(shareUrl)+'&text='+encodeURIComponent(shareText),'_blank')} style={{flex:1,padding:'14px',background:'#0088cc',color:'#fff',border:'none',borderRadius:'12px',fontSize:'14px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>Telegram</button>
-        <button onClick={()=>{navigator.clipboard?.writeText(shareUrl);}} style={{flex:1,padding:'14px',background:c.CARD2,color:c.T,border:`1px solid ${c.BD}`,borderRadius:'12px',fontSize:'14px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>🔗</button>
-      </div>
+      <p style={{color:c.M2,fontSize:'14px',marginBottom:'24px'}}>{t.shareCodeMsg2||'Ya puedes compartir tu código con quien quieras. Revisa tu plan para editar o añadir lo que necesites.'}</p>
       <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
-        <Btn onClick={()=>onCreated(created)} full style={{padding:'14px'}} c={c} accent={mc}>{t.reviewPlan}</Btn>
-        <Btn onClick={()=>{setCreated(null);setStep(0);setSelDates([]);setStartTimes(['']);setStops([emptyStop(1,'')]);}} v="secondary" full style={{padding:'14px'}} c={c}>{t.createAnother}</Btn>
+        <div style={{position:'relative'}}>
+          <Btn onClick={()=>setShareOpen(o=>!o)} full style={{padding:'14px'}} c={c} accent={mc}>{t.sharePlanBtn||'Comparte tu plan'} {shareOpen?'▾':'▸'}</Btn>
+          {shareOpen&&<div className="fade-in" style={{display:'flex',gap:'8px',marginTop:'8px'}}>
+            <button onClick={()=>window.open('https://wa.me/?text='+encodeURIComponent(shareText),'_blank')} style={{flex:1,padding:'12px',background:'#25D366',color:'#fff',border:'none',borderRadius:'12px',fontSize:'13px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>WhatsApp</button>
+            <button onClick={()=>window.open('https://t.me/share/url?url='+encodeURIComponent(shareUrl)+'&text='+encodeURIComponent(shareText),'_blank')} style={{flex:1,padding:'12px',background:'#0088cc',color:'#fff',border:'none',borderRadius:'12px',fontSize:'13px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>Telegram</button>
+            <button onClick={()=>{navigator.clipboard?.writeText(shareUrl);}} style={{flex:1,padding:'12px',background:c.CARD2,color:c.T,border:`1px solid ${c.BD}`,borderRadius:'12px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>🔗</button>
+          </div>}
+        </div>
+        <Btn onClick={()=>onCreated(created)} v="secondary" full style={{padding:'14px'}} c={c}>{t.reviewPlan}</Btn>
+        <Btn onClick={()=>{setCreated(null);setShareOpen(false);setStep(0);setSelDates([]);setStartTimes(['']);setStops([emptyStop(1,'')]);}} v="secondary" full style={{padding:'14px'}} c={c}>{t.createAnother}</Btn>
         <button onClick={onBack} style={{padding:'12px',background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'14px'}}>🏠 {t.homeBtn}</button>
       </div>
     </div>;

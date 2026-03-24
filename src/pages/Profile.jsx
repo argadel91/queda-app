@@ -34,10 +34,6 @@ export default function Profile({onBack,c,lang,authUser,profile,onUpdateProfile,
         </div>
 
 
-        {/* Theme */}
-        <div style={{marginBottom:'16px'}}>
-          <button onClick={onThemeToggle} style={{width:'100%',padding:'10px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'14px',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}}>{theme==='dark'?'☀️':'🌙'} {theme==='dark'?t.lightMode:t.darkMode}</button>
-        </div>
         <div style={{display:'flex',gap:'8px'}}>
           <button onClick={()=>setEditing(true)} style={{flex:1,padding:'10px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:'600'}}>✏️ {t.editBtn||'Edit'}</button>
           <button onClick={onSignOut} style={{flex:1,padding:'10px',background:'transparent',border:'1px solid #ef444440',borderRadius:'10px',color:'#ef4444',cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:'500'}}>{t.signOut}</button>
