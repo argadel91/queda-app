@@ -148,9 +148,9 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
     setSaving(false);
   };
 
-  // Inline map for step 1
+  // Inline map for step 2 (place)
   useEffect(()=>{
-    if(step!==1||!inlineMapRef.current||inlineMapObj.current)return;
+    if(step!==2||!inlineMapRef.current||inlineMapObj.current)return;
     const loadGM=()=>{if(window.__loadGoogleMaps)window.__loadGoogleMaps();return new Promise(r=>{if(window.google?.maps)return r();const ch=setInterval(()=>{if(window.google?.maps){clearInterval(ch);r();}},100);setTimeout(()=>clearInterval(ch),10000);});};
     const mapDiv=document.createElement('div');
     mapDiv.style.cssText='width:100%;height:100%;';
@@ -299,24 +299,24 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
 
       {/* ── STEP 0: DATE ── */}
       {step===0&&<div className="fade-in">
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>📅 {lang==='es'?'Elige una fecha':'Pick a date'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{lang==='es'?'Podrás añadir más fechas después.':'You can add more dates later.'}</p>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>📅 {lang==='es'?'Elige solo una fecha':'Pick just one date'}</h2>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{lang==='es'?'Luego podrás añadir o editar más fechas, horas y puntos.':'You can add or edit more dates, times and points later.'}</p>
         <CalendarPicker selected={selDates} onChange={d=>setSelDates(d.slice(-1))} c={c} lang={lang} max={1}/>
         <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(1)} disabled={selDates.length<1} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{lang==='es'?'Siguiente →':'Next →'}</Btn></div>
       </div>}
 
       {/* ── STEP 1: TIME ── */}
       {step===1&&<div className="fade-in">
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>🕐 {lang==='es'?'Elige una hora':'Pick a time'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{lang==='es'?'Podrás añadir más horarios después.':'You can add more times later.'}</p>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>🕐 {lang==='es'?'Elige solo una hora':'Pick just one time'}</h2>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{lang==='es'?'Luego podrás añadir o editar más fechas, horas y puntos.':'You can add or edit more dates, times and points later.'}</p>
         <ClockPicker value={startTimes[0]||''} onChange={v=>setStartTimes([v])} c={c}/>
         <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(2)} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{lang==='es'?'Siguiente →':'Next →'}</Btn></div>
       </div>}
 
       {/* ── STEP 2: PLACE ── */}
       {step===2&&<div className="fade-in">
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>📍 {lang==='es'?'Elige un lugar':'Pick a place'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'10px'}}>{lang==='es'?'Podrás añadir más puntos después.':'You can add more points later.'}</p>
+        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>📍 {lang==='es'?'Elige solo un lugar':'Pick just one place'}</h2>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'10px'}}>{lang==='es'?'Luego podrás añadir o editar más fechas, horas y puntos.':'You can add or edit more dates, times and points later.'}</p>
 
         {/* Selected place */}
         {stops.filter(s=>(s.options||[]).some(o=>o.name)).map((s)=>{
