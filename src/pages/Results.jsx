@@ -460,7 +460,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
                         <span style={{fontSize:'14px',color:isBest?mc:c.T,fontWeight:isBest?'700':'500',textTransform:'capitalize'}}>{fmtShort(s.date,lang)}{s.startTime?' · '+s.startTime:''}</span>
                         {isBest&&<span>⭐</span>}
                       </div>
-                      <div style={{fontSize:'13px',color:c.M2,marginBottom:'6px'}}>👥 {ny}/{total} ({pct}%){nm>0?` · 🤔 ${nm}`:''}</div>
+                      <div style={{fontSize:'13px',color:c.M2,marginBottom:'6px'}}>👥 {ny}/{total} ({pct}%){nn>0?` · ❌ ${nn}`:''}</div>
                       <div style={{fontSize:'12px',color:c.M2,lineHeight:1.5,fontStyle:'italic'}}>{explanation}</div>
                       {isOrgRef.current&&!plan.confirmedDate&&<button onClick={()=>confirmDate(s.date,s.startTime)} style={{marginTop:'8px',padding:'6px 14px',background:isBest?mc:c.CARD2,border:isBest?'none':`1px solid ${c.BD}`,borderRadius:'8px',color:isBest?'#0A0A0A':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:'700'}}>{t.confirmBtn||'Confirm'}</button>}
                     </div>
@@ -477,7 +477,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
               <span style={{color:c.M2}}>{openSection.votes?'▾':'▸'}</span>
             </button>
             {openSection.votes&&<div style={{padding:'14px',background:c.CARD2,border:`1px solid ${c.BD}`,borderTop:'none',borderRadius:'0 0 10px 10px'}}>
-              {slots.map(s=>{const d=s.date;const key=s.key;const ny=cntY(key);const nm=cntM(key);const pct=(ny/mx)*100;const isBest=best&&key===best.key&&ny>0;const isConf=d===plan.confirmedDate;return(
+              {slots.map(s=>{const d=s.date;const key=s.key;const ny=cntY(key);const nn=cntN(key);const pct=(ny/mx)*100;const isBest=best&&key===best.key&&ny>0;const isConf=d===plan.confirmedDate;return(
                 <div key={key} style={{marginBottom:'12px'}}>
                   <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'5px'}}>
                     <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
@@ -487,12 +487,12 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
                     </div>
                     <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
                       <span style={{fontSize:'12px',color:'#22c55e',fontWeight:'600'}}>✅ {ny}</span>
-                      {nm>0&&<span style={{fontSize:'12px',color:'#f59e0b',fontWeight:'600'}}>🤔 {nm}</span>}
+                      {nn>0&&<span style={{fontSize:'12px',color:'#ef4444',fontWeight:'600'}}>❌ {nn}</span>}
                     </div>
                   </div>
                   <div style={{height:'7px',background:c.BD,borderRadius:'4px',overflow:'hidden',position:'relative'}}>
                     <div style={{height:'100%',width:`${pct}%`,background:isConf||isBest?mc:'#22c55e',borderRadius:'4px',transition:'width .5s'}}/>
-                    {nm>0&&<div style={{position:'absolute',left:`${pct}%`,top:0,height:'100%',width:`${(nm/total)*100}%`,background:'#f59e0b'}}/>}
+                    {nn>0&&<div style={{position:'absolute',left:`${pct}%`,top:0,height:'100%',width:`${(nn/total)*100}%`,background:'#ef4444'}}/>}
                   </div>
                 </div>);})}
             </div>}
