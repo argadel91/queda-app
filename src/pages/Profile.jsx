@@ -4,7 +4,7 @@ import { Btn, Lbl, Back } from '../components/ui.jsx'
 
 const FLAGS={es:'🇪🇸',en:'🇬🇧',pt:'🇵🇹',fr:'🇫🇷',de:'🇩🇪',it:'🇮🇹'};
 const LANG_NAMES={es:'Español',en:'English',pt:'Português',fr:'Français',de:'Deutsch',it:'Italiano'};
-const LANGS=['es','en'];
+const LANGS=['es','en','pt','fr','de','it'];
 
 export default function Profile({onBack,c,lang,authUser,profile,onUpdateProfile,onSignOut,onLangChange,onThemeToggle,theme}){
   const t=T[lang];
