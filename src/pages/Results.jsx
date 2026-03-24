@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import T from '../constants/translations.js'
 import { db, updatePlan, loadResps, saveResp, savePlan } from '../lib/supabase.js'
 import { ls, addMyPlan } from '../lib/storage.js'
-import { daysUntil, fmtDate, fmtShort, genId } from '../lib/utils.js'
+import { daysUntil, fmtDate, fmtShort, fmtTime, genId } from '../lib/utils.js'
 import { Btn, Card, Lbl, Badge, Back, HR } from '../components/ui.jsx'
 const ExpenseSplitter = React.lazy(() => import('../components/ExpenseSplitter.jsx'))
 import PostPlanSurvey from '../components/PostPlanSurvey.jsx'
@@ -105,7 +105,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
   })();
   const du=plan.confirmedDate?daysUntil(plan.confirmedDate):null;
   const confirmDate=async(d,st)=>{setConf(true);const up={...plan,confirmedDate:d,confirmedStartTime:st||''};await updatePlan(up);setPlan(up);setConf(false);};
-  const waConfirm=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`📌 *${plan.name}* — ${t.dateConfirmedMsg}\n\n🗓️ ${fmtDate(plan.confirmedDate,lang)}${plan.confirmedStartTime?' · 🕐 '+plan.confirmedStartTime:''}\n\n${url}`),'_blank');};
+  const waConfirm=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`📌 *${plan.name}* — ${t.dateConfirmedMsg}\n\n🗓️ ${fmtDate(plan.confirmedDate,lang)}${plan.confirmedStartTime?' · 🕐 '+fmtTime(plan.confirmedStartTime):''}\n\n${url}`),'_blank');};
   const waRem=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`⏰ ${t.reminderMsg.replace('{name}',plan.name)}\n${url}`),'_blank');setRem(true);};
   const howL=v=>({car:t.car,moto:t.moto,transit:t.transit,taxi:t.taxi,walk:t.walk,bike:t.bike}[v]||v);
   const TABS=['plan','summary'];
@@ -165,7 +165,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
       {plan.confirmedDate&&du!=null&&du>=0&&du<=3&&<div style={{background:`${mc}15`,border:`1px solid ${mc}40`,borderRadius:'12px',padding:'12px 16px',marginBottom:'14px',display:'flex',gap:'10px',alignItems:'center'}}>
         <div style={{fontSize:'20px'}}>{du===0?'🎉':du===1?'⏰':'📅'}</div>
         <div><div style={{fontSize:'13px',fontWeight:'700',color:mc}}>{du===0?(t.itsToday):du===1?(t.tomorrowLbl):`${du} ${t.daysLbl} ⏳`}</div>
-        <div style={{fontSize:'12px',color:c.M2,textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,lang)}{plan.confirmedStartTime?' · 🕐 '+plan.confirmedStartTime:''}</div></div>
+        <div style={{fontSize:'12px',color:c.M2,textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,lang)}{plan.confirmedStartTime?' · 🕐 '+fmtTime(plan.confirmedStartTime):''}</div></div>
       </div>}
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'6px'}}>
         <div><div style={{display:'flex',alignItems:'center'}}><h2 style={{fontFamily:"'Syne',serif",fontSize:'24px',fontWeight:'800',color:c.T,margin:'0 0 4px'}}>{plan.name}</h2>{isOrgRef.current&&<button onClick={()=>setEditMode(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',marginLeft:'8px'}}>✏️</button>}</div></div>
@@ -178,7 +178,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
       </div>
       <div style={{fontSize:'13px',color:c.M2,margin:'8px 0 12px'}}>{total} {total===1?t.responses:t.responsesP} · <span style={{color:mc,fontWeight:'700',letterSpacing:'.1em'}}>{plan.id}</span>{city&&<span> · 📍 {city}</span>}</div>
       {plan.confirmedDate&&<div style={{background:`${mc}15`,border:`1px solid ${mc}50`,borderRadius:'12px',padding:'14px 16px',marginBottom:'14px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-        <div><div style={{fontSize:'11px',color:mc,fontWeight:'700',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:'2px'}}>{t.confirmedDate}</div><div style={{fontSize:'15px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,lang)}{plan.confirmedStartTime?' · 🕐 '+plan.confirmedStartTime:''}</div></div>
+        <div><div style={{fontSize:'11px',color:mc,fontWeight:'700',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:'2px'}}>{t.confirmedDate}</div><div style={{fontSize:'15px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,lang)}{plan.confirmedStartTime?' · 🕐 '+fmtTime(plan.confirmedStartTime):''}</div></div>
         <div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>
           {isOrgRef.current&&<button onClick={waConfirm} title={t.waGroupMsg} style={{background:'#25D366',border:'none',borderRadius:'10px',padding:'8px 12px',color:'#fff',fontSize:'12px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>{t.notifyGrp}</button>}
           <button onClick={waRem} title={t.waReminderMsg} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'8px 12px',color:remSent?mc:c.M2,fontSize:'12px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>{remSent?t.remSent:t.sendRem}</button>
@@ -252,7 +252,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
           <div id="memory-card" style={{background:`linear-gradient(135deg,${mc}30,${mc}08)`,border:`2px solid ${mc}50`,borderRadius:'16px',padding:'24px',textAlign:'center'}}>
             <div style={{fontSize:'36px',marginBottom:'8px'}}>{'🎉'}</div>
             <div style={{fontFamily:"'Syne',serif",fontSize:'22px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>{plan.name}</div>
-            <div style={{fontSize:'14px',color:mc,fontWeight:'600',marginBottom:'12px',textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,lang)}{plan.confirmedStartTime?' · '+plan.confirmedStartTime:''}</div>
+            <div style={{fontSize:'14px',color:mc,fontWeight:'600',marginBottom:'12px',textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,lang)}{plan.confirmedStartTime?' · '+fmtTime(plan.confirmedStartTime):''}</div>
             {(plan.stops||[]).filter(s=>(s.options?.[0]?.name||s.name)).slice(0,4).map((s,i)=>{
               const opt=s.options?.[0]||s;
               return<div key={i} style={{fontSize:'13px',color:c.M2,marginBottom:'2px'}}>{i===0?'📍':'↓'} {opt.name||s.name}</div>;
@@ -318,7 +318,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
             <div style={{display:'flex',gap:'14px',alignItems:'center',marginBottom:isOrgRef.current&&!plan.confirmedDate?'14px':'0'}}>
               <div style={{fontSize:'28px'}}>⭐</div>
               <div><div style={{fontSize:'11px',color:mc,fontWeight:'700',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:'2px'}}>{t.bestOpt}</div>
-                <div style={{fontSize:'15px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtDate(best.date,lang)}{best.startTime?' · '+best.startTime:''}</div>
+                <div style={{fontSize:'15px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtDate(best.date,lang)}{best.startTime?' · '+fmtTime(best.startTime):''}</div>
                 {plan.times?.[best.date]?.length>0&&<div style={{fontSize:'12px',color:c.M2}}>{plan.times[best.date].join(', ')}</div>}
                 <div style={{fontSize:'13px',color:c.M2}}>👥 {cntY(best.key)}/{total}</div>
               </div>
@@ -381,7 +381,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
             const ny=cntY(showKey);
             return<div style={{background:`${mc}12`,border:`1px solid ${mc}35`,borderRadius:'14px',padding:'16px',marginBottom:'14px'}}>
               <div style={{fontSize:'11px',color:mc,fontWeight:'700',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'4px'}}>📌 {lang==='es'?'Plan elegido':'Chosen plan'}</div>
-              <div style={{fontSize:'16px',color:c.T,fontWeight:'700',textTransform:'capitalize'}}>{fmtShort(plan.confirmedDate,lang)}{plan.confirmedStartTime?' · '+plan.confirmedStartTime:''}</div>
+              <div style={{fontSize:'16px',color:c.T,fontWeight:'700',textTransform:'capitalize'}}>{fmtShort(plan.confirmedDate,lang)}{plan.confirmedStartTime?' · '+fmtTime(plan.confirmedStartTime):''}</div>
               <div style={{fontSize:'13px',color:c.M2,marginTop:'2px'}}>👥 {ny}/{total} {lang==='es'?'asistencia':'attendance'}</div>
             </div>;
           })()}
@@ -393,7 +393,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
               <div style={{fontSize:'11px',color:isTie?'#f59e0b':mc,fontWeight:'700',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'8px'}}>{isTie?(lang==='es'?`⚖️ Empate — ${tied.length} opciones`:`⚖️ Tie — ${tied.length} options`):'⭐ '+(lang==='es'?'Mejor opción':'Best option')}</div>
               {(isTie?tied:[best]).map(s=><div key={s.key} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 0',borderBottom:isTie?`1px solid ${c.BD}20`:'none'}}>
                 <div>
-                  <div style={{fontSize:'15px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtShort(s.date,lang)}{s.startTime?' · '+s.startTime:''}</div>
+                  <div style={{fontSize:'15px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtShort(s.date,lang)}{s.startTime?' · '+fmtTime(s.startTime):''}</div>
                   <div style={{fontSize:'12px',color:c.M2}}>👥 {cntY(s.key)}/{total} {lang==='es'?'asistencia':'attendance'}</div>
                 </div>
                 {isOrgRef.current&&<button onClick={()=>confirmDate(s.date,s.startTime)} style={{padding:'8px 14px',background:isTie?'#f59e0b':mc,border:'none',borderRadius:'8px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'12px'}}>{t.confirmBtn||'Elegir'}</button>}
@@ -462,7 +462,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
               return<div key={s.key} style={{display:'flex',alignItems:'center',gap:'10px',padding:'10px 12px',background:isBest?`${mc}10`:c.CARD,border:`1px solid ${isBest?mc+'30':c.BD}`,borderRadius:'10px',marginBottom:'6px'}}>
                 <span style={{fontSize:'14px',width:'20px',textAlign:'center'}}>{i===0?'⭐':i+1}</span>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:'13px',color:isBest?mc:c.T,fontWeight:isBest?'700':'500',textTransform:'capitalize'}}>{fmtShort(s.date,lang)}{s.startTime?' · '+s.startTime:''}</div>
+                  <div style={{fontSize:'13px',color:isBest?mc:c.T,fontWeight:isBest?'700':'500',textTransform:'capitalize'}}>{fmtShort(s.date,lang)}{s.startTime?' · '+fmtTime(s.startTime):''}</div>
                   <div style={{height:'4px',background:c.BD,borderRadius:'2px',marginTop:'4px',overflow:'hidden'}}>
                     <div style={{height:'100%',width:`${pct}%`,background:isBest?mc:'#22c55e',borderRadius:'2px'}}/>
                   </div>

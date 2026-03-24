@@ -7,3 +7,4 @@ export const fmtDate = (iso, lang) => new Date(iso+'T12:00:00').toLocaleDateStri
 export const fmtShort = (iso, lang) => new Date(iso+'T12:00:00').toLocaleDateString(lang==='en'?'en-GB':'es-ES', { weekday:'short', day:'numeric', month:'short' })
 export const fmtMonthYear = (y, m, lang) => new Date(y,m,1).toLocaleDateString(lang==='en'?'en-GB':'es-ES', { month:'long', year:'numeric' })
 export const daysUntil = iso => Math.round((new Date(iso+'T12:00:00') - dayStart()) / 86400000)
+export const fmtTime = t => { if(!t)return''; const[h,m]=t.split(':').map(Number); if(isNaN(h))return t; return`${t} (${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'})` }

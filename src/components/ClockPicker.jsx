@@ -20,7 +20,7 @@ export default function ClockPicker({value,onChange,c}){
 
   return<div style={{position:'relative'}}>
     <button onClick={()=>setOpen(true)} style={{width:'100%',padding:'12px 14px',background:c?.CARD,border:`1px solid ${c?.BD}`,borderRadius:'10px',color:value?c?.T:c?.M,fontSize:'15px',fontFamily:'inherit',cursor:'pointer',textAlign:'left',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-      <span>{value||'--:--'}</span>
+      <span>{value?`${value} (${(parseInt(value.split(':')[0])%12||12)}:${value.split(':')[1]} ${parseInt(value.split(':')[0])>=12?'PM':'AM'})`:'--:--'}</span>
       <span style={{fontSize:'18px'}}>🕐</span>
     </button>
 

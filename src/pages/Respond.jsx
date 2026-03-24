@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import T from '../constants/translations.js'
 import { saveResp, loadResps, db } from '../lib/supabase.js'
 import { ls, addMyPlan } from '../lib/storage.js'
-import { fmtDate } from '../lib/utils.js'
+import { fmtDate, fmtTime } from '../lib/utils.js'
 import { Btn, Lbl, Inp, Txa, HR, Back, Stepper } from '../components/ui.jsx'
 
 export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,authUser,profile}){
@@ -146,7 +146,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
               {times.map(t2=>{
                 const key=`${d}_${t2}`;const sel=avail[key]==='yes';
                 return<button key={key} onClick={()=>setAvail(p=>({...p,[key]:p[key]==='yes'?undefined:'yes'}))} style={{width:'100%',padding:'10px 14px',background:sel?'#22c55e18':c.CARD,borderBottom:`1px solid ${c.BD}20`,cursor:'pointer',border:'none',fontFamily:'inherit',fontSize:'13px',color:sel?'#22c55e':c.M2,fontWeight:sel?'700':'400',textAlign:'left',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                  <span>🕐 {t2}</span>
+                  <span>🕐 {fmtTime(t2)}</span>
                   <span style={{fontSize:'16px'}}>{sel?'✓':'○'}</span>
                 </button>;
               })}
@@ -176,7 +176,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
           <div style={{flex:1}}>
             <div style={{fontSize:'16px',color:c.T,fontWeight:'700'}}>{stopName}</div>
             {opt.address&&<div style={{fontSize:'12px',color:c.M2}}>📍 {opt.address}</div>}
-            {stop.startTime&&<div style={{fontSize:'12px',color:mc}}>🕐 {stop.startTime}{stop.duration?' · '+stop.duration:''}</div>}
+            {stop.startTime&&<div style={{fontSize:'12px',color:mc}}>🕐 {fmtTime(stop.startTime)}{stop.duration?' · '+stop.duration:''}</div>}
           </div>
           {opt.photo&&<img src={opt.photo} alt="" style={{width:'48px',height:'48px',borderRadius:'10px',objectFit:'cover',flexShrink:0}}/>}
         </div>
@@ -221,7 +221,7 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
                 const key=voteKey(stop.id,{date:d,time:t2,key:`${d}_${t2}`});
                 const sel=avail[key]==='yes';
                 return<button key={key} onClick={()=>{setErr('');setAvail(p=>({...p,[key]:p[key]==='yes'?undefined:'yes'}));}} style={{width:'100%',padding:'10px 14px',background:sel?'#22c55e18':c.CARD,borderBottom:`1px solid ${c.BD}20`,cursor:'pointer',border:'none',fontFamily:'inherit',fontSize:'13px',color:sel?'#22c55e':c.M2,fontWeight:sel?'700':'400',textAlign:'left',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                  <span>🕐 {t2}</span>
+                  <span>🕐 {fmtTime(t2)}</span>
                   <span style={{fontSize:'16px'}}>{sel?'✓':'○'}</span>
                 </button>;
               })}
