@@ -35,7 +35,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
         setAlert(who);
         setTimeout(()=>setAlert(null),4000);
         // Browser notification if permission granted
-        if(Notification.permission==='granted'){
+        if(typeof Notification!=='undefined'&&Notification.permission==='granted'){
           new Notification(plan.name,{body:((T[plan.lang]?.newRespNotif||'New response from')+' '+who),icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">📅</text></svg>'});
         }
       }
@@ -243,7 +243,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
       {isOrgRef.current&&plan.confirmedDate&&daysUntil(plan.confirmedDate)<0&&!plan.attendanceMarked&&(
         <Card c={c} style={{marginBottom:'14px'}}>
           <Lbl c={c}>📋 {t.whoCame}</Lbl>
-          {rs.filter(r=>r.avail?.[plan.confirmedDate]==='yes').map((r,i)=>{
+          {rs.filter(r=>{const cd=plan.confirmedDate;return Object.entries(r.avail||{}).some(([k,v])=>v==='yes'&&k.startsWith(cd));}).map((r,i)=>{
             const st=attendance[r.name]?.came;// true=came, false=didnt, 'unknown'=dunno, undefined=unmarked
             return(<div key={i} style={{padding:'10px 0',borderBottom:`1px solid ${c.BD}`}}>
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'6px'}}>

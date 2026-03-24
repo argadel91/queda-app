@@ -29,8 +29,8 @@ export const loadPlan = async id => {
   catch { return null }
 }
 export const updatePlan = async p => {
-  try { await db.from('plans').update({ data: p, is_public: !!p.isPublic }).eq('id', p.id) }
-  catch {}
+  try { const{error}=await db.from('plans').update({ data: p, is_public: !!p.isPublic }).eq('id', p.id);if(error)throw error; }
+  catch(e) { showErr('Error updating plan.'); }
 }
 export const loadPublicPlans = async () => {
   try {
@@ -43,9 +43,9 @@ export const loadPublicPlans = async () => {
 export const saveResp = async (planId, name, resp) => {
   try {
     const { data: ex } = await db.from('responses').select('id').eq('plan_id', planId).eq('name', name).maybeSingle()
-    if (ex?.id) { await db.from('responses').update({ data: resp }).eq('id', ex.id) }
-    else { await db.from('responses').insert({ plan_id: planId, name, data: resp }) }
-  } catch {}
+    if (ex?.id) { const{error}=await db.from('responses').update({ data: resp }).eq('id', ex.id);if(error)throw error; }
+    else { const{error}=await db.from('responses').insert({ plan_id: planId, name, data: resp });if(error)throw error; }
+  } catch(e) { showErr('Error saving response.'); throw e; }
 }
 export const loadResps = async id => {
   try { const { data } = await db.from('responses').select('data').eq('plan_id', id); return (data || []).map(r => r.data) }
@@ -58,6 +58,6 @@ export const loadProfile = async uid => {
   catch { return null }
 }
 export const saveProfile = async (uid, prof) => {
-  try { await db.from('profiles').upsert({ id: uid, ...prof, updated_at: new Date().toISOString() }) }
-  catch {}
+  try { const{error}=await db.from('profiles').upsert({ id: uid, ...prof, updated_at: new Date().toISOString() });if(error)throw error; }
+  catch(e) { showErr('Error saving profile.'); }
 }

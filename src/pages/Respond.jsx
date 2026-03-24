@@ -61,9 +61,12 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
     setSaving(true);
     const changeLog=[...(prev?.changeLog||[])];
     if(prev)changeLog.unshift({at:new Date().toISOString(),desc:t.respUpdated});
-    const dateAvail=hasStops?deriveDateAvail():avail;
+    // Filter out temporary _exp_ UI state keys
+    const cleanAvail=Object.fromEntries(Object.entries(avail).filter(([k])=>!k.startsWith('_')));
+    const dateAvail=hasStops?deriveDateAvail():cleanAvail;
     const sa=hasStops?deriveStopAttend():null;
-    const resp={name:name.trim(),avail:dateAvail,pointAvail:hasStops?avail:null,stopAttend:sa,how:how==='other'?howOther:how,howOther,comment,pollVote:pollVote||null,changeLog,at:new Date().toISOString()};
+    const cleanPointAvail=hasStops?Object.fromEntries(Object.entries(avail).filter(([k])=>!k.startsWith('_'))):null;
+    const resp={name:name.trim(),avail:dateAvail,pointAvail:cleanPointAvail,stopAttend:sa,how:how==='other'?howOther:how,howOther,comment,pollVote:pollVote||null,changeLog,at:new Date().toISOString()};
     await saveResp(plan.id,name.trim(),resp);
     if(authUser)try{await db.from('responses').update({user_id:authUser.id}).eq('plan_id',plan.id).eq('name',name.trim());}catch{}
     addMyPlan(plan.id,plan.name,'invited');
