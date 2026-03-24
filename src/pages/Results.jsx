@@ -84,7 +84,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
   const cntN=key=>rs.filter(r=>r.avail?.[key]==='no').length;
   const score=key=>cntY(key)-cntN(key);
   const mx=Math.max(...slots.map(s=>cntY(s.key)),1);
-  const best=total>0?slots.reduce((b,s)=>score(s.key)>score(b.key)?s:b,slots[0]):null;
+  const best=total>0&&slots.length>0?slots.reduce((b,s)=>score(s.key)>score(b.key)?s:b,slots[0]):null;
   const budget=(plan.stops||[]).reduce((s,p2)=>s+(parseFloat(p2.cost)||0),0);
   // Auto-cancel points below minimum attendance
   const stopYesCount=(sid)=>rs.filter(r=>r.stopAttend?.[sid]==='yes').length;
@@ -204,7 +204,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'6px'}}>
         <div><div style={{display:'flex',alignItems:'center'}}><h2 style={{fontFamily:"'Syne',serif",fontSize:'24px',fontWeight:'800',color:c.T,margin:'0 0 4px'}}>{plan.name}</h2>{isOrgRef.current&&<button onClick={()=>setEditMode(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',marginLeft:'8px'}}>✏️</button>}</div></div>
         <div style={{display:'flex',gap:'5px'}}>
-          <button onClick={()=>{const url=location.href.split('?')[0]+'?code='+plan.id;const txt=`${t.respondToPlan.replace('{name}',plan.name)}\n${url}`;window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}} title={t.shareWATitle} style={{background:'#25D36618',border:'1px solid #25D36640',borderRadius:'8px',padding:'6px 10px',color:'#25D366',cursor:'pointer',fontSize:'13px'}}>💬</button>
+          <button onClick={()=>{const url=location.href.split('?')[0]+'?code='+plan.id;const txt=`${t.respondToPlan.replace('{name}',plan.name||'queda.')}\n${url}`;window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}} title={t.shareWATitle} style={{background:'#25D36618',border:'1px solid #25D36640',borderRadius:'8px',padding:'6px 10px',color:'#25D366',cursor:'pointer',fontSize:'13px'}}>💬</button>
           <button onClick={()=>{const url=location.href.split('?')[0]+'?code='+plan.id;navigator.clipboard?.writeText(url);}} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}} title={t.copyLinkTitle}>🔗</button>
           {typeof Notification!=='undefined'&&Notification.permission==='default'&&<button onClick={()=>Notification.requestPermission()} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}} title={t.enableNotif}>🔔</button>}
           <button onClick={refresh} title={t.refreshResp} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}}>↻</button>
@@ -340,7 +340,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
             <textarea value={editDesc} onChange={e=>setEditDesc(e.target.value)} placeholder={t.desc||'Description'} rows={2} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box',resize:'vertical'}}/>
             <div style={{display:'flex',gap:'6px'}}>
               <button onClick={()=>setEditMode(false)} style={{flex:1,padding:'8px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'13px'}}>{t.cancel||'Cancel'}</button>
-              <button onClick={async()=>{const up={...plan,name:editName.trim()||null,desc:editDesc.trim()||null};await updatePlan(up);setPlan(up);setEditMode(false);}} style={{flex:1,padding:'8px',background:mc,border:'none',borderRadius:'8px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'700'}}>{t.saveLbl||'Save'}</button>
+              <button onClick={async()=>{const up={...plan,name:editName.trim()||plan.name,desc:editDesc.trim()||null};await updatePlan(up);setPlan(up);setEditMode(false);}} style={{flex:1,padding:'8px',background:mc,border:'none',borderRadius:'8px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'700'}}>{t.saveLbl||'Save'}</button>
             </div>
           </div>}
         </div>}
