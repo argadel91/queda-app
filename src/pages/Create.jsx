@@ -300,7 +300,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       {/* ── STEP 0: DATE ── */}
       {step===0&&<div className="fade-in">
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>📅 {lang==='es'?'Elige solo una fecha':'Pick just one date'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{lang==='es'?'Luego podrás añadir o editar más fechas, horas y puntos.':'You can add or edit more dates, times and points later.'}</p>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{lang==='es'?'No te preocupes, luego podrás añadir o editar más fechas.':'Don\'t worry, you can add or edit more dates later.'}</p>
         <CalendarPicker selected={selDates} onChange={d=>setSelDates(d.slice(-1))} c={c} lang={lang} max={1}/>
         <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(1)} disabled={selDates.length<1} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{lang==='es'?'Siguiente →':'Next →'}</Btn></div>
       </div>}
@@ -308,7 +308,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       {/* ── STEP 1: TIME ── */}
       {step===1&&<div className="fade-in">
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>🕐 {lang==='es'?'Elige solo una hora':'Pick just one time'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{lang==='es'?'Luego podrás añadir o editar más fechas, horas y puntos.':'You can add or edit more dates, times and points later.'}</p>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{lang==='es'?'No te preocupes, luego podrás añadir o editar más horas.':'Don\'t worry, you can add or edit more times later.'}</p>
         <ClockPicker value={startTimes[0]||''} onChange={v=>setStartTimes([v])} c={c}/>
         <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(2)} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{lang==='es'?'Siguiente →':'Next →'}</Btn></div>
       </div>}
@@ -316,7 +316,13 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       {/* ── STEP 2: PLACE ── */}
       {step===2&&<div className="fade-in">
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>📍 {lang==='es'?'Elige solo un lugar':'Pick just one place'}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'10px'}}>{lang==='es'?'Luego podrás añadir o editar más fechas, horas y puntos.':'You can add or edit more dates, times and points later.'}</p>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'10px'}}>{lang==='es'?'No te preocupes, luego podrás añadir o editar más puntos.':'Don\'t worry, you can add or edit more points later.'}</p>
+
+        {/* Online / Physical toggle */}
+        {!stops.some(s=>(s.options||[]).some(o=>o.name))&&<div style={{display:'flex',gap:'8px',marginBottom:'12px'}}>
+          <button onClick={()=>{const ns=emptyStop(Date.now());ns.options[0].name='Online';ns.options[0].address='💻';setStops(p=>[...p,ns]);}} style={{flex:1,padding:'14px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',cursor:'pointer',fontFamily:'inherit',fontSize:'14px',color:c.T,fontWeight:'500',textAlign:'center'}}>💻 Online</button>
+          <div style={{flex:1,padding:'14px',background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'12px',fontSize:'14px',color:mc,fontWeight:'600',textAlign:'center'}}>📍 {lang==='es'?'Lugar físico':'Physical'}</div>
+        </div>}
 
         {/* Selected place */}
         {stops.filter(s=>(s.options||[]).some(o=>o.name)).map((s)=>{
@@ -363,7 +369,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
           {(()=>{const opt=stops.find(s=>(s.options||[]).some(o=>o.name))?.options?.[0];return opt?<div style={{fontSize:'16px',color:c.T,fontWeight:'700'}}>{opt.name}</div>:null;})()}
           <div style={{fontSize:'12px',color:c.M2,marginTop:'4px'}}>@ {profile?.name||org}</div>
         </div>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'20px'}}>{lang==='es'?'Estás a punto de crear tu plan. Luego podrás editarlo, añadir más fechas, puntos y detalles.':'You\'re about to create your plan. You can edit it, add more dates, points and details later.'}</p>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'20px'}}>{lang==='es'?'Estás a punto de crear tu plan. Luego podrás editar, añadir y compartir lo que necesites.':'You\'re about to create your plan. You can edit, add and share whatever you need later.'}</p>
         <Btn onClick={create} disabled={saving} full style={{padding:'16px',fontSize:'16px',background:mc,color:'#0A0A0A'}} c={c}>{saving?(lang==='es'?'Creando...':'Creating...'):(lang==='es'?'Crear plan 🎉':'Create plan 🎉')}</Btn>
       </div>}
 
