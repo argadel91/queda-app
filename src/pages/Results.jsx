@@ -87,6 +87,13 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
   const mx=Math.max(...slots.map(s=>cntY(s.key)),1);
   const best=total>0?slots.reduce((b,s)=>score(s.key)>score(b.key)?s:b,slots[0]):null;
   const budget=(plan.stops||[]).reduce((s,p2)=>s+(parseFloat(p2.cost)||0),0);
+  // Auto-cancel points below minimum attendance
+  const stopYesCount=(sid)=>rs.filter(r=>r.stopAttend?.[sid]==='yes').length;
+  const cancelledStops=new Set((plan.stops||[]).filter(s=>{
+    const min=parseInt(s.minAttendees);
+    return min>0&&total>0&&stopYesCount(s.id)<min;
+  }).map(s=>s.id));
+  const firstActiveStop=(plan.stops||[]).find(s=>!cancelledStops.has(s.id));
   const giftPer=plan.gift?.price?parseFloat(plan.gift.price):0;
   const fs=plan.stops?.find(s=>(s.options?.[0]?.lat&&s.options?.[0]?.lng)||(s.lat&&s.lng));
   const city=(()=>{
@@ -323,18 +330,22 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
         {city&&(plan.confirmedDate||plan.dates?.[0])&&<a href={`https://www.google.com/search?q=weather+${encodeURIComponent(city)}+${plan.confirmedDate||plan.dates[0]}`} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:'4px',padding:'3px 8px',background:c.CARD2,borderRadius:'8px',textDecoration:'none',fontSize:'11px',color:c.M2,marginBottom:'8px'}}>🌤️ {city}</a>}
         {plan.dressCode&&(Array.isArray(plan.dressCode)?plan.dressCode.length>0:plan.dressCode)&&<span style={{display:'inline-flex',padding:'4px 10px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',fontSize:'12px',color:c.M2,marginBottom:'10px',marginLeft:'6px'}}>👗 {Array.isArray(plan.dressCode)?plan.dressCode.join(', '):plan.dressCode}</span>}
         {(plan.stops||[]).length===0&&<Card c={c} style={{textAlign:'center',padding:'28px'}}><div style={{fontSize:'32px',marginBottom:'8px'}}>📍</div><div style={{color:c.M2,fontSize:'14px'}}>{t.noStopsMsg}</div></Card>}
-        {(plan.stops||[]).map((s,i)=>{const opt=s.options?.[0]||s;return<div key={s.id||i} style={{display:'flex',gap:'12px',marginBottom:'10px'}}>
+        {cancelledStops.size>0&&total>0&&<div style={{background:'#f59e0b10',border:'1px solid #f59e0b30',borderRadius:'10px',padding:'10px 14px',marginBottom:'12px',fontSize:'13px',color:'#f59e0b'}}>
+          ⚠️ {lang==='es'?`${cancelledStops.size} punto${cancelledStops.size>1?'s':''} cancelado${cancelledStops.size>1?'s':''} por falta de asistentes`:`${cancelledStops.size} point${cancelledStops.size>1?'s':''} cancelled — not enough attendees`}
+          {firstActiveStop&&<span style={{color:c.M2}}> · {lang==='es'?'El plan empieza en':'Plan starts at'} {(plan.stops||[]).indexOf(firstActiveStop)+1}</span>}
+        </div>}
+        {(plan.stops||[]).map((s,i)=>{const opt=s.options?.[0]||s;const isCancelled=cancelledStops.has(s.id);return<div key={s.id||i} style={{display:'flex',gap:'12px',marginBottom:'10px',opacity:isCancelled?.4:1}}>
           <div style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
-            <div style={{width:'28px',height:'28px',borderRadius:'50%',background:`${mc}20`,border:`1.5px solid ${mc}60`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',fontWeight:'800',color:mc,flexShrink:0}}>{i+1}</div>
+            <div style={{width:'28px',height:'28px',borderRadius:'50%',background:isCancelled?c.CARD2:`${mc}20`,border:`1.5px solid ${isCancelled?c.BD:mc+'60'}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',fontWeight:'800',color:isCancelled?c.M:mc,flexShrink:0,textDecoration:isCancelled?'line-through':'none'}}>{i+1}</div>
             {i<plan.stops.length-1&&<div style={{width:'2px',flex:1,background:c.BD,margin:'4px 0'}}/>}
           </div>
           <Card c={c} style={{flex:1,marginBottom:0}}>
-            <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>{s.cat}</div>
-            <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'4px'}}>{opt.name||'—'}</div>
+            {isCancelled&&<div style={{fontSize:'11px',color:'#f59e0b',fontWeight:'600',marginBottom:'4px'}}>⚠️ {lang==='es'?'Cancelado — mínimo no alcanzado':'Cancelled — minimum not reached'}</div>}
+            <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'4px',textDecoration:isCancelled?'line-through':'none'}}>{opt.name||'—'}</div>
             {opt.address&&<div style={{fontSize:'12px',color:c.M2,marginBottom:'6px'}}>📍 {opt.address}</div>}
-            <VenueInfo stop={opt} c={c} lang={lang}/>
-            {parseFloat(s.cost)>0&&<div style={{marginTop:'6px'}}><Badge color={mc}>{s.cost}€/pers.</Badge></div>}
-            {isOrgRef.current&&<button onClick={()=>alert(lang==='es'?'Próximamente: añadir alternativas para esta parada':'Coming soon: add alternatives for this stop')} style={{marginTop:'8px',padding:'5px 10px',background:'none',border:`1px dashed ${c.BD}`,borderRadius:'8px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'11px',width:'100%'}}>+ {t.alternative||'Alternative'}</button>}
+            {!isCancelled&&<VenueInfo stop={opt} c={c} lang={lang}/>}
+            {s.meetingPoint&&!isCancelled&&<div style={{fontSize:'12px',color:mc,marginTop:'6px'}}>📍 {t.meetingPointLbl||'Meeting point'}: {s.meetingPoint}{s.meetingMinsBefore?` (${s.meetingMinsBefore} min ${lang==='es'?'antes':'before'})`:''}</div>}
+            {parseFloat(s.cost)>0&&!isCancelled&&<div style={{marginTop:'6px'}}><Badge color={mc}>{s.cost}€/pers.</Badge></div>}
           </Card>
         </div>})}
         {budget>0&&<><HR c={c}/>

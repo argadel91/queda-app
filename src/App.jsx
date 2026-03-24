@@ -12,7 +12,6 @@ import Landing from './pages/Landing.jsx'
 const AuthScreen = React.lazy(() => import('./pages/AuthScreen.jsx'))
 const ResetPasswordScreen = React.lazy(() => import('./pages/ResetPasswordScreen.jsx'))
 const Create = React.lazy(() => import('./pages/Create.jsx'))
-const PlanPreview = React.lazy(() => import('./pages/PlanPreview.jsx'))
 const Respond = React.lazy(() => import('./pages/Respond.jsx'))
 const Results = React.lazy(() => import('./pages/Results.jsx'))
 const Profile = React.lazy(() => import('./pages/Profile.jsx'))
@@ -180,16 +179,16 @@ export default function App(){
 
   useEffect(()=>{
     const code=new URLSearchParams(location.search).get('code');
-    if(code){loadPlan(code).then(p=>{if(p){setPlan(p);setIsOrg(false);setScreen('preview');}});return;}
+    if(code){loadPlan(code).then(p=>{if(p){setPlan(p);setIsOrg(false);setScreen('respond');}});return;}
     const saved=ls.get('q_state',null);
     if(saved?.planId){loadPlan(saved.planId).then(p=>{if(p){setPlan(p);setIsOrg(false);setScreen(saved.screen||'home');}});}
   },[]);
   const nav=(s,p=null,org=false)=>{setScreen(s);if(p)setPlan(p);if(!p&&s==='home'){setPlan(null);setIsOrg(false);}else setIsOrg(org);if(s!=='home')ls.set('q_state',{screen:s,planId:p?.id||plan?.id,isOrg:org});else ls.set('q_state',{});};
-  const handleJoin=async code=>{const p=await loadPlan(code);if(p){setPlan(p);setIsOrg(false);setScreen('preview');ls.set('q_state',{screen:'preview',planId:p.id,isOrg:false});return true;}return false;};
+  const handleJoin=async code=>{const p=await loadPlan(code);if(p){setPlan(p);setIsOrg(false);setScreen('respond');ls.set('q_state',{screen:'respond',planId:p.id,isOrg:false});return true;}return false;};
   const handleFromProfile=async id=>{const p=await loadPlan(id);if(p){const mine=getMyPlans().find(x=>x.id===id);nav('results',p,mine?.role==='organizer');}};
 
   const mc=c.A;
-  const noNav=['home','create','profile','myplans','preview'];
+  const noNav=['home','create','profile','myplans'];
   if(authLoading)return(<div style={{minHeight:'100vh',background:c.BG,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'16px'}}><div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'28px',color:c.T}}>queda<span style={{color:c.A}}>.</span></div><div style={{width:'24px',height:'24px',border:`3px solid ${c.BD}`,borderTop:`3px solid ${c.A}`,borderRadius:'50%',animation:'spin 1s linear infinite'}}/></div>);
   const Fallback=()=><div style={{minHeight:'100vh',background:c.BG,display:'flex',alignItems:'center',justifyContent:'center'}}><div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'22px',color:c.T}}>queda<span style={{color:c.A}}>.</span></div></div>;
   if(resetMode)return<React.Suspense fallback={<Fallback/>}><ResetPasswordScreen onDone={()=>{setResetMode(false);authSignOut();}} c={c} lang={lang}/></React.Suspense>;
@@ -242,8 +241,7 @@ export default function App(){
     {screen==='myplans'&&<MyPlans onBack={()=>nav('home')} onOpen={handleFromProfile} c={c} lang={lang}/>}
 
     {screen==='create'&&<Create onBack={()=>nav('home')} onCreated={p=>{setShowShareModal(true);nav('results',p,true);}} c={c} lang={lang} authUser={authUser} profile={profile}/>}
-    {screen==='preview'&&plan&&<PlanPreview plan={plan} onRespond={()=>nav('respond',plan,false)} onBack={()=>nav('home')} c={c} lang={lang}/>}
-    {screen==='respond'&&plan&&<Respond plan={plan} onBack={()=>nav('preview',plan,false)} onDone={()=>nav('results',plan,false)} onCreateOwn={()=>nav('create')} c={c} lang={lang} authUser={authUser} profile={profile}/>}
+    {screen==='respond'&&plan&&<Respond plan={plan} onBack={()=>nav('home')} onDone={()=>nav('results',plan,false)} onCreateOwn={()=>nav('create')} c={c} lang={lang} authUser={authUser} profile={profile}/>}
     {screen==='results'&&plan&&<Results plan={plan} onBack={()=>nav('home')} isOrg={isOrg} c={c} lang={lang} showShare={showShareModal} onCloseShare={()=>setShowShareModal(false)}/>}
     {showInstall&&<div style={{position:'fixed',bottom:'0',left:'0',right:'0',background:c.CARD,borderTop:`1px solid ${c.BD}`,padding:'14px 20px',display:'flex',alignItems:'center',gap:'12px',zIndex:50}}>
       <div style={{flex:1}}>

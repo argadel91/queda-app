@@ -326,14 +326,33 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
             </div>
             <input value={opt.website||''} onChange={e=>updOption(s.id,opt.id,'website',e.target.value)} placeholder={lang==='es'?'Link o detalles (Zoom, Meet, Discord...)':'Link or details (Zoom, Meet, Discord...)'} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
           </div>;
-          return<div key={s.id} style={{display:'flex',alignItems:'center',gap:'10px',padding:'10px 12px',background:c.CARD,border:`1px solid ${mc}30`,borderRadius:'12px',marginBottom:'8px'}}>
-            <div style={{width:'24px',height:'24px',borderRadius:'50%',background:`${mc}25`,border:`1px solid ${mc}50`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',fontWeight:'800',color:mc,flexShrink:0}}>{i+1}</div>
-            {opt.photo&&<img src={opt.photo} alt="" style={{width:'36px',height:'36px',borderRadius:'8px',objectFit:'cover',flexShrink:0}}/>}
-            <div style={{flex:1,minWidth:0}}>
-              <div style={{fontSize:'14px',color:c.T,fontWeight:'600',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{opt.name}</div>
-              {opt.rating&&<div style={{fontSize:'11px',color:c.M2}}>⭐{opt.rating}{opt.priceLevel?' · '+'€'.repeat(opt.priceLevel):''}</div>}
+          return<div key={s.id} style={{background:c.CARD,border:`1px solid ${mc}30`,borderRadius:'12px',marginBottom:'8px',overflow:'hidden'}}>
+            <div style={{display:'flex',alignItems:'center',gap:'10px',padding:'10px 12px'}}>
+              <div style={{width:'24px',height:'24px',borderRadius:'50%',background:`${mc}25`,border:`1px solid ${mc}50`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',fontWeight:'800',color:mc,flexShrink:0}}>{i+1}</div>
+              {opt.photo&&<img src={opt.photo} alt="" style={{width:'36px',height:'36px',borderRadius:'8px',objectFit:'cover',flexShrink:0}}/>}
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:'14px',color:c.T,fontWeight:'600',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{opt.name}</div>
+                {opt.rating&&<div style={{fontSize:'11px',color:c.M2}}>⭐{opt.rating}{opt.priceLevel?' · '+'€'.repeat(opt.priceLevel):''}</div>}
+              </div>
+              <button onClick={()=>updStop(s.id,'_expanded',!s._expanded)} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'12px',padding:'4px'}}>{s._expanded?'▾':'⚙️'}</button>
+              <button onClick={()=>remStop(s.id)} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'16px',flexShrink:0}}>×</button>
             </div>
-            <button onClick={()=>remStop(s.id)} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'16px',flexShrink:0}}>×</button>
+            {s._expanded&&<div style={{padding:'8px 12px 12px',borderTop:`1px solid ${c.BD}`,display:'flex',flexDirection:'column',gap:'8px'}}>
+              <div>
+                <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>{t.meetingPointLbl||'Meeting point'}</div>
+                <input value={s.meetingPoint||''} onChange={e=>updStop(s.id,'meetingPoint',e.target.value)} placeholder={t.meetingPointPh||'Where to meet before'} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+              </div>
+              <div style={{display:'flex',gap:'8px'}}>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>{t.minsBefore||'Minutes before'}</div>
+                  <input type="number" value={s.meetingMinsBefore||''} onChange={e=>updStop(s.id,'meetingMinsBefore',e.target.value)} placeholder="15" style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+                </div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>{t.minAttendeesLbl||'Min. people'}</div>
+                  <input type="number" value={s.minAttendees||''} onChange={e=>updStop(s.id,'minAttendees',e.target.value)} placeholder="0" style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+                </div>
+              </div>
+            </div>}
           </div>;
         })}
 

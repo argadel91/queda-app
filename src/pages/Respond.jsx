@@ -86,8 +86,14 @@ export default function Respond({plan,onBack,onDone,onCreateOwn,c,lang:appLang,a
   }
   return(<div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
     <Back onClick={()=>{if(Object.keys(avail).length>0&&!window.confirm(t.unsavedWarning))return;onBack();}} label={t.back} c={c}/>
-    <div style={{background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'12px',padding:'12px 14px',marginBottom:'16px',display:'flex',alignItems:'center',gap:'10px'}}>
-      <div style={{flex:1,minWidth:0}}><div style={{fontSize:'15px',color:c.T,fontWeight:'600',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{plan.name}</div><div style={{fontSize:'12px',color:c.M2}}>@ {plan.organizer}</div></div>
+    <div style={{background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'14px',padding:'16px',marginBottom:'16px',textAlign:'center'}}>
+      <div style={{fontSize:'32px',marginBottom:'8px'}}>🎉</div>
+      <div style={{fontSize:'18px',color:c.T,fontWeight:'700',fontFamily:"'Syne',serif"}}>{plan.name||'queda.'}</div>
+      <div style={{fontSize:'13px',color:c.M2,marginTop:'4px'}}>@ {plan.organizer}</div>
+      <div style={{display:'flex',justifyContent:'center',gap:'12px',marginTop:'10px',fontSize:'12px',color:c.M2}}>
+        {plan.dates?.length>0&&<span>📅 {plan.dates.length}</span>}
+        {plan.stops?.length>0&&<span>📍 {plan.stops.length}</span>}
+      </div>
     </div>
     {prev&&<div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',marginBottom:'14px',fontSize:'12px',color:c.M2}}>✏️ {t.editingPrev}</div>}
     {plan.confirmedDate&&<div style={{background:`${mc}15`,border:`1px solid ${mc}50`,borderRadius:'12px',padding:'12px 14px',marginBottom:'16px',display:'flex',gap:'10px',alignItems:'center'}}><span style={{fontSize:'18px'}}>📌</span><div><div style={{fontSize:'11px',color:mc,fontWeight:'700',textTransform:'uppercase',letterSpacing:'.06em'}}>{t.confirmedDate}</div><div style={{fontSize:'14px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,pLang)}</div></div></div>}
