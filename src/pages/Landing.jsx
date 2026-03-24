@@ -7,6 +7,25 @@ export default function Landing({onGetStarted, c, lang, onLangChange}){
   const LANGS=['es','en','pt','fr','de','it'];
   const[langOpen,setLangOpen]=useState(false);
 
+  const hero={
+    es:['Crea tu plan','en menos de 1 minuto.','Nunca fue tan fácil quedar.'],
+    en:['Create your plan','in less than 1 minute.','Meeting up was never this easy.'],
+    pt:['Cria o teu plano','em menos de 1 minuto.','Nunca foi tão fácil combinar.'],
+    fr:['Crée ton plan','en moins d\'1 minute.','Se retrouver n\'a jamais été si simple.'],
+    de:['Erstelle deinen Plan','in unter 1 Minute.','Sich verabreden war nie so einfach.'],
+    it:['Crea il tuo piano','in meno di 1 minuto.','Incontrarsi non è mai stato così facile.']
+  };
+  const steps={
+    es:[{e:'📅',l:'Elige una fecha'},{e:'🕐',l:'Elige una hora'},{e:'📍',l:'Elige un lugar'},{e:'📨',l:'Comparte el código'}],
+    en:[{e:'📅',l:'Pick a date'},{e:'🕐',l:'Pick a time'},{e:'📍',l:'Pick a place'},{e:'📨',l:'Share the code'}],
+    pt:[{e:'📅',l:'Escolhe uma data'},{e:'🕐',l:'Escolhe uma hora'},{e:'📍',l:'Escolhe um local'},{e:'📨',l:'Partilha o código'}],
+    fr:[{e:'📅',l:'Choisis une date'},{e:'🕐',l:'Choisis une heure'},{e:'📍',l:'Choisis un lieu'},{e:'📨',l:'Partage le code'}],
+    de:[{e:'📅',l:'Wähle ein Datum'},{e:'🕐',l:'Wähle eine Uhrzeit'},{e:'📍',l:'Wähle einen Ort'},{e:'📨',l:'Teile den Code'}],
+    it:[{e:'📅',l:'Scegli una data'},{e:'🕐',l:'Scegli un orario'},{e:'📍',l:'Scegli un luogo'},{e:'📨',l:'Condividi il codice'}]
+  };
+  const h=hero[lang]||hero.en;
+  const st=steps[lang]||steps.en;
+
   return(<div style={{minHeight:'100vh',background:c.BG,color:c.T,fontFamily:"'DM Sans',system-ui,sans-serif",display:'flex',flexDirection:'column'}} onClick={()=>setLangOpen(false)}>
     {/* Nav */}
     <div style={{padding:'16px 24px',display:'flex',justifyContent:'space-between',alignItems:'center',maxWidth:'500px',width:'100%',margin:'0 auto'}}>
@@ -25,21 +44,20 @@ export default function Landing({onGetStarted, c, lang, onLangChange}){
     {/* Content */}
     <div style={{flex:1,display:'flex',flexDirection:'column',justifyContent:'center',maxWidth:'500px',width:'100%',margin:'0 auto',padding:'0 24px'}}>
       {/* Hero */}
-      <div style={{textAlign:'center',marginBottom:'48px'}}>
-        <h1 style={{fontFamily:"'Syne',serif",fontSize:'48px',fontWeight:'800',lineHeight:1.05,marginBottom:'14px',letterSpacing:'-.03em'}}>{t.landingHero1||'Group plans,'}<br/><span style={{color:c.A}}>{t.landingHero2||'zero chaos.'}</span></h1>
-        <p style={{fontSize:'16px',color:c.M2,lineHeight:1.7,marginBottom:'28px'}}>{t.landingSub2||'Say goodbye to endless chats.'}</p>
+      <div style={{textAlign:'center',marginBottom:'40px'}}>
+        <h1 style={{fontFamily:"'Syne',serif",fontSize:'44px',fontWeight:'800',lineHeight:1.05,marginBottom:'12px',letterSpacing:'-.03em'}}>{h[0]}<br/><span style={{color:c.A}}>{h[1]}</span></h1>
+        <p style={{fontSize:'16px',color:c.M2,lineHeight:1.7,marginBottom:'28px'}}>{h[2]}</p>
         <button onClick={onGetStarted} style={{padding:'16px 40px',background:c.A,color:'#0A0A0A',border:'none',borderRadius:'14px',fontSize:'17px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>{t.landingCTA2||'Get started'}</button>
       </div>
 
-      {/* 3 steps — compact */}
-      <div style={{display:'flex',gap:'8px',marginBottom:'32px'}}>
-        {[
-          {emoji:'📍',label:t.landingStep1T||'Pick spots'},
-          {emoji:'📅',label:t.landingStep2T||'Vote dates'},
-          {emoji:'📨',label:t.landingStep3T||'Share code'},
-        ].map((s,i)=><div key={i} style={{flex:1,textAlign:'center',padding:'12px 4px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px'}}>
-          <div style={{fontSize:'20px',marginBottom:'4px'}}>{s.emoji}</div>
-          <div style={{fontSize:'11px',fontWeight:'600'}}>{s.label}</div>
+      {/* 4 steps */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',marginBottom:'32px'}}>
+        {st.map((s,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:'10px',padding:'14px 12px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px'}}>
+          <span style={{fontSize:'22px'}}>{s.e}</span>
+          <div>
+            <div style={{fontSize:'10px',color:c.M,fontWeight:'700',letterSpacing:'.05em'}}>{lang==='es'?'PASO':'STEP'} {i+1}</div>
+            <div style={{fontSize:'13px',fontWeight:'600',color:c.T}}>{s.l}</div>
+          </div>
         </div>)}
       </div>
     </div>

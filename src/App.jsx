@@ -221,7 +221,14 @@ export default function App(){
     <div style={{borderBottom:`1px solid ${c.BD}`,padding:'14px 24px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,background:c.BG+'F0',backdropFilter:'blur(10px)',zIndex:10}}>
       <div onClick={()=>nav('home')} style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'22px',cursor:'pointer',color:c.T,letterSpacing:'-.02em'}}>queda<span style={{color:c.A}}>.</span></div>
       <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
-        {screen!=='home'&&<button onClick={()=>nav('home')} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 10px',cursor:'pointer',fontSize:'12px',color:c.T,fontFamily:'inherit',fontWeight:'600'}}>🏠 Menu</button>}
+        {/* Language selector — always visible */}
+        <div style={{position:'relative'}} onClick={e=>e.stopPropagation()}>
+          <button onClick={()=>setLangOpen(o=>!o)} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 8px',cursor:'pointer',fontSize:'14px',color:c.T,fontFamily:'inherit'}}>{({es:'🇪🇸',en:'🇬🇧',pt:'🇵🇹',fr:'🇫🇷',de:'🇩🇪',it:'🇮🇹'})[lang]}</button>
+          {langOpen&&<div style={{position:'absolute',right:0,top:'calc(100% + 4px)',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',boxShadow:'0 8px 24px rgba(0,0,0,.3)',zIndex:100,overflow:'hidden'}}>
+            {['es','en','pt','fr','de','it'].map(l=><button key={l} onClick={()=>{setLang(l);ls.set('q_lang',l);if(authUser)saveProfile(authUser.id,{...profile,lang:l}).catch(()=>{});setLangOpen(false);}} style={{display:'flex',alignItems:'center',gap:'8px',width:'100%',padding:'10px 14px',background:l===lang?`${c.A}15`:'transparent',border:'none',borderBottom:`1px solid ${c.BD}`,cursor:'pointer',fontSize:'13px',color:l===lang?c.A:c.T,fontWeight:l===lang?'700':'400',fontFamily:'inherit'}}>{({es:'🇪🇸',en:'🇬🇧',pt:'🇵🇹',fr:'🇫🇷',de:'🇩🇪',it:'🇮🇹'})[l]}</button>)}
+          </div>}
+        </div>
+        {screen!=='home'&&<button onClick={()=>nav('home')} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 10px',cursor:'pointer',fontSize:'12px',color:c.T,fontFamily:'inherit',fontWeight:'600'}}>🏠</button>}
         {plan&&!noNav.includes(screen)&&<span style={{color:mc,fontWeight:'800',fontSize:'12px',letterSpacing:'.1em'}}>{plan.id}</span>}
         {authUser&&<div style={{position:'relative'}} onClick={e=>e.stopPropagation()}>
           <button onClick={e=>{e.stopPropagation();setAvatarOpen(o=>!o);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 10px',cursor:'pointer',fontSize:'13px',color:c.T,fontFamily:'inherit',fontWeight:'500',display:'flex',alignItems:'center',gap:'5px'}}>

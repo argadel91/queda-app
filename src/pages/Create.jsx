@@ -271,11 +271,18 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
 
   // Done screen
   if(created){
-    return<div style={{padding:'60px 24px',maxWidth:'420px',margin:'0 auto',textAlign:'center'}}>
+    const shareUrl=location.href.split('?')[0]+'?code='+created.id;
+    const shareText=lang==='es'?`¡Únete a mi plan! ${shareUrl}`:`Join my plan! ${shareUrl}`;
+    return<div style={{padding:'48px 24px',maxWidth:'420px',margin:'0 auto',textAlign:'center'}}>
       <div style={{fontSize:'64px',marginBottom:'16px'}}>🎉</div>
       <h2 style={{fontFamily:"'Syne',serif",fontSize:'28px',fontWeight:'800',color:mc,marginBottom:'8px'}}>{lang==='es'?'¡Plan creado!':'Plan created!'}</h2>
       <div style={{fontFamily:'monospace',fontSize:'40px',fontWeight:'900',color:mc,letterSpacing:'.15em',margin:'16px 0'}}>{created.id}</div>
-      <p style={{color:c.M2,fontSize:'14px',marginBottom:'28px'}}>{lang==='es'?'Comparte el código con tu grupo. Visita tu plan para editar, añadir detalles y ver resultados.':'Share the code with your group. Visit your plan to edit, add details and see results.'}</p>
+      <p style={{color:c.M2,fontSize:'14px',marginBottom:'24px'}}>{lang==='es'?'Comparte el código para que tu grupo se una. Luego podrás editar, añadir y compartir lo que necesites.':'Share the code so your group can join. You can edit, add and share whatever you need later.'}</p>
+      <div style={{display:'flex',gap:'8px',marginBottom:'20px'}}>
+        <button onClick={()=>window.open('https://wa.me/?text='+encodeURIComponent(shareText),'_blank')} style={{flex:1,padding:'14px',background:'#25D366',color:'#fff',border:'none',borderRadius:'12px',fontSize:'14px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>WhatsApp</button>
+        <button onClick={()=>window.open('https://t.me/share/url?url='+encodeURIComponent(shareUrl)+'&text='+encodeURIComponent(shareText),'_blank')} style={{flex:1,padding:'14px',background:'#0088cc',color:'#fff',border:'none',borderRadius:'12px',fontSize:'14px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>Telegram</button>
+        <button onClick={()=>{navigator.clipboard?.writeText(shareUrl);}} style={{flex:1,padding:'14px',background:c.CARD2,color:c.T,border:`1px solid ${c.BD}`,borderRadius:'12px',fontSize:'14px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>🔗</button>
+      </div>
       <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
         <Btn onClick={()=>onCreated(created)} full style={{padding:'14px'}} c={c} accent={mc}>{lang==='es'?'Revisa tu plan →':'Review your plan →'}</Btn>
         <Btn onClick={()=>{setCreated(null);setStep(0);setSelDates([]);setStartTimes(['']);setStops([emptyStop(1,'')]);}} v="secondary" full style={{padding:'14px'}} c={c}>{lang==='es'?'Crear otro plan':'Create another plan'}</Btn>
