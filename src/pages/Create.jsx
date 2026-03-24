@@ -193,7 +193,9 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
     }
   };
 
+  const pickingRef=useRef(false);
   const pickInlineResult=async(r)=>{
+    if(pickingRef.current)return;pickingRef.current=true;setTimeout(()=>{pickingRef.current=false;},500);
     setInlineResults([]);
     if(inlineSearchRef.current)inlineSearchRef.current.value=r.name;
     // Enrich with details

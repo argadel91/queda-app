@@ -20,6 +20,9 @@ export const addMyPlan = (id, name, role) => {
 
 export const removeMyPlan = (id) => {
   ls.set('q_plans', getMyPlans().filter(x => x.id !== id))
+  // Also delete user's response from this plan
+  const myName = ls.get('q_myname', '')
+  if (myName) db.from('responses').delete().eq('plan_id', id).eq('name', myName).catch(() => {})
   db.auth.getUser().then(({ data }) => {
     if (data?.user) {
       db.from('user_plans').delete().eq('user_id', data.user.id).eq('plan_id', id).then(() => {})

@@ -25,7 +25,8 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
   const[ratingDone,setRatingDone]=useState(false);
   const isOrgRef=useRef(isOrg);
   const prevCountRef=useRef(null);
-  const refresh=useCallback(async(silent=false)=>{
+  const refreshRef=useRef(null);
+  refreshRef.current=async(silent=false)=>{
     if(!silent)setL(true);
     const newRs=await loadResps(plan.id);
     if(silent&&prevCountRef.current!==null&&newRs.length>prevCountRef.current){
@@ -34,24 +35,22 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
         const who=added[added.length-1].name;
         setAlert(who);
         setTimeout(()=>setAlert(null),4000);
-        // Browser notification if permission granted
         if(typeof Notification!=='undefined'&&Notification.permission==='granted'){
-          new Notification(plan.name,{body:((T[plan.lang]?.newRespNotif||'New response from')+' '+who),icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">📅</text></svg>'});
+          new Notification(plan.name||'queda.',{body:((T[plan.lang]?.newRespNotif||'New response from')+' '+who)});
         }
       }
     }
     prevCountRef.current=newRs.length;
     setRs(newRs);
-    // Auto-confirm check
     if(isOrgRef.current&&plan.autoConfirm&&!plan.confirmedDate){
       const cntYFn=key=>newRs.filter(r=>r.avail?.[key]==='yes').length;
       const autoSlot=slots.find(s=>cntYFn(s.key)>=plan.autoConfirmN);
       if(autoSlot&&!autoConfirmPending)setAutoConfirmPending(autoSlot);
     }
     if(!silent)setL(false);
-  },[plan.id,rs]);
+  };
+  const refresh=(silent)=>refreshRef.current(silent);
   useEffect(()=>{refresh();},[plan.id]);
-  // NOTE: Requires "Realtime" enabled on the "responses" table in Supabase dashboard
   useEffect(()=>{
     const channel=db.channel('responses-'+plan.id)
       .on('postgres_changes',{event:'*',schema:'public',table:'responses',filter:'plan_id=eq.'+plan.id},()=>refresh(true))
