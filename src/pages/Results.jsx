@@ -381,6 +381,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
             </div>}
           </div>;
         })}
+        {isOrgRef.current&&<button onClick={()=>alert(t.addPointHint||'Coming soon: add points from here')} style={{width:'100%',padding:'12px',background:'none',border:`2px dashed ${c.BD}`,borderRadius:'12px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'600',marginBottom:'8px'}}>+ {t.addNextPoint||'Add the next point'}</button>}
 
         {/* Map */}
         {plan.stops?.some(s=>(s.options?.[0]?.lat&&s.options?.[0]?.lng)||(s.lat&&s.lng))&&<><HR c={c}/><RouteMap stops={(plan.stops||[]).flatMap(s=>{
