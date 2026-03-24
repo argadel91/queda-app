@@ -44,20 +44,17 @@ export default function Landing({onGetStarted, c, lang, onLangChange}){
     {/* Content */}
     <div style={{flex:1,display:'flex',flexDirection:'column',justifyContent:'center',maxWidth:'500px',width:'100%',margin:'0 auto',padding:'0 24px'}}>
       {/* Hero */}
-      <div style={{textAlign:'center',marginBottom:'40px'}}>
-        <h1 style={{fontFamily:"'Syne',serif",fontSize:'44px',fontWeight:'800',lineHeight:1.05,marginBottom:'12px',letterSpacing:'-.03em'}}>{h[0]}<br/><span style={{color:c.A}}>{h[1]}</span></h1>
-        <p style={{fontSize:'16px',color:c.M2,lineHeight:1.7,marginBottom:'28px'}}>{h[2]}</p>
+      <div style={{textAlign:'center',marginBottom:'48px'}}>
+        <h1 style={{fontFamily:"'Syne',serif",fontSize:'48px',fontWeight:'800',lineHeight:1.05,marginBottom:'14px',letterSpacing:'-.03em'}}>{t.landingHero1||'Group plans,'}<br/><span style={{color:c.A}}>{t.landingHero2||'zero chaos.'}</span></h1>
+        <p style={{fontSize:'16px',color:c.M2,lineHeight:1.7,marginBottom:'28px'}}>{h[0]} {h[1]}</p>
         <button onClick={onGetStarted} style={{padding:'16px 40px',background:c.A,color:'#0A0A0A',border:'none',borderRadius:'14px',fontSize:'17px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>{t.landingCTA2||'Get started'}</button>
       </div>
 
-      {/* 4 steps */}
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',marginBottom:'32px'}}>
-        {st.map((s,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:'10px',padding:'14px 12px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px'}}>
-          <span style={{fontSize:'22px'}}>{s.e}</span>
-          <div>
-            <div style={{fontSize:'10px',color:c.M,fontWeight:'700',letterSpacing:'.05em'}}>{lang==='es'?'PASO':'STEP'} {i+1}</div>
-            <div style={{fontSize:'13px',fontWeight:'600',color:c.T}}>{s.l}</div>
-          </div>
+      {/* 4 steps — compact row */}
+      <div style={{display:'flex',gap:'6px',marginBottom:'32px'}}>
+        {st.map((s,i)=><div key={i} style={{flex:1,textAlign:'center',padding:'10px 4px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px'}}>
+          <div style={{fontSize:'18px',marginBottom:'2px'}}>{s.e}</div>
+          <div style={{fontSize:'10px',fontWeight:'600',color:c.T}}>{s.l}</div>
         </div>)}
       </div>
     </div>
