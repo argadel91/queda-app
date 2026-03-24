@@ -215,9 +215,9 @@ const T ={
     // Profile
     langLabel:'Idioma',
     shareCodeMsg2:'Já podes partilhar o teu código com quem quiseres. Revê o teu plano para editar ou adicionar o que precisares.',sharePlanBtn:'Partilha o teu plano',
-    tipLang:'Mudar idioma',tipTheme:'Mudar tema',tipHome:'Menu principal',tipProfile:'O teu perfil',
+    tipLang:'Mudar idioma',tipTheme:'Mudar tema',tipHome:'Menu principal',tipProfile:'O teu perfil',usernameTaken:'Este utilizador já está em uso.',
     shareCodeMsg2:'Ya puedes compartir tu código con quien quieras. Revisa tu plan para editar o añadir lo que necesites.',sharePlanBtn:'Comparte tu plan',
-    tipLang:'Cambiar idioma',tipTheme:'Cambiar tema',tipHome:'Menú principal',tipProfile:'Tu perfil',
+    tipLang:'Cambiar idioma',tipTheme:'Cambiar tema',tipHome:'Menú principal',tipProfile:'Tu perfil',usernameTaken:'Este usuario ya está en uso.',
   },
   en:{
     tagline:'More plans, less chaos.',sub:'Say goodbye to endless chats.',
@@ -428,7 +428,7 @@ const T ={
     cancelledDetail:(yc,min)=>`cancelled (${yc}/${min} min)`,responsesLbl:'responses',dateRanking:'Date ranking',
     maxDatesMsg:(n)=>`Maximum ${n} dates`,langLabel:'Language',
     shareCodeMsg2:'You can now share your code with whoever you want. Review your plan to edit or add what you need.',sharePlanBtn:'Share your plan',
-    tipLang:'Change language',tipTheme:'Change theme',tipHome:'Home',tipProfile:'Your profile',
+    tipLang:'Change language',tipTheme:'Change theme',tipHome:'Home',tipProfile:'Your profile',usernameTaken:'This username is already taken.',
   },
   pt:{
 tagline:'Mais planos, menos caos.',sub:'Diga adeus aos chats intermináveis.',
@@ -502,7 +502,7 @@ nextBtn:'Suivant →',physicalPlace:'Physique',readyQ:'Prêt ?',aboutToCreate:'V
 stepName:'Nom',stepSend:'Envoyer',stepDates:'Dates',tapDates:'Appuyez sur les dates disponibles',enterYourName:'Entrez votre nom',meetingPointLbl2:'Point de rencontre',beforeLbl:'avant',whenCanGoHere:'Quand pouvez-vous y aller ?',tapDateInstruction:'Appuyez sur une date pour indiquer votre disponibilité.',timesLbl:'horaires',whichOptionPref:'Quelle option préférez-vous ?',pointN:'Point',finishBtn:'Terminer',backBtn:'Retour',
 editNameLbl:'Nom',editDescLbl:'Description',editDatesLbl:'Dates',editTimesLbl:'Horaires',editPointsLbl:'Points',editHintMsg:'Pour ajouter des points et alternatives, modifiez depuis la vue du plan.',cancelledStopsMsg:(n)=>`${n} point${n>1?'s':''} annulé${n>1?'s':''}`,planStartsAt:'Le plan commence à',cancelledMin:'Annulé — minimum non atteint',noDataYet:'Pas encore de données',noDataHint:'Quand les invités répondront, vous verrez les données ici',chosenPlan:'Plan choisi',bestOption:'Meilleure option',attendance:'participation',tieMsg:(n)=>`Égalité — ${n} options`,pickToConfirm:'Choisissez-en une pour confirmer',cancelledDetail:(yc,min)=>`annulé (${yc}/${min} min)`,responsesLbl:'réponses',dateRanking:'Classement des dates',maxDatesMsg:(n)=>`Maximum ${n} dates`,langLabel:'Langue',
     shareCodeMsg2:'Tu peux maintenant partager ton code avec qui tu veux. Consulte ton plan pour modifier ou ajouter ce dont tu as besoin.',sharePlanBtn:'Partage ton plan',
-    tipLang:'Changer la langue',tipTheme:'Changer le thème',tipHome:'Accueil',tipProfile:'Ton profil',
+    tipLang:'Changer la langue',tipTheme:'Changer le thème',tipHome:'Accueil',tipProfile:'Ton profil',usernameTaken:'Ce nom d\'utilisateur est déjà pris.',
   },
   de:{
 tagline:'Mehr Pläne, weniger Chaos.',sub:'Schluss mit endlosen Chats.',
@@ -529,7 +529,7 @@ nextBtn:'Weiter →',physicalPlace:'Physisch',readyQ:'Bereit?',aboutToCreate:'Du
 stepName:'Name',stepSend:'Senden',stepDates:'Termine',tapDates:'Tippe auf die Termine, an denen du kannst',enterYourName:'Gib deinen Namen ein',meetingPointLbl2:'Treffpunkt',beforeLbl:'vorher',whenCanGoHere:'Wann kannst du hier hin?',tapDateInstruction:'Tippe auf einen Termin, um deine Verfügbarkeit zu markieren.',timesLbl:'Zeiten',whichOptionPref:'Welche Option bevorzugst du?',pointN:'Punkt',finishBtn:'Fertig',backBtn:'Zurück',
 editNameLbl:'Name',editDescLbl:'Beschreibung',editDatesLbl:'Termine',editTimesLbl:'Zeiten',editPointsLbl:'Punkte',editHintMsg:'Um Punkte und Alternativen hinzuzufügen, bearbeite aus der Planansicht.',cancelledStopsMsg:(n)=>`${n} Punkt${n>1?'e':''} storniert`,planStartsAt:'Plan beginnt um',cancelledMin:'Storniert — Minimum nicht erreicht',noDataYet:'Noch keine Daten',noDataHint:'Wenn Eingeladene antworten, siehst du die Daten hier',chosenPlan:'Gewählter Plan',bestOption:'Beste Option',attendance:'Teilnahme',tieMsg:(n)=>`Gleichstand — ${n} Optionen`,pickToConfirm:'Wähle eine aus, um zu bestätigen',cancelledDetail:(yc,min)=>`storniert (${yc}/${min} Min.)`,responsesLbl:'Antworten',dateRanking:'Termin-Ranking',maxDatesMsg:(n)=>`Maximal ${n} Termine`,langLabel:'Sprache',
     shareCodeMsg2:'Du kannst jetzt deinen Code mit wem du willst teilen. Schau dir deinen Plan an, um zu bearbeiten oder hinzuzufügen.',sharePlanBtn:'Teile deinen Plan',
-    tipLang:'Sprache ändern',tipTheme:'Thema wechseln',tipHome:'Startseite',tipProfile:'Dein Profil',
+    tipLang:'Sprache ändern',tipTheme:'Thema wechseln',tipHome:'Startseite',tipProfile:'Dein Profil',usernameTaken:'Dieser Benutzername ist bereits vergeben.',
   },
   it:{
 tagline:'Più piani, meno caos.',sub:'Dì addio alle chat infinite.',
@@ -556,7 +556,7 @@ nextBtn:'Avanti →',physicalPlace:'Fisico',readyQ:'Pronto?',aboutToCreate:'Stai
 stepName:'Nome',stepSend:'Invia',stepDates:'Date',tapDates:'Tocca le date in cui sei disponibile',enterYourName:'Inserisci il tuo nome',meetingPointLbl2:"Punto d'incontro",beforeLbl:'prima',whenCanGoHere:'Quando puoi venire qui?',tapDateInstruction:'Tocca una data per segnare la tua disponibilità.',timesLbl:'orari',whichOptionPref:'Quale opzione preferisci?',pointN:'Punto',finishBtn:'Fine',backBtn:'Indietro',
 editNameLbl:'Nome',editDescLbl:'Descrizione',editDatesLbl:'Date',editTimesLbl:'Orari',editPointsLbl:'Punti',editHintMsg:'Per aggiungere punti e alternative, modifica dalla vista del piano.',cancelledStopsMsg:(n)=>`${n} punt${n>1?'i':'o'} cancellat${n>1?'i':'o'}`,planStartsAt:'Il piano inizia alle',cancelledMin:'Cancellato — minimo non raggiunto',noDataYet:'Nessun dato ancora',noDataHint:'Quando gli invitati risponderanno, vedrai i dati qui',chosenPlan:'Piano scelto',bestOption:'Migliore opzione',attendance:'partecipazione',tieMsg:(n)=>`Parità — ${n} opzioni`,pickToConfirm:'Scegline una per confermare',cancelledDetail:(yc,min)=>`cancellato (${yc}/${min} min)`,responsesLbl:'risposte',dateRanking:'Classifica date',maxDatesMsg:(n)=>`Massimo ${n} date`,langLabel:'Lingua',
     shareCodeMsg2:'Ora puoi condividere il tuo codice con chi vuoi. Rivedi il tuo piano per modificare o aggiungere ciò che ti serve.',sharePlanBtn:'Condividi il tuo piano',
-    tipLang:'Cambia lingua',tipTheme:'Cambia tema',tipHome:'Home',tipProfile:'Il tuo profilo',
+    tipLang:'Cambia lingua',tipTheme:'Cambia tema',tipHome:'Home',tipProfile:'Il tuo profilo',usernameTaken:'Questo nome utente è già in uso.',
   },
 };
 export default T

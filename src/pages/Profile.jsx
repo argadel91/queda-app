@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import T from '../constants/translations.js'
+import { db } from '../lib/supabase.js'
 import { Btn, Back } from '../components/ui.jsx'
 
 const FLAGS={es:'🇪🇸',en:'🇬🇧',pt:'🇵🇹',fr:'🇫🇷',de:'🇩🇪',it:'🇮🇹'};
@@ -11,10 +12,19 @@ export default function Profile({onBack,c,lang,authUser,profile,onUpdateProfile,
   const[editing,setEditing]=useState(false);
   const[newName,setNewName]=useState(profile?.name||'');
   const[newUsername,setNewUsername]=useState(profile?.username||'');
+  const[usernameErr,setUsernameErr]=useState('');
+  const[saving,setSaving]=useState(false);
   const save=async()=>{
     if(!newName.trim())return;
-    await onUpdateProfile({name:newName.trim(),username:newUsername.trim()||null});
-    setEditing(false);
+    const uname=newUsername.trim()||null;
+    if(uname&&uname!==profile?.username){
+      // Check if username is taken
+      const{data}=await db.from('profiles').select('id').eq('username',uname).maybeSingle();
+      if(data&&data.id!==authUser?.id){setUsernameErr(t.usernameTaken||'Username already taken');return;}
+    }
+    setSaving(true);setUsernameErr('');
+    await onUpdateProfile({name:newName.trim(),username:uname});
+    setSaving(false);setEditing(false);
   };
 
   return(<div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
@@ -51,7 +61,7 @@ export default function Profile({onBack,c,lang,authUser,profile,onUpdateProfile,
               <span style={{color:c.M,fontSize:'15px',fontWeight:'600'}}>@</span>
               <input value={newUsername} onChange={e=>setNewUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g,'').slice(0,20))} placeholder="username" style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none'}}/>
             </div>
-            <div style={{fontSize:'11px',color:c.M2,marginTop:'4px'}}>{t.usernameHint||'So others can find you.'}</div>
+            <div style={{fontSize:'11px',color:usernameErr?'#ef4444':c.M2,marginTop:'4px'}}>{usernameErr||t.usernameHint}</div>
           </div>
           <div style={{display:'flex',gap:'8px',marginTop:'4px'}}>
             <button onClick={()=>setEditing(false)} style={{flex:1,padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontWeight:'600',fontSize:'14px'}}>{t.cancel||'Cancel'}</button>
