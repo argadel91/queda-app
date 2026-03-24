@@ -324,70 +324,52 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
 
       {/* PLAN tab = Route + budget + inline map + respondents */}
       {!ldg&&tab==='plan'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><>
-        {/* Inline edit for organizer */}
-        {isOrgRef.current&&<div style={{marginBottom:'14px'}}>
-          {!editMode?<div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
-            <div>
-              {plan.name&&<div style={{fontSize:'18px',fontWeight:'700',color:c.T,marginBottom:'4px'}}>{plan.name}</div>}
+        {/* Title + Description */}
+        <div style={{marginBottom:'14px'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+            <div style={{flex:1}}>
+              <h3 style={{fontSize:'18px',fontWeight:'700',color:c.T,margin:'0 0 4px'}}>{plan.name||t.untitled}</h3>
               {plan.desc&&<div style={{fontSize:'13px',color:c.M2,lineHeight:1.5}}>{plan.desc}</div>}
-              {plan.orgRole&&<div style={{fontSize:'12px',color:c.M2,marginTop:'4px'}}>👤 {plan.organizer} · {plan.orgRole}</div>}
             </div>
-            <button onClick={()=>setEditMode(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'6px 10px',color:c.M2,cursor:'pointer',fontSize:'12px',flexShrink:0}}>✏️</button>
+            {isOrgRef.current&&<button onClick={()=>setEditMode(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 10px',color:c.M2,cursor:'pointer',fontSize:'11px',flexShrink:0}}>{t.editLbl||'Edit'}</button>}
           </div>
-          :<div style={{display:'flex',flexDirection:'column',gap:'8px',marginBottom:'8px'}}>
-            <input value={editName} onChange={e=>setEditName(e.target.value)} placeholder={t.planName||'Plan name'} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
-            <textarea value={editDesc} onChange={e=>setEditDesc(e.target.value)} placeholder={t.desc||'Description'} rows={2} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box',resize:'vertical'}}/>
-            <div style={{display:'flex',gap:'6px'}}>
-              <button onClick={()=>setEditMode(false)} style={{flex:1,padding:'8px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'13px'}}>{t.cancel||'Cancel'}</button>
-              <button onClick={async()=>{const up={...plan,name:editName.trim()||plan.name,desc:editDesc.trim()||null};await updatePlan(up);setPlan(up);setEditMode(false);}} style={{flex:1,padding:'8px',background:mc,border:'none',borderRadius:'8px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'700'}}>{t.saveLbl||'Save'}</button>
-            </div>
-          </div>}
-        </div>}
-        {/* Respondents summary (merged from WHO tab) */}
+          {/* Dates */}
+          <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginTop:'8px'}}>
+            {(plan.dates||[]).map(d=><span key={d} style={{fontSize:'12px',padding:'3px 10px',borderRadius:'20px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`,textTransform:'capitalize'}}>{fmtShort(d,lang)}</span>)}
+          </div>
+        </div>
+
+        {/* Respondents */}
         {total===0
         ?<Card c={c} style={{textAlign:'center',padding:'32px',marginBottom:'14px'}}><div style={{fontSize:'36px',marginBottom:'12px'}}>⏳</div><div style={{color:c.T,fontWeight:'500',marginBottom:'6px'}}>{t.noResp}</div><div style={{color:c.M2,fontSize:'13px'}}>{t.noRespSub} <span style={{color:mc,fontWeight:'700'}}>{plan.id}</span></div></Card>
-        :<>
-          {best&&cntY(best.key)>0&&<div style={{background:`${mc}12`,border:`1px solid ${mc}35`,borderRadius:'14px',padding:'16px',marginBottom:'18px'}}>
-            <div style={{display:'flex',gap:'14px',alignItems:'center',marginBottom:isOrgRef.current&&!plan.confirmedDate?'14px':'0'}}>
-              <div style={{fontSize:'28px'}}>⭐</div>
-              <div><div style={{fontSize:'11px',color:mc,fontWeight:'700',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:'2px'}}>{t.bestOpt}</div>
-                <div style={{fontSize:'15px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtDate(best.date,lang)}{best.startTime?' · '+fmtTime(best.startTime):''}</div>
-                {plan.times?.[best.date]?.length>0&&<div style={{fontSize:'12px',color:c.M2}}>{plan.times[best.date].join(', ')}</div>}
-                <div style={{fontSize:'13px',color:c.M2}}>👥 {cntY(best.key)}/{total}</div>
+        :<div style={{fontSize:'13px',color:c.M2,marginBottom:'14px'}}>👥 {total} {t.responsesLbl}</div>}
+
+        {/* Points — minimal cards */}
+        {(plan.stops||[]).filter(s=>(s.options?.[0]?.name||s.name)).map((s,i)=>{
+          const opt=s.options?.[0]||s;
+          const isCancelled=cancelledStops.has(s.id);
+          const expanded=openSection['stop_'+s.id];
+          return<div key={s.id||i} style={{marginBottom:'8px',opacity:isCancelled?.4:1}}>
+            <div style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px',background:c.CARD,border:`1px solid ${isCancelled?'#f59e0b30':c.BD}`,borderRadius:'12px'}}>
+              <div style={{width:'28px',height:'28px',borderRadius:'50%',background:isCancelled?c.CARD2:`${mc}20`,border:`1.5px solid ${isCancelled?c.BD:mc+'60'}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',fontWeight:'800',color:isCancelled?c.M:mc,flexShrink:0}}>{i+1}</div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:'15px',color:c.T,fontWeight:'600',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',textDecoration:isCancelled?'line-through':'none'}}>{opt.name||'—'}</div>
+                {isCancelled&&<div style={{fontSize:'11px',color:'#f59e0b'}}>⚠️ {t.cancelledMin}</div>}
               </div>
+              <button onClick={()=>setOpenSection(p=>({...p,['stop_'+s.id]:!p['stop_'+s.id]}))} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>{t.seeDetails||'See'}</button>
+              {isOrgRef.current&&<button onClick={()=>setEditMode('stop_'+s.id)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>{t.editLbl||'Edit'}</button>}
             </div>
-            {isOrgRef.current&&!plan.confirmedDate&&<Btn onClick={()=>confirmDate(best.date,best.startTime)} disabled={conf} full sm c={c} accent={mc}>{conf?t.confirming:t.confirmThis}</Btn>}
-            {best&&<button onClick={()=>generateICS({...plan,confirmedDate:best.date},lang)} style={{width:'100%',padding:'8px',background:'none',border:`1px dashed ${c.BD}`,borderRadius:'8px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',marginTop:'6px'}}>{t.addToCalendar} 📅</button>}
-          </div>}
-        </>}
-        <HR c={c}/>
-        {/* Route + budget + inline map */}
-        {city&&(plan.confirmedDate||plan.dates?.[0])&&<a href={`https://www.google.com/search?q=weather+${encodeURIComponent(city)}+${plan.confirmedDate||plan.dates[0]}`} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:'4px',padding:'3px 8px',background:c.CARD2,borderRadius:'8px',textDecoration:'none',fontSize:'11px',color:c.M2,marginBottom:'8px'}}>🌤️ {city}</a>}
-        {plan.dressCode&&(Array.isArray(plan.dressCode)?plan.dressCode.length>0:plan.dressCode)&&<span style={{display:'inline-flex',padding:'4px 10px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',fontSize:'12px',color:c.M2,marginBottom:'10px',marginLeft:'6px'}}>👗 {Array.isArray(plan.dressCode)?plan.dressCode.join(', '):plan.dressCode}</span>}
-        {(plan.stops||[]).length===0&&<Card c={c} style={{textAlign:'center',padding:'28px'}}><div style={{fontSize:'32px',marginBottom:'8px'}}>📍</div><div style={{color:c.M2,fontSize:'14px'}}>{t.noStopsMsg}</div></Card>}
-        {cancelledStops.size>0&&total>0&&<div style={{background:'#f59e0b10',border:'1px solid #f59e0b30',borderRadius:'10px',padding:'10px 14px',marginBottom:'12px',fontSize:'13px',color:'#f59e0b'}}>
-          ⚠️ {t.cancelledStopsMsg?t.cancelledStopsMsg(cancelledStops.size):`${cancelledStops.size} cancelled`}
-          {firstActiveStop&&<span style={{color:c.M2}}> · {t.planStartsAt} {(plan.stops||[]).indexOf(firstActiveStop)+1}</span>}
-        </div>}
-        {(plan.stops||[]).map((s,i)=>{const opt=s.options?.[0]||s;const isCancelled=cancelledStops.has(s.id);return<div key={s.id||i} style={{display:'flex',gap:'12px',marginBottom:'10px',opacity:isCancelled?.4:1}}>
-          <div style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
-            <div style={{width:'28px',height:'28px',borderRadius:'50%',background:isCancelled?c.CARD2:`${mc}20`,border:`1.5px solid ${isCancelled?c.BD:mc+'60'}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',fontWeight:'800',color:isCancelled?c.M:mc,flexShrink:0,textDecoration:isCancelled?'line-through':'none'}}>{i+1}</div>
-            {i<plan.stops.length-1&&<>{plan.stops[i+1]?.transport&&<div style={{fontSize:'12px',margin:'4px 0'}}>{({walk:'🚶',car:'🚗',transit:'🚇',bike:'🚲',taxi:'🚕'})[plan.stops[i+1].transport]||'·'}</div>}<div style={{width:'2px',flex:1,background:c.BD,margin:'2px 0'}}/></>}
-          </div>
-          <Card c={c} style={{flex:1,marginBottom:0}}>
-            {isCancelled&&<div style={{fontSize:'11px',color:'#f59e0b',fontWeight:'600',marginBottom:'4px'}}>⚠️ {t.cancelledMin}</div>}
-            <div style={{fontSize:'15px',color:c.T,fontWeight:'600',marginBottom:'4px',textDecoration:isCancelled?'line-through':'none'}}>{opt.name||'—'}</div>
-            {opt.address&&<div style={{fontSize:'12px',color:c.M2,marginBottom:'6px'}}>📍 {opt.address}</div>}
-            {!isCancelled&&<VenueInfo stop={opt} c={c} lang={lang}/>}
-            {s.meetingPoint&&!isCancelled&&<div style={{fontSize:'12px',color:mc,marginTop:'6px'}}>📍 {t.meetingPointLbl||'Meeting point'}: {s.meetingPoint}{s.meetingMinsBefore?` (${s.meetingMinsBefore} min ${t.beforeLbl})`:''}</div>}
-            {parseFloat(s.cost)>0&&!isCancelled&&<div style={{marginTop:'6px'}}><Badge color={mc}>{s.cost}€/pers.</Badge></div>}
-          </Card>
-        </div>})}
-        {budget>0&&<><HR c={c}/>
-          <div style={{display:'flex',justifyContent:'space-between',padding:'14px 16px',background:`${mc}0D`,border:`1px solid ${mc}30`,borderRadius:'12px',marginBottom:'8px'}}><span style={{color:c.M2}}>{t.perPerson}</span><span style={{color:mc,fontSize:'22px',fontWeight:'800'}}>{budget.toFixed(0)}€</span></div>
-          {giftPer>0&&<div style={{display:'flex',justifyContent:'space-between',padding:'12px 16px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',marginBottom:'8px'}}><span style={{color:c.M2,fontSize:'14px'}}>+ {t.giftLbl}</span><span style={{color:c.T,fontWeight:'600'}}>{giftPer.toFixed(0)}€</span></div>}
-          <div style={{display:'flex',justifyContent:'space-between',padding:'14px 16px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px'}}><span style={{color:c.T,fontWeight:'700'}}>{t.totalLbl}</span><span style={{color:mc,fontSize:'18px',fontWeight:'800'}}>{(budget+giftPer).toFixed(0)}€</span></div>
-        </>}
+            {/* Expanded details */}
+            {expanded&&!isCancelled&&<div className="fade-in" style={{padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderTop:'none',borderRadius:'0 0 12px 12px',marginTop:'-1px'}}>
+              {opt.address&&<div style={{fontSize:'12px',color:c.M2,marginBottom:'6px'}}>📍 {opt.address}</div>}
+              <VenueInfo stop={opt} c={c} lang={lang}/>
+              {s.meetingPoint&&<div style={{fontSize:'12px',color:mc,marginTop:'6px'}}>📍 {t.meetingPointLbl2||'Meeting point'}: {s.meetingPoint}{s.meetingMinsBefore?` (${s.meetingMinsBefore} min ${t.beforeLbl})`:''}</div>}
+              {opt.googleMapsURI&&<a href={opt.googleMapsURI} target="_blank" rel="noreferrer" style={{display:'inline-block',marginTop:'6px',fontSize:'12px',color:mc,textDecoration:'none'}}>Google Maps ↗</a>}
+            </div>}
+          </div>;
+        })}
+
+        {/* Map */}
         {plan.stops?.some(s=>(s.options?.[0]?.lat&&s.options?.[0]?.lng)||(s.lat&&s.lng))&&<><HR c={c}/><RouteMap stops={(plan.stops||[]).flatMap(s=>{
           const o=s.options?.[0]||s;
           const pts=[];
