@@ -25,7 +25,7 @@ export const savePlanWithUser = async (p, uid) => {
   }
 }
 export const loadPlan = async id => {
-  try { const { data } = await db.from('plans').select('data').eq('id', id).maybeSingle(); return data?.data || null }
+  try { const { data } = await db.from('plans').select('data,user_id').eq('id', id).maybeSingle(); return data?{...data.data,_owner:data.user_id}:null }
   catch { return null }
 }
 export const updatePlan = async p => {

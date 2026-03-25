@@ -183,7 +183,7 @@ export default function App(){
   },[]);
   const nav=(s,p=null,org=false)=>{setScreen(s);if(p)setPlan(p);if(!p&&s==='home'){setPlan(null);setIsOrg(false);}else setIsOrg(org);if(s!=='home')ls.set('q_state',{screen:s,planId:p?.id||plan?.id,isOrg:org});else ls.set('q_state',{});};
   const handleJoin=async code=>{const p=await loadPlan(code);if(p){setPlan(p);setIsOrg(false);setScreen('respond');ls.set('q_state',{screen:'respond',planId:p.id,isOrg:false});return true;}return false;};
-  const handleFromProfile=async id=>{const p=await loadPlan(id);if(p){const mine=getMyPlans().find(x=>x.id===id);nav('results',p,mine?.role==='organizer');}};
+  const handleFromProfile=async id=>{const p=await loadPlan(id);if(p){const mine=getMyPlans().find(x=>x.id===id);const isOwner=mine?.role==='organizer'||(authUser&&p._owner===authUser.id);nav('results',p,isOwner);}};
 
   const mc=c.A;
   const noNav=['home','create','profile','myplans'];
