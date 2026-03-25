@@ -40,6 +40,8 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
   const[mySaving,setMySaving]=useState(false);
   const[mySaved,setMySaved]=useState(!!myPrev);
   const[mySaveConfirm,setMySaveConfirm]=useState(false);
+  const[tick,setTick]=useState(0);
+  useEffect(()=>{if(!ip.deadline)return;const iv=setInterval(()=>setTick(t2=>t2+1),1000);return()=>clearInterval(iv);},[ip.deadline]);
   const[planRating,setPlanRating]=useState(0);
   const[ratingDone,setRatingDone]=useState(false);
   const isOrgRef=useRef(isOrg);
@@ -123,7 +125,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
   const confirmDate=async(d,st)=>{setConf(true);const up={...plan,confirmedDate:d,confirmedStartTime:st||''};await updatePlan(up);setPlan(up);setConf(false);};
   const waConfirm=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`📌 *${plan.name}* — ${t.dateConfirmedMsg}\n\n🗓️ ${fmtDate(plan.confirmedDate,lang)}${plan.confirmedStartTime?' · 🕐 '+fmtTime(plan.confirmedStartTime):''}\n\n${url}`),'_blank');};
   const waRem=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`⏰ ${t.reminderMsg.replace('{name}',plan.name)}\n${url}`),'_blank');setRem(true);};
-  const TABS=['plan','vote','summary','more'];
+  const TABS=['plan','vote','more'];
   const tlbl=k=>t.tabs[k]||k;
   const shareUrl=location.href.split('?')[0]+'?code='+plan.id;
   const copyShare=()=>{navigator.clipboard?.writeText(shareUrl).catch(()=>{});};
@@ -133,9 +135,11 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
     if(!myName.trim())return;
     setMySaving(true);
     const planDate=plan.date||plan.dates?.[0];const planTime=plan.time||plan.startTimes?.[0];
+    const placeOk=openSection._placeOk!==false;
     const resp={name:myName.trim(),dateOk:myDateOk,timeOk:myTimeOk,meetOk:myMeetOk,lateMin:myLateMin,
       availDates:myDateOk===false?myAltDates:[],availTimeFrom:myTimeOk===false?myTimeFrom:'',availTimeTo:myTimeOk===false?myTimeTo:'',
-      placeOk:true,avail:myDateOk&&myTimeOk?{[planTime?`${planDate}_${planTime}`:planDate]:'yes'}:{},
+      placeOk,placeComment:openSection._placeComment||'',
+      avail:myDateOk&&myTimeOk?{[planTime?`${planDate}_${planTime}`:planDate]:'yes'}:{},
       how:'',comment:'',at:new Date().toISOString()};
     try{await saveResp(plan.id,myName.trim(),resp);addMyPlan(plan.id,plan.name,'invited');ls.set(myRespKey,resp);ls.set('q_myname',myName.trim());setMySaved(true);setMySaveConfirm(true);setTimeout(()=>setMySaveConfirm(false),3000);refresh(true);}catch{}
     setMySaving(false);
@@ -234,6 +238,12 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
               {times2.length<2&&<ClockPicker value='' onChange={async v=>{if(!v||times2.includes(v))return;const newDt={...dt,[d]:[...times2,v]};const up={...plan,dateTimes:newDt};await updatePlan(up);setPlan(up);}} c={c}/>}
             </div>;
           })}
+          {/* Deadline */}
+          <div style={{marginBottom:'14px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'12px'}}>
+            <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>⏰ {t.deadlineLbl||'Deadline to respond'}</div>
+            <input type="datetime-local" min={new Date().toISOString().slice(0,16)} max={plan.date||plan.dates?.[0]||''} value={plan.deadline||''} onChange={async e=>{const up={...plan,deadline:e.target.value||null};await updatePlan(up);setPlan(up);}} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
+            {plan.deadline&&<button onClick={async()=>{const up={...plan,deadline:null};await updatePlan(up);setPlan(up);}} style={{marginTop:'4px',background:'none',border:'none',color:'#ef4444',cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>× {t.removeDeadline||'Remove deadline'}</button>}
+          </div>
           <button onClick={()=>setEditMode(false)} style={{width:'100%',padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.doneLbl||'Done'}</button>
         </>}
 
@@ -504,8 +514,8 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
 
           {/* Expanded view with voting */}
           {viewOpen&&<div className="fade-in">
-            {/* Place info */}
-            <div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px',marginBottom:'8px'}}>
+            {/* Place info + vote */}
+            {(()=>{const placeOk=openSection._placeOk;return<div style={{background:placeOk===true?'#22c55e10':placeOk===false?'#ef444410':c.CARD2,border:`1px solid ${placeOk===true?'#22c55e40':placeOk===false?'#ef444440':c.BD}`,borderRadius:'10px',padding:'12px',marginBottom:'8px'}}>
               {planPlace?.photo&&<img src={planPlace.photo} alt="" style={{width:'100%',height:'100px',objectFit:'cover',borderRadius:'8px',marginBottom:'8px'}}/>}
               <div style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>{planPlace?.name||'—'}</div>
               {planPlace?.address&&<div style={{fontSize:'12px',color:c.M2,marginTop:'2px'}}>📍 {planPlace.address}</div>}
@@ -514,7 +524,16 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
                 {minCap?`👥 min: ${minCap}`:(t.noMinCap||'No min capacity')}{' · '}{maxCap?`max: ${maxCap}`:(t.noMaxCap||'No max capacity')}
               </div>
               {planPlace?.googleMapsURI&&<a href={planPlace.googleMapsURI} target="_blank" rel="noreferrer" style={{display:'inline-block',marginTop:'6px',fontSize:'11px',color:mc,textDecoration:'none'}}>Google Maps ↗</a>}
-            </div>
+              {!isOrgRef.current&&<div style={{marginTop:'8px'}}>
+                <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>{t.placeOkQ||'Does the place work?'}</div>
+                {ynBtnInline(placeOk,v=>{setOpenSection(p=>({...p,_placeOk:v}));if(!v)setOpenSection(p=>({...p,_placeNoPopup:true}));},t.yesLbl||'Sí','No')}
+              </div>}
+              {placeOk===false&&openSection._placeNoPopup&&<div className="fade-in" style={{marginTop:'8px',padding:'10px',background:'#ef444408',border:'1px solid #ef444420',borderRadius:'8px'}}>
+                <div style={{fontSize:'12px',color:'#ef4444',fontWeight:'600',marginBottom:'6px'}}>{t.placeNoMsg||'Want to tell the organizer?'}</div>
+                <input value={openSection._placeComment||''} onChange={e=>setOpenSection(p=>({...p,_placeComment:e.target.value}))} placeholder={t.commentPh||'Write a comment...'} style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box',marginBottom:'6px'}}/>
+                <button onClick={()=>window.open(location.href.split('?')[0],'_blank')} style={{width:'100%',padding:'8px',background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px'}}>{t.createOwnPlan||'Or create your own plan →'}</button>
+              </div>}
+            </div>;})()}
 
             {/* Date + Time side by side with voting */}
             {!isOrgRef.current&&<div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
@@ -555,8 +574,9 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
             </div>}
 
             {/* Alt time range (if invitee said No to time) — ClockPickers */}
-            {!isOrgRef.current&&myTimeOk===false&&<div style={{background:'#ef444408',border:'1px solid #ef444420',borderRadius:'10px',padding:'10px',marginBottom:'8px'}}>
-              <div style={{fontSize:'12px',color:'#ef4444',fontWeight:'600',marginBottom:'8px'}}>{t.availStartTime||'What time could you start?'}</div>
+            {!isOrgRef.current&&myTimeOk===false&&<div style={{background:'#f59e0b08',border:'1px solid #f59e0b20',borderRadius:'10px',padding:'10px',marginBottom:'8px'}}>
+              <div style={{fontSize:'12px',color:'#f59e0b',fontWeight:'600',marginBottom:'4px'}}>{t.availStartTime||'What time range could you start?'}</div>
+              <div style={{fontSize:'11px',color:c.M2,marginBottom:'8px'}}>{t.availStartHint||'Select your availability range. The organizer will consider it to propose an alternative start time.'}</div>
               <div style={{marginBottom:'8px'}}>
                 <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>{t.fromLbl||'From'}{myTimeFrom&&` → ${myTimeFrom}`}</div>
                 <ClockPicker value={myTimeFrom} onChange={v=>setMyTimeFrom(v)} c={c}/>
@@ -570,15 +590,18 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
 
             {/* On time? (if organizer set tolerance) */}
             {!isOrgRef.current&&tolerance>0&&(()=>{
-              const isLate=myLateMin>0;const isOnTime=myLateMin===0&&mySaved;
+              const isLate=myLateMin>0;const isOnTime=openSection._onTime===true;
               return<div style={{background:isOnTime?'#22c55e10':isLate?'#f59e0b10':c.CARD2,border:`1px solid ${isOnTime?'#22c55e40':isLate?'#f59e0b40':c.BD}`,borderRadius:'10px',padding:'10px',marginBottom:'8px'}}>
                 <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>⏰ {t.onTimeQ||'Will you be on time?'} <span style={{fontSize:'10px',color:c.M2}}>({t.maxLateLbl||'Max late'}: {tolerance} min = {addMins(planTime,tolerance)})</span></div>
-                {ynBtnInline(isOnTime?true:isLate?false:null,v=>{if(v)setMyLateMin(0);else setMyLateMin(5);},t.yesLbl||'Sí','No')}
+                <div style={{display:'flex',gap:'6px'}}>
+                  <button onClick={()=>{setMyLateMin(0);setOpenSection(p=>({...p,_onTime:true}));}} style={{flex:1,padding:'8px',borderRadius:'8px',border:`1px solid ${isOnTime?'#22c55e50':c.BD}`,background:isOnTime?'#22c55e18':'transparent',color:isOnTime?'#22c55e':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:isOnTime?'700':'500'}}>{isOnTime?'✓ ':''}{t.yesLbl||'Sí'}</button>
+                  <button onClick={()=>{setMyLateMin(5);setOpenSection(p=>({...p,_onTime:false}));}} style={{flex:1,padding:'8px',borderRadius:'8px',border:`1px solid ${isLate?'#f59e0b50':c.BD}`,background:isLate?'#f59e0b18':'transparent',color:isLate?'#f59e0b':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:isLate?'700':'500'}}>{isLate?'⏰ ':''}{t.noLbl||'No'}</button>
+                </div>
                 {isLate&&<div style={{marginTop:'8px'}}>
-                  <div style={{fontSize:'11px',color:'#f59e0b',marginBottom:'4px'}}>{t.howLateQ||'How late?'}</div>
+                  <div style={{fontSize:'11px',color:'#f59e0b',marginBottom:'4px'}}>{t.howLateQ||'How many minutes late?'}</div>
                   <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
                     <span style={{fontSize:'12px',color:c.M}}>+</span>
-                    <input type="number" min="1" max={tolerance} value={myLateMin} onChange={e=>{const v=Math.min(Math.max(parseInt(e.target.value)||1,1),tolerance);setMyLateMin(v);}} style={{width:'60px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',textAlign:'center'}}/>
+                    <input type="number" inputMode="numeric" min="1" max={tolerance} value={myLateMin} onChange={e=>{const v=Math.min(Math.max(parseInt(e.target.value)||1,1),tolerance);setMyLateMin(v);}} style={{width:'70px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',textAlign:'center'}}/>
                     <span style={{fontSize:'12px',color:c.M}}>min</span>
                     <span style={{fontSize:'12px',color:'#f59e0b',fontWeight:'600'}}>{fmtMinsToH(myLateMin)} = {addMins(planTime,myLateMin)}</span>
                   </div>
@@ -605,8 +628,24 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
             {/* Save response (invitee) */}
             {!isOrgRef.current&&<div style={{marginTop:'10px'}}>
               {!mySaved&&<div style={{marginBottom:'8px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.yourName}</div><input value={myName} onChange={e=>{setMyName(e.target.value);ls.set('q_myname',e.target.value);}} placeholder={t.yourNamePh||'Your name'} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/></div>}
-              <button onClick={saveMyResp} disabled={mySaving||!myName.trim()||(myDateOk===null&&planDate)||(myTimeOk===null&&planTime)} style={{width:'100%',padding:'12px',background:mySaved?'#22c55e':mc,border:'none',borderRadius:'10px',color:mySaved?'#fff':'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px',opacity:(mySaving||!myName.trim())?0.5:1}}>{mySaving?'...':(mySaved?(t.respSaved||'✓ Saved — tap to update'):(t.saveAvail||'Save'))}</button>
+              <button onClick={saveMyResp} disabled={mySaving||!myName.trim()||(myDateOk===null&&planDate)||(myTimeOk===null&&planTime)||(plan.deadline&&new Date(plan.deadline)<new Date())} style={{width:'100%',padding:'12px',background:mySaved?'#22c55e':mc,border:'none',borderRadius:'10px',color:mySaved?'#fff':'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px',opacity:(mySaving||!myName.trim())?0.5:1}}>{mySaving?'...':(mySaved?(t.respSaved||'✓ Saved — tap to update'):(t.saveAvail||'Save'))}</button>
               {mySaveConfirm&&<div className="fade-in" style={{marginTop:'8px',padding:'10px',background:'#22c55e15',border:'1px solid #22c55e40',borderRadius:'10px',textAlign:'center',fontSize:'13px',color:'#22c55e',fontWeight:'600'}}>✓ {t.savedTitle||'Saved!'}</div>}
+              {/* Deadline */}
+              {(()=>{
+                const dl=plan.deadline?new Date(plan.deadline):null;
+                if(!dl)return null;
+                const now2=new Date();const diff=dl-now2;
+                if(diff<=0)return<div style={{marginTop:'8px',padding:'12px',background:'#ef444410',border:'1px solid #ef444430',borderRadius:'10px',textAlign:'center'}}>
+                  <div style={{fontSize:'13px',color:'#ef4444',fontWeight:'600',marginBottom:'8px'}}>⏰ {t.deadlinePassed||'Deadline passed — responses are closed'}</div>
+                  <button onClick={()=>setTab('vote')} style={{padding:'8px 16px',background:mc,border:'none',borderRadius:'8px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'13px'}}>{t.goToResults||'See results'} →</button>
+                </div>;
+                const daysLeft=Math.floor(diff/86400000);const hoursLeft=Math.floor((diff%86400000)/3600000);const minsLeft=Math.floor((diff%3600000)/60000);const secsLeft=Math.floor((diff%60000)/1000);
+                return<div style={{marginTop:'8px',padding:'10px',background:'#f59e0b10',border:'1px solid #f59e0b30',borderRadius:'10px',textAlign:'center',fontSize:'12px',color:'#f59e0b'}}>
+                  <div style={{fontWeight:'600',marginBottom:'2px'}}>⏰ {t.deadlineLbl||'Deadline to respond'}</div>
+                  <div>{fmtDate(plan.deadline.split('T')[0],lang)}{plan.deadline.includes('T')?' · '+plan.deadline.split('T')[1]?.slice(0,5):''}</div>
+                  <div style={{fontSize:'13px',fontWeight:'700',fontFamily:'monospace',marginTop:'4px'}}>{daysLeft>0?`${daysLeft}d `:''}{ String(hoursLeft).padStart(2,'0')}:{String(minsLeft).padStart(2,'0')}:{String(secsLeft).padStart(2,'0')}</div>
+                </div>;
+              })()}
             </div>}
           </div>}
         </div>
@@ -619,8 +658,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
       </>;})()}
       </></React.Suspense>}
 
-      {/* ALTS tab = Alternative dates */}
-      {/* SUMMARY tab */}
+      {/* SUMMARY tab (legacy — kept for old plans) */}
       {!ldg&&tab==='summary'&&<>
         {total===0?<Card c={c} style={{textAlign:'center',padding:'32px'}}>
           <div style={{fontSize:'36px',marginBottom:'10px'}}>📊</div>
@@ -801,24 +839,69 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
             </div>}
           </div>
 
-          {/* Time suggestions */}
-          {suggestedTimes.length>0&&<div style={{marginBottom:'16px',background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'12px',padding:'14px'}}>
-            <div style={{fontSize:'13px',fontWeight:'700',color:mc,marginBottom:'8px'}}>💡 {t.bestTimeSuggestion||'Suggested times'}</div>
-            {suggestedTimes.map((s,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 0',borderBottom:i<suggestedTimes.length-1?`1px solid ${mc}20`:'none'}}>
-              <span style={{fontSize:'14px',color:c.T,fontWeight:i===0?'700':'400'}}>🕐 {fmtTime(s.time)}</span>
-              <span style={{fontSize:'12px',color:mc,fontWeight:'600'}}>👥 {s.count}/{total}</span>
-            </div>)}
+          {/* Availability ranges + suggested time */}
+          {timeRanges.length>0&&(()=>{
+            // Find intersection
+            const allFroms=timeRanges.map(r=>r.from).sort();
+            const allTos=timeRanges.map(r=>r.to).sort();
+            const interFrom=allFroms[allFroms.length-1];const interTo=allTos[0];
+            const hasInter=interFrom<interTo;
+            const orgTime=planTime;
+            // Best time = closest to original within intersection
+            const bestT=hasInter?(interFrom>=orgTime?interFrom:orgTime<=interTo?orgTime:interFrom):null;
+            return<div style={{marginBottom:'16px'}}>
+              <div style={{fontSize:'13px',fontWeight:'700',color:mc,marginBottom:'8px'}}>🕐 {t.availabilityLbl||'Availability'}</div>
+              {timeRanges.map((r,i)=><div key={i} style={{fontSize:'12px',color:c.M2,marginBottom:'2px'}}>{r.name}: {fmtTime(r.from)} → {fmtTime(r.to)}</div>)}
+              {hasInter&&<div style={{marginTop:'8px',padding:'10px',background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'10px'}}>
+                <div style={{fontSize:'12px',color:c.M2}}>{t.overlapLbl||'Everyone overlaps'}: {fmtTime(interFrom)} → {fmtTime(interTo)}</div>
+                {bestT&&<div style={{fontSize:'16px',fontWeight:'700',color:mc,marginTop:'4px'}}>💡 {t.suggestedTimeLbl||'Suggested'}: {fmtTime(bestT)}</div>}
+              </div>}
+              {!hasInter&&<div style={{marginTop:'6px',fontSize:'12px',color:'#f59e0b'}}>{t.noOverlapLbl||'No overlapping time found'}</div>}
+            </div>;
+          })()}
+
+          {/* Meeting point — with names */}
+          {rs.some(r=>r.meetOk!==undefined)&&<div style={{marginBottom:'16px'}}>
+            <div style={{fontSize:'14px',fontWeight:'700',color:'#f59e0b',marginBottom:'8px'}}>📍 {t.meetingPointLbl2||'Meeting point'}</div>
+            <div style={{display:'flex',gap:'8px',marginBottom:'6px'}}>
+              <div style={{flex:1,padding:'10px',background:'#f59e0b15',border:'1px solid #f59e0b30',borderRadius:'10px'}}>
+                <div style={{fontSize:'16px',fontWeight:'700',color:'#f59e0b',textAlign:'center'}}>{rs.filter(r=>r.meetOk===true).length}</div>
+                <div style={{fontSize:'10px',color:'#f59e0b',textAlign:'center',marginBottom:'4px'}}>{t.meetYes||"I'll be there!"}</div>
+                {rs.filter(r=>r.meetOk===true).map((r,i)=><div key={i} style={{fontSize:'11px',color:c.M2}}>{r.name}</div>)}
+              </div>
+              <div style={{flex:1,padding:'10px',background:'#22c55e15',border:'1px solid #22c55e30',borderRadius:'10px'}}>
+                <div style={{fontSize:'16px',fontWeight:'700',color:'#22c55e',textAlign:'center'}}>{rs.filter(r=>r.meetOk===false).length}</div>
+                <div style={{fontSize:'10px',color:'#22c55e',textAlign:'center',marginBottom:'4px'}}>{t.meetNo||'Going directly'}</div>
+                {rs.filter(r=>r.meetOk===false).map((r,i)=><div key={i} style={{fontSize:'11px',color:c.M2}}>{r.name}</div>)}
+              </div>
+            </div>
+          </div>}
+
+          {/* Late arrivals */}
+          {rs.some(r=>r.lateMin>0)&&<div style={{marginBottom:'16px'}}>
+            <div style={{fontSize:'14px',fontWeight:'700',color:'#f59e0b',marginBottom:'8px'}}>⏰ {t.lateArrivals||'Late arrivals'}</div>
+            {rs.filter(r=>r.lateMin>0).map((r,i)=><div key={i} style={{fontSize:'12px',color:c.M2,marginBottom:'2px'}}>⏰ {r.name}: +{r.lateMin} min</div>)}
           </div>}
 
           {/* Per-person */}
           <div style={{fontSize:'12px',color:c.M2,fontWeight:'600',marginBottom:'8px'}}>👥 {total} {t.responsesLbl}</div>
           {rs.map((r,i)=>{
-            const allOk=hasV4?(r.placeOk&&r.dateOk&&r.timeOk):(r.avail&&Object.values(r.avail).some(v=>v==='yes'));
-            return<div key={i} style={{display:'flex',alignItems:'center',gap:'8px',padding:'8px 12px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',marginBottom:'4px'}}>
-              <div style={{width:'8px',height:'8px',borderRadius:'50%',background:allOk?'#22c55e':'#ef4444',flexShrink:0}}/>
-              <span style={{flex:1,fontSize:'13px',color:c.T,fontWeight:allOk?'600':'400'}}>{r.name}</span>
-              {hasV4&&<span style={{fontSize:'11px',color:c.M2}}>{[r.placeOk&&'📍',r.dateOk&&'📅',r.timeOk&&'🕐'].filter(Boolean).join(' ')}</span>}
-              {r.how&&<span style={{fontSize:'12px'}}>{({car:'🚗',moto:'🏍️',transit:'🚇',taxi:'🚕',walk:'🚶',bike:'🚲'})[r.how]||''}</span>}
+            const allOk=hasV4?(r.dateOk&&r.timeOk):(r.avail&&Object.values(r.avail).some(v=>v==='yes'));
+            const expanded2=openSection['vp_'+i];
+            return<div key={i} style={{marginBottom:'4px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',overflow:'hidden'}}>
+              <div onClick={()=>setOpenSection(p=>({...p,['vp_'+i]:!p['vp_'+i]}))} style={{display:'flex',alignItems:'center',gap:'8px',padding:'8px 12px',cursor:'pointer'}}>
+                <div style={{width:'8px',height:'8px',borderRadius:'50%',background:allOk?'#22c55e':'#ef4444',flexShrink:0}}/>
+                <span style={{flex:1,fontSize:'13px',color:c.T,fontWeight:allOk?'600':'400'}}>{r.name}</span>
+                {hasV4&&<span style={{fontSize:'11px',color:c.M2}}>{[r.dateOk?'📅✓':'📅✗',r.timeOk?'🕐✓':'🕐✗'].join(' ')}</span>}
+                {r.lateMin>0&&<span style={{fontSize:'10px',color:'#f59e0b'}}>+{r.lateMin}min</span>}
+                <span style={{fontSize:'11px',color:c.M2}}>{expanded2?'▾':'▸'}</span>
+              </div>
+              {expanded2&&<div style={{padding:'6px 12px 10px',borderTop:`1px solid ${c.BD}`,fontSize:'12px',color:c.M2}}>
+                {r.dateOk===false&&r.availDates?.length>0&&<div style={{marginBottom:'4px'}}>📅 {t.yourAvailDates}: {r.availDates.map(d=>fmtShort(d,lang)).join(', ')}</div>}
+                {r.timeOk===false&&r.availTimeFrom&&<div style={{marginBottom:'4px'}}>🕐 {r.availTimeFrom} → {r.availTimeTo}</div>}
+                {r.meetOk!==undefined&&<div style={{marginBottom:'4px'}}>📍 {r.meetOk?t.meetYes:t.meetNo}</div>}
+                {r.comment&&<div style={{fontStyle:'italic',padding:'4px 8px',background:c.CARD2,borderRadius:'6px'}}>"{r.comment}"</div>}
+              </div>}
             </div>;
           })}
         </>}
