@@ -8,6 +8,10 @@ import PostPlanSurvey from '../components/PostPlanSurvey.jsx'
 import { generateICS } from '../lib/ics.js'
 const RouteMap = React.lazy(() => import('../components/RouteMap.jsx'))
 import VenueInfo from '../components/VenueInfo.jsx'
+import ClockPicker from '../components/ClockPicker.jsx'
+import CalendarPicker from '../components/CalendarPicker.jsx'
+const addMins=(time,mins)=>{if(!time)return'';const[h,m]=time.split(':').map(Number);const total=h*60+m+mins;const nh=Math.floor(((total%1440)+1440)%1440/60);const nm=((total%1440)+1440)%1440%60;return`${String(nh).padStart(2,'0')}:${String(nm).padStart(2,'0')}`;};
+const fmtMinsToH=(mins)=>{const h=Math.floor(Math.abs(mins)/60);const m=Math.abs(mins)%60;return`${mins>=0?'+':'-'}${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}h`;};
 
 export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseShare}){
   const[plan,setPlan]=useState(ip);const t=T[lang];
@@ -21,6 +25,21 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
   const[editDesc,setEditDesc]=useState(ip.desc||'');
   const[attendance,setAttendance]=useState(ip.attendance||{});
   const[openSection,setOpenSection]=useState({});
+  // Inline response state (invitee votes from Plan tab)
+  const myRespKey='q_myresp_'+ip.id;
+  const myPrev=ls.get(myRespKey,null);
+  const[myDateOk,setMyDateOk]=useState(myPrev?.dateOk??null);
+  const[myTimeOk,setMyTimeOk]=useState(myPrev?.timeOk??null);
+  const[myMeetOk,setMyMeetOk]=useState(myPrev?.meetOk??null);
+  const[myLateMin,setMyLateMin]=useState(myPrev?.lateMin||0);
+  const[myAltDates,setMyAltDates]=useState(myPrev?.availDates||[]);
+  const[myTimeFrom,setMyTimeFrom]=useState(myPrev?.availTimeFrom||'');
+  const[myTimeTo,setMyTimeTo]=useState(myPrev?.availTimeTo||'');
+  const[myName,setMyName]=useState(myPrev?.name||ls.get('q_myname',''));
+  const[mpSearch,setMpSearch]=useState('');const[mpResults,setMpResults]=useState([]);
+  const[mySaving,setMySaving]=useState(false);
+  const[mySaved,setMySaved]=useState(!!myPrev);
+  const[mySaveConfirm,setMySaveConfirm]=useState(false);
   const[planRating,setPlanRating]=useState(0);
   const[ratingDone,setRatingDone]=useState(false);
   const isOrgRef=useRef(isOrg);
@@ -109,6 +128,18 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
   const shareUrl=location.href.split('?')[0]+'?code='+plan.id;
   const copyShare=()=>{navigator.clipboard?.writeText(shareUrl).catch(()=>{});};
   const waShare=()=>window.open('https://wa.me/?text='+encodeURIComponent(`${plan.name||'queda.'}\n${shareUrl}`),'_blank');
+  // Save inline response
+  const saveMyResp=async()=>{
+    if(!myName.trim())return;
+    setMySaving(true);
+    const planDate=plan.date||plan.dates?.[0];const planTime=plan.time||plan.startTimes?.[0];
+    const resp={name:myName.trim(),dateOk:myDateOk,timeOk:myTimeOk,meetOk:myMeetOk,lateMin:myLateMin,
+      availDates:myDateOk===false?myAltDates:[],availTimeFrom:myTimeOk===false?myTimeFrom:'',availTimeTo:myTimeOk===false?myTimeTo:'',
+      placeOk:true,avail:myDateOk&&myTimeOk?{[planTime?`${planDate}_${planTime}`:planDate]:'yes'}:{},
+      how:'',comment:'',at:new Date().toISOString()};
+    try{await saveResp(plan.id,myName.trim(),resp);addMyPlan(plan.id,plan.name,'invited');ls.set(myRespKey,resp);ls.set('q_myname',myName.trim());setMySaved(true);setMySaveConfirm(true);setTimeout(()=>setMySaveConfirm(false),3000);refresh(true);}catch{}
+    setMySaving(false);
+  };
 
   return(<>
     {/* Share modal */}
@@ -179,23 +210,30 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
           </div>
         </>}
 
-        {/* Edit dates + times */}
+        {/* Edit dates + times (per date) */}
         {editMode==='dates'&&<>
           <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>{t.editDatesLbl}</div>
+          {/* Add date */}
           <div style={{marginBottom:'12px'}}>
-            <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>📅 {t.editDatesLbl} ({(plan.dates||[]).length}/3)</div>
-            <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'8px'}}>
-              {(plan.dates||[]).map(d=><span key={d} style={{fontSize:'12px',padding:'4px 10px',borderRadius:'20px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`,display:'flex',alignItems:'center',gap:'4px'}}>{fmtShort(d,lang)}<button onClick={async()=>{if((plan.dates||[]).length<=1)return;const up={...plan,dates:plan.dates.filter(x=>x!==d)};await updatePlan(up);setPlan(up);}} style={{background:'none',border:'none',color:mc,cursor:'pointer',fontSize:'12px',padding:'0 0 0 2px'}}>×</button></span>)}
-            </div>
-            {(plan.dates||[]).length<3&&<input type="date" min={new Date().toISOString().split('T')[0]} onChange={async e=>{if(!e.target.value||(plan.dates||[]).includes(e.target.value))return;const up={...plan,dates:[...(plan.dates||[]),e.target.value].sort()};await updatePlan(up);setPlan(up);e.target.value='';}} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
+            <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>📅 ({(plan.dates||[]).length}/3)</div>
+            {(plan.dates||[]).length<3&&<input type="date" min={new Date().toISOString().split('T')[0]} onChange={async e=>{if(!e.target.value||(plan.dates||[]).includes(e.target.value))return;const up={...plan,dates:[...(plan.dates||[]),e.target.value].sort()};await updatePlan(up);setPlan(up);e.target.value='';}} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box',marginBottom:'10px'}}/>}
           </div>
-          <div style={{marginBottom:'16px'}}>
-            <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>🕐 {t.editTimesLbl} ({(plan.startTimes||[]).filter(Boolean).length}/3)</div>
-            <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'8px'}}>
-              {(plan.startTimes||[]).filter(Boolean).map(t2=><span key={t2} style={{fontSize:'12px',padding:'4px 10px',borderRadius:'20px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`,display:'flex',alignItems:'center',gap:'4px'}}>{fmtTime(t2)}<button onClick={async()=>{const up={...plan,startTimes:plan.startTimes.filter(x=>x!==t2)};await updatePlan(up);setPlan(up);}} style={{background:'none',border:'none',color:mc,cursor:'pointer',fontSize:'12px',padding:'0 0 0 2px'}}>×</button></span>)}
-            </div>
-            {(plan.startTimes||[]).filter(Boolean).length<3&&<input type="time" onChange={async e=>{if(!e.target.value||(plan.startTimes||[]).includes(e.target.value))return;const up={...plan,startTimes:[...(plan.startTimes||[]),e.target.value]};await updatePlan(up);setPlan(up);e.target.value='';}} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
-          </div>
+          {/* Per-date times */}
+          {(plan.dates||[]).map(d=>{
+            const dt=plan.dateTimes||{};
+            const times2=(dt[d]||(plan.startTimes||[])).filter(Boolean);
+            return<div key={d} style={{marginBottom:'14px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'12px'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'8px'}}>
+                <span style={{fontSize:'13px',color:mc,fontWeight:'600',textTransform:'capitalize'}}>📅 {fmtShort(d,lang)}</span>
+                <button onClick={async()=>{if((plan.dates||[]).length<=1)return;const newDt={...dt};delete newDt[d];const up={...plan,dates:plan.dates.filter(x=>x!==d),dateTimes:newDt};await updatePlan(up);setPlan(up);}} style={{background:'none',border:'none',color:'#ff4444',cursor:'pointer',fontSize:'14px',padding:'2px 6px'}}>{(plan.dates||[]).length>1?'×':''}</button>
+              </div>
+              <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>🕐 {t.editTimesLbl} ({times2.length}/2)</div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'8px'}}>
+                {times2.map(t2=><span key={t2} style={{fontSize:'12px',padding:'4px 10px',borderRadius:'20px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`,display:'flex',alignItems:'center',gap:'4px'}}>{fmtTime(t2)}<button onClick={async()=>{const newDt={...dt,[d]:times2.filter(x=>x!==t2)};const up={...plan,dateTimes:newDt};await updatePlan(up);setPlan(up);}} style={{background:'none',border:'none',color:mc,cursor:'pointer',fontSize:'12px',padding:'0 0 0 2px'}}>×</button></span>)}
+              </div>
+              {times2.length<2&&<ClockPicker value='' onChange={async v=>{if(!v||times2.includes(v))return;const newDt={...dt,[d]:[...times2,v]};const up={...plan,dateTimes:newDt};await updatePlan(up);setPlan(up);}} c={c}/>}
+            </div>;
+          })}
           <button onClick={()=>setEditMode(false)} style={{width:'100%',padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.doneLbl||'Done'}</button>
         </>}
 
@@ -207,6 +245,20 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
           const opt=s.options?.[0]||s;
           const si=(plan.stops||[]).indexOf(s);
           const inpSt={width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'};
+          const searchMP=async(q)=>{
+            if(!q||q.length<2){setMpResults([]);return;}
+            try{
+              const Place=window.google?.maps?.places?.Place;
+              if(Place){const{places}=await Place.searchByText({textQuery:q,fields:['displayName','formattedAddress','location'],maxResultCount:5});setMpResults((places||[]).map(p=>({name:p.displayName,address:p.formattedAddress,lat:p.location?.lat(),lng:p.location?.lng()})));}
+              else{const svc=new window.google.maps.places.PlacesService(document.createElement('div'));svc.textSearch({query:q},(r,s)=>{if(s==='OK')setMpResults((r||[]).slice(0,5).map(p=>({name:p.name,address:p.formatted_address,lat:p.geometry?.location?.lat(),lng:p.geometry?.location?.lng()})));});}
+            }catch{setMpResults([]);}
+          };
+          const pickMP=async(r)=>{
+            const stops=[...(plan.stops||[])];const idx=stops.findIndex(x=>x.id==stopId||String(x.id)===stopId);
+            if(idx<0)return;
+            stops[idx]={...stops[idx],meetingPoint:r.name+(r.address?' — '+r.address:''),meetingPointLat:r.lat,meetingPointLng:r.lng};
+            const up={...plan,stops};await updatePlan(up);setPlan(up);setMpResults([]);setMpSearch('');
+          };
           const updateStop=async(field,val,optField)=>{
             const stops=[...(plan.stops||[])];const idx=stops.findIndex(x=>x.id==stopId||String(x.id)===stopId);
             if(idx<0)return;
@@ -220,7 +272,42 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
             {isOrgRef.current?<>
               <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.editNameLbl}</div><input defaultValue={opt.name||''} onBlur={e=>updateStop('name',e.target.value.trim(),true)} style={inpSt}/></div>
               <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>📍 {t.addressLbl||'Address'}</div><input defaultValue={opt.address||''} onBlur={e=>updateStop('address',e.target.value.trim(),true)} style={inpSt}/></div>
-              <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.meetingPointLbl2||'Meeting point'}</div><input defaultValue={s.meetingPoint||''} onBlur={e=>updateStop('meetingPoint',e.target.value.trim())} style={inpSt}/></div>
+              {/* Capacity */}
+              <div style={{display:'flex',gap:'8px',marginBottom:'10px'}}>
+                <div style={{flex:1}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>👥 {t.minCapLbl||'Min capacity'}</div><input type="number" min="0" defaultValue={s.minAttendees||''} onBlur={e=>updateStop('minAttendees',e.target.value)} placeholder="—" style={{...inpSt,width:'100%'}}/></div>
+                <div style={{flex:1}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>👥 {t.maxCapLbl||'Max capacity'}</div><input type="number" min="0" defaultValue={s.maxCapacity||''} onBlur={e=>updateStop('maxCapacity',e.target.value)} placeholder="—" style={{...inpSt,width:'100%'}}/></div>
+              </div>
+              {/* Tolerance (independent of meeting point) */}
+              <div style={{marginBottom:'10px'}}>
+                <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>⏰ {t.toleranceLbl||'Tolerance (max late)'}</div>
+                <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
+                  <input type="number" min="0" max="120" defaultValue={s.tolerance||''} onBlur={e=>updateStop('tolerance',e.target.value)} placeholder="15" style={{...inpSt,width:'80px'}}/>
+                  <span style={{fontSize:'11px',color:c.M}}>min</span>
+                  {s.tolerance&&<span style={{fontSize:'11px',color:c.M2}}>{fmtMinsToH(parseInt(s.tolerance))}</span>}
+                </div>
+              </div>
+              <div style={{marginBottom:'10px'}}>
+                <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>📍 {t.meetingPointLbl2||'Meeting point'}</div>
+                {s.meetingPoint&&<div style={{display:'flex',alignItems:'center',gap:'8px',padding:'8px 12px',background:`#f59e0b10`,border:'1px solid #f59e0b30',borderRadius:'8px',marginBottom:'6px'}}>
+                  <span style={{flex:1,fontSize:'13px',color:c.T}}>{s.meetingPoint}</span>
+                  <button onClick={()=>updateStop('meetingPoint','')} style={{background:'none',border:'none',color:'#ff4444',cursor:'pointer',fontSize:'14px'}}>×</button>
+                </div>}
+                <div style={{display:'flex',gap:'6px'}}>
+                  <input value={mpSearch} onChange={e=>setMpSearch(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();searchMP(mpSearch);}}} placeholder={t.searchPlacePh||'Search a place... (Enter)'} style={{...inpSt,flex:1}}/>
+                  <button onClick={()=>searchMP(mpSearch)} style={{background:mc,border:'none',borderRadius:'8px',padding:'8px 12px',color:'#0A0A0A',cursor:'pointer',fontWeight:'700',fontSize:'14px'}}>🔍</button>
+                </div>
+                {mpResults.length>0&&<div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',marginTop:'4px',maxHeight:'150px',overflowY:'auto'}}>
+                  {mpResults.map((r,i)=><div key={i} onClick={()=>pickMP(r)} style={{padding:'8px 12px',cursor:'pointer',borderBottom:i<mpResults.length-1?`1px solid ${c.BD}`:'none',fontSize:'12px'}} onMouseEnter={e=>e.currentTarget.style.background=c.CARD2} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                    <div style={{color:c.T,fontWeight:'500'}}>{r.name}</div>
+                    <div style={{color:c.M2,fontSize:'11px'}}>{r.address}</div>
+                  </div>)}
+                </div>}
+                {s.meetingPoint&&<div style={{marginTop:'6px'}}>
+                  <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.minBeforeLbl||'Minutes before'}</div>
+                  <input type="number" min="0" max="120" defaultValue={s.meetingMinsBefore||''} onBlur={e=>updateStop('meetingMinsBefore',e.target.value)} placeholder="10" style={{...inpSt,width:'80px'}}/>
+                  {s.meetingMinsBefore&&<span style={{fontSize:'11px',color:c.M2,marginLeft:'6px'}}>{fmtMinsToH(-parseInt(s.meetingMinsBefore))}</span>}
+                </div>}
+              </div>
               <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.notesLbl||'Notes'}</div><input defaultValue={s.notes||''} onBlur={e=>updateStop('notes',e.target.value.trim())} style={inpSt}/></div>
             </>:<>
               {opt.name&&<div style={{fontSize:'14px',color:c.T,fontWeight:'600',marginBottom:'6px'}}>{opt.name}</div>}
@@ -252,20 +339,20 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
         <button onClick={()=>{const url=location.href.split('?')[0]+'?code='+plan.id;navigator.clipboard?.writeText(url);}} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}} title={t.copyLinkTitle}>🔗</button>
         <button onClick={refresh} title={t.refreshResp} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}}>↻</button>
       </div>
-      {/* Title + Description */}
+      {/* Title + Description — pencils aligned right */}
       <div style={{marginBottom:'4px'}}>
-        <div style={{display:'flex',alignItems:'flex-start',gap:'8px'}}>
+        <div style={{display:'flex',alignItems:'flex-start'}}>
           <div style={{flex:1,minWidth:0}}>
             <h2 style={{fontFamily:"'Syne',serif",fontSize:'24px',fontWeight:'800',color:plan.name?c.T:c.M,margin:0,lineHeight:1.2}}>{plan.name&&plan.name.length>60?plan.name.slice(0,60)+'…':plan.name||t.untitled}{plan.name&&plan.name.length>60?<span onClick={()=>setEditMode('view_title')} style={{fontSize:'12px',fontWeight:'500',color:mc,cursor:'pointer',marginLeft:'4px'}}>{t.seeMore||'see more'}</span>:null}</h2>
           </div>
-          {isOrgRef.current&&<button onClick={()=>{setEditName(plan.name||'');setEditMode('title');}} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',flexShrink:0,marginTop:'4px'}}>✏️</button>}
+          {isOrgRef.current&&<button onClick={()=>{setEditName(plan.name||'');setEditMode('title');}} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',flexShrink:0,marginLeft:'8px',marginTop:'2px'}}>✏️</button>}
         </div>
-        <div style={{display:'flex',alignItems:'flex-start',gap:'6px',marginTop:'4px'}}>
+        <div style={{display:'flex',alignItems:'flex-start',marginTop:'4px'}}>
           <div style={{flex:1,minWidth:0}}>
             <span style={{fontSize:'13px',color:plan.desc?c.M2:c.M,fontStyle:plan.desc?'normal':'italic',lineHeight:1.4}}>{plan.desc&&plan.desc.length>120?plan.desc.slice(0,120)+'…':plan.desc||(t.noDesc||'No description')}</span>
             {plan.desc&&plan.desc.length>120&&<span onClick={()=>setEditMode('view_desc')} style={{fontSize:'12px',color:mc,cursor:'pointer',marginLeft:'4px'}}>{t.seeMore||'see more'}</span>}
           </div>
-          {isOrgRef.current&&<button onClick={()=>{setEditDesc(plan.desc||'');setEditMode('desc');}} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'11px',padding:0,flexShrink:0}}>✏️</button>}
+          {isOrgRef.current&&<button onClick={()=>{setEditDesc(plan.desc||'');setEditMode('desc');}} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',flexShrink:0,marginLeft:'8px'}}>✏️</button>}
         </div>
       </div>
       <div style={{fontSize:'13px',color:c.M2,margin:'6px 0 12px'}}>{total} {total===1?t.responses:t.responsesP} · <span style={{color:mc,fontWeight:'700',letterSpacing:'.1em'}}>{plan.id}</span></div>
@@ -381,72 +468,155 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
   </div>)}
 </div>}
 
-      {/* PLAN tab */}
-      {!ldg&&tab==='plan'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><>
-        {/* Dates as tree: each date with its times below */}
-        <div style={{marginBottom:'12px'}}>
-          {(plan.dates||[]).map(d=><div key={d} style={{marginBottom:'6px'}}>
-            <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
-              <span style={{fontSize:'13px',padding:'4px 12px',borderRadius:'20px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`,textTransform:'capitalize',fontWeight:'600'}}>📅 {fmtShort(d,lang)}</span>
+      {/* PLAN tab — unified view + inline voting */}
+      {!ldg&&tab==='plan'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><>{(()=>{
+        const planDate=plan.date||plan.dates?.[0]||null;
+        const planTime=plan.time||plan.startTimes?.[0]||null;
+        const planPlace=plan.place||plan.stops?.[0]?.options?.[0]||null;
+        const stop=plan.stops?.[0]||{};
+        const tolerance=parseInt(stop.tolerance)||0;
+        const minCap=stop.minAttendees||'';
+        const maxCap=stop.maxCapacity||'';
+        const viewOpen=openSection._planView;
+        const ynBtnInline=(val,setVal,yesLbl,noLbl)=>(
+          <div style={{display:'flex',gap:'6px'}}>
+            <button onClick={()=>setVal(true)} style={{flex:1,padding:'8px',borderRadius:'8px',border:`1px solid ${val===true?'#22c55e50':c.BD}`,background:val===true?'#22c55e18':'transparent',color:val===true?'#22c55e':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:val===true?'700':'500'}}>{val===true?'✓ ':''}{yesLbl}</button>
+            <button onClick={()=>setVal(false)} style={{flex:1,padding:'8px',borderRadius:'8px',border:`1px solid ${val===false?'#ef444450':c.BD}`,background:val===false?'#ef444418':'transparent',color:val===false?'#ef4444':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:val===false?'700':'500'}}>{val===false?'✗ ':''}{noLbl}</button>
+          </div>
+        );
+        return<>
+        {/* Point card — compact */}
+        <div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'14px',padding:'14px',marginBottom:'10px'}}>
+          <div style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:viewOpen?'12px':0}}>
+            <div style={{width:'30px',height:'30px',borderRadius:'50%',background:`${mc}20`,border:`2px solid ${mc}60`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',fontWeight:'800',color:mc,flexShrink:0}}>1</div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:'15px',color:c.T,fontWeight:'700',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{planPlace?.name||'—'}</div>
+              <div style={{display:'flex',gap:'6px',fontSize:'11px',color:c.M2,marginTop:'2px'}}>
+                {planDate&&<span style={{textTransform:'capitalize'}}>📅 {fmtShort(planDate,lang)}</span>}
+                {planTime&&<span>🕐 {fmtTime(planTime)}</span>}
+              </div>
             </div>
-            {(plan.startTimes||[]).filter(Boolean).length>0&&<div style={{marginLeft:'20px',borderLeft:`2px solid ${mc}30`,paddingLeft:'12px',marginTop:'4px'}}>
-              {(plan.startTimes||[]).filter(Boolean).map(t2=><div key={t2} style={{marginBottom:'2px'}}>
-                <span style={{fontSize:'12px',padding:'3px 10px',borderRadius:'20px',background:c.CARD2,color:c.M2,border:`1px solid ${c.BD}`}}>🕐 {fmtTime(t2)}</span>
-              </div>)}
+            <div style={{display:'flex',gap:'4px',flexShrink:0}}>
+              <button onClick={()=>setOpenSection(p=>({...p,_planView:!p._planView}))} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>{viewOpen?'▾':t.seeDetails||'Ver'}</button>
+              {isOrgRef.current&&<button onClick={()=>setEditMode('stop_'+stop.id)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px'}}>✏️</button>}
+            </div>
+          </div>
+
+          {/* Expanded view with voting */}
+          {viewOpen&&<div className="fade-in">
+            {/* Place info */}
+            <div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px',marginBottom:'8px'}}>
+              {planPlace?.photo&&<img src={planPlace.photo} alt="" style={{width:'100%',height:'100px',objectFit:'cover',borderRadius:'8px',marginBottom:'8px'}}/>}
+              <div style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>{planPlace?.name||'—'}</div>
+              {planPlace?.address&&<div style={{fontSize:'12px',color:c.M2,marginTop:'2px'}}>📍 {planPlace.address}</div>}
+              {planPlace?.rating&&<div style={{fontSize:'11px',color:c.M2,marginTop:'2px'}}>⭐ {planPlace.rating}{planPlace?.priceLevel?' · '+'€'.repeat(planPlace.priceLevel):''}</div>}
+              <div style={{fontSize:'11px',color:c.M,marginTop:'6px'}}>
+                {minCap?`👥 min: ${minCap}`:(t.noMinCap||'No min capacity')}{' · '}{maxCap?`max: ${maxCap}`:(t.noMaxCap||'No max capacity')}
+              </div>
+              {planPlace?.googleMapsURI&&<a href={planPlace.googleMapsURI} target="_blank" rel="noreferrer" style={{display:'inline-block',marginTop:'6px',fontSize:'11px',color:mc,textDecoration:'none'}}>Google Maps ↗</a>}
+            </div>
+
+            {/* Date + Time side by side with voting */}
+            {!isOrgRef.current&&<div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
+              {/* Date */}
+              {planDate&&<div style={{flex:1,background:myDateOk===true?'#22c55e10':myDateOk===false?'#ef444410':c.CARD2,border:`1px solid ${myDateOk===true?'#22c55e40':myDateOk===false?'#ef444440':c.BD}`,borderRadius:'10px',padding:'10px'}}>
+                <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>📅 {t.dateOkQ||'Date'}</div>
+                <div style={{fontSize:'14px',color:c.T,fontWeight:'600',textTransform:'capitalize',marginBottom:'6px'}}>{fmtShort(planDate,lang)}</div>
+                {ynBtnInline(myDateOk,setMyDateOk,t.yesLbl||'Sí','No')}
+              </div>}
+              {/* Time */}
+              {planTime&&<div style={{flex:1,background:myTimeOk===true?'#22c55e10':myTimeOk===false?'#ef444410':c.CARD2,border:`1px solid ${myTimeOk===true?'#22c55e40':myTimeOk===false?'#ef444440':c.BD}`,borderRadius:'10px',padding:'10px'}}>
+                <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>🕐 {t.timeOkQ||'Time'}</div>
+                <div style={{fontSize:'14px',color:c.T,fontWeight:'600',marginBottom:'6px'}}>{fmtTime(planTime)}</div>
+                {ynBtnInline(myTimeOk,setMyTimeOk,t.yesLbl||'Sí','No')}
+              </div>}
             </div>}
-          </div>)}
-          {isOrgRef.current&&<button onClick={()=>setEditMode('dates')} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'3px 8px',color:c.M2,cursor:'pointer',fontSize:'11px',fontFamily:'inherit',marginTop:'4px'}}>✏️ {t.editDatesLbl}</button>}
+
+            {/* Organizer sees date/time as info + edit */}
+            {isOrgRef.current&&<div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
+              {planDate&&<div style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px'}}>
+                <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>📅</div>
+                <div style={{fontSize:'14px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtShort(planDate,lang)}</div>
+              </div>}
+              {planTime&&<div style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px'}}>
+                <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>🕐</div>
+                <div style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>{fmtTime(planTime)}</div>
+              </div>}
+              <button onClick={()=>setEditMode('dates')} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',alignSelf:'center'}}>✏️</button>
+            </div>}
+
+            {/* Alt dates (if invitee said No to date) — CalendarPicker */}
+            {!isOrgRef.current&&myDateOk===false&&<div style={{background:'#ef444408',border:'1px solid #ef444420',borderRadius:'10px',padding:'10px',marginBottom:'8px'}}>
+              <div style={{fontSize:'12px',color:'#ef4444',fontWeight:'600',marginBottom:'6px'}}>{t.yourAvailDates||'Which days can you?'} ({myAltDates.length}/3)</div>
+              <CalendarPicker selected={myAltDates} onChange={d=>setMyAltDates(d.slice(-3))} max={3} c={c} lang={lang}/>
+              {myAltDates.length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:'4px',marginTop:'6px'}}>
+                {myAltDates.map(d2=><span key={d2} style={{fontSize:'11px',padding:'3px 8px',borderRadius:'12px',background:'#22c55e18',color:'#22c55e',border:'1px solid #22c55e40'}}>✓ {fmtShort(d2,lang)}</span>)}
+              </div>}
+            </div>}
+
+            {/* Alt time range (if invitee said No to time) — ClockPickers */}
+            {!isOrgRef.current&&myTimeOk===false&&<div style={{background:'#ef444408',border:'1px solid #ef444420',borderRadius:'10px',padding:'10px',marginBottom:'8px'}}>
+              <div style={{fontSize:'12px',color:'#ef4444',fontWeight:'600',marginBottom:'8px'}}>{t.availStartTime||'What time could you start?'}</div>
+              <div style={{marginBottom:'8px'}}>
+                <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>{t.fromLbl||'From'}{myTimeFrom&&` → ${myTimeFrom}`}</div>
+                <ClockPicker value={myTimeFrom} onChange={v=>setMyTimeFrom(v)} c={c}/>
+              </div>
+              <div>
+                <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>{t.toLbl||'To'}{myTimeTo&&` → ${myTimeTo}`}</div>
+                <ClockPicker value={myTimeTo} onChange={v=>setMyTimeTo(v)} c={c}/>
+              </div>
+              {myTimeFrom&&myTimeTo&&<div style={{fontSize:'12px',color:mc,marginTop:'6px',textAlign:'center',fontWeight:'600'}}>{myTimeFrom} → {myTimeTo}</div>}
+            </div>}
+
+            {/* On time? (if organizer set tolerance) */}
+            {!isOrgRef.current&&tolerance>0&&(()=>{
+              const isLate=myLateMin>0;const isOnTime=myLateMin===0&&mySaved;
+              return<div style={{background:isOnTime?'#22c55e10':isLate?'#f59e0b10':c.CARD2,border:`1px solid ${isOnTime?'#22c55e40':isLate?'#f59e0b40':c.BD}`,borderRadius:'10px',padding:'10px',marginBottom:'8px'}}>
+                <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>⏰ {t.onTimeQ||'Will you be on time?'} <span style={{fontSize:'10px',color:c.M2}}>({t.maxLateLbl||'Max late'}: {tolerance} min = {addMins(planTime,tolerance)})</span></div>
+                {ynBtnInline(isOnTime?true:isLate?false:null,v=>{if(v)setMyLateMin(0);else setMyLateMin(5);},t.yesLbl||'Sí','No')}
+                {isLate&&<div style={{marginTop:'8px'}}>
+                  <div style={{fontSize:'11px',color:'#f59e0b',marginBottom:'4px'}}>{t.howLateQ||'How late?'}</div>
+                  <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
+                    <span style={{fontSize:'12px',color:c.M}}>+</span>
+                    <input type="number" min="1" max={tolerance} value={myLateMin} onChange={e=>{const v=Math.min(Math.max(parseInt(e.target.value)||1,1),tolerance);setMyLateMin(v);}} style={{width:'60px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',textAlign:'center'}}/>
+                    <span style={{fontSize:'12px',color:c.M}}>min</span>
+                    <span style={{fontSize:'12px',color:'#f59e0b',fontWeight:'600'}}>{fmtMinsToH(myLateMin)} = {addMins(planTime,myLateMin)}</span>
+                  </div>
+                </div>}
+              </div>;
+            })()}
+
+            {/* Meeting point (hidden if invitee is late) */}
+            {stop.meetingPoint&&myLateMin===0&&(()=>{
+              const mpMins=parseInt(stop.meetingMinsBefore)||0;
+              const mpTime=mpMins>0&&planTime?addMins(planTime,-mpMins):planTime;
+              return<div style={{background:myMeetOk===true?'#f59e0b10':myMeetOk===false?'#22c55e10':c.CARD2,border:`1px solid ${myMeetOk===true?'#f59e0b40':myMeetOk===false?'#22c55e40':c.BD}`,borderRadius:'10px',padding:'10px',marginBottom:'8px'}}>
+                <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>📍 {t.meetingPointLbl2||'Meeting point'}</div>
+                <div style={{fontSize:'13px',color:c.T,fontWeight:'600'}}>{stop.meetingPoint}</div>
+                {mpMins>0&&<div style={{fontSize:'11px',color:c.M2,marginTop:'2px'}}>{mpMins} min {t.beforeLbl||'before'} ({fmtMinsToH(-mpMins)})</div>}
+                {!isOrgRef.current&&<>
+                  <div style={{marginTop:'8px'}}>{ynBtnInline(myMeetOk,setMyMeetOk,t.meetYes||"I'll be there!",t.meetNo||'Going directly')}</div>
+                  {myMeetOk===true&&mpTime&&<div style={{marginTop:'8px',textAlign:'center',fontSize:'20px',fontWeight:'800',color:'#f59e0b'}}>🕐 {mpTime}</div>}
+                  {myMeetOk===false&&planTime&&<div style={{marginTop:'8px',textAlign:'center',fontSize:'20px',fontWeight:'800',color:'#22c55e'}}>🕐 {planTime}</div>}
+                </>}
+              </div>;
+            })()}
+
+            {/* Save response (invitee) */}
+            {!isOrgRef.current&&<div style={{marginTop:'10px'}}>
+              {!mySaved&&<div style={{marginBottom:'8px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.yourName}</div><input value={myName} onChange={e=>{setMyName(e.target.value);ls.set('q_myname',e.target.value);}} placeholder={t.yourNamePh||'Your name'} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/></div>}
+              <button onClick={saveMyResp} disabled={mySaving||!myName.trim()||(myDateOk===null&&planDate)||(myTimeOk===null&&planTime)} style={{width:'100%',padding:'12px',background:mySaved?'#22c55e':mc,border:'none',borderRadius:'10px',color:mySaved?'#fff':'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px',opacity:(mySaving||!myName.trim())?0.5:1}}>{mySaving?'...':(mySaved?(t.respSaved||'✓ Saved — tap to update'):(t.saveAvail||'Save'))}</button>
+              {mySaveConfirm&&<div className="fade-in" style={{marginTop:'8px',padding:'10px',background:'#22c55e15',border:'1px solid #22c55e40',borderRadius:'10px',textAlign:'center',fontSize:'13px',color:'#22c55e',fontWeight:'600'}}>✓ {t.savedTitle||'Saved!'}</div>}
+            </div>}
+          </div>}
         </div>
 
-        {/* Points with side-by-side alternatives */}
-        {(plan.stops||[]).filter(s=>(s.options?.[0]?.name||s.name)).map((s,i)=>{
-          const opts=(s.options||[]).filter(o=>o.name);
-          const isCancelled=cancelledStops.has(s.id);
-          const expanded=openSection['stop_'+s.id];
-          const hasMultiple=opts.length>1;
-          return<div key={s.id||i} style={{marginBottom:'10px',opacity:isCancelled?.4:1}}>
-            {/* Point header */}
-            <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'6px'}}>
-              <div style={{width:'26px',height:'26px',borderRadius:'50%',background:isCancelled?c.CARD2:`${mc}20`,border:`1.5px solid ${isCancelled?c.BD:mc+'60'}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',fontWeight:'800',color:isCancelled?c.M:mc,flexShrink:0}}>{i+1}</div>
-              {!hasMultiple&&<span style={{flex:1,fontSize:'14px',color:c.T,fontWeight:'600',textDecoration:isCancelled?'line-through':'none'}}>{opts[0]?.name||'—'}</span>}
-              {hasMultiple&&<span style={{flex:1,fontSize:'12px',color:c.M2}}>{opts.length} {lang==='es'?'opciones':'options'}</span>}
-              <button onClick={()=>setOpenSection(p=>({...p,['stop_'+s.id]:!p['stop_'+s.id]}))} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'3px 8px',color:c.M2,cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>{expanded?'▾':t.seeDetails}</button>
-              {isOrgRef.current&&<button onClick={()=>setEditMode('stop_'+s.id)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'3px 8px',color:c.M2,cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>{t.editLbl}</button>}
-            </div>
-            {isCancelled&&<div style={{fontSize:'11px',color:'#f59e0b',marginBottom:'6px',marginLeft:'34px'}}>⚠️ {t.cancelledMin}</div>}
-            {/* Options side by side */}
-            {expanded&&!isCancelled&&<div className="fade-in" style={{display:'flex',gap:'6px',marginBottom:'4px'}}>
-              {opts.map((opt,oi)=><div key={opt.id||oi} style={{flex:1,background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px',minWidth:0}}>
-                {/* Letter label */}
-                <div style={{display:'flex',alignItems:'center',gap:'6px',marginBottom:'6px'}}>
-                  <span style={{width:'20px',height:'20px',borderRadius:'50%',background:`${mc}20`,border:`1px solid ${mc}50`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'10px',fontWeight:'800',color:mc}}>{String.fromCharCode(65+oi)}</span>
-                  <span style={{fontSize:'13px',color:c.T,fontWeight:'600',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{opt.name}</span>
-                </div>
-                {opt.address&&<div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>📍 {opt.address}</div>}
-                {opt.rating&&<div style={{fontSize:'11px',color:c.M2}}>⭐ {opt.rating}{opt.priceLevel?' · '+'€'.repeat(opt.priceLevel):''}</div>}
-                {opt.photo&&<img src={opt.photo} alt="" style={{width:'100%',height:'60px',objectFit:'cover',borderRadius:'6px',marginTop:'6px'}}/>}
-                {opt.googleMapsURI&&<a href={opt.googleMapsURI} target="_blank" rel="noreferrer" style={{display:'inline-block',marginTop:'4px',fontSize:'10px',color:mc,textDecoration:'none'}}>Maps ↗</a>}
-              </div>)}
-            </div>}
-            {/* Meeting point + times (shared or per-option) */}
-            {expanded&&!isCancelled&&<>
-              {s.meetingPoint&&<div style={{fontSize:'11px',color:mc,background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'8px',padding:'6px 10px',marginTop:'4px'}}>📍 {t.meetingPointLbl2}: {s.meetingPoint}{s.meetingMinsBefore?` (${s.meetingMinsBefore} min ${t.beforeLbl})`:''}</div>}
-              {s.startTime&&<div style={{fontSize:'11px',color:c.M2,marginTop:'4px'}}>🕐 {fmtTime(s.startTime)}{s.duration?' · '+s.duration:''}</div>}
-            </>}
-          </div>;
-        })}
-        {isOrgRef.current&&<button onClick={async()=>{const newStop={id:Date.now(),options:[{id:Date.now(),name:'',address:'',lat:null,lng:null,rating:null,photo:null,googleMapsURI:null,types:[]}],startTime:'',duration:'',notes:'',maxCapacity:'',meetingPoint:'',minAttendees:''};const up={...plan,stops:[...(plan.stops||[]),newStop]};await updatePlan(up);setPlan(up);setEditMode('stop_'+newStop.id);}} style={{width:'100%',padding:'12px',background:'none',border:`2px dashed ${c.BD}`,borderRadius:'12px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'600',marginBottom:'8px'}}>+ {t.addNextPoint}</button>}
-
         {/* Map */}
-        {plan.stops?.some(s=>(s.options?.[0]?.lat&&s.options?.[0]?.lng)||(s.lat&&s.lng))&&<><HR c={c}/><RouteMap stops={(plan.stops||[]).flatMap(s=>{
-          const o=s.options?.[0]||s;
-          const pts=[];
-          if(s.meetingPoint&&s.meetingPointLat&&s.meetingPointLng){
-            pts.push({lat:s.meetingPointLat,lng:s.meetingPointLng,name:'📍 '+s.meetingPoint,isMeetingPoint:true});
-          }
-          pts.push({...s,lat:o.lat||s.lat,lng:o.lng||s.lng,name:o.name||s.name,address:o.address||s.address,placeId:o.placeId||s.placeId||null});
-          return pts;
-        })} c={c}/></>}
+        {planPlace?.lat&&planPlace?.lng&&<RouteMap stops={[
+          ...(stop.meetingPoint?[{lat:stop.meetingPointLat||planPlace.lat,lng:stop.meetingPointLng||planPlace.lng,name:'📍 '+stop.meetingPoint,isMeetingPoint:true}]:[]),
+          {...planPlace,lat:planPlace.lat,lng:planPlace.lng,name:planPlace.name,address:planPlace.address}
+        ]} c={c}/>}
+      </>;})()}
       </></React.Suspense>}
 
       {/* ALTS tab = Alternative dates */}
