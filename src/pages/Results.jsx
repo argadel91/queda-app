@@ -335,21 +335,31 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
   </div>)}
 </div>}
 
-      {/* PLAN tab = Route + budget + inline map + respondents */}
+      {/* PLAN tab */}
       {!ldg&&tab==='plan'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><>
-        {/* Title + Description */}
-        <div style={{marginBottom:'14px'}}>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
-            <div style={{flex:1}}>
-              <h3 style={{fontSize:'18px',fontWeight:'700',color:c.T,margin:'0 0 4px'}}>{plan.name||t.untitled}</h3>
-              {plan.desc&&<div style={{fontSize:'13px',color:c.M2,lineHeight:1.5}}>{plan.desc}</div>}
+        {/* Section: Title */}
+        <div style={{marginBottom:'8px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',overflow:'hidden'}}>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px'}}>
+            <h3 style={{fontSize:'16px',fontWeight:'700',color:c.T,margin:0}}>{plan.name||t.untitled}</h3>
+            <div style={{display:'flex',gap:'4px'}}>
+              {isOrgRef.current&&<button onClick={()=>setEditMode(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>{t.editLbl}</button>}
             </div>
-            {isOrgRef.current&&<button onClick={()=>setEditMode(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 10px',color:c.M2,cursor:'pointer',fontSize:'11px',flexShrink:0}}>{t.editLbl||'Edit'}</button>}
           </div>
-          {/* Dates */}
-          <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginTop:'8px'}}>
-            {(plan.dates||[]).map(d=><span key={d} style={{fontSize:'12px',padding:'3px 10px',borderRadius:'20px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`,textTransform:'capitalize'}}>{fmtShort(d,lang)}</span>)}
+        </div>
+
+        {/* Section: Description */}
+        {(plan.desc||isOrgRef.current)&&<div style={{marginBottom:'8px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',overflow:'hidden'}}>
+          <div onClick={()=>setOpenSection(p=>({...p,desc:!p.desc}))} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px',cursor:'pointer'}}>
+            <span style={{fontSize:'13px',color:plan.desc?c.T:c.M2}}>{plan.desc?plan.desc.slice(0,50)+(plan.desc.length>50?'...':''):(t.desc||'Description')}</span>
+            <span style={{fontSize:'11px',color:c.M2}}>{openSection.desc?'▾':'▸'}</span>
           </div>
+          {openSection.desc&&<div className="fade-in" style={{padding:'0 12px 12px',fontSize:'13px',color:c.M2,lineHeight:1.6}}>{plan.desc||<span style={{fontStyle:'italic'}}>{t.noDataYet}</span>}</div>}
+        </div>}
+
+        {/* Section: Dates */}
+        <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'12px'}}>
+          {(plan.dates||[]).map(d=><span key={d} style={{fontSize:'12px',padding:'3px 10px',borderRadius:'20px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`,textTransform:'capitalize'}}>{fmtShort(d,lang)}</span>)}
+          {(plan.startTimes||[]).filter(Boolean).map(t2=><span key={t2} style={{fontSize:'12px',padding:'3px 10px',borderRadius:'20px',background:c.CARD2,color:c.M2,border:`1px solid ${c.BD}`}}>🕐 {fmtTime(t2)}</span>)}
         </div>
 
         {/* Respondents */}
@@ -357,31 +367,44 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
         ?<Card c={c} style={{textAlign:'center',padding:'32px',marginBottom:'14px'}}><div style={{fontSize:'36px',marginBottom:'12px'}}>⏳</div><div style={{color:c.T,fontWeight:'500',marginBottom:'6px'}}>{t.noResp}</div><div style={{color:c.M2,fontSize:'13px'}}>{t.noRespSub} <span style={{color:mc,fontWeight:'700'}}>{plan.id}</span></div></Card>
         :<div style={{fontSize:'13px',color:c.M2,marginBottom:'14px'}}>👥 {total} {t.responsesLbl}</div>}
 
-        {/* Points — minimal cards */}
+        {/* Points with side-by-side alternatives */}
         {(plan.stops||[]).filter(s=>(s.options?.[0]?.name||s.name)).map((s,i)=>{
-          const opt=s.options?.[0]||s;
+          const opts=(s.options||[]).filter(o=>o.name);
           const isCancelled=cancelledStops.has(s.id);
           const expanded=openSection['stop_'+s.id];
-          return<div key={s.id||i} style={{marginBottom:'8px',opacity:isCancelled?.4:1}}>
-            <div style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px',background:c.CARD,border:`1px solid ${isCancelled?'#f59e0b30':c.BD}`,borderRadius:'12px'}}>
-              <div style={{width:'28px',height:'28px',borderRadius:'50%',background:isCancelled?c.CARD2:`${mc}20`,border:`1.5px solid ${isCancelled?c.BD:mc+'60'}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',fontWeight:'800',color:isCancelled?c.M:mc,flexShrink:0}}>{i+1}</div>
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{fontSize:'15px',color:c.T,fontWeight:'600',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',textDecoration:isCancelled?'line-through':'none'}}>{opt.name||'—'}</div>
-                {isCancelled&&<div style={{fontSize:'11px',color:'#f59e0b'}}>⚠️ {t.cancelledMin}</div>}
-              </div>
-              <button onClick={()=>setOpenSection(p=>({...p,['stop_'+s.id]:!p['stop_'+s.id]}))} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>{t.seeDetails||'See'}</button>
-              {isOrgRef.current&&<button onClick={()=>setEditMode('stop_'+s.id)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>{t.editLbl||'Edit'}</button>}
+          const hasMultiple=opts.length>1;
+          return<div key={s.id||i} style={{marginBottom:'10px',opacity:isCancelled?.4:1}}>
+            {/* Point header */}
+            <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'6px'}}>
+              <div style={{width:'26px',height:'26px',borderRadius:'50%',background:isCancelled?c.CARD2:`${mc}20`,border:`1.5px solid ${isCancelled?c.BD:mc+'60'}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',fontWeight:'800',color:isCancelled?c.M:mc,flexShrink:0}}>{i+1}</div>
+              {!hasMultiple&&<span style={{flex:1,fontSize:'14px',color:c.T,fontWeight:'600',textDecoration:isCancelled?'line-through':'none'}}>{opts[0]?.name||'—'}</span>}
+              {hasMultiple&&<span style={{flex:1,fontSize:'12px',color:c.M2}}>{opts.length} {lang==='es'?'opciones':'options'}</span>}
+              <button onClick={()=>setOpenSection(p=>({...p,['stop_'+s.id]:!p['stop_'+s.id]}))} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'3px 8px',color:c.M2,cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>{expanded?'▾':t.seeDetails}</button>
+              {isOrgRef.current&&<button onClick={()=>setEditMode('stop_'+s.id)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'3px 8px',color:c.M2,cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>{t.editLbl}</button>}
             </div>
-            {/* Expanded details */}
-            {expanded&&!isCancelled&&<div className="fade-in" style={{padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderTop:'none',borderRadius:'0 0 12px 12px',marginTop:'-1px'}}>
-              {opt.address&&<div style={{fontSize:'12px',color:c.M2,marginBottom:'6px'}}>📍 {opt.address}</div>}
-              <VenueInfo stop={opt} c={c} lang={lang}/>
-              {s.meetingPoint&&<div style={{fontSize:'12px',color:mc,marginTop:'6px'}}>📍 {t.meetingPointLbl2||'Meeting point'}: {s.meetingPoint}{s.meetingMinsBefore?` (${s.meetingMinsBefore} min ${t.beforeLbl})`:''}</div>}
-              {opt.googleMapsURI&&<a href={opt.googleMapsURI} target="_blank" rel="noreferrer" style={{display:'inline-block',marginTop:'6px',fontSize:'12px',color:mc,textDecoration:'none'}}>Google Maps ↗</a>}
+            {isCancelled&&<div style={{fontSize:'11px',color:'#f59e0b',marginBottom:'6px',marginLeft:'34px'}}>⚠️ {t.cancelledMin}</div>}
+            {/* Options side by side */}
+            {expanded&&!isCancelled&&<div className="fade-in" style={{display:'flex',gap:'6px',marginBottom:'4px'}}>
+              {opts.map((opt,oi)=><div key={opt.id||oi} style={{flex:1,background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px',minWidth:0}}>
+                {/* Letter label */}
+                <div style={{display:'flex',alignItems:'center',gap:'6px',marginBottom:'6px'}}>
+                  <span style={{width:'20px',height:'20px',borderRadius:'50%',background:`${mc}20`,border:`1px solid ${mc}50`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'10px',fontWeight:'800',color:mc}}>{String.fromCharCode(65+oi)}</span>
+                  <span style={{fontSize:'13px',color:c.T,fontWeight:'600',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{opt.name}</span>
+                </div>
+                {opt.address&&<div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>📍 {opt.address}</div>}
+                {opt.rating&&<div style={{fontSize:'11px',color:c.M2}}>⭐ {opt.rating}{opt.priceLevel?' · '+'€'.repeat(opt.priceLevel):''}</div>}
+                {opt.photo&&<img src={opt.photo} alt="" style={{width:'100%',height:'60px',objectFit:'cover',borderRadius:'6px',marginTop:'6px'}}/>}
+                {opt.googleMapsURI&&<a href={opt.googleMapsURI} target="_blank" rel="noreferrer" style={{display:'inline-block',marginTop:'4px',fontSize:'10px',color:mc,textDecoration:'none'}}>Maps ↗</a>}
+              </div>)}
             </div>}
+            {/* Meeting point + times (shared or per-option) */}
+            {expanded&&!isCancelled&&<>
+              {s.meetingPoint&&<div style={{fontSize:'11px',color:mc,background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'8px',padding:'6px 10px',marginTop:'4px'}}>📍 {t.meetingPointLbl2}: {s.meetingPoint}{s.meetingMinsBefore?` (${s.meetingMinsBefore} min ${t.beforeLbl})`:''}</div>}
+              {s.startTime&&<div style={{fontSize:'11px',color:c.M2,marginTop:'4px'}}>🕐 {fmtTime(s.startTime)}{s.duration?' · '+s.duration:''}</div>}
+            </>}
           </div>;
         })}
-        {isOrgRef.current&&<button onClick={()=>alert(t.addPointHint||'Coming soon: add points from here')} style={{width:'100%',padding:'12px',background:'none',border:`2px dashed ${c.BD}`,borderRadius:'12px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'600',marginBottom:'8px'}}>+ {t.addNextPoint||'Add the next point'}</button>}
+        {isOrgRef.current&&<button onClick={()=>alert(t.addPointHint||'Coming soon')} style={{width:'100%',padding:'12px',background:'none',border:`2px dashed ${c.BD}`,borderRadius:'12px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'600',marginBottom:'8px'}}>+ {t.addNextPoint}</button>}
 
         {/* Map */}
         {plan.stops?.some(s=>(s.options?.[0]?.lat&&s.options?.[0]?.lng)||(s.lat&&s.lng))&&<><HR c={c}/><RouteMap stops={(plan.stops||[]).flatMap(s=>{
