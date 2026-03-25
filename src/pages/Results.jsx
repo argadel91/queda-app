@@ -104,7 +104,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
   const confirmDate=async(d,st)=>{setConf(true);const up={...plan,confirmedDate:d,confirmedStartTime:st||''};await updatePlan(up);setPlan(up);setConf(false);};
   const waConfirm=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`📌 *${plan.name}* — ${t.dateConfirmedMsg}\n\n🗓️ ${fmtDate(plan.confirmedDate,lang)}${plan.confirmedStartTime?' · 🕐 '+fmtTime(plan.confirmedStartTime):''}\n\n${url}`),'_blank');};
   const waRem=()=>{const url=location.href.split('?')[0]+'?code='+plan.id;window.open('https://wa.me/?text='+encodeURIComponent(`⏰ ${t.reminderMsg.replace('{name}',plan.name)}\n${url}`),'_blank');setRem(true);};
-  const TABS=['plan','summary'];
+  const TABS=['plan','vote','summary','more'];
   const tlbl=k=>t.tabs[k]||k;
   const shareUrl=location.href.split('?')[0]+'?code='+plan.id;
   const copyShare=()=>{navigator.clipboard?.writeText(shareUrl).catch(()=>{});};
@@ -142,14 +142,46 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
         </div>
       </div>
     </div>}
-    {editMode&&<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:200,display:'flex',alignItems:'flex-end',justifyContent:'center'}} onClick={()=>setEditMode(false)}>
-      <div onClick={e=>e.stopPropagation()} className="fade-in" style={{background:c.CARD,borderRadius:'20px 20px 0 0',padding:'24px',width:'100%',maxWidth:'420px',maxHeight:'85vh',overflowY:'auto'}}>
-        {/* Edit title/description */}
-        {editMode===true&&<>
-          <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>{t.editPlan||'Edit plan'}</div>
-          <div style={{marginBottom:'12px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.editNameLbl}</div><input value={editName} onChange={e=>setEditName(e.target.value)} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/></div>
-          <div style={{marginBottom:'16px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.editDescLbl}</div><textarea value={editDesc} onChange={e=>setEditDesc(e.target.value)} rows={2} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box',resize:'vertical'}}/></div>
-          {/* Dates */}
+    {editMode&&<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setEditMode(false)}>
+      <div onClick={e=>e.stopPropagation()} className="fade-in" style={{background:c.CARD,borderRadius:'16px',padding:'24px',width:'100%',maxWidth:'400px',maxHeight:'80vh',overflowY:'auto'}}>
+
+        {/* View title (read-only) */}
+        {editMode==='view_title'&&<>
+          <div style={{fontSize:'11px',color:c.M,fontWeight:'600',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'8px'}}>{t.editNameLbl}</div>
+          <div style={{fontSize:'18px',fontWeight:'700',color:plan.name?c.T:c.M,fontFamily:"'Syne',serif",lineHeight:1.4,wordBreak:'break-word'}}>{plan.name||t.untitled}</div>
+          <button onClick={()=>setEditMode(false)} style={{width:'100%',marginTop:'16px',padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.closeLbl||'Close'}</button>
+        </>}
+
+        {/* View description (read-only) */}
+        {editMode==='view_desc'&&<>
+          <div style={{fontSize:'11px',color:c.M,fontWeight:'600',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'8px'}}>{t.editDescLbl}</div>
+          <div style={{fontSize:'14px',color:plan.desc?c.T:c.M,lineHeight:1.6,wordBreak:'break-word',fontStyle:plan.desc?'normal':'italic'}}>{plan.desc||(t.noDesc||'No description')}</div>
+          <button onClick={()=>setEditMode(false)} style={{width:'100%',marginTop:'16px',padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.closeLbl||'Close'}</button>
+        </>}
+
+        {/* Edit title */}
+        {editMode==='title'&&<>
+          <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>{t.editNameLbl}</div>
+          <div style={{marginBottom:'16px'}}><input value={editName} onChange={e=>setEditName(e.target.value)} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/></div>
+          <div style={{display:'flex',gap:'8px'}}>
+            <button onClick={()=>setEditMode(false)} style={{flex:1,padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontWeight:'600',fontSize:'14px'}}>{t.cancel||'Cancel'}</button>
+            <button onClick={async()=>{const up={...plan,name:editName.trim()||null};await updatePlan(up);setPlan(up);setEditMode(false);}} style={{flex:1,padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.saveLbl||'Save'}</button>
+          </div>
+        </>}
+
+        {/* Edit description */}
+        {editMode==='desc'&&<>
+          <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>{t.editDescLbl}</div>
+          <div style={{marginBottom:'16px'}}><textarea value={editDesc} onChange={e=>setEditDesc(e.target.value)} rows={3} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box',resize:'vertical'}}/></div>
+          <div style={{display:'flex',gap:'8px'}}>
+            <button onClick={()=>setEditMode(false)} style={{flex:1,padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontWeight:'600',fontSize:'14px'}}>{t.cancel||'Cancel'}</button>
+            <button onClick={async()=>{const up={...plan,desc:editDesc.trim()||null};await updatePlan(up);setPlan(up);setEditMode(false);}} style={{flex:1,padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.saveLbl||'Save'}</button>
+          </div>
+        </>}
+
+        {/* Edit dates + times */}
+        {editMode==='dates'&&<>
+          <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>{t.editDatesLbl}</div>
           <div style={{marginBottom:'12px'}}>
             <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>📅 {t.editDatesLbl} ({(plan.dates||[]).length}/3)</div>
             <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'8px'}}>
@@ -157,7 +189,6 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
             </div>
             {(plan.dates||[]).length<3&&<input type="date" min={new Date().toISOString().split('T')[0]} onChange={async e=>{if(!e.target.value||(plan.dates||[]).includes(e.target.value))return;const up={...plan,dates:[...(plan.dates||[]),e.target.value].sort()};await updatePlan(up);setPlan(up);e.target.value='';}} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
           </div>
-          {/* Times */}
           <div style={{marginBottom:'16px'}}>
             <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>🕐 {t.editTimesLbl} ({(plan.startTimes||[]).filter(Boolean).length}/3)</div>
             <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'8px'}}>
@@ -165,10 +196,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
             </div>
             {(plan.startTimes||[]).filter(Boolean).length<3&&<input type="time" onChange={async e=>{if(!e.target.value||(plan.startTimes||[]).includes(e.target.value))return;const up={...plan,startTimes:[...(plan.startTimes||[]),e.target.value]};await updatePlan(up);setPlan(up);e.target.value='';}} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>}
           </div>
-          <div style={{display:'flex',gap:'8px'}}>
-            <button onClick={()=>setEditMode(false)} style={{flex:1,padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontWeight:'600',fontSize:'14px'}}>{t.cancel||'Cancel'}</button>
-            <button onClick={async()=>{const up={...plan,name:editName.trim()||plan.name,desc:editDesc.trim()||null};await updatePlan(up);setPlan(up);setEditMode(false);}} style={{flex:1,padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.saveLbl||'Save'}</button>
-          </div>
+          <button onClick={()=>setEditMode(false)} style={{width:'100%',padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.doneLbl||'Done'}</button>
         </>}
 
         {/* Edit specific point */}
@@ -178,26 +206,31 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
           if(!s)return null;
           const opt=s.options?.[0]||s;
           const si=(plan.stops||[]).indexOf(s);
+          const inpSt={width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'};
+          const updateStop=async(field,val,optField)=>{
+            const stops=[...(plan.stops||[])];const idx=stops.findIndex(x=>x.id==stopId||String(x.id)===stopId);
+            if(idx<0)return;
+            if(optField){stops[idx]={...stops[idx],options:stops[idx].options.map((o,oi)=>oi===0?{...o,[field]:val}:o)};}
+            else{stops[idx]={...stops[idx],[field]:val};}
+            const up={...plan,stops};await updatePlan(up);setPlan(up);
+          };
           return<>
-            <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>📍 {opt.name||`${si+1}`}</div>
-            {/* Full venue details */}
-            {opt.address&&<div style={{fontSize:'13px',color:c.M2,marginBottom:'8px'}}>📍 {opt.address}</div>}
-            {opt.photo&&<img src={opt.photo} alt="" style={{width:'100%',height:'120px',objectFit:'cover',borderRadius:'10px',marginBottom:'10px'}}/>}
-            <VenueInfo stop={opt} c={c} lang={lang}/>
+            <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>{t.editLbl} — {t.stopLbl||'Stop'} {si+1}</div>
+            {opt.photo&&<img src={opt.photo} alt="" style={{width:'100%',height:'100px',objectFit:'cover',borderRadius:'10px',marginBottom:'10px'}}/>}
+            {isOrgRef.current?<>
+              <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.editNameLbl}</div><input defaultValue={opt.name||''} onBlur={e=>updateStop('name',e.target.value.trim(),true)} style={inpSt}/></div>
+              <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>📍 {t.addressLbl||'Address'}</div><input defaultValue={opt.address||''} onBlur={e=>updateStop('address',e.target.value.trim(),true)} style={inpSt}/></div>
+              <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.meetingPointLbl2||'Meeting point'}</div><input defaultValue={s.meetingPoint||''} onBlur={e=>updateStop('meetingPoint',e.target.value.trim())} style={inpSt}/></div>
+              <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.notesLbl||'Notes'}</div><input defaultValue={s.notes||''} onBlur={e=>updateStop('notes',e.target.value.trim())} style={inpSt}/></div>
+            </>:<>
+              {opt.name&&<div style={{fontSize:'14px',color:c.T,fontWeight:'600',marginBottom:'6px'}}>{opt.name}</div>}
+              {opt.address&&<div style={{fontSize:'13px',color:c.M2,marginBottom:'6px'}}>📍 {opt.address}</div>}
+              <VenueInfo stop={opt} c={c} lang={lang}/>
+            </>}
             {opt.googleMapsURI&&<a href={opt.googleMapsURI} target="_blank" rel="noreferrer" style={{display:'inline-block',marginTop:'6px',marginBottom:'10px',fontSize:'12px',color:mc,textDecoration:'none'}}>Google Maps ↗</a>}
-            {s.meetingPoint&&<div style={{fontSize:'12px',color:mc,background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'8px',padding:'8px 12px',marginBottom:'10px'}}>📍 {t.meetingPointLbl2||'Meeting point'}: {s.meetingPoint}{s.meetingMinsBefore?` (${s.meetingMinsBefore} min ${t.beforeLbl})`:''}</div>}
-            {/* Dates + times of the plan */}
-            <div style={{marginTop:'10px',paddingTop:'10px',borderTop:`1px solid ${c.BD}`}}>
-              <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>📅 {t.editDatesLbl}</div>
-              <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'6px'}}>
-                {(plan.dates||[]).map(d=><span key={d} style={{fontSize:'12px',padding:'3px 10px',borderRadius:'20px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`,textTransform:'capitalize'}}>{fmtShort(d,lang)}</span>)}
-              </div>
-              {(plan.startTimes||[]).filter(Boolean).length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:'6px'}}>
-                {(plan.startTimes||[]).filter(Boolean).map(t2=><span key={t2} style={{fontSize:'12px',padding:'3px 10px',borderRadius:'20px',background:c.CARD2,color:c.M2,border:`1px solid ${c.BD}`}}>🕐 {fmtTime(t2)}</span>)}
-              </div>}
-            </div>
-            <div style={{marginTop:'16px'}}>
-              <button onClick={()=>setEditMode(false)} style={{width:'100%',padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontWeight:'600',fontSize:'14px'}}>{t.backBtn||'Back'}</button>
+            <div style={{display:'flex',gap:'8px',marginTop:'12px'}}>
+              {isOrgRef.current&&<button onClick={async()=>{if(!confirm(t.delConfirm2||'Delete this stop?'))return;const up={...plan,stops:(plan.stops||[]).filter(x=>x.id!=stopId&&String(x.id)!==stopId)};await updatePlan(up);setPlan(up);setEditMode(false);}} style={{padding:'10px 16px',background:'#ff444420',border:'1px solid #ff444440',borderRadius:'10px',color:'#ff4444',cursor:'pointer',fontFamily:'inherit',fontWeight:'600',fontSize:'13px'}}>🗑️</button>}
+              <button onClick={()=>setEditMode(false)} style={{flex:1,padding:'10px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.doneLbl||'Done'}</button>
             </div>
           </>;
         })()}
@@ -213,16 +246,29 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
         <div><div style={{fontSize:'13px',fontWeight:'700',color:mc}}>{du===0?(t.itsToday):du===1?(t.tomorrowLbl):`${du} ${t.daysLbl} ⏳`}</div>
         <div style={{fontSize:'12px',color:c.M2,textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,lang)}{plan.confirmedStartTime?' · 🕐 '+fmtTime(plan.confirmedStartTime):''}</div></div>
       </div>}
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'6px'}}>
-        <div><div style={{display:'flex',alignItems:'center'}}><h2 style={{fontFamily:"'Syne',serif",fontSize:'24px',fontWeight:'800',color:c.T,margin:'0 0 4px'}}>{plan.name}</h2>{isOrgRef.current&&<button onClick={()=>setEditMode(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',marginLeft:'8px'}}>✏️</button>}</div></div>
-        <div style={{display:'flex',gap:'5px'}}>
-          <button onClick={()=>{const url=location.href.split('?')[0]+'?code='+plan.id;const txt=`${t.respondToPlan.replace('{name}',plan.name||'queda.')}\n${url}`;window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}} title={t.shareWATitle} style={{background:'#25D36618',border:'1px solid #25D36640',borderRadius:'8px',padding:'6px 10px',color:'#25D366',cursor:'pointer',fontSize:'13px'}}>💬</button>
-          <button onClick={()=>{const url=location.href.split('?')[0]+'?code='+plan.id;navigator.clipboard?.writeText(url);}} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}} title={t.copyLinkTitle}>🔗</button>
-          {typeof Notification!=='undefined'&&Notification.permission==='default'&&<button onClick={()=>Notification.requestPermission()} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}} title={t.enableNotif}>🔔</button>}
-          <button onClick={refresh} title={t.refreshResp} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}}>↻</button>
+      {/* Action buttons row */}
+      <div style={{display:'flex',gap:'5px',marginBottom:'10px'}}>
+        <button onClick={()=>{const url=location.href.split('?')[0]+'?code='+plan.id;const txt=`${t.respondToPlan.replace('{name}',plan.name||'queda.')}\n${url}`;window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}} title={t.shareWATitle} style={{background:'#25D36618',border:'1px solid #25D36640',borderRadius:'8px',padding:'6px 10px',color:'#25D366',cursor:'pointer',fontSize:'13px'}}>💬</button>
+        <button onClick={()=>{const url=location.href.split('?')[0]+'?code='+plan.id;navigator.clipboard?.writeText(url);}} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}} title={t.copyLinkTitle}>🔗</button>
+        <button onClick={refresh} title={t.refreshResp} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}}>↻</button>
+      </div>
+      {/* Title + Description */}
+      <div style={{marginBottom:'4px'}}>
+        <div style={{display:'flex',alignItems:'flex-start',gap:'8px'}}>
+          <div style={{flex:1,minWidth:0}}>
+            <h2 style={{fontFamily:"'Syne',serif",fontSize:'24px',fontWeight:'800',color:plan.name?c.T:c.M,margin:0,lineHeight:1.2}}>{plan.name&&plan.name.length>60?plan.name.slice(0,60)+'…':plan.name||t.untitled}{plan.name&&plan.name.length>60?<span onClick={()=>setEditMode('view_title')} style={{fontSize:'12px',fontWeight:'500',color:mc,cursor:'pointer',marginLeft:'4px'}}>{t.seeMore||'see more'}</span>:null}</h2>
+          </div>
+          {isOrgRef.current&&<button onClick={()=>{setEditName(plan.name||'');setEditMode('title');}} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',flexShrink:0,marginTop:'4px'}}>✏️</button>}
+        </div>
+        <div style={{display:'flex',alignItems:'flex-start',gap:'6px',marginTop:'4px'}}>
+          <div style={{flex:1,minWidth:0}}>
+            <span style={{fontSize:'13px',color:plan.desc?c.M2:c.M,fontStyle:plan.desc?'normal':'italic',lineHeight:1.4}}>{plan.desc&&plan.desc.length>120?plan.desc.slice(0,120)+'…':plan.desc||(t.noDesc||'No description')}</span>
+            {plan.desc&&plan.desc.length>120&&<span onClick={()=>setEditMode('view_desc')} style={{fontSize:'12px',color:mc,cursor:'pointer',marginLeft:'4px'}}>{t.seeMore||'see more'}</span>}
+          </div>
+          {isOrgRef.current&&<button onClick={()=>{setEditDesc(plan.desc||'');setEditMode('desc');}} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'11px',padding:0,flexShrink:0}}>✏️</button>}
         </div>
       </div>
-      <div style={{fontSize:'13px',color:c.M2,margin:'8px 0 12px'}}>{total} {total===1?t.responses:t.responsesP} · <span style={{color:mc,fontWeight:'700',letterSpacing:'.1em'}}>{plan.id}</span>{city&&<span> · 📍 {city}</span>}</div>
+      <div style={{fontSize:'13px',color:c.M2,margin:'6px 0 12px'}}>{total} {total===1?t.responses:t.responsesP} · <span style={{color:mc,fontWeight:'700',letterSpacing:'.1em'}}>{plan.id}</span></div>
       {plan.confirmedDate&&<div style={{background:`${mc}15`,border:`1px solid ${mc}50`,borderRadius:'12px',padding:'14px 16px',marginBottom:'14px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
         <div><div style={{fontSize:'11px',color:mc,fontWeight:'700',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:'2px'}}>{t.confirmedDate}</div><div style={{fontSize:'15px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtDate(plan.confirmedDate,lang)}{plan.confirmedStartTime?' · 🕐 '+fmtTime(plan.confirmedStartTime):''}</div></div>
         <div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>
@@ -337,35 +383,20 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
 
       {/* PLAN tab */}
       {!ldg&&tab==='plan'&&<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><>
-        {/* Section: Title */}
-        <div style={{marginBottom:'8px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',overflow:'hidden'}}>
-          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px'}}>
-            <h3 style={{fontSize:'16px',fontWeight:'700',color:c.T,margin:0}}>{plan.name||t.untitled}</h3>
-            <div style={{display:'flex',gap:'4px'}}>
-              {isOrgRef.current&&<button onClick={()=>setEditMode(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>{t.editLbl}</button>}
+        {/* Dates as tree: each date with its times below */}
+        <div style={{marginBottom:'12px'}}>
+          {(plan.dates||[]).map(d=><div key={d} style={{marginBottom:'6px'}}>
+            <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
+              <span style={{fontSize:'13px',padding:'4px 12px',borderRadius:'20px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`,textTransform:'capitalize',fontWeight:'600'}}>📅 {fmtShort(d,lang)}</span>
             </div>
-          </div>
+            {(plan.startTimes||[]).filter(Boolean).length>0&&<div style={{marginLeft:'20px',borderLeft:`2px solid ${mc}30`,paddingLeft:'12px',marginTop:'4px'}}>
+              {(plan.startTimes||[]).filter(Boolean).map(t2=><div key={t2} style={{marginBottom:'2px'}}>
+                <span style={{fontSize:'12px',padding:'3px 10px',borderRadius:'20px',background:c.CARD2,color:c.M2,border:`1px solid ${c.BD}`}}>🕐 {fmtTime(t2)}</span>
+              </div>)}
+            </div>}
+          </div>)}
+          {isOrgRef.current&&<button onClick={()=>setEditMode('dates')} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'3px 8px',color:c.M2,cursor:'pointer',fontSize:'11px',fontFamily:'inherit',marginTop:'4px'}}>✏️ {t.editDatesLbl}</button>}
         </div>
-
-        {/* Section: Description */}
-        {(plan.desc||isOrgRef.current)&&<div style={{marginBottom:'8px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',overflow:'hidden'}}>
-          <div onClick={()=>setOpenSection(p=>({...p,desc:!p.desc}))} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px',cursor:'pointer'}}>
-            <span style={{fontSize:'13px',color:plan.desc?c.T:c.M2}}>{plan.desc?plan.desc.slice(0,50)+(plan.desc.length>50?'...':''):(t.desc||'Description')}</span>
-            <span style={{fontSize:'11px',color:c.M2}}>{openSection.desc?'▾':'▸'}</span>
-          </div>
-          {openSection.desc&&<div className="fade-in" style={{padding:'0 12px 12px',fontSize:'13px',color:c.M2,lineHeight:1.6}}>{plan.desc||<span style={{fontStyle:'italic'}}>{t.noDataYet}</span>}</div>}
-        </div>}
-
-        {/* Section: Dates */}
-        <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'12px'}}>
-          {(plan.dates||[]).map(d=><span key={d} style={{fontSize:'12px',padding:'3px 10px',borderRadius:'20px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`,textTransform:'capitalize'}}>{fmtShort(d,lang)}</span>)}
-          {(plan.startTimes||[]).filter(Boolean).map(t2=><span key={t2} style={{fontSize:'12px',padding:'3px 10px',borderRadius:'20px',background:c.CARD2,color:c.M2,border:`1px solid ${c.BD}`}}>🕐 {fmtTime(t2)}</span>)}
-        </div>
-
-        {/* Respondents */}
-        {total===0
-        ?<Card c={c} style={{textAlign:'center',padding:'32px',marginBottom:'14px'}}><div style={{fontSize:'36px',marginBottom:'12px'}}>⏳</div><div style={{color:c.T,fontWeight:'500',marginBottom:'6px'}}>{t.noResp}</div><div style={{color:c.M2,fontSize:'13px'}}>{t.noRespSub} <span style={{color:mc,fontWeight:'700'}}>{plan.id}</span></div></Card>
-        :<div style={{fontSize:'13px',color:c.M2,marginBottom:'14px'}}>👥 {total} {t.responsesLbl}</div>}
 
         {/* Points with side-by-side alternatives */}
         {(plan.stops||[]).filter(s=>(s.options?.[0]?.name||s.name)).map((s,i)=>{
@@ -404,7 +435,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
             </>}
           </div>;
         })}
-        {isOrgRef.current&&<button onClick={()=>alert(t.addPointHint||'Coming soon')} style={{width:'100%',padding:'12px',background:'none',border:`2px dashed ${c.BD}`,borderRadius:'12px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'600',marginBottom:'8px'}}>+ {t.addNextPoint}</button>}
+        {isOrgRef.current&&<button onClick={async()=>{const newStop={id:Date.now(),options:[{id:Date.now(),name:'',address:'',lat:null,lng:null,rating:null,photo:null,googleMapsURI:null,types:[]}],startTime:'',duration:'',notes:'',maxCapacity:'',meetingPoint:'',minAttendees:''};const up={...plan,stops:[...(plan.stops||[]),newStop]};await updatePlan(up);setPlan(up);setEditMode('stop_'+newStop.id);}} style={{width:'100%',padding:'12px',background:'none',border:`2px dashed ${c.BD}`,borderRadius:'12px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'600',marginBottom:'8px'}}>+ {t.addNextPoint}</button>}
 
         {/* Map */}
         {plan.stops?.some(s=>(s.options?.[0]?.lat&&s.options?.[0]?.lng)||(s.lat&&s.lng))&&<><HR c={c}/><RouteMap stops={(plan.stops||[]).flatMap(s=>{
@@ -539,7 +570,134 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
         </>}
       </>}
 
-      {/* MORE tab = Extras + Suggestions */}
+      {/* VOTE tab — Place/Date/Time + availability + suggestions */}
+      {!ldg&&tab==='vote'&&(()=>{
+        const hasV4=rs.some(r=>r.placeOk!==undefined);
+        const placeYes=rs.filter(r=>hasV4?r.placeOk===true:true).length;
+        const dateYes=rs.filter(r=>hasV4?r.dateOk===true:r.avail&&Object.values(r.avail).some(v=>v==='yes')).length;
+        const timeYes=rs.filter(r=>hasV4?r.timeOk===true:r.avail&&Object.values(r.avail).some(v=>v==='yes')).length;
+        const timeRanges=rs.filter(r=>r.availTimeFrom&&r.availTimeTo).map(r=>({name:r.name,from:r.availTimeFrom,to:r.availTimeTo}));
+        const altDates=rs.filter(r=>r.availDates?.length>0);
+        // Time suggestion algorithm
+        const planTime=plan.time||plan.startTimes?.[0]||null;
+        const suggestedTimes=(()=>{
+          if(timeRanges.length===0||!planTime)return[];
+          const slots2=[];
+          for(let h=0;h<24;h++)for(let m=0;m<60;m+=30){
+            const t2=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+            const cnt=timeRanges.filter(r=>t2>=r.from&&t2<=r.to).length;
+            if(cnt>0)slots2.push({time:t2,count:cnt+timeYes,dist:Math.abs(parseInt(t2)-parseInt(planTime.replace(':','')))});
+          }
+          slots2.sort((a,b)=>b.count-a.count||a.dist-b.dist);
+          return slots2.slice(0,3);
+        })();
+        return<>
+        {total===0?<Card c={c} style={{textAlign:'center',padding:'32px'}}>
+          <div style={{fontSize:'36px',marginBottom:'10px'}}>🗳️</div>
+          <div style={{color:c.T,fontWeight:'500',marginBottom:'6px'}}>{t.noDataYet}</div>
+          <div style={{color:c.M2,fontSize:'13px'}}>{t.noDataHint}</div>
+        </Card>
+        :<>
+          {/* Place */}
+          <div style={{marginBottom:'16px'}}>
+            <div style={{fontSize:'14px',fontWeight:'700',color:mc,marginBottom:'8px'}}>{t.placeOkQ||'Place'}</div>
+            <div style={{display:'flex',gap:'8px',marginBottom:'6px'}}>
+              <div style={{flex:1,padding:'10px',background:'#22c55e15',border:'1px solid #22c55e30',borderRadius:'10px',textAlign:'center'}}><div style={{fontSize:'20px',fontWeight:'700',color:'#22c55e'}}>{placeYes}</div><div style={{fontSize:'11px',color:'#22c55e'}}>✓</div></div>
+              <div style={{flex:1,padding:'10px',background:'#ef444415',border:'1px solid #ef444430',borderRadius:'10px',textAlign:'center'}}><div style={{fontSize:'20px',fontWeight:'700',color:'#ef4444'}}>{total-placeYes}</div><div style={{fontSize:'11px',color:'#ef4444'}}>✗</div></div>
+            </div>
+          </div>
+
+          {/* Date */}
+          <div style={{marginBottom:'16px'}}>
+            <div style={{fontSize:'14px',fontWeight:'700',color:mc,marginBottom:'8px'}}>{t.dateOkQ||'Date'}</div>
+            <div style={{display:'flex',gap:'8px',marginBottom:'6px'}}>
+              <div style={{flex:1,padding:'10px',background:'#22c55e15',border:'1px solid #22c55e30',borderRadius:'10px',textAlign:'center'}}><div style={{fontSize:'20px',fontWeight:'700',color:'#22c55e'}}>{dateYes}</div><div style={{fontSize:'11px',color:'#22c55e'}}>✓</div></div>
+              <div style={{flex:1,padding:'10px',background:'#ef444415',border:'1px solid #ef444430',borderRadius:'10px',textAlign:'center'}}><div style={{fontSize:'20px',fontWeight:'700',color:'#ef4444'}}>{total-dateYes}</div><div style={{fontSize:'11px',color:'#ef4444'}}>✗</div></div>
+            </div>
+            {altDates.length>0&&<div style={{fontSize:'12px',color:c.M2,marginTop:'6px'}}>
+              {altDates.map((r,i)=><div key={i} style={{marginBottom:'4px'}}>📅 {r.name}: {r.availDates.map(d=>fmtShort(d,lang)).join(', ')}</div>)}
+            </div>}
+          </div>
+
+          {/* Time */}
+          <div style={{marginBottom:'16px'}}>
+            <div style={{fontSize:'14px',fontWeight:'700',color:mc,marginBottom:'8px'}}>{t.timeOkQ||'Time'}</div>
+            <div style={{display:'flex',gap:'8px',marginBottom:'6px'}}>
+              <div style={{flex:1,padding:'10px',background:'#22c55e15',border:'1px solid #22c55e30',borderRadius:'10px',textAlign:'center'}}><div style={{fontSize:'20px',fontWeight:'700',color:'#22c55e'}}>{timeYes}</div><div style={{fontSize:'11px',color:'#22c55e'}}>✓</div></div>
+              <div style={{flex:1,padding:'10px',background:'#ef444415',border:'1px solid #ef444430',borderRadius:'10px',textAlign:'center'}}><div style={{fontSize:'20px',fontWeight:'700',color:'#ef4444'}}>{total-timeYes}</div><div style={{fontSize:'11px',color:'#ef4444'}}>✗</div></div>
+            </div>
+            {timeRanges.length>0&&<div style={{fontSize:'12px',color:c.M2,marginTop:'6px'}}>
+              {timeRanges.map((r,i)=><div key={i}>🕐 {r.name}: {fmtTime(r.from)} → {fmtTime(r.to)}</div>)}
+            </div>}
+          </div>
+
+          {/* Time suggestions */}
+          {suggestedTimes.length>0&&<div style={{marginBottom:'16px',background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'12px',padding:'14px'}}>
+            <div style={{fontSize:'13px',fontWeight:'700',color:mc,marginBottom:'8px'}}>💡 {t.bestTimeSuggestion||'Suggested times'}</div>
+            {suggestedTimes.map((s,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 0',borderBottom:i<suggestedTimes.length-1?`1px solid ${mc}20`:'none'}}>
+              <span style={{fontSize:'14px',color:c.T,fontWeight:i===0?'700':'400'}}>🕐 {fmtTime(s.time)}</span>
+              <span style={{fontSize:'12px',color:mc,fontWeight:'600'}}>👥 {s.count}/{total}</span>
+            </div>)}
+          </div>}
+
+          {/* Per-person */}
+          <div style={{fontSize:'12px',color:c.M2,fontWeight:'600',marginBottom:'8px'}}>👥 {total} {t.responsesLbl}</div>
+          {rs.map((r,i)=>{
+            const allOk=hasV4?(r.placeOk&&r.dateOk&&r.timeOk):(r.avail&&Object.values(r.avail).some(v=>v==='yes'));
+            return<div key={i} style={{display:'flex',alignItems:'center',gap:'8px',padding:'8px 12px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',marginBottom:'4px'}}>
+              <div style={{width:'8px',height:'8px',borderRadius:'50%',background:allOk?'#22c55e':'#ef4444',flexShrink:0}}/>
+              <span style={{flex:1,fontSize:'13px',color:c.T,fontWeight:allOk?'600':'400'}}>{r.name}</span>
+              {hasV4&&<span style={{fontSize:'11px',color:c.M2}}>{[r.placeOk&&'📍',r.dateOk&&'📅',r.timeOk&&'🕐'].filter(Boolean).join(' ')}</span>}
+              {r.how&&<span style={{fontSize:'12px'}}>{({car:'🚗',moto:'🏍️',transit:'🚇',taxi:'🚕',walk:'🚶',bike:'🚲'})[r.how]||''}</span>}
+            </div>;
+          })}
+        </>}
+      </>})()}
+
+      {/* MORE tab */}
+      {!ldg&&tab==='more'&&<>
+        {/* Share section */}
+        <Card c={c} style={{marginBottom:'12px'}}>
+          <Lbl c={c}>{t.sharePlanBtn||'Share'}</Lbl>
+          <div style={{display:'flex',gap:'8px'}}>
+            <button onClick={waShare} style={{flex:1,padding:'12px',background:'#25D366',color:'#fff',border:'none',borderRadius:'12px',fontSize:'13px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>WhatsApp</button>
+            <button onClick={()=>{window.open('https://t.me/share/url?url='+encodeURIComponent(shareUrl),'_blank');}} style={{flex:1,padding:'12px',background:'#0088cc',color:'#fff',border:'none',borderRadius:'12px',fontSize:'13px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>Telegram</button>
+            <button onClick={copyShare} style={{flex:1,padding:'12px',background:c.CARD2,color:c.T,border:`1px solid ${c.BD}`,borderRadius:'12px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>🔗</button>
+          </div>
+        </Card>
+
+        {/* Plan code */}
+        <Card c={c} style={{marginBottom:'12px',textAlign:'center'}}>
+          <div style={{fontSize:'11px',color:c.M2,marginBottom:'4px'}}>{t.codeLbl||'Plan code'}</div>
+          <div style={{fontFamily:'monospace',fontSize:'28px',fontWeight:'900',color:mc,letterSpacing:'.15em'}}>{plan.id}</div>
+        </Card>
+
+        {/* Poll results */}
+        {plan.poll?.q&&rs.some(r=>r.pollVote)&&<Card c={c} style={{marginBottom:'12px'}}>
+          <Lbl c={c}>🗳️ {plan.poll.q}</Lbl>
+          {plan.poll.opts.filter(o=>o.trim()).map(o=>{const cnt=rs.filter(r=>r.pollVote===o).length;const pct=rs.length>0?Math.round(cnt/rs.length*100):0;return(<div key={o} style={{marginBottom:'8px'}}>
+            <div style={{display:'flex',justifyContent:'space-between',marginBottom:'3px'}}><span style={{fontSize:'13px',color:c.T}}>{o}</span><span style={{fontSize:'12px',color:mc,fontWeight:'600'}}>{cnt} ({pct}%)</span></div>
+            <div style={{height:'6px',background:c.BD,borderRadius:'3px',overflow:'hidden'}}><div style={{height:'100%',width:`${pct}%`,background:mc,borderRadius:'3px',transition:'width .5s'}}/></div>
+          </div>);})}
+        </Card>}
+
+        {/* Comments */}
+        {rs.some(r=>r.comment)&&<Card c={c} style={{marginBottom:'12px'}}>
+          <Lbl c={c}>💬 {t.comments}</Lbl>
+          {rs.filter(r=>r.comment).map((r,i)=><div key={i} style={{marginBottom:'8px',padding:'8px 12px',background:c.CARD2,borderRadius:'10px'}}>
+            <div style={{fontSize:'12px',fontWeight:'600',color:mc,marginBottom:'2px'}}>{r.name}</div>
+            <div style={{fontSize:'13px',color:c.M2,fontStyle:'italic'}}>"{r.comment}"</div>
+          </div>)}
+        </Card>}
+
+        {/* Transportation summary */}
+        {rs.some(r=>r.how)&&<Card c={c} style={{marginBottom:'12px'}}>
+          <Lbl c={c}>🚗 {t.transportLbl||'Transport'}</Lbl>
+          <div style={{display:'flex',flexWrap:'wrap',gap:'6px'}}>
+            {rs.filter(r=>r.how).map((r,i)=><span key={i} style={{fontSize:'12px',padding:'4px 10px',borderRadius:'20px',background:c.CARD2,border:`1px solid ${c.BD}`,color:c.T}}>{({car:'🚗',moto:'🏍️',transit:'🚇',taxi:'🚕',walk:'🚶',bike:'🚲'})[r.how]||''} {r.name}</span>)}
+          </div>
+        </Card>}
+      </>}
 
     </div>
   </>);

@@ -56,28 +56,32 @@ export default function MyPlans({onBack,onOpen,c,lang}){
       const mc=c.A;const d=dates[p.id];
       const du=d?daysUntil(d):null;const isToday=du===0;const isTmrw=du===1;const isSoon=du!=null&&du<=3&&du>=0;
       const fp=fullPlans[p.id];
-      const stopsWithName=(fp?.stops||[]).filter(s=>(s.options||[]).some(o=>o.name));
+      const title=fp?.name||p.name||null;
+      const desc=fp?.desc||null;
+      const truncate=(s,n)=>s&&s.length>n?s.slice(0,n)+'…':s;/*60 title, 120 desc*/
+      const place=fp?.place||fp?.stops?.[0]?.options?.[0]||null;
       return(<div key={p.id} onClick={()=>{ls.set('q_seen_'+p.id,Date.now());onOpen(p.id);}} style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'16px',padding:'16px',marginBottom:'12px',cursor:'pointer',opacity:isPast(p.id)?0.6:1}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'8px'}}>
           <div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'11px',color:mc,letterSpacing:'.08em',textTransform:'uppercase'}}>queda.</div>
           <button onClick={e=>{e.stopPropagation();setConfirm(p);}} style={{background:'none',border:'1px solid #ff444430',borderRadius:'6px',color:'#ff6666',cursor:'pointer',fontSize:'13px',padding:'4px 8px'}}>×</button>
         </div>
-        <div style={{textAlign:'center',marginBottom:'8px'}}>
-          <div style={{fontFamily:'monospace',fontSize:'28px',fontWeight:'900',color:mc,letterSpacing:'.15em'}}>{p.id}</div>
-          {p.name&&<div style={{fontSize:'14px',color:c.T,fontWeight:'600',marginTop:'4px'}}>{p.name}</div>}
-          <div style={{fontSize:'11px',color:c.M2,marginTop:'2px'}}>{p.role==='organizer'?(t.organizer||'Organizer'):(t.guest||'Guest')}{fp?.organizer?' · '+fp.organizer:''}</div>
+        <div style={{marginBottom:'8px'}}>
+          <div style={{fontSize:'16px',color:c.T,fontWeight:'700',marginBottom:'2px'}}>{truncate(title,60)||(t.untitled||'Sin título')}</div>
+          <div style={{fontSize:'12px',color:c.M2,marginBottom:'4px'}}>{truncate(desc,120)||(t.noDesc||'Sin descripción')}</div>
+          <div style={{display:'flex',alignItems:'center',gap:'6px',fontSize:'11px',color:c.M2}}>
+            <span style={{color:mc,fontWeight:'700',letterSpacing:'.1em',fontFamily:'monospace'}}>{p.id}</span>
+            <span>·</span>
+            <span>{p.role==='organizer'?(t.organizer||'Organizer'):(t.guest||'Guest')}</span>
+            {fp?.organizer&&<><span>·</span><span>{fp.organizer}</span></>}
+          </div>
         </div>
-        {d&&<div style={{textAlign:'center',marginBottom:'6px'}}>
+        {d&&<div style={{marginBottom:'6px'}}>
           <span style={{fontSize:'13px',padding:'3px 12px',borderRadius:'10px',background:isSoon?`${mc}20`:c.CARD2,color:isSoon?mc:c.T,border:`1px solid ${isSoon?mc+'40':c.BD}`,fontWeight:'600',textTransform:'capitalize'}}>{isToday?(t.todayLbl||'Today'):isTmrw?(t.tomorrowLbl||'Tomorrow'):fmtShort(d,lang)}{fp?.startTimes?.[0]?' · '+fp.startTimes[0]:''}</span>
         </div>}
-        {stopsWithName.length>0&&<div style={{borderTop:`1px solid ${mc}20`,paddingTop:'6px',marginTop:'6px'}}>
-          {stopsWithName.slice(0,3).map((s,si)=>{const opt=(s.options||[])[0]||{};return<div key={si} style={{display:'flex',alignItems:'center',gap:'5px',justifyContent:'center',fontSize:'11px',color:c.M2,marginBottom:'2px'}}>
-            <span style={{color:mc,fontWeight:'700'}}>{si+1}.</span>
-            {opt.photo&&<img src={opt.photo} alt="" style={{width:'16px',height:'16px',borderRadius:'3px',objectFit:'cover'}}/>}
-            <span>{opt.name}</span>
-            {opt.rating&&<span style={{color:mc,fontSize:'10px'}}>⭐{opt.rating}</span>}
-          </div>;})}
-          {stopsWithName.length>3&&<div style={{fontSize:'10px',color:c.M2,textAlign:'center'}}>+{stopsWithName.length-3}</div>}
+        {place?.name&&<div style={{display:'flex',alignItems:'center',gap:'6px',fontSize:'12px',color:c.M2,marginTop:'4px'}}>
+          {place.photo&&<img src={place.photo} alt="" style={{width:'20px',height:'20px',borderRadius:'4px',objectFit:'cover'}}/>}
+          <span>📍 {truncate(place.name,30)}</span>
+          {place.rating&&<span style={{color:mc,fontSize:'10px'}}>⭐{place.rating}</span>}
         </div>}
       </div>);
     })}

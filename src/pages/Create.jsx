@@ -135,7 +135,8 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
     setSaving(true);
     try{
       const cleanStops=stops.filter(s=>(s.options||[]).some(o=>o.name));
-      const plan={id:genId(),name:null,desc:null,organizer:profile?.name||org.trim()||'',dates:[...selDates].sort(),startTimes:startTimes.filter(t=>t),timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,stops:cleanStops,confirmedDate:null,isPublic:false,lang,createdAt:new Date().toISOString()};
+      const theDate=selDates[0]||null;const theTime=startTimes[0]||null;const thePlace=cleanStops[0]?.options?.[0]||null;
+      const plan={id:genId(),name:null,desc:null,organizer:profile?.name||org.trim()||'',date:theDate,time:theTime,place:thePlace,dates:theDate?[theDate]:[],startTimes:theTime?[theTime]:[],stops:cleanStops,timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,confirmedDate:null,alternatives:[],isPublic:false,lang,createdAt:new Date().toISOString()};
       if(authUser)await savePlanWithUser(plan,authUser.id);else await savePlan(plan);
       addMyPlan(plan.id,plan.name,'organizer');
       clearDraft();setCreated(plan);
