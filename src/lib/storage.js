@@ -7,27 +7,23 @@ export const ls = {
 
 export const getMyPlans = () => ls.get('q_plans', [])
 
+const getUid = () => {
+  try { return JSON.parse(localStorage.getItem('sb-gxkdibhfzjkjxuuhuwfv-auth-token'))?.user?.id || null } catch { return null }
+}
+
 export const addMyPlan = (id, name, role) => {
   const p = getMyPlans().filter(x => x.id !== id)
   ls.set('q_plans', [{ id, name, role, at: new Date().toISOString() }, ...p].slice(0, 40))
-  // Sync to Supabase (fire and forget)
-  db.auth.getUser().then(({ data }) => {
-    if (data?.user) {
-      db.from('user_plans').upsert({ user_id: data.user.id, plan_id: id, role }, { onConflict: 'user_id,plan_id' }).then(() => {})
-    }
-  }).catch(() => {})
+  const uid = getUid()
+  if (uid) db.from('user_plans').upsert({ user_id: uid, plan_id: id, role }, { onConflict: 'user_id,plan_id' }).then(() => {}, () => {})
 }
 
 export const removeMyPlan = (id) => {
   ls.set('q_plans', getMyPlans().filter(x => x.id !== id))
-  // Also delete user's response from this plan
   const myName = ls.get('q_myname', '')
-  if (myName) db.from('responses').delete().eq('plan_id', id).eq('name', myName).catch(() => {})
-  db.auth.getUser().then(({ data }) => {
-    if (data?.user) {
-      db.from('user_plans').delete().eq('user_id', data.user.id).eq('plan_id', id).then(() => {})
-    }
-  }).catch(() => {})
+  if (myName) db.from('responses').delete().eq('plan_id', id).eq('name', myName).then(() => {}, () => {})
+  const uid = getUid()
+  if (uid) db.from('user_plans').delete().eq('user_id', uid).eq('plan_id', id).then(() => {}, () => {})
 }
 
 // Sync from Supabase → merge with localStorage (called on login)
@@ -45,7 +41,7 @@ export const syncMyPlans = async (userId) => {
     // Also push local-only plans to Supabase
     for (const loc of local) {
       if (!data.find(x => x.plan_id === loc.id)) {
-        db.from('user_plans').upsert({ user_id: userId, plan_id: loc.id, role: loc.role || 'invited' }, { onConflict: 'user_id,plan_id' }).catch(() => {})
+        db.from('user_plans').upsert({ user_id: userId, plan_id: loc.id, role: loc.role || 'invited' }, { onConflict: 'user_id,plan_id' }).then(() => {}, () => {})
       }
     }
     ls.set('q_plans', merged.slice(0, 40))

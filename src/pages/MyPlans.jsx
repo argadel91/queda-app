@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import T from '../constants/translations.js'
 import { ls, getMyPlans, removeMyPlan } from '../lib/storage.js'
-import { loadPlan, db } from '../lib/supabase.js'
+import { loadPlan, deletePlan } from '../lib/supabase.js'
 import { daysUntil, fmtShort, dayStart } from '../lib/utils.js'
 import { Back } from '../components/ui.jsx'
 
@@ -21,7 +21,10 @@ export default function MyPlans({onBack,onOpen,c,lang}){
   const past=sortByDate(plans.filter(p=>isPast(p.id))).reverse();
   const shown=tab==='upcoming'?upcoming:past;
   const removeLocal=id=>{removeMyPlan(id);setPlans(getMyPlans());setConfirm(null);};
-  const delFull=async id=>{try{await db.from('responses').delete().eq('plan_id',id);await db.from('plans').delete().eq('id',id);}catch{}finally{removeLocal(id);}};
+  const delFull=id=>{
+    removeLocal(id);
+    deletePlan(id).then(()=>{},e=>console.error('DB delete:',e));
+  };
 
   return(<div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
     <Back onClick={onBack} label={t.back} c={c}/>

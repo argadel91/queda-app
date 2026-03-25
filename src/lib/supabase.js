@@ -46,6 +46,12 @@ export const loadResps = async id => {
   catch { return [] }
 }
 
+// Delete plan (organizer only) — uses SECURITY DEFINER function to bypass RLS
+export const deletePlan = async (planId) => {
+  const { error } = await db.rpc('delete_plan', { p_plan_id: planId })
+  if (error) throw error
+}
+
 // Profiles
 export const loadProfile = async uid => {
   try { const { data } = await db.from('profiles').select('*').eq('id', uid).maybeSingle(); return data }
