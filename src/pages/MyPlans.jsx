@@ -21,7 +21,7 @@ export default function MyPlans({onBack,onOpen,c,lang}){
   const past=sortByDate(plans.filter(p=>isPast(p.id))).reverse();
   const shown=tab==='upcoming'?upcoming:past;
   const removeLocal=id=>{removeMyPlan(id);setPlans(getMyPlans());setConfirm(null);};
-  const delFull=async id=>{try{await db.from('responses').delete().eq('plan_id',id);await db.from('plans').delete().eq('id',id);}catch{}removeLocal(id);};
+  const delFull=async id=>{try{await db.from('responses').delete().eq('plan_id',id);await db.from('plans').delete().eq('id',id);}catch{}finally{removeLocal(id);}};
 
   return(<div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
     <Back onClick={onBack} label={t.back} c={c}/>
