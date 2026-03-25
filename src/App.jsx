@@ -12,7 +12,7 @@ import Landing from './pages/Landing.jsx'
 const AuthScreen = React.lazy(() => import('./pages/AuthScreen.jsx'))
 const ResetPasswordScreen = React.lazy(() => import('./pages/ResetPasswordScreen.jsx'))
 const Create = React.lazy(() => import('./pages/Create.jsx'))
-const Respond = React.lazy(() => import('./pages/Respond.jsx'))
+// Respond.jsx replaced by inline voting in Results.jsx
 const Results = React.lazy(() => import('./pages/Results.jsx'))
 const Profile = React.lazy(() => import('./pages/Profile.jsx'))
 const MyPlans = React.lazy(() => import('./pages/MyPlans.jsx'))

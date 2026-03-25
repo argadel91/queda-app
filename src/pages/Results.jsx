@@ -136,12 +136,19 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
     setMySaving(true);
     const planDate=plan.date||plan.dates?.[0];const planTime=plan.time||plan.startTimes?.[0];
     const placeOk=openSection._placeOk!==false;
+    const changeLog=[...(myPrev?.changeLog||[])];
+    if(myPrev)changeLog.unshift({at:new Date().toISOString(),desc:'Updated'});
     const resp={name:myName.trim(),dateOk:myDateOk,timeOk:myTimeOk,meetOk:myMeetOk,lateMin:myLateMin,
       availDates:myDateOk===false?myAltDates:[],availTimeFrom:myTimeOk===false?myTimeFrom:'',availTimeTo:myTimeOk===false?myTimeTo:'',
       placeOk,placeComment:openSection._placeComment||'',
       avail:myDateOk&&myTimeOk?{[planTime?`${planDate}_${planTime}`:planDate]:'yes'}:{},
-      how:'',comment:'',at:new Date().toISOString()};
-    try{await saveResp(plan.id,myName.trim(),resp);addMyPlan(plan.id,plan.name,'invited');ls.set(myRespKey,resp);ls.set('q_myname',myName.trim());setMySaved(true);setMySaveConfirm(true);setTimeout(()=>setMySaveConfirm(false),3000);refresh(true);}catch{}
+      how:'',comment:myPrev?.comment||'',changeLog,at:new Date().toISOString()};
+    try{
+      await saveResp(plan.id,myName.trim(),resp);
+      const{data:{user}}=await db.auth.getSession().then(s=>({data:{user:s.data?.session?.user}}));
+      if(user)db.from('responses').update({user_id:user.id}).eq('plan_id',plan.id).eq('name',myName.trim()).then(()=>{},()=>{});
+      addMyPlan(plan.id,plan.name,'invited');ls.set(myRespKey,resp);ls.set('q_myname',myName.trim());setMySaved(true);setMySaveConfirm(true);setTimeout(()=>setMySaveConfirm(false),3000);refresh(true);
+    }catch{}
     setMySaving(false);
   };
 
@@ -649,6 +656,9 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
             </div>}
           </div>}
         </div>
+
+        {/* Add point (organizer) */}
+        {isOrgRef.current&&<button onClick={async()=>{const newStop={id:Date.now(),options:[{id:Date.now(),name:'',address:'',lat:null,lng:null,rating:null,photo:null,googleMapsURI:null,types:[]}],startTime:'',duration:'',notes:'',maxCapacity:'',meetingPoint:'',minAttendees:'',tolerance:''};const up={...plan,stops:[...(plan.stops||[]),newStop]};await updatePlan(up);setPlan(up);setEditMode('stop_'+newStop.id);}} style={{width:'100%',padding:'12px',background:'none',border:`2px dashed ${c.BD}`,borderRadius:'12px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'600',marginBottom:'8px',marginTop:'8px'}}>+ {t.addNextPoint}</button>}
 
         {/* Map */}
         {planPlace?.lat&&planPlace?.lng&&<RouteMap stops={[
