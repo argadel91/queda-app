@@ -3,7 +3,7 @@ import T from '../constants/translations.js'
 import { db, updatePlan, loadResps, saveResp, savePlan } from '../lib/supabase.js'
 import { ls, addMyPlan } from '../lib/storage.js'
 import { daysUntil, fmtDate, fmtShort, fmtTime, genId } from '../lib/utils.js'
-import { Btn, Card, Lbl, Badge, Back, HR } from '../components/ui.jsx'
+import { Btn, Card, Lbl, Back } from '../components/ui.jsx'
 import PostPlanSurvey from '../components/PostPlanSurvey.jsx'
 import { generateICS } from '../lib/ics.js'
 const RouteMap = React.lazy(() => import('../components/RouteMap.jsx'))
@@ -691,126 +691,6 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
         ]} c={c}/>}
       </>;})()}
       </></React.Suspense>}
-
-      {/* SUMMARY tab (legacy — kept for old plans) */}
-      {!ldg&&tab==='summary'&&<>
-        {total===0?<Card c={c} style={{textAlign:'center',padding:'32px'}}>
-          <div style={{fontSize:'36px',marginBottom:'10px'}}>📊</div>
-          <div style={{color:c.T,fontWeight:'500',marginBottom:'6px'}}>{t.noDataYet}</div>
-          <div style={{color:c.M2,fontSize:'13px'}}>{t.noDataHint}</div>
-        </Card>
-        :<>
-          {/* Confirmed plan OR best/tied options */}
-          {plan.confirmedDate&&(()=>{
-            const showKey=slots.find(s=>s.date===plan.confirmedDate)?.key||plan.confirmedDate;
-            const ny=cntY(showKey);
-            return<div style={{background:`${mc}12`,border:`1px solid ${mc}35`,borderRadius:'14px',padding:'16px',marginBottom:'14px'}}>
-              <div style={{fontSize:'11px',color:mc,fontWeight:'700',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'4px'}}>📌 {t.chosenPlan}</div>
-              <div style={{fontSize:'16px',color:c.T,fontWeight:'700',textTransform:'capitalize'}}>{fmtShort(plan.confirmedDate,lang)}{plan.confirmedStartTime?' · '+fmtTime(plan.confirmedStartTime):''}</div>
-              <div style={{fontSize:'13px',color:c.M2,marginTop:'2px'}}>👥 {ny}/{total} {t.attendance}</div>
-            </div>;
-          })()}
-          {!plan.confirmedDate&&best&&cntY(best.key)>0&&(()=>{
-            const bestScore=score(best.key);
-            const tied=slots.filter(s=>score(s.key)===bestScore&&cntY(s.key)>0);
-            const isTie=tied.length>1;
-            return<div style={{background:isTie?'#f59e0b10':`${mc}12`,border:`1px solid ${isTie?'#f59e0b40':mc+'35'}`,borderRadius:'14px',padding:'16px',marginBottom:'14px'}}>
-              <div style={{fontSize:'11px',color:isTie?'#f59e0b':mc,fontWeight:'700',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'8px'}}>{isTie?`⚖️ ${t.tieMsg?t.tieMsg(tied.length):'Tie — '+tied.length}`:'⭐ '+(t.bestOption)}</div>
-              {(isTie?tied:[best]).map(s=><div key={s.key} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 0',borderBottom:isTie?`1px solid ${c.BD}20`:'none'}}>
-                <div>
-                  <div style={{fontSize:'15px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtShort(s.date,lang)}{s.startTime?' · '+fmtTime(s.startTime):''}</div>
-                  <div style={{fontSize:'12px',color:c.M2}}>👥 {cntY(s.key)}/{total} {t.attendance}</div>
-                </div>
-                {isOrgRef.current&&<button onClick={()=>confirmDate(s.date,s.startTime)} style={{padding:'8px 14px',background:isTie?'#f59e0b':mc,border:'none',borderRadius:'8px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'12px'}}>{t.confirmBtn||'Elegir'}</button>}
-              </div>)}
-              {isTie&&isOrgRef.current&&<div style={{fontSize:'12px',color:c.M2,marginTop:'8px'}}>{t.pickToConfirm}</div>}
-            </div>;
-          })()}
-
-          {/* Cancelled stops info */}
-          {cancelledStops.size>0&&<div style={{background:'#f59e0b10',border:'1px solid #f59e0b30',borderRadius:'10px',padding:'10px 14px',marginBottom:'12px',fontSize:'12px',color:'#f59e0b'}}>
-            {(plan.stops||[]).filter(s=>cancelledStops.has(s.id)).map((s,i)=>{
-              const si=(plan.stops||[]).indexOf(s);
-              const sName=s.options?.[0]?.name||`${si+1}`;
-              const min=parseInt(s.minAttendees);
-              const yc=rs.filter(r=>r.stopAttend?.[s.id]==='yes').length;
-              return<div key={s.id}>⚠️ {sName} {t.cancelledDetail?t.cancelledDetail(yc,min):`(${yc}/${min})`}</div>;
-            })}
-          </div>}
-
-          {/* People list — sorted by attendance */}
-          {(()=>{
-            const hasAnyYes=r2=>r2.avail&&Object.values(r2.avail).some(v=>v==='yes');
-            const yesSlots=r2=>Object.values(r2.avail||{}).filter(v=>v==='yes').length;
-            const sorted=[...rs].sort((a,b)=>{
-              if(hasAnyYes(a)&&!hasAnyYes(b))return-1;if(!hasAnyYes(a)&&hasAnyYes(b))return 1;
-              return yesSlots(b)-yesSlots(a);
-            });
-            return<div style={{marginBottom:'14px'}}>
-              <div style={{fontSize:'12px',color:c.M2,fontWeight:'600',marginBottom:'10px'}}>👥 {total} {t.responsesLbl}</div>
-              {sorted.map((r,i)=>{
-                const yes=hasAnyYes(r);
-                const expanded=openSection['p_'+i];
-                return<div key={i} style={{marginBottom:'6px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',overflow:'hidden'}}>
-                  <div onClick={()=>setOpenSection(p=>({...p,['p_'+i]:!p['p_'+i]}))} style={{display:'flex',alignItems:'center',gap:'10px',padding:'10px 14px',cursor:'pointer'}}>
-                    <div style={{width:'8px',height:'8px',borderRadius:'50%',background:yes?'#22c55e':r.avail&&Object.values(r.avail).some(v=>v==='no')?'#ef4444':c.M,flexShrink:0}}/>
-                    <span style={{flex:1,fontSize:'14px',color:yes?c.T:c.M2,fontWeight:yes?'600':'400'}}>{r.name}{r.username?<span style={{fontSize:'11px',color:c.M,marginLeft:'4px'}}>@{r.username}</span>:''}</span>
-                    {r.comment&&<span style={{fontSize:'11px',color:c.M}}>💬</span>}
-                    {r.how&&<span style={{fontSize:'12px'}}>{({car:'🚗',moto:'🏍️',transit:'🚇',taxi:'🚕',walk:'🚶',bike:'🚲'})[r.how]||''}</span>}
-                    <span style={{fontSize:'11px',color:c.M2}}>{expanded?'▾':'▸'}</span>
-                  </div>
-                  {expanded&&<div style={{padding:'8px 14px 12px',borderTop:`1px solid ${c.BD}`,fontSize:'13px'}}>
-                    {r.comment&&<div style={{color:c.M2,fontStyle:'italic',marginBottom:'8px',padding:'6px 10px',background:c.CARD2,borderRadius:'8px'}}>"{r.comment}"</div>}
-                    {(plan.stops||[]).filter(s=>(s.options?.[0]?.name||s.name)).length>0
-                      ?<div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
-                        {(plan.stops||[]).filter(s=>(s.options?.[0]?.name||s.name)).map((s,si)=>{
-                          const v=r.stopAttend?.[s.id];const sName=s.options?.[0]?.name||`${si+1}`;
-                          const cancelled=cancelledStops.has(s.id);
-                          return<span key={s.id} style={{fontSize:'11px',padding:'3px 9px',borderRadius:'20px',background:cancelled?`${c.M}10`:v==='yes'?'#22c55e20':v==='no'?'#ef444420':`${c.M}10`,color:cancelled?c.M:v==='yes'?'#22c55e':v==='no'?'#ef4444':c.M,border:`1px solid ${cancelled?c.BD:v==='yes'?'#22c55e30':v==='no'?'#ef444430':c.BD}`,textDecoration:cancelled?'line-through':'none'}}>{cancelled?'—':v==='yes'?'✓':v==='no'?'✗':'·'} {sName}</span>;
-                        })}
-                      </div>
-                      :<div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
-                        {slots.map(s=>{const v=r.avail?.[s.key];return<span key={s.key} style={{fontSize:'11px',padding:'3px 9px',borderRadius:'20px',background:v==='yes'?'#22c55e20':v==='no'?'#ef444420':`${c.M}10`,color:v==='yes'?'#22c55e':v==='no'?'#ef4444':c.M,border:`1px solid ${v==='yes'?'#22c55e30':v==='no'?'#ef444430':c.BD}`,textTransform:'capitalize'}}>{v==='yes'?'✓':'✗'} {fmtShort(s.date,lang)}{s.startTime?' '+s.startTime:''}</span>;})}
-                      </div>}
-                  </div>}
-                </div>;
-              })}
-            </div>;
-          })()}
-
-          {/* Ranking: all date options best to worst */}
-          {slots.length>1&&<div style={{marginBottom:'14px'}}>
-            <div style={{fontSize:'12px',color:c.M2,fontWeight:'600',marginBottom:'8px'}}>{t.dateRanking}</div>
-            {[...slots].sort((a,b)=>score(b.key)-score(a.key)).map((s,i)=>{
-              const ny=cntY(s.key);const nn=cntN(s.key);const pct=total>0?Math.round(ny/total*100):0;
-              const isBest=best&&s.key===best.key;
-              return<div key={s.key} style={{display:'flex',alignItems:'center',gap:'10px',padding:'10px 12px',background:isBest?`${mc}10`:c.CARD,border:`1px solid ${isBest?mc+'30':c.BD}`,borderRadius:'10px',marginBottom:'6px'}}>
-                <span style={{fontSize:'14px',width:'20px',textAlign:'center'}}>{i===0?'⭐':i+1}</span>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:'13px',color:isBest?mc:c.T,fontWeight:isBest?'700':'500',textTransform:'capitalize'}}>{fmtShort(s.date,lang)}{s.startTime?' · '+fmtTime(s.startTime):''}</div>
-                  <div style={{height:'4px',background:c.BD,borderRadius:'2px',marginTop:'4px',overflow:'hidden'}}>
-                    <div style={{height:'100%',width:`${pct}%`,background:isBest?mc:'#22c55e',borderRadius:'2px'}}/>
-                  </div>
-                </div>
-                <div style={{textAlign:'right',flexShrink:0}}>
-                  <div style={{fontSize:'13px',fontWeight:'700',color:isBest?mc:c.T}}>👥 {ny}/{total}</div>
-                  <div style={{fontSize:'11px',color:c.M2}}>{pct}% {t.attendance}</div>
-                </div>
-                {isOrgRef.current&&!plan.confirmedDate&&ny>0&&<button onClick={()=>confirmDate(s.date,s.startTime)} style={{padding:'4px 10px',background:isBest?mc:c.CARD2,border:isBest?'none':`1px solid ${c.BD}`,borderRadius:'6px',color:isBest?'#0A0A0A':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'11px',fontWeight:'600',flexShrink:0}}>{t.confirmBtn||'✓'}</button>}
-              </div>;
-            })}
-          </div>}
-
-          {/* Poll results */}
-          {plan.poll?.q&&rs.some(r=>r.pollVote)&&<Card c={c}>
-            <Lbl c={c}>🗳️ {plan.poll.q}</Lbl>
-            {plan.poll.opts.filter(o=>o.trim()).map(o=>{const cnt=rs.filter(r=>r.pollVote===o).length;const pct=rs.length>0?Math.round(cnt/rs.length*100):0;return(<div key={o} style={{marginBottom:'8px'}}>
-              <div style={{display:'flex',justifyContent:'space-between',marginBottom:'3px'}}><span style={{fontSize:'13px',color:c.T}}>{o}</span><span style={{fontSize:'12px',color:mc,fontWeight:'600'}}>{cnt} ({pct}%)</span></div>
-              <div style={{height:'6px',background:c.BD,borderRadius:'3px',overflow:'hidden'}}><div style={{height:'100%',width:`${pct}%`,background:mc,borderRadius:'3px',transition:'width .5s'}}/></div>
-            </div>);})}
-          </Card>}
-        </>}
-      </>}
 
       {/* VOTE tab — Place/Date/Time + availability + suggestions */}
       {!ldg&&tab==='vote'&&(()=>{
