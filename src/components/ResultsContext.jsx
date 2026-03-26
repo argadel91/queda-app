@@ -64,10 +64,6 @@ export default function ResultsProvider({plan:ip,isOrg,c,lang,children}){
   });
   const setMyVote=(k,v)=>setMyVoteRaw(p=>({...p,[k]:v}));
 
-  // Countdown
-  const[,forceUpdate]=useState(0);
-  useEffect(()=>{if(!ip.deadline)return;const iv=setInterval(()=>forceUpdate(n=>n+1),1000);return()=>clearInterval(iv);},[ip.deadline]);
-
   // Refresh
   refreshRef.current=async(silent=false)=>{
     if(!silent)setL(true);

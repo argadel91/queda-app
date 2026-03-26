@@ -4,6 +4,7 @@ import { fmtShort, fmtTime, fmtDate } from '../../lib/utils.js'
 import { updatePlan } from '../../lib/supabase.js'
 import ClockPicker from '../ClockPicker.jsx'
 import CalendarPicker from '../CalendarPicker.jsx'
+import Countdown from '../Countdown.jsx'
 const RouteMap = React.lazy(() => import('../RouteMap.jsx'))
 
 export default function PlanTab(){
@@ -151,20 +152,7 @@ export default function PlanTab(){
             return<button onClick={saveMyResp} disabled={!can} style={{width:'100%',padding:'12px',background:myVote.saved?'#22c55e':can?mc:c.CARD2,border:can||myVote.saved?'none':`1px solid ${c.BD}`,borderRadius:'10px',color:myVote.saved?'#fff':can?'#0A0A0A':c.M,cursor:can?'pointer':'default',fontFamily:'inherit',fontWeight:'700',fontSize:'14px',opacity:can||myVote.saved?1:0.5}}>{myVote.saving?'...':(myVote.saved?t.respSaved:(ok?t.saveAvail:(t.answerAllToSave)))}</button>;
           })()}
           {myVote.saveConfirm&&<div className="fade-in" style={{marginTop:'8px',padding:'10px',background:'#22c55e15',border:'1px solid #22c55e40',borderRadius:'10px',textAlign:'center',fontSize:'13px',color:'#22c55e',fontWeight:'600'}}>✓ {t.savedTitle}</div>}
-          {(()=>{
-            const dl=plan.deadline?new Date(plan.deadline):null;if(!dl)return null;
-            const diff=dl-new Date();
-            if(diff<=0)return<div style={{marginTop:'8px',padding:'12px',background:'#ef444410',border:'1px solid #ef444430',borderRadius:'10px',textAlign:'center'}}>
-              <div style={{fontSize:'13px',color:'#ef4444',fontWeight:'600',marginBottom:'8px'}}>⏰ {t.deadlinePassed}</div>
-              <button onClick={()=>setTab('vote')} style={{padding:'8px 16px',background:mc,border:'none',borderRadius:'8px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'13px'}}>{t.goToResults} →</button>
-            </div>;
-            const d2=Math.floor(diff/86400000);const h2=Math.floor((diff%86400000)/3600000);const m2=Math.floor((diff%3600000)/60000);const s2=Math.floor((diff%60000)/1000);
-            return<div style={{marginTop:'8px',padding:'10px',background:'#f59e0b10',border:'1px solid #f59e0b30',borderRadius:'10px',textAlign:'center',fontSize:'12px',color:'#f59e0b'}}>
-              <div style={{fontWeight:'600',marginBottom:'2px'}}>⏰ {t.deadlineLbl}</div>
-              <div>{fmtDate(plan.deadline.split('T')[0],lang)}{plan.deadline.includes('T')?' · '+plan.deadline.split('T')[1]?.slice(0,5):''}</div>
-              <div style={{fontSize:'13px',fontWeight:'700',fontFamily:'monospace',marginTop:'4px'}}>{d2>0?`${d2}d `:''}{String(h2).padStart(2,'0')}:{String(m2).padStart(2,'0')}:{String(s2).padStart(2,'0')}</div>
-            </div>;
-          })()}
+          {plan.deadline&&<Countdown deadline={plan.deadline} lang={lang} c={c} t={t} mc={mc} onExpired={()=>setTab('vote')}/>}
         </div>}
       </div>}
     </div>
