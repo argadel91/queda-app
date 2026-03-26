@@ -695,10 +695,11 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
 
       {/* VOTE tab — Place/Date/Time + availability + suggestions */}
       {!ldg&&tab==='vote'&&(()=>{
-        const hasV4=rs.some(r=>r.placeOk!==undefined);
-        const placeYes=rs.filter(r=>hasV4?r.placeOk===true:true).length;
-        const dateYes=rs.filter(r=>hasV4?r.dateOk===true:r.avail&&Object.values(r.avail).some(v=>v==='yes')).length;
-        const timeYes=rs.filter(r=>hasV4?r.timeOk===true:r.avail&&Object.values(r.avail).some(v=>v==='yes')).length;
+        const isV4=r=>r.placeOk!==undefined;
+        const placeYes=rs.filter(r=>isV4(r)?r.placeOk===true:false).length;
+        const placeNo=rs.filter(r=>isV4(r)?r.placeOk===false:false).length;
+        const dateYes=rs.filter(r=>isV4(r)?r.dateOk===true:r.avail&&Object.values(r.avail).some(v=>v==='yes')).length;
+        const timeYes=rs.filter(r=>isV4(r)?r.timeOk===true:r.avail&&Object.values(r.avail).some(v=>v==='yes')).length;
         const Donut=({yes,no,label,yesColor,noColor})=>{
           const pct=yes+no>0?Math.round(yes/(yes+no)*100):0;
           const r2=28;const circ=2*Math.PI*r2;const dash=circ*pct/100;
@@ -736,7 +737,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
         :<>
           {/* Visual summary — donuts */}
           <div style={{display:'flex',justifyContent:'space-around',marginBottom:'16px',padding:'12px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'14px'}}>
-            <Donut yes={placeYes} no={total-placeYes} label="📍" yesColor="#22c55e" noColor="#ef444430"/>
+            <Donut yes={placeYes} no={placeNo} label="📍" yesColor="#22c55e" noColor="#ef444430"/>
             <Donut yes={dateYes} no={total-dateYes} label="📅" yesColor="#22c55e" noColor="#ef444430"/>
             <Donut yes={timeYes} no={total-timeYes} label="🕐" yesColor="#22c55e" noColor="#ef444430"/>
           </div>
@@ -756,7 +757,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
             const hasInter=interFrom<interTo;
             const orgTime=planTime;
             // Best time = closest to original within intersection
-            const bestT=hasInter?(interFrom>=orgTime?interFrom:orgTime<=interTo?orgTime:interFrom):null;
+            const bestT=hasInter?(orgTime>=interFrom&&orgTime<=interTo?orgTime:interFrom):null;
             return<div style={{marginBottom:'16px'}}>
               <div style={{fontSize:'13px',fontWeight:'700',color:mc,marginBottom:'8px'}}>🕐 {t.availabilityLbl||'Availability'}</div>
               {timeRanges.map((r,i)=><div key={i} style={{fontSize:'12px',color:c.M2,marginBottom:'2px'}}>{r.name}: {fmtTime(r.from)} → {fmtTime(r.to)}</div>)}
@@ -770,7 +771,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
 
           {/* Meeting point — with names */}
           {rs.some(r=>r.meetOk!==undefined&&r.meetOk!==null)&&(()=>{
-            const goingRs=rs.filter(r=>r.placeOk!==false&&r.dateOk===true&&r.timeOk===true);
+            const goingRs=rs.filter(r=>isV4(r)?(r.placeOk===true&&r.dateOk===true&&r.timeOk===true):(r.avail&&Object.values(r.avail).some(v=>v==='yes')));
             const mpYes=goingRs.filter(r=>r.meetOk===true);const mpNo=goingRs.filter(r=>r.meetOk===false);
             return<div style={{marginBottom:'16px'}}>
             <div style={{fontSize:'14px',fontWeight:'700',color:'#f59e0b',marginBottom:'4px'}}>📍 {t.meetingPointLbl2}</div>
@@ -797,8 +798,8 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
 
           {/* Per-person — GOING vs NOT GOING */}
           {(()=>{
-            const going=rs.filter(r=>hasV4?(r.placeOk!==false&&r.dateOk===true&&r.timeOk===true):(r.avail&&Object.values(r.avail).some(v=>v==='yes')));
-            const notGoing=rs.filter(r=>hasV4?(r.placeOk===false||r.dateOk===false||r.timeOk===false||r.dateOk===null||r.timeOk===null):(!(r.avail&&Object.values(r.avail).some(v=>v==='yes'))));
+            const going=rs.filter(r=>isV4(r)?(r.placeOk===true&&r.dateOk===true&&r.timeOk===true):(r.avail&&Object.values(r.avail).some(v=>v==='yes')));
+            const notGoing=rs.filter(r=>isV4(r)?(r.placeOk===false||r.dateOk===false||r.timeOk===false||r.dateOk===null||r.timeOk===null):(!(r.avail&&Object.values(r.avail).some(v=>v==='yes'))));
             return<>
             <div style={{fontSize:'14px',fontWeight:'700',color:'#22c55e',marginBottom:'8px'}}>✓ {t.goingLbl||'Going'} ({going.length} {t.ofLbl||'of'} {total})</div>
             {going.map((r,i)=>{
