@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import * as Sentry from '@sentry/react'
 import { BrowserRouter, Routes, Route, useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom'
 import T from './constants/translations.js'
 import { C, getSysTheme, applyTheme } from './constants/theme.js'
@@ -69,7 +70,7 @@ function AppInner(){
         let prof=null;
         try{prof=await loadProfile(session.user.id);}catch{}
         if(!prof){prof={name:session.user.email?.split('@')[0]||'User',email:session.user.email||'',contacts:[]};try{await saveProfile(session.user.id,prof);}catch{}}
-        setAuthUser(session.user);setProfile(prof);if(prof?.lang)setLang(prof.lang);
+        setAuthUser(session.user);setProfile(prof);if(prof?.lang)setLang(prof.lang);Sentry.setUser({id:session.user.id,email:session.user.email});
         syncMyPlans(session.user.id).catch(()=>{});
       }
       setAuthLoading(false);
@@ -80,7 +81,7 @@ function AppInner(){
       if(session?.user){
         loadProfile(session.user.id).then(prof=>{
           if(!prof){prof={name:session.user.email?.split('@')[0]||'User',email:session.user.email||'',contacts:[]};saveProfile(session.user.id,prof).catch(()=>{});}
-          setAuthUser(session.user);setProfile(prof);
+          setAuthUser(session.user);setProfile(prof);Sentry.setUser({id:session.user.id,email:session.user.email});
           const savedLang=ls.get('q_lang',null);if(savedLang)setLang(savedLang);else if(prof?.lang)setLang(prof.lang);
           syncMyPlans(session.user.id).catch(()=>{});setAuthLoading(false);
         }).catch(()=>{setAuthUser(session.user);setProfile({name:session.user.email?.split('@')[0]||'User',email:session.user.email||'',contacts:[]});setAuthLoading(false);});
@@ -96,8 +97,8 @@ function AppInner(){
     if(code&&!authUser&&!previewPlan)loadPlan(code).then(p=>{if(p)setPreviewPlan(p);});
   },[authUser,location.pathname]);
 
-  const handleAuth=(user,prof)=>{setAuthUser(user);setProfile(prof);if(prof?.lang)setLang(prof.lang);};
-  const handleSignOut=async()=>{try{await authSignOut();}catch{}ls.set('q_plans',[]);navigate('/');window.location.reload();};
+  const handleAuth=(user,prof)=>{setAuthUser(user);setProfile(prof);if(prof?.lang)setLang(prof.lang);Sentry.setUser({id:user?.id,email:user?.email});};
+  const handleSignOut=async()=>{Sentry.setUser(null);try{await authSignOut();}catch{}ls.set('q_plans',[]);navigate('/');window.location.reload();};
   const updateProfile=async(updates)=>{if(!authUser)return;const updated={...profile,...updates};setProfile(updated);await saveProfile(authUser.id,updated);if(updates.lang)setLang(updates.lang);};
 
   // Nav helper
