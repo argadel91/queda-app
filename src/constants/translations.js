@@ -1,154 +1,154 @@
 // ─── TRANSLATIONS ────────────────────────────────────
 const T ={
   es:{
-    tagline:'Más planes, menos caos.',sub:'Despídete de chats interminables.',
-    create:'Crear un plan →',myPlans:'👤 Mis planes',discover:'🔍 Descubrir',orJoin:'o únete',codePh:'Código del plan',go:'Ir',notFound:'Código no encontrado.',
-    back:'← Volver',cont:'Continuar →',
-    datesStep:'Fechas',extrasStep:'Extras',
-    planName:'Nombre del plan',desc:'Descripción (opcional)',descPh:'Detalles, notas...',
+    sub:'Despídete de chats interminables.',
+    create:'Crear un plan →',myPlans:'👤 Mis planes',orJoin:'o únete',codePh:'Código del plan',go:'Ir',notFound:'Código no encontrado.',
+    back:'← Volver',
+    datesStep:'Fechas',
+    
     yourName:'Tu nombre',yourNamePh:'¿Cómo te llamas?',emailPh:'tu@email.com',
     stop:'Parada',
-    estPer:'Estimado por persona',
-    extrasTitle:'Extras',
-    dcLbl:'👗 Dress code / Qué ponerse',dcNote:'Nota para los invitados (opcional)...',dcCustomPh:',Ej: hawaiano, años 80...',dcNoneNote:'Sin dress code. Pregunta si tienes dudas.',
-    dressCodes:[{k:'smart',l:'👔 Elegante'},{k:'casual',l:'👕 Casual'},{k:'beach',l:'🩱 Playa'},{k:'sport',l:'🥾 Cómodo'},{k:'party',l:'🪩 Fiesta'},{k:'business',l:'💼 Traje'},{k:'costume',l:'🎭 Disfraz'},{k:'custom',l:'✏️ Custom'}],
-    gift:'🎁 Hay regalo colectivo',giftSub:'Cumple, boda, despedida...',giftName:'Nombre del regalo',giftLink:'Link',giftPrice:'Precio total €',payLink:'Link de pago',
-    bring:'🎒 Qué llevar',addItem:'+ Añadir',newItem:',Ej: vino, paraguas...',
-    payData:'💳 Datos de pago',payNote:'Deja vacío lo que no uses.',
-    bizumPh:'Teléfono Bizum',
-    createBtn:'Crear plan 🎉',saving:'Guardando...',
-    planCreated:'¡Plan creado!',shareWith:'Comparte con tu grupo',
-    copyLink:'Copiar link 🔗',copied:'✓ ¡Copiado!',viewRes:'Ver resultados →',
-    previewBy:'Organizado por',previewDates:'Fechas propuestas',previewBudget:'Presupuesto estimado',previewJoin:'Marcar disponibilidad →',editAvail:'Editar mi respuesta →',
-    yourAvail:'¿Cuándo puedes?',
-    avYes:'✅ Sí',avMaybe:'🤔 Quizás',avNo:'❌ No puedo',
-    markAtLeastOne:'Marca al menos una fecha',
-    maybeNote:`Lo añade a «quizás» — el organizador lo verá.`,
-    votingExplainYes:'cuento con que vienes, tu voto decide la fecha',
-    votingExplainNo:'no puedes ese día, si ese día sale elegido quedas fuera',
-    votingExplainMaybe:'no es seguro que vayas, no cuentas para elegir esa fecha, te avisaremos cuando se confirme y tendrás que elegir sí o no',
-    planFull:'El aforo del plan está lleno. Ponte en contacto con el organizador para más información.',
-    chooseOption:'Elige tu opción preferida',
-    whichStops:'¿A qué paradas vas?',stopAttendHint:'Puedes unirte a parte del plan',stopFull:'Esta parada está llena',
-    howGet:'¿Cómo llegas?',howOpt:'(opcional)',
-    car:'🚗 Coche',moto:'🏍️ Moto',transit:'🚇 Transporte público',taxi:'🚕 Taxi/Uber',walk:'🚶 Andando',bike:'🚲 Bici/Patinete',other:'✏️ Otro',otherPh:'¿Cómo llegas?',
-    commentLbl:'💬 Comentario (opcional)',commentPh:'¡Con ganas! / Llego un poco tarde / ...',
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    car:'🚗 Coche',
+    commentPh:'¡Con ganas! / Llego un poco tarde / ...',
     saveAvail:'Guardar →',
-    savedTitle:'¡Guardado!',savedSub:'Tu disponibilidad está registrada. Puedes editarla cuando quieras.',
-    editingPrev:'Editando tu respuesta anterior',
-    viralQ:'¿Te ha gustado queda.?',viralSub:'Crea tu propio plan gratis.',viralBtn:'Crear mi plan →',
-    placeOkQ:'¿Te va el sitio?',dateOkQ:'¿Te va la fecha?',timeOkQ:'¿Te va la hora?',answerAll:'Responde a todas las preguntas',suggestAlt:'Sugerir alternativa',suggestAltHint:'Opcional — sugiere un sitio que prefieras',placeNamePh:'Nombre del sitio...',yourAvailDates:'¿Qué días puedes?',yourAvailDatesHint:'Selecciona los días que te vienen bien',yourAvailTime:'¿En qué horario puedes?',fromLbl:'Desde',toLbl:'Hasta',
+    savedTitle:'¡Guardado!',
+    
+    
+    placeOkQ:'¿Te va el sitio?',dateOkQ:'¿Te va la fecha?',timeOkQ:'¿Te va la hora?',yourAvailDates:'¿Qué días puedes?',fromLbl:'Desde',toLbl:'Hasta',
     responses:'respuesta',responsesP:'respuestas',
-    noResp:'Nadie ha respondido todavía',noRespSub:'Comparte el código',
-    bestOpt:'Mejor opción',CONFIRMED:'CONFIRMADO',
-    confirmThis:'📌 Confirmar esta fecha',confirming:'Confirmando...',confirmSmall:'Confirmar',
-    perPerson:'Por persona',totalLbl:'Total',
-    giftSec:'🎁 Regalo colectivo',totalPrice:'Precio total',perOf:'Por persona',seeGift:'Ver regalo ↗',payTitle:'Pagar mi parte',
-    myPlansT:'Mis planes',noPlansUp:'No tienes planes próximos',noPlansUpS:'Crea o únete a uno',noPlansPast:'No tienes planes pasados',
+    
+    
+    
+    
+    
+    noPlansUp:'No tienes planes próximos',noPlansPast:'No tienes planes pasados',
     upcoming:'📅 Próximos',pastTab:'✅ Pasados',
     organizer:'Organizador',guest:'Invitado',
     confirmedDate:'📌 Fecha confirmada',notifyGrp:'Avisar al grupo 💬',sendRem:'Recordatorio',remSent:'✓ Enviado',
-    makePublic:'🌍 Hacer público',isPublicLbl:'✓ Público',
-    delConfirm:'¿Eliminar este plan?',delWarn:'Se eliminará para todos. No se puede deshacer.',delError:'No se pudo eliminar el plan',deleting:'Eliminando...',
+    
+    delConfirm:'¿Eliminar este plan?',delWarn:'Se eliminará para todos. No se puede deshacer.',
     leaveConfirm:'¿Salirte del plan?',leaveWarn:'Solo se quitará de tu lista.',
     cancel:'Cancelar',del:'Eliminar',leave:'Salirme',
     comments:'Comentarios',
-    tabs:{plan:'📍 Plan',vote:'🗳️ Votos',result:'📋 Resultado',more:'💡 Más'},changeHistoryLbl:'Historial de cambios',attendanceLbl:'Asistencia',answerAllToSave:'Responde a todo para guardar',ofLbl:'de',goingLbl:'Van',notGoingLbl:'No van',rangeIncludesOriginal:'Tu rango incluye la hora original — si puedes, selecciona Sí arriba',cantSelectOrigDate:'No puedes seleccionar la fecha original',screenshotBtn:'Descargar como imagen',confirmPlanBtn:'Confirmar este plan',planConfirmed:'¡Plan confirmado!',altDatesLbl:'Fechas alternativas',deadlineLbl:'Fecha límite',deadlinePassed:'Plazo cerrado — no se aceptan más respuestas',goToResults:'Ver resultados',remainingLbl:'restante',removeDeadline:'Quitar fecha límite',lateArrivals:'Llegan tarde',voteWhen:'¿Cuándo?',voteWhere:'¿Dónde?',stopLbl:'Parada',codeLbl:'Código del plan',transportLbl:'Transporte',addressLbl:'Dirección',notesLbl:'Notas',delConfirm2:'¿Eliminar esta parada?',noMinCap:'Sin aforo mínimo',noMaxCap:'Sin aforo máximo',minCapLbl:'Aforo mínimo',maxCapLbl:'Aforo máximo',minBeforeLbl:'Minutos antes',toleranceLbl:'Tolerancia (máx. retraso)',onTimeQ:'¿Llegas a tiempo?',howLateQ:'¿Cuánto tarde?',maxLateLbl:'Máx. retraso',onTimeLbl:'Puntual',meetYes:'Iré al punto de encuentro',meetNo:'Voy directo al sitio',respSaved:'✓ Guardado — pulsa para actualizar',availStartTime:'¿A qué hora podrías empezar?',availStartHint:'Marca el rango de horas en el que la actividad podría iniciarse para ti. El organizador lo tendrá en consideración.',placeNoMsg:'¿Quieres comentarle algo al organizador?',createOwnPlan:'O crea tu propio plan →',availabilityLbl:'Disponibilidad',overlapLbl:'Todos coinciden',suggestedTimeLbl:'Hora sugerida',noOverlapLbl:'No se encontró horario común',noLbl:'No',
-    alternativeDates:'Fechas alternativas',alternativeDatesHint:'Próximamente — añade fechas y horas alternativas para tu plan.',
-    discoverT:'Descubrir',discoverS:'Planes públicos abiertos a todos.',noPublic:'No hay planes públicos ahora.',joinPlan:'Unirse →',
-    yourRoleLbl:'Tu rol',optionalLbl:'opcional',otherRolePh:'O escribe el tuyo...',yourRolePh:',Ej: Manager, Alumno, Cliente...',
-    surpriseMode_lbl:`🎭 Modo sorpresa`,
-    surpriseReveal:`¡Es una sorpresa!`,
-    surpriseSub:`El destino se revela cuando el organizador confirme la fecha.`,
-    nearbyRestaurants:`Restaurantes cerca`,nearbyBars:`Bares cerca`,nearbyCafes:`Cafeterías cerca`,nearbyActivities:`Actividades cerca`,
-    sugIdeas:`¿Necesitas ideas?`,sugTransport:`¿Necesitas transporte?`,sugAccom:`¿Necesitas alojamiento?`,sugHungry:`¿Tienes hambre?`,sugShopping:`¿Compra de última hora?`,sugEmergency:`¿Necesitas ayuda?`,breakfast:`Desayuno`,fastFood:`Comida rápida`,supermarket:`Supermercado`,shoppingMall:`Centro comercial`,stores:`Tiendas`,atm:`Cajero`,hospital:`Hospital`,pharmacy:`Farmacia`,police:`Policía`,fireDept:`Bomberos`,flights:`Vuelos`,
-    totalPerPerson:`Total por persona`,
-    statTotal:`Total`,
-    flights:`Vuelos`,
+    tabs:{plan:'📍 Plan',vote:'🗳️ Votos',result:'📋 Resultado',more:'💡 Más'},changeHistoryLbl:'Historial de cambios',attendanceLbl:'Asistencia',answerAllToSave:'Responde a todo para guardar',ofLbl:'de',goingLbl:'Van',notGoingLbl:'No van',rangeIncludesOriginal:'Tu rango incluye la hora original — si puedes, selecciona Sí arriba',screenshotBtn:'Descargar como imagen',confirmPlanBtn:'Confirmar este plan',planConfirmed:'¡Plan confirmado!',altDatesLbl:'Fechas alternativas',deadlineLbl:'Fecha límite',deadlinePassed:'Plazo cerrado — no se aceptan más respuestas',goToResults:'Ver resultados',removeDeadline:'Quitar fecha límite',lateArrivals:'Llegan tarde',stopLbl:'Parada',codeLbl:'Código del plan',transportLbl:'Transporte',addressLbl:'Dirección',notesLbl:'Notas',delConfirm2:'¿Eliminar esta parada?',noMinCap:'Sin aforo mínimo',noMaxCap:'Sin aforo máximo',minCapLbl:'Aforo mínimo',maxCapLbl:'Aforo máximo',minBeforeLbl:'Minutos antes',toleranceLbl:'Tolerancia (máx. retraso)',onTimeQ:'¿Llegas a tiempo?',howLateQ:'¿Cuánto tarde?',maxLateLbl:'Máx. retraso',onTimeLbl:'Puntual',meetYes:'Iré al punto de encuentro',meetNo:'Voy directo al sitio',respSaved:'✓ Guardado — pulsa para actualizar',availStartTime:'¿A qué hora podrías empezar?',availStartHint:'Marca el rango de horas en el que la actividad podría iniciarse para ti. El organizador lo tendrá en consideración.',placeNoMsg:'¿Quieres comentarle algo al organizador?',createOwnPlan:'O crea tu propio plan →',availabilityLbl:'Disponibilidad',noLbl:'No',
+    
+    
+    
+    
+    
+    
+    
+    atm:`Cajero`,
+    
+    
+    
     signOut:`Cerrar sesión`,
     todayLbl:`¡Hoy!`,
     tomorrowLbl:`¡Mañana!`,
-    surpriseModeSub:`El destino se revela al confirmar la fecha`,
-    pollQuestion:`Encuesta rápida (opcional)`,
-    addPollOption:`+ Añadir opción`,
-    planCard:`🃏 Tarjeta del plan`,
-    splitExpensesSub:`Añade gastos y calcula quién debe qué`,
+    
+    
+    
+    
+    
     submitSurvey:`Enviar →`,
     skipSurvey:`Saltar`,
     authInvalidEmail:`Email no válido`,
-    authSendError:`Error al enviar el email. Intenta de nuevo.`,
-    authSaving:`Guardando...`,
+    
+    
     venueGoogleMaps:`Ver en Google Maps`,
-    venueVegetarian:`🥗 Vegetariano`,
+    
     venueTerrace:`🌿 Terraza`,
-    payOrgPhone:`Teléfono del organizador`,
-    payDescription:`Concepto`,
-    payPrint:`Imprimir`,
-    discoverSearch:`Buscar por ciudad o nombre...`,
-    privatePlan:`Plan privado`,
-    appearsInDiscover:`Aparece en Descubrir`,
-    codeOnly:`Solo con código`,
-    yourZone:`Tu zona:`,
-    confirmWith:`Confirmar con`,
-    peopleLbl:`personas`,
-    removeItem:`Eliminar elemento`,
-    pollPlaceholder:`¿Restaurante italiano o japonés?`,
-    optionLbl:`Opción`,
-    copiedLbl:`✓ Copiado`,
-    copyLbl:`Copiar`,
-    personLbl:`persona`,
-    prevRespLbl:`Tu respuesta anterior`,
-    respUpdated:`Respuesta actualizada`,
-    unsavedWarning:`¿Salir? Perderás los cambios no guardados.`,
-    whenCanYou:'¿Cuándo puedes?',
-    startsAt:'Empieza a las',
-    tutStep1:'Elige qué días y horas puedes',
-    tutStep2:'Elige a qué paradas vas',
-    tutStep3:'Listo — la app encuentra la mejor opción',
-    noDateWorks:`Ninguna fecha te viene bien. ¿Propones otra?`,
-    optionalNote:`Nota opcional...`,
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     confirmBtn:`Confirmar →`,
-    newResponse:`Nueva respuesta de `,
+    
     daysLbl:`días`,
     shareWATitle:`Compartir por WhatsApp`,
     copyLinkTitle:`Copiar link`,
-    enableNotif:`Activar notificaciones`,
+    
     refreshResp:`Actualizar respuestas`,
-    waGroupMsg:`Enviar mensaje de WhatsApp al grupo con la fecha confirmada`,
-    waReminderMsg:`Enviar un recordatorio del plan por WhatsApp`,
-    confirmDateTitle:`Confirmar esta fecha para todo el grupo`,
-    detailPerPerson:`Detalle por persona`,
-    noStopsMsg:`Este plan no tiene paradas definidas.`,
-    bookLbl:`Reserva`,
-    giftLbl:`regalo`,
-    payArrow:`Pagar →`,
-    whatToWear:`¿Qué ponerse para la noche?`,
-    firstImpressions:`La primera impresión importa.`,
-    rightLook:`El look adecuado para el entorno.`,
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     howWasIt:`¿Qué tal fue?`,
     rateThePlan:`¿Cómo puntuarías el plan?`,
     wouldRepeat:`¿Repetiríais?`,
     maybeLbl:`Quizás`,
     improveNext:`¿Qué mejoraríais para la próxima? (opcional)`,
-    splitExpensesLbl:`Dividir gastos`,
-    planExpenses:`Gastos del plan`,
-    addExpenseLbl:`Añadir gasto`,
-    whoPaidLbl:`¿Quién pagó?`,
-    meOrganiser:`Yo (organizador)`,
-    whatWasIt:`¿Qué fue? (cena, taxi...)`,
-    transfersLbl:`Transferencias para cuadrar`,
-    allSettledLbl:`¡Todo cuadrado!`,
-    dresscodeOfPlan:`Dress code del plan`,
+    
+    
+    
+    
+    
+    
+    
+    
+    
     dateConfirmedMsg:`¡fecha confirmada!`,
-    hintScreenshot:`Haz screenshot y comparte 📱`,
-    datesSuggestedLbl:`Fechas sugeridas por invitados`,
-    perPersonLbl:`Por persona`,
-    allLbl:`Todos`,
-    addLbl:`Añadir`,
-    firstAvailable:`Primera fecha disponible`,
-    notifyOrg:`Avisar al organizador`,
-    makePublicTitle:`Haz el plan público para que aparezca en Descubrir`,
-    confirmBtn2:`Confirmar`,
+    
+    
+    
+    
+    
+    
+    
+    
+    
     authSignInTab:`Entrar`,
     authRegisterTab:`Registrarse`,
     authPassword:`Contraseña`,
@@ -173,7 +173,7 @@ const T ={
     checkSpam:'Si no lo ves, revisa la carpeta de spam.',
     goToSignIn:'Ir a Iniciar sesión →',
     yesLbl:'Sí',
-    autoConfirmDesc:'Confirma automáticamente cuando X personas digan Sí',
+    
     passwordsNoMatch:'Las contraseñas no coinciden.',
     passwordChangeError:'Error al cambiar la contraseña.',
     connectionError:'Error de conexión.',
@@ -183,192 +183,189 @@ const T ={
     chooseNewPassword:'Elige una contraseña nueva para tu cuenta.',
     repeatPassword:'Repite la contraseña',
     changePassword:'Cambiar contraseña',
-    notifyTo:'Avisar a',
+    
     reminderMsg:',Recordatorio: *{name}* se acerca!',
     newRespFrom:'Nueva respuesta de {name}',
     itsToday:'¡Es hoy!',
     respondToPlan:'¡Responde al plan *{name}*!',
-    editedTimes:'Editado {n} vez/veces',
-    shareLangLbl:'Idioma del mensaje',copyCode:'Copiar código',codeCopied:'✓ ¡Código copiado!',draftRestored:'Borrador restaurado',draftDiscard:'Descartar',autoConfirmTitle:'Auto-confirmación',peopleSaid:'personas dijeron sí para',autoConfirmQ:'¿Confirmar esta fecha automáticamente?',notYet:'Todavía no',editPlan:'Editar plan',saveLbl:'Guardar',doneLbl:'Hecho',addToCalendar:'Añadir al calendario',
-    createError:'Error al crear el plan. Comprueba tu conexión.',someone:'Alguien',noResponsesYet:'Nadie ha respondido aún',personResponded:n=>n===1?'persona ha respondido':`personas han respondido`,
-    personalInfo:'Información personal',genderLbl:'Género',genderFemale:'Mujer',genderMale:'Hombre',genderOther:'Otro',genderCustomPh:'¿Cómo te identificas?',birthdateLbl:'Fecha de nacimiento',locationLbl:'Ubicación',yearsOld:'años',
-    completeProfile:'Completa tu perfil para mejores recomendaciones en Discover',completeProfileDiscover:'Completa tu perfil para ver planes hechos para ti',
-    filterGender:'¿Quién puede unirse?',filterAny:'Cualquiera',filterAgeMin:'Edad mín.',filterAgeMax:'Edad máx.',filterRadius:'Distancia máxima',filterNoLimit:'Sin límite',publishBtn:'Publicar',
-    duplicatePlan:'Duplicar plan',planDuplicated:'¡Plan duplicado! Código:',installApp:'Instalar queda.',installHint:'Añade a la pantalla de inicio para acceso rápido',installBtn:'Instalar',
-    whoCame:'¿Quién vino?',markAllCame:'Marcar todos',saveAttendance:'Guardar asistencia',attendanceSaved:'Asistencia guardada',howWasPlan:'¿Qué tal el plan?',ratePlan:'Valorar',thanksFeedback:'¡Gracias por tu valoración!',shareMemory:'Comparte el recuerdo',screenshotHint:'¡Haz captura y comparte en tus stories!',repeatPlan:'¿Repetimos?',repeatPlanSub:'Mismas paradas, nuevas fechas. Un click.',repeatBtn:'Crear de nuevo 🔄',tiedDates:'Empate entre estas fechas',decideTie:'Decide tú',secondRound:'Segunda ronda',deadlinePassed:'Plazo vencido',deadlineIn:'Plazo en',hours:'horas',participationSummary:'Resumen de participación',
-    startsAt:'Empieza a las',
-    landingSignIn:'Entrar',landingHero1:'Más planes,',landingHero2:'menos caos.',landingSub2:'Despídete de chats interminables.',landingCTA2:'Empezar',landingStep1T:'Elige los sitios',landingStep2T:'Elige las fechas',landingStep3T:'Comparte el código',landingFooter:'Planes en grupo, cero caos.',
-    whenTitle:'¿Cuándo?',whereTitle:'¿Dónde?',nameTitle:'Nombre',organizedBy:'Organiza',planPreviewEmpty:'Tu plan se verá aquí...',whatsPlanName:'¿Cómo se llama tu plan?',describeIt:'Descríbelo',optionalSkip:'Opcional — puedes dejarlo vacío',whatsYourRole:'¿Cuál es tu rol?',optionalRoleHint:'Opcional — ej: profesor, cumpleañero...',yourRolePh2:'Tu rol...',publicOrPrivate:'¿Público o privado?',privateLabel:'🔒 Privado',privateDesc:'Compártelo con quien elijas',publicLabel:'🌍 Público',publicDesc:'Compártelo con el mundo',whoCanJoin:'¿Quién puede unirse?',radiusLabel:'📍 Radio',worldwideLabel:'🌍 Todo el mundo',fromWhere:'📍 ¿Desde dónde?',refCityPh:'Ciudad de referencia...',setDeadlineQ:'¿Poner deadline?',deadlineExplain:'Después de esta fecha se confirmará la opción más votada',whereSub:'Elige un lugar. Podrás editar o añadir alternativas después.',pickFirstPlace:'📍 Elige el primer lugar',placeN:'Lugar',searchPlacePh:'Busca un sitio... (Enter)',nameQ:'¿Nombre?',nameSub:'Dale un nombre a tu plan. Si no, se guardará por código.',namePh:',Ej: Cena de cumple, Ruta por Valencia...',creatingBtn:'Creando...',whenSub:'Elige una fecha y una hora. Podrás añadir alternativas después.',whatTime:'¿A qué hora? (24h)',goToMyPlansHint:'Ve a Mis planes para editar o añadir más detalles.',dateWord:'fecha',closeBtn:'Cerrar',shareBtn:'Compartir',categoryLabel:'Categoría',catSocialSub:'Todo lo demás',catDatingLabel:'Citas',catDatingSub:'Conocer gente',catProSub:'Trabajo y estudios',myProfile:'Mi perfil',completeDiscoverHint:'Completa tu género, edad y ubicación para que te encuentren en Discover.',editBtn:'Editar',nameLbl:'Nombre *',yourNamePh2:'Tu nombre',usernameLbl:'Usuario *',usernameHint:'Tu usuario es único y te identifica.',optionalDiscoverHint:'Opcional — útil para planes públicos en Discover',optionalWord:'opcional',yourCityPh:'Tu ciudad...',myPlansTitle:'Mis planes',lightMode:'Modo claro',darkMode:'Modo oscuro',newRespNotif:'Nueva respuesta de',prevMonth:'Mes anterior',nextMonth:'Mes siguiente',fromLabel:'De',removeExpense:'Eliminar gasto',icsDesc:'Plan creado con queda.',icsCode:'Código',summaryMsg:(y,t,l,no,n)=>`${y} de ${t} puede${y!==1?'n':''} el ${l}${no>0?` · ${no} no`:''}.`,
+    
+    draftRestored:'Borrador restaurado',draftDiscard:'Descartar',autoConfirmTitle:'Auto-confirmación',notYet:'Todavía no',saveLbl:'Guardar',doneLbl:'Hecho',addToCalendar:'Añadir al calendario',
+    createError:'Error al crear el plan. Comprueba tu conexión.',
+    
+    
+    
+    installHint:'Añade a la pantalla de inicio para acceso rápido',installBtn:'Instalar',
+    deadlinePassed:'Plazo vencido',
+    
+    landingSignIn:'Entrar',landingHero1:'Más planes,',landingHero2:'menos caos.',landingCTA2:'Empezar',
+    searchPlacePh:'Busca un sitio... (Enter)',myProfile:'Mi perfil',editBtn:'Editar',nameLbl:'Nombre *',yourNamePh2:'Tu nombre',usernameLbl:'Usuario *',usernameHint:'Tu usuario es único y te identifica.',myPlansTitle:'Mis planes',prevMonth:'Mes anterior',nextMonth:'Mes siguiente',icsDesc:'Plan creado con queda.',icsCode:'Código',
     // Create flow
     pickOneDate:'Elige solo una fecha',pickOneTime:'Elige solo una hora',pickOnePlace:'Elige solo un lugar',
     dontWorryDates:'No te preocupes, luego podrás añadir o editar más fechas.',dontWorryTimes:'No te preocupes, luego podrás añadir o editar más horas.',dontWorryPoints:'No te preocupes, luego podrás añadir o editar más puntos.',
     nextBtn:'Siguiente →',physicalPlace:'Lugar físico',readyQ:'¿Listo?',aboutToCreate:'Estás a punto de crear tu plan. Luego podrás editar, añadir y compartir lo que necesites.',creatingPlan:'Creando...',createPlanBtn:'Crear plan 🎉',
-    planCreatedTitle:'¡Plan creado!',shareCodeMsg:'Comparte el código para que tu grupo se una. Luego podrás editar, añadir y compartir lo que necesites.',reviewPlan:'Revisa tu plan →',createAnother:'Crear otro plan',homeBtn:'Menú principal',shareJoinText:'¡Únete a mi plan!',
+    planCreatedTitle:'¡Plan creado!',shareCodeMsg:'Comparte el código para que tu grupo se una. Luego podrás editar, añadir y compartir lo que necesites.',reviewPlan:'Revisa tu plan →',createAnhomeBtn:'Menú principal',shareJoinText:'¡Únete a mi plan!',
     // Respond
-    stepName:'Nombre',stepSend:'Enviar',stepDates:'Fechas',tapDates:'Toca las fechas a las que puedes ir',enterYourName:'Escribe tu nombre',meetingPointLbl2:'Punto de encuentro',beforeLbl:'antes',whenCanGoHere:'¿Cuándo puedes ir aquí?',tapDateInstruction:'Toca una fecha para marcar que puedes. Toca los horarios disponibles.',timesLbl:'horarios',whichOptionPref:'¿Qué opción prefieres?',pointN:'Punto',finishBtn:'Finalizar',backBtn:'Atrás',
+    meetingPointLbl2:'Punto de encuentro',beforeLbl:'antes',
     // Results
-    editNameLbl:'Nombre',editDescLbl:'Descripción',editDatesLbl:'Fechas',editTimesLbl:'Horarios',editPointsLbl:'Puntos',editHintMsg:'Para añadir puntos, meeting points, aforo y alternativas, edita desde la vista del plan.',
-    cancelledStopsMsg:(n)=>`${n} punto${n>1?'s':''} cancelado${n>1?'s':''} por falta de asistentes`,planStartsAt:'El plan empieza en',cancelledMin:'Cancelado — mínimo no alcanzado',
-    noDataYet:'Aún no hay datos',noDataHint:'Cuando los invitados respondan, verás los datos aquí',chosenPlan:'Plan elegido',bestOption:'Mejor opción',attendance:'asistencia',tieMsg:(n)=>`Empate — ${n} opciones`,pickToConfirm:'Elige una para confirmar el plan',
-    cancelledDetail:(yc,min)=>`cancelado (${yc}/${min} mínimo)`,responsesLbl:'respuestas',dateRanking:'Ranking de fechas',
+    editNameLbl:'Nombre',editDescLbl:'Descripción',editDatesLbl:'Fechas',editTimesLbl:'Horarios',
+    
+    noDataYet:'Aún no hay datos',noDataHint:'Cuando los invitados respondan, verás los datos aquí',
+    
     // Calendar
     maxDatesMsg:(n)=>`Máximo ${n} fechas`,
     // Profile
-    langLabel:'Idioma',
+    
     shareCodeMsg2:'Já podes partilhar o teu código com quem quiseres. Revê o teu plano para editar ou adicionar o que precisares.',sharePlanBtn:'Partilha o teu plano',
     tipLang:'Mudar idioma',tipTheme:'Mudar tema',tipHome:'Menu principal',tipProfile:'O teu perfil',usernameTaken:'Este utilizador já está em uso.',untitled:'Sem título',noDesc:'Sem descrição',seeMore:'ver mais',addNextPoint:'Adiciona o próximo ponto',seeDetails:'Ver',editLbl:'Editar',
     shareCodeMsg2:'Ya puedes compartir tu código con quien quieras. Revisa tu plan para editar o añadir lo que necesites.',sharePlanBtn:'Comparte tu plan',
     tipLang:'Cambiar idioma',tipTheme:'Cambiar tema',tipHome:'Menú principal',tipProfile:'Tu perfil',usernameTaken:'Este usuario ya está en uso.',untitled:'Sin título',noDesc:'Sin descripción',seeMore:'ver más',addNextPoint:'Añade el siguiente punto',seeDetails:'Ver',editLbl:'Editar',
   },
   en:{
-    tagline:'More plans, less chaos.',sub:'Say goodbye to endless chats.',
-    create:'Create a plan →',myPlans:'👤 My plans',discover:'🔍 Discover',orJoin:'or join',codePh:'Plan code',go:'Go',notFound:'Code not found.',
-    back:'← Back',cont:'Continue →',
-    datesStep:'Dates',extrasStep:'Extras',
-    planName:'Plan name',desc:'Description (optional)',descPh:'Details, notes...',
+    sub:'Say goodbye to endless chats.',
+    create:'Create a plan →',myPlans:'👤 My plans',orJoin:'or join',codePh:'Plan code',go:'Go',notFound:'Code not found.',
+    back:'← Back',
+    datesStep:'Dates',
+    
     yourName:'Your name',yourNamePh:"What's your name?",emailPh:'you@email.com',
     stop:'Stop',
-    estPer:'Estimated per person',
-    extrasTitle:'Extras',
-    dcLbl:'👗 Dress code / What to wear',dcNote:'Note for guests (optional)...',dcCustomPh:'e.g. Hawaiian, 80s theme...',dcNoneNote:'No dress code. Ask if unsure.',
-    dressCodes:[{k:'smart',l:'👔 Smart'},{k:'casual',l:'👕 Casual'},{k:'beach',l:'🩱 Beach'},{k:'sport',l:'🥾 Sporty'},{k:'party',l:'🪩 Party'},{k:'business',l:'💼 Formal'},{k:'costume',l:'🎭 Costume'},{k:'custom',l:'✏️ Custom'}],
-    gift:'🎁 There is a collective gift',giftSub:'Birthday, wedding, farewell...',giftName:'Gift name',giftLink:'Link',giftPrice:'Total price €',payLink:'Payment link',
-    bring:'🎒 What to bring',addItem:'+ Add',newItem:'e.g. wine, umbrella...',
-    payData:'💳 Payment details',payNote:"Leave empty what you don't use.",
-    bizumPh:'Bizum phone',
-    createBtn:'Create plan 🎉',saving:'Saving...',
-    planCreated:'Plan created!',shareWith:'Share with your group',
-    copyLink:'Copy link 🔗',copied:'✓ Copied!',viewRes:'View results →',
-    previewBy:'Organised by',previewDates:'Proposed dates',previewBudget:'Estimated budget',previewJoin:'Mark availability →',editAvail:'Edit my response →',
-    yourAvail:'When can you make it?',
-    avYes:'✅ Yes',avMaybe:'🤔 Maybe',avNo:"❌ Can't make it",
-    markAtLeastOne:'Mark at least one date',
-    maybeNote:`Added to «maybe» — the organiser will see this.`,
-    votingExplainYes:'I count on you coming, your vote decides the date',
-    votingExplainNo:'you can\'t make it that day, if that day is chosen you\'re out',
-    votingExplainMaybe:'not sure you\'ll go, you don\'t count towards choosing that date, we\'ll notify you when it\'s confirmed and you\'ll have to choose yes or no',
-    planFull:'The plan is full. Contact the organiser for more information.',
-    chooseOption:'Choose your preferred option',
-    whichStops:'Which stops will you attend?',stopAttendHint:'You can join for part of the plan',stopFull:'This stop is full',
-    howGet:'How are you getting there?',howOpt:'(optional)',
-    car:'🚗 By car',moto:'🏍️ By motorbike',transit:'🚇 Public transport',taxi:'🚕 Taxi/Uber',walk:'🚶 Walking',bike:'🚲 Bike/Scooter',other:'✏️ Other',otherPh:'How are you getting there?',
-    commentLbl:'💬 Comment (optional)',commentPh:"Can't wait! / I'll be a bit late / ...",
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    car:'🚗 By car',
+    commentPh:"Can't wait! / I'll be a bit late / ...",
     saveAvail:'Save →',
-    savedTitle:'Saved!',savedSub:'Your availability is recorded. You can edit it any time.',
-    editingPrev:'Editing your previous response',
-    viralQ:'Did you like queda.?',viralSub:'Create your own plan for free.',viralBtn:'Create my plan →',
-    placeOkQ:'Does the place work for you?',dateOkQ:'Does the date work for you?',timeOkQ:'Does the time work for you?',answerAll:'Answer all questions',suggestAlt:'Suggest an alternative',suggestAltHint:'Optional — suggest a place you prefer',placeNamePh:'Place name...',yourAvailDates:'Which days can you make it?',yourAvailDatesHint:'Select the dates that work for you',yourAvailTime:'What time range works for you?',fromLbl:'From',toLbl:'To',
+    savedTitle:'Saved!',
+    
+    
+    placeOkQ:'Does the place work for you?',dateOkQ:'Does the date work for you?',timeOkQ:'Does the time work for you?',yourAvailDates:'Which days can you make it?',fromLbl:'From',toLbl:'To',
     responses:'response',responsesP:'responses',
-    noResp:'Nobody has responded yet',noRespSub:'Share the code',
-    bestOpt:'Best option',CONFIRMED:'CONFIRMED',
-    confirmThis:'📌 Confirm this date',confirming:'Confirming...',confirmSmall:'Confirm',
-    perPerson:'Per person',totalLbl:'Total',
-    giftSec:'🎁 Collective gift',totalPrice:'Total price',perOf:'Per person',seeGift:'See gift ↗',payTitle:'Pay my share',
-    myPlansT:'My plans',noPlansUp:'No upcoming plans',noPlansUpS:'Create or join one',noPlansPast:'No past plans',
+    
+    
+    
+    
+    
+    noPlansUp:'No upcoming plans',noPlansPast:'No past plans',
     upcoming:'📅 Upcoming',pastTab:'✅ Past',
     organizer:'Organizer',guest:'Guest',
     confirmedDate:'📌 Confirmed date',notifyGrp:'Notify group 💬',sendRem:'Reminder',remSent:'✓ Sent',
-    makePublic:'🌍 Make public',isPublicLbl:'✓ Public',
-    delConfirm:'Delete this plan?',delWarn:'Will delete for everyone. Cannot be undone.',delError:'Could not delete plan',deleting:'Deleting...',
+    
+    delConfirm:'Delete this plan?',delWarn:'Will delete for everyone. Cannot be undone.',
     leaveConfirm:'Leave this plan?',leaveWarn:'Will only remove from your list.',
     cancel:'Cancel',del:'Delete',leave:'Leave',
     comments:'Comments',
-    tabs:{plan:'📍 Plan',vote:'🗳️ Votes',result:'📋 Result',more:'💡 More'},changeHistoryLbl:'Change history',attendanceLbl:'Attendance',answerAllToSave:'Answer all to save',ofLbl:'of',goingLbl:'Going',notGoingLbl:'Not going',rangeIncludesOriginal:'Your range includes the original time — if you can make it, select Yes above',cantSelectOrigDate:"You can't select the original date",screenshotBtn:'Download as image',confirmPlanBtn:'Confirm this plan',planConfirmed:'Plan confirmed!',altDatesLbl:'Alternative dates',deadlineLbl:'Deadline to respond',deadlinePassed:'Deadline passed — responses are closed',goToResults:'See results',remainingLbl:'remaining',removeDeadline:'Remove deadline',lateArrivals:'Late arrivals',voteWhen:'When?',voteWhere:'Where?',stopLbl:'Stop',codeLbl:'Plan code',transportLbl:'Transport',addressLbl:'Address',notesLbl:'Notes',delConfirm2:'Delete this stop?',noMinCap:'No min capacity',noMaxCap:'No max capacity',minCapLbl:'Min capacity',maxCapLbl:'Max capacity',minBeforeLbl:'Minutes before',toleranceLbl:'Tolerance (max late)',onTimeQ:'Will you be on time?',howLateQ:'How late?',maxLateLbl:'Max late',onTimeLbl:'On time',meetYes:'Meeting point',meetNo:'Going directly',respSaved:'✓ Saved — tap to update',availStartTime:'What time range could you start?',availStartHint:'Select your availability range for starting the activity. The organizer will consider it to propose an alternative time.',placeNoMsg:'Want to tell the organizer something?',createOwnPlan:'Or create your own plan →',availabilityLbl:'Availability',overlapLbl:'Everyone overlaps',suggestedTimeLbl:'Suggested time',noOverlapLbl:'No overlapping time found',noLbl:'No',
-    alternativeDates:'Alternative dates',alternativeDatesHint:'Coming soon — add alternative dates and times for your plan.',
-    discoverT:'Discover',discoverS:'Public plans open to everyone.',noPublic:'No public plans at the moment.',joinPlan:'Join →',
-    yourRoleLbl:'Your role',optionalLbl:'optional',otherRolePh:'Or type your own...',yourRolePh:'e.g. Manager, Student, Client...',
-    surpriseMode_lbl:`🎭 Surprise mode`,
-    surpriseReveal:`It's a surprise!`,
-    surpriseSub:`The destination is revealed when the organiser confirms the date.`,
-    nearbyRestaurants:`Restaurants nearby`,nearbyBars:`Bars nearby`,nearbyCafes:`Cafés nearby`,nearbyActivities:`Activities nearby`,
-    sugIdeas:`Need ideas?`,sugTransport:`Need transport?`,sugAccom:`Need a place to stay?`,sugHungry:`Hungry?`,sugShopping:`Last-minute shopping?`,sugEmergency:`Need help?`,breakfast:`Breakfast`,fastFood:`Fast food`,supermarket:`Supermarket`,shoppingMall:`Mall`,stores:`Stores`,atm:`ATM`,hospital:`Hospital`,pharmacy:`Pharmacy`,police:`Police`,fireDept:`Fire dept.`,flights:`Flights`,
-    totalPerPerson:`Total per person`,
-    statTotal:`Total`,
-    flights:`Flights`,
+    tabs:{plan:'📍 Plan',vote:'🗳️ Votes',result:'📋 Result',more:'💡 More'},changeHistoryLbl:'Change history',attendanceLbl:'Attendance',answerAllToSave:'Answer all to save',ofLbl:'of',goingLbl:'Going',notGoingLbl:'Not going',rangeIncludesOriginal:'Your range includes the original time — if you can make it, select Yes above',screenshotBtn:'Download as image',confirmPlanBtn:'Confirm this plan',planConfirmed:'Plan confirmed!',altDatesLbl:'Alternative dates',deadlineLbl:'Deadline to respond',deadlinePassed:'Deadline passed — responses are closed',goToResults:'See results',removeDeadline:'Remove deadline',lateArrivals:'Late arrivals',stopLbl:'Stop',codeLbl:'Plan code',transportLbl:'Transport',addressLbl:'Address',notesLbl:'Notes',delConfirm2:'Delete this stop?',noMinCap:'No min capacity',noMaxCap:'No max capacity',minCapLbl:'Min capacity',maxCapLbl:'Max capacity',minBeforeLbl:'Minutes before',toleranceLbl:'Tolerance (max late)',onTimeQ:'Will you be on time?',howLateQ:'How late?',maxLateLbl:'Max late',onTimeLbl:'On time',meetYes:'Meeting point',meetNo:'Going directly',respSaved:'✓ Saved — tap to update',availStartTime:'What time range could you start?',availStartHint:'Select your availability range for starting the activity. The organizer will consider it to propose an alternative time.',placeNoMsg:'Want to tell the organizer something?',createOwnPlan:'Or create your own plan →',availabilityLbl:'Availability',noLbl:'No',
+    
+    
+    
+    
+    
+    
+    
+    atm:`ATM`,
+    
+    
+    
     signOut:`Sign out`,
     todayLbl:`Today!`,
     tomorrowLbl:`Tomorrow!`,
-    surpriseModeSub:`The destination is revealed when the date is confirmed`,
-    pollQuestion:`Quick poll (optional)`,
-    addPollOption:`+ Add option`,
-    planCard:`🃏 Plan card`,
-    splitExpensesSub:`Add expenses and calculate who owes what`,
+    
+    
+    
+    
+    
     submitSurvey:`Submit →`,
     skipSurvey:`Skip`,
     authInvalidEmail:`Invalid email`,
-    authSendError:`Error sending email. Try again.`,
-    authSaving:`Saving...`,
+    
+    
     venueGoogleMaps:`View on Google Maps`,
-    venueVegetarian:`🥗 Vegetarian options`,
+    
     venueTerrace:`🌿 Terrace`,
-    payOrgPhone:`Organiser phone`,
-    payDescription:`Description`,
-    payPrint:`Print`,
-    discoverSearch:`Search by city or name...`,
-    privatePlan:`Private plan`,
-    appearsInDiscover:`Appears in Discover`,
-    codeOnly:`Code only`,
-    yourZone:`Your zone:`,
-    confirmWith:`Confirm with`,
-    peopleLbl:`people`,
-    removeItem:`Remove item`,
-    pollPlaceholder:`Italian or Japanese restaurant?`,
-    optionLbl:`Option`,
-    copiedLbl:`✓ Copied`,
-    copyLbl:`Copy`,
-    personLbl:`person`,
-    prevRespLbl:`Your previous response`,
-    respUpdated:`Response updated`,
-    unsavedWarning:`Exit? Unsaved changes will be lost.`,
-    whenCanYou:'When can you?',
-    startsAt:'Starts at',
-    tutStep1:'Pick which days + times work',
-    tutStep2:'Choose which stops you\'ll attend',
-    tutStep3:'Done — the app finds the best option',
-    noDateWorks:`None of the dates work. Want to suggest one?`,
-    optionalNote:`Optional note...`,
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     confirmBtn:`Confirm →`,
-    newResponse:`New response from `,
+    
     daysLbl:`days`,
     shareWATitle:`Share on WhatsApp`,
     copyLinkTitle:`Copy link`,
-    enableNotif:`Enable notifications`,
+    
     refreshResp:`Refresh responses`,
-    waGroupMsg:`Send WhatsApp message to the group with the confirmed date`,
-    waReminderMsg:`Send a plan reminder via WhatsApp`,
-    confirmDateTitle:`Confirm this date for the whole group`,
-    detailPerPerson:`Detail per person`,
-    noStopsMsg:`This plan has no stops defined.`,
-    bookLbl:`Book`,
-    giftLbl:`gift`,
-    payArrow:`Pay →`,
-    whatToWear:`What to wear?`,
-    firstImpressions:`First impressions matter.`,
-    rightLook:`The right look for the setting.`,
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     howWasIt:`How did it go?`,
     rateThePlan:`How would you rate the plan?`,
     wouldRepeat:`Would you do it again?`,
     maybeLbl:`Maybe`,
     improveNext:`What would you improve next time? (optional)`,
-    splitExpensesLbl:`Split expenses`,
-    planExpenses:`Plan expenses`,
-    addExpenseLbl:`Add expense`,
-    whoPaidLbl:`Who paid?`,
-    meOrganiser:`Me (organiser)`,
-    whatWasIt:`What was it? (dinner, taxi...)`,
-    transfersLbl:`Transfers to settle up`,
-    allSettledLbl:`All settled!`,
-    dresscodeOfPlan:`Plan dress code`,
+    
+    
+    
+    
+    
+    
+    
+    
+    
     dateConfirmedMsg:`date confirmed!`,
-    hintScreenshot:`Screenshot and share 📱`,
-    datesSuggestedLbl:`Dates suggested by guests`,
-    perPersonLbl:`Per person`,
-    allLbl:`All`,
-    addLbl:`Add`,
-    firstAvailable:`First available date`,
-    notifyOrg:`Notify organiser`,
-    makePublicTitle:`Make the plan public so it appears in Discover`,
-    confirmBtn2:`Confirm`,
+    
+    
+    
+    
+    
+    
+    
+    
+    
     authSignInTab:`Sign in`,
     authRegisterTab:`Register`,
     authPassword:`Password`,
@@ -393,7 +390,7 @@ const T ={
     checkSpam:'If you don\'t see it, check your spam folder.',
     goToSignIn:'Go to Sign in →',
     yesLbl:'Yes',
-    autoConfirmDesc:'Auto-confirms when X people say Yes',
+    
     passwordsNoMatch:'Passwords do not match.',
     passwordChangeError:'Error changing password.',
     connectionError:'Connection error.',
@@ -403,164 +400,164 @@ const T ={
     chooseNewPassword:'Choose a new password for your account.',
     repeatPassword:'Repeat password',
     changePassword:'Change password',
-    notifyTo:'Notify',
+    
     reminderMsg:',Reminder: *{name}* is coming up!',
     newRespFrom:'New response from {name}',
     itsToday:'It\'s today!',
     respondToPlan:'Respond to *{name}*!',
-    editedTimes:'Edited {n} time(s)',
-    shareLangLbl:'Message language',copyCode:'Copy code',codeCopied:'✓ Code copied!',draftRestored:'Draft restored',draftDiscard:'Discard',autoConfirmTitle:'Auto-confirmation',peopleSaid:'people said yes for',autoConfirmQ:'Auto-confirm this date?',notYet:'Not yet',editPlan:'Edit plan',saveLbl:'Save',doneLbl:'Done',addToCalendar:'Add to calendar',
-    createError:'Error creating the plan. Check your connection.',someone:'Someone',noResponsesYet:'Nobody has responded yet',personResponded:n=>n===1?'person responded':`people responded`,
-    personalInfo:'Personal info',genderLbl:'Gender',genderFemale:'Woman',genderMale:'Man',genderOther:'Other',genderCustomPh:'How do you identify?',birthdateLbl:'Date of birth',locationLbl:'Location',yearsOld:'years',
-    completeProfile:'Complete your profile for better Discover recommendations',completeProfileDiscover:'Complete your profile to see plans tailored to you',
-    filterGender:'Who can join?',filterAny:'Anyone',filterAgeMin:'Min age',filterAgeMax:'Max age',filterRadius:'Max distance',filterNoLimit:'No limit',publishBtn:'Publish',
-    duplicatePlan:'Duplicate plan',planDuplicated:'Plan duplicated! Code:',installApp:'Install queda.',installHint:'Add to home screen for quick access',installBtn:'Install',
-    whoCame:'Who came?',markAllCame:'Mark all',saveAttendance:'Save attendance',attendanceSaved:'Attendance saved',howWasPlan:'How was the plan?',ratePlan:'Rate',thanksFeedback:'Thanks for your feedback!',shareMemory:'Share the memory',screenshotHint:'Screenshot and share on your stories!',repeatPlan:'Do it again?',repeatPlanSub:'Same stops, new dates. One click.',repeatBtn:'Create again 🔄',tiedDates:'Tied dates',decideTie:'You decide',secondRound:'Second round',deadlinePassed:'Deadline passed',deadlineIn:'Deadline in',hours:'hours',participationSummary:'Participation summary',
-    startsAt:'Starts at',
-    landingSignIn:'Sign in',landingHero1:'More plans,',landingHero2:'less chaos.',landingSub2:'Say goodbye to endless chats.',landingCTA2:'Get started',landingStep1T:'Pick the spots',landingStep2T:'Choose the dates',landingStep3T:'Share the code',landingFooter:'Group plans, zero chaos.',
-    whenTitle:'When?',whereTitle:'Where?',nameTitle:'Name',organizedBy:'By',planPreviewEmpty:'Your plan will appear here...',whatsPlanName:"What's your plan called?",describeIt:'Describe it',optionalSkip:'Optional — you can skip this',whatsYourRole:"What's your role?",optionalRoleHint:'Optional — e.g. professor, birthday person...',yourRolePh2:'Your role...',publicOrPrivate:'Public or private?',privateLabel:'🔒 Private',privateDesc:'Share with who you choose',publicLabel:'🌍 Public',publicDesc:'Share with the world',whoCanJoin:'Who can join?',radiusLabel:'📍 Radius',worldwideLabel:'🌍 Worldwide',fromWhere:'📍 From where?',refCityPh:'Reference city...',setDeadlineQ:'Set a deadline?',deadlineExplain:'After this date the most voted option will be confirmed',whereSub:'Pick a place. You can edit or add alternatives later.',pickFirstPlace:'📍 Pick the first place',placeN:'Place',searchPlacePh:'Search a place... (Enter)',nameQ:'Name?',nameSub:"Give your plan a name. If not, it'll be saved by code.",namePh:'e.g. Birthday dinner, Valencia trip...',creatingBtn:'Creating...',whenSub:'Pick one date and time. You can add alternatives later.',whatTime:'What time? (24h)',goToMyPlansHint:'Go to My plans to edit or add more details.',dateWord:'date',closeBtn:'Close',shareBtn:'Share',categoryLabel:'Category',catSocialSub:'Everything else',catDatingLabel:'Dating',catDatingSub:'Meet people',catProSub:'Work & studies',myProfile:'My profile',completeDiscoverHint:'Complete your gender, age and location so people can find you on Discover.',editBtn:'Edit',nameLbl:'Name *',yourNamePh2:'Your name',usernameLbl:'Username *',usernameHint:'Your username is unique and identifies you.',optionalDiscoverHint:'Optional — useful for public plans on Discover',optionalWord:'optional',yourCityPh:'Your city...',myPlansTitle:'My plans',lightMode:'Light mode',darkMode:'Dark mode',newRespNotif:'New response from',prevMonth:'Previous month',nextMonth:'Next month',fromLabel:'From',removeExpense:'Remove expense',icsDesc:'Plan created with queda.',icsCode:'Code',summaryMsg:(y,t,l,m,n)=>`${y} of ${t} can make ${l}${m>0?` · ${m} maybe`:''}${n>0?` · ${n} yet to respond`:''}.`,
+    
+    draftRestored:'Draft restored',draftDiscard:'Discard',autoConfirmTitle:'Auto-confirmation',notYet:'Not yet',saveLbl:'Save',doneLbl:'Done',addToCalendar:'Add to calendar',
+    createError:'Error creating the plan. Check your connection.',
+    
+    
+    
+    installApp:'Install queda.',installHint:'Add to home screen for quick access',installBtn:'Install',
+    deadlinePassed:'Deadline passed',
+    
+    landingSignIn:'Sign in',landingHero1:'More plans,',landingHero2:'less chaos.',landingCTA2:'Get started',
+    searchPlacePh:'Search a place... (Enter)',myProfile:'My profile',editBtn:'Edit',nameLbl:'Name *',yourNamePh2:'Your name',usernameLbl:'Username *',usernameHint:'Your username is unique and identifies you.',myPlansTitle:'My plans',prevMonth:'Previous month',nextMonth:'Next month',icsDesc:'Plan created with queda.',icsCode:'Code',
     pickOneDate:'Pick just one date',pickOneTime:'Pick just one time',pickOnePlace:'Pick just one place',
     dontWorryDates:"Don't worry, you can add or edit more dates later.",dontWorryTimes:"Don't worry, you can add or edit more times later.",dontWorryPoints:"Don't worry, you can add or edit more points later.",
     nextBtn:'Next →',physicalPlace:'Physical',readyQ:'Ready?',aboutToCreate:"You're about to create your plan. You can edit, add and share whatever you need later.",creatingPlan:'Creating...',createPlanBtn:'Create plan 🎉',
-    planCreatedTitle:'Plan created!',shareCodeMsg:'Share the code so your group can join. You can edit, add and share whatever you need later.',reviewPlan:'Review your plan →',createAnother:'Create another plan',homeBtn:'Home',shareJoinText:'Join my plan!',
-    stepName:'Name',stepSend:'Send',stepDates:'Dates',tapDates:'Tap the dates you can attend',enterYourName:'Enter your name',meetingPointLbl2:'Meeting point',beforeLbl:'before',whenCanGoHere:'When can you go here?',tapDateInstruction:'Tap a date to mark you can go. Tap available times.',timesLbl:'times',whichOptionPref:'Which option do you prefer?',pointN:'Point',finishBtn:'Finish',backBtn:'Back',
-    editNameLbl:'Name',editDescLbl:'Description',editDatesLbl:'Dates',editTimesLbl:'Times',editPointsLbl:'Points',editHintMsg:'To add points, meeting points, capacity and alternatives, edit from the plan view.',
-    cancelledStopsMsg:(n)=>`${n} point${n>1?'s':''} cancelled — not enough attendees`,planStartsAt:'Plan starts at',cancelledMin:'Cancelled — minimum not reached',
-    noDataYet:'No data yet',noDataHint:"When invitees respond, you'll see the data here",chosenPlan:'Chosen plan',bestOption:'Best option',attendance:'attendance',tieMsg:(n)=>`Tie — ${n} options`,pickToConfirm:'Pick one to confirm the plan',
-    cancelledDetail:(yc,min)=>`cancelled (${yc}/${min} min)`,responsesLbl:'responses',dateRanking:'Date ranking',
-    maxDatesMsg:(n)=>`Maximum ${n} dates`,langLabel:'Language',
+    planCreatedTitle:'Plan created!',shareCodeMsg:'Share the code so your group can join. You can edit, add and share whatever you need later.',reviewPlan:'Review your plan →',createAnhomeBtn:'Home',shareJoinText:'Join my plan!',
+    meetingPointLbl2:'Meeting point',beforeLbl:'before',
+    editNameLbl:'Name',editDescLbl:'Description',editDatesLbl:'Dates',editTimesLbl:'Times',
+    
+    noDataYet:'No data yet',noDataHint:"When invitees respond, you'll see the data here",
+    
+    maxDatesMsg:(n)=>`Maximum ${n} dates`,
     shareCodeMsg2:'You can now share your code with whoever you want. Review your plan to edit or add what you need.',sharePlanBtn:'Share your plan',
     tipLang:'Change language',tipTheme:'Change theme',tipHome:'Home',tipProfile:'Your profile',usernameTaken:'This username is already taken.',untitled:'Untitled',noDesc:'No description',seeMore:'see more',addNextPoint:'Add the next point',seeDetails:'See',editLbl:'Edit',
   },
   pt:{
-tagline:'Mais planos, menos caos.',sub:'Diga adeus aos chats intermináveis.',
-create:'Criar um plano →',myPlans:'👤 Meus planos',discover:'🔍 Descobrir',orJoin:'ou participe',codePh:'Código do plano',go:'Ir',notFound:'Código não encontrado.',
-back:'← Voltar',cont:'Continuar →',
-datesStep:'Datas',extrasStep:'Extras',
-planName:'Nome do plano',desc:'Descrição (opcional)',descPh:'Detalhes, notas...',
+sub:'Diga adeus aos chats intermináveis.',
+create:'Criar um plano →',myPlans:'👤 Meus planos',orJoin:'ou participe',codePh:'Código do plano',go:'Ir',notFound:'Código não encontrado.',
+back:'← Voltar',
+datesStep:'Datas',
+
 yourName:'O seu nome',yourNamePh:'Como se chama?',emailPh:'voce@email.com',
-stop:'Paragem',estPer:'Estimativa por pessoa',extrasTitle:'Extras',
-dcLbl:'👗 Dress code / O que vestir',dcNote:'Nota para os convidados (opcional)...',dcCustomPh:'ex. Havaiano, tema anos 80...',dcNoneNote:'Sem dress code. Pergunte em caso de dúvida.',
-dressCodes:[{k:'smart',l:'👔 Elegante'},{k:'casual',l:'👕 Casual'},{k:'beach',l:'🩱 Praia'},{k:'sport',l:'🥾 Desportivo'},{k:'party',l:'🪩 Festa'},{k:'business',l:'💼 Formal'},{k:'costume',l:'🎭 Fantasia'},{k:'custom',l:'✏️ Personalizado'}],
-gift:'🎁 Há um presente coletivo',giftSub:'Aniversário, casamento, despedida...',giftName:'Nome do presente',giftLink:'Link',giftPrice:'Preço total €',payLink:'Link de pagamento',
-bring:'🎒 O que trazer',addItem:'+ Adicionar',newItem:'ex. vinho, guarda-chuva...',
-payData:'💳 Dados de pagamento',payNote:'Deixe vazio o que não usar.',bizumPh:'Telefone Bizum',
-createBtn:'Criar plano 🎉',saving:'A guardar...',planCreated:'Plano criado!',shareWith:'Partilhe com o seu grupo',
-copyLink:'Copiar link 🔗',copied:'✓ Copiado!',viewRes:'Ver resultados →',
-previewBy:'Organizado por',previewDates:'Datas propostas',previewBudget:'Orçamento estimado',previewJoin:'Marcar disponibilidade →',editAvail:'Editar a minha resposta →',
-yourAvail:'Quando pode?',avYes:'✅ Sim',avMaybe:'🤔 Talvez',avNo:'❌ Não posso',markAtLeastOne:'Marque pelo menos uma data',
-maybeNote:'Adicionado a «talvez» — o organizador verá isto.',votingExplainYes:'Conto consigo, o seu voto decide a data',votingExplainNo:'não pode nesse dia, se esse dia for escolhido fica de fora',votingExplainMaybe:'não tem a certeza se vai, não conta para a escolha dessa data',
-planFull:'O plano está cheio. Contacte o organizador para mais informações.',chooseOption:'Escolha a sua opção preferida',
-whichStops:'Em que paragens vai participar?',stopAttendHint:'Pode participar em parte do plano',stopFull:'Esta paragem está cheia',
-howGet:'Como vai chegar?',howOpt:'(opcional)',car:'🚗 De carro',moto:'🏍️ De mota',transit:'🚇 Transporte público',taxi:'🚕 Táxi/Uber',walk:'🚶 A pé',bike:'🚲 Bicicleta/Trotinete',other:'✏️ Outro',otherPh:'Como vai chegar?',
-commentLbl:'💬 Comentário (opcional)',commentPh:'Mal posso esperar! / Vou chegar um pouco atrasado / ...',saveAvail:'Guardar →',
-savedTitle:'Guardado!',savedSub:'A sua disponibilidade foi registada. Pode editá-la a qualquer momento.',editingPrev:'A editar a sua resposta anterior',
-viralQ:'Gostou do queda.?',viralSub:'Crie o seu próprio plano gratuitamente.',viralBtn:'Criar o meu plano →',
-placeOkQ:'O local serve?',dateOkQ:'A data serve?',timeOkQ:'O horário serve?',answerAll:'Responda a todas as perguntas',suggestAlt:'Sugerir alternativa',suggestAltHint:'Opcional — sugira um local que prefira',placeNamePh:'Nome do local...',yourAvailDates:'Que dias pode?',yourAvailDatesHint:'Selecione os dias que lhe convêm',yourAvailTime:'Que horário lhe convém?',fromLbl:'Das',toLbl:'Até',
-responses:'resposta',responsesP:'respostas',noResp:'Ninguém respondeu ainda',noRespSub:'Partilhe o código',
-bestOpt:'Melhor opção',CONFIRMED:'CONFIRMADO',confirmThis:'📌 Confirmar esta data',confirming:'A confirmar...',confirmSmall:'Confirmar',
-perPerson:'Por pessoa',totalLbl:'Total',giftSec:'🎁 Presente coletivo',totalPrice:'Preço total',perOf:'Por pessoa',seeGift:'Ver presente ↗',payTitle:'Pagar a minha parte',
-myPlansT:'Meus planos',noPlansUp:'Sem planos futuros',noPlansUpS:'Crie ou participe num',noPlansPast:'Sem planos passados',upcoming:'📅 Futuros',pastTab:'✅ Passados',
+stop:'Paragem',
+
+
+
+
+
+
+
+
+
+
+
+
+car:'🚗 De carro',
+commentPh:'Mal posso esperar! / Vou chegar um pouco atrasado / ...',saveAvail:'Guardar →',
+savedTitle:'Guardado!',
+
+placeOkQ:'O local serve?',dateOkQ:'A data serve?',timeOkQ:'O horário serve?',yourAvailDates:'Que dias pode?',fromLbl:'Das',toLbl:'Até',
+responses:'resposta',responsesP:'respostas',
+
+
+noPlansUp:'Sem planos futuros',noPlansPast:'Sem planos passados',upcoming:'📅 Futuros',pastTab:'✅ Passados',
 organizer:'Organizador',guest:'Convidado',confirmedDate:'📌 Data confirmada',notifyGrp:'Notificar grupo 💬',sendRem:'Lembrete',remSent:'✓ Enviado',
-makePublic:'🌍 Tornar público',isPublicLbl:'✓ Público',delConfirm:'Eliminar este plano?',delWarn:'Será eliminado para todos. Não pode ser desfeito.',delError:'Não foi possível eliminar o plano',deleting:'A eliminar...',leaveConfirm:'Sair deste plano?',leaveWarn:'Será removido apenas da sua lista.',cancel:'Cancelar',del:'Eliminar',leave:'Sair',comments:'Comentários',
-tabs:{plan:'📍 Plano',vote:'🗳️ Votos',result:'📋 Resultado',more:'💡 Mais'},changeHistoryLbl:'Histórico de alterações',attendanceLbl:'Presença',screenshotBtn:'Descarregar como imagem',confirmPlanBtn:'Confirmar este plano',planConfirmed:'Plano confirmado!',altDatesLbl:'Datas alternativas',deadlineLbl:'Prazo para responder',deadlinePassed:'Prazo encerrado',remainingLbl:'restante',removeDeadline:'Remover prazo',lateArrivals:'Chegam tarde',voteWhen:'Quando?',voteWhere:'Onde?',stopLbl:'Paragem',codeLbl:'Código do plano',transportLbl:'Transporte',addressLbl:'Morada',notesLbl:'Notas',delConfirm2:'Eliminar esta paragem?',noMinCap:'Sem lotação mín.',noMaxCap:'Sem lotação máx.',onTimeQ:'Chega a tempo?',howLateQ:'Quanto tarde?',maxLateLbl:'Máx. atraso',onTimeLbl:'Pontual',meetYes:'Irei ao ponto de encontro',meetNo:'Vou direto ao local',respSaved:'✓ Guardado — toque para atualizar',availStartTime:'A que horas poderia começar?',alternativeDates:'Datas alternativas',
-discoverT:'Descobrir',discoverS:'Planos públicos abertos a todos.',noPublic:'Sem planos públicos de momento.',joinPlan:'Participar →',
-yourRoleLbl:'O seu papel',optionalLbl:'opcional',otherRolePh:'Ou escreva o seu...',surpriseMode_lbl:'🎭 Modo surpresa',surpriseReveal:'É uma surpresa!',surpriseSub:'O destino é revelado quando o organizador confirma a data.',signOut:'Sair',todayLbl:'Hoje!',tomorrowLbl:'Amanhã!',
+delConfirm:'Eliminar este plano?',delWarn:'Será eliminado para todos. Não pode ser desfeito.',leaveConfirm:'Sair deste plano?',leaveWarn:'Será removido apenas da sua lista.',cancel:'Cancelar',del:'Eliminar',leave:'Sair',comments:'Comentários',
+tabs:{plan:'📍 Plano',vote:'🗳️ Votos',result:'📋 Resultado',more:'💡 Mais'},changeHistoryLbl:'Histórico de alterações',attendanceLbl:'Presença',screenshotBtn:'Descarregar como imagem',confirmPlanBtn:'Confirmar este plano',planConfirmed:'Plano confirmado!',altDatesLbl:'Datas alternativas',deadlineLbl:'Prazo para responder',deadlinePassed:'Prazo encerrado',removeDeadline:'Remover prazo',lateArrivals:'Chegam tarde',stopLbl:'Paragem',codeLbl:'Código do plano',transportLbl:'Transporte',addressLbl:'Morada',notesLbl:'Notas',delConfirm2:'Eliminar esta paragem?',noMinCap:'Sem lotação mín.',noMaxCap:'Sem lotação máx.',onTimeQ:'Chega a tempo?',howLateQ:'Quanto tarde?',maxLateLbl:'Máx. atraso',onTimeLbl:'Pontual',meetYes:'Irei ao ponto de encontro',meetNo:'Vou direto ao local',respSaved:'✓ Guardado — toque para atualizar',availStartTime:'A que horas poderia começar?',
+
+signOut:'Sair',todayLbl:'Hoje!',tomorrowLbl:'Amanhã!',
 authSignInTab:'Iniciar sessão',authRegisterTab:'Registar',authPassword:'Palavra-passe',authMinChars:'Pelo menos 6 caracteres',authCreateAccount:'Criar conta',authForgotPass:'Esqueceu a palavra-passe?',authBackLogin:'← Voltar ao início de sessão',authSendEmail:'Enviar email',authWrongPass:'Email ou palavra-passe incorretos.',authConnError:'Erro de conexão. Tente novamente.',
-orContinueWith:'ou continue com',continueGoogle:'Continuar com Google',authAlreadyReg:'Este email já está registado. Inicie sessão.',authPassMin:'A palavra-passe deve ter pelo menos 6 caracteres',authResetInfo:'Introduza o seu email e enviaremos um link para redefinir a sua palavra-passe.',authEmailSent:'Email enviado. Verifique a sua caixa de entrada.',confirmEmailFirst:'Por favor confirme o seu email primeiro.',signInError:'Erro ao iniciar sessão.',createAccountError:'Erro ao criar conta.',sendEmailError:'Erro ao enviar email.',checkYourEmail:'Verifique o seu email!',sentConfirmTo:'Enviámos um link de confirmação para:',clickToConfirm:'Clique no link do email para ativar a sua conta. Depois volte aqui e inicie sessão.',checkSpam:'Se não o encontrar, verifique a pasta de spam.',goToSignIn:'Ir para Iniciar sessão →',yesLbl:'Sim',autoConfirmDesc:'Confirma automaticamente quando X pessoas dizem Sim',passwordsNoMatch:'As palavras-passe não coincidem.',passwordChangeError:'Erro ao alterar a palavra-passe.',connectionError:'Erro de conexão.',passwordUpdated:'Palavra-passe atualizada!',nowCanSignIn:'Já pode iniciar sessão.',newPassword:'Nova palavra-passe',chooseNewPassword:'Escolha uma nova palavra-passe para a sua conta.',repeatPassword:'Repetir palavra-passe',changePassword:'Alterar palavra-passe',notifyTo:'Notificar',reminderMsg:'Lembrete: *{name}* está a chegar!',newRespFrom:'Nova resposta de {name}',itsToday:'É hoje!',respondToPlan:'Responda a *{name}*!',editedTimes:'Editado {n} vez(es)',
-shareLangLbl:'Idioma da mensagem',copyCode:'Copiar código',codeCopied:'✓ Código copiado!',draftRestored:'Rascunho restaurado',draftDiscard:'Descartar',autoConfirmTitle:'Confirmação automática',peopleSaid:'pessoas disseram sim para',autoConfirmQ:'Confirmar automaticamente esta data?',notYet:'Ainda não',editPlan:'Editar plano',saveLbl:'Guardar',doneLbl:'Feito',addToCalendar:'Adicionar ao calendário',
-createError:'Erro ao criar o plano. Verifique a sua conexão.',someone:'Alguém',noResponsesYet:'Ninguém respondeu ainda',personResponded:n=>n===1?'pessoa respondeu':'pessoas responderam',
-personalInfo:'Informações pessoais',genderLbl:'Género',genderFemale:'Mulher',genderMale:'Homem',genderOther:'Outro',genderCustomPh:'Como se identifica?',birthdateLbl:'Data de nascimento',locationLbl:'Localização',yearsOld:'anos',
-landingSignIn:'Iniciar sessão',landingHero1:'Mais planos,',landingHero2:'menos caos.',landingSub2:'Diga adeus aos chats intermináveis.',landingCTA2:'Começar',landingFooter:'Planos de grupo, zero caos.',
-whenTitle:'Quando?',whereTitle:'Onde?',nameTitle:'Nome',organizedBy:'Por',planPreviewEmpty:'O seu plano aparecerá aqui...',searchPlacePh:'Procurar um local... (Enter)',myProfile:'O meu perfil',editBtn:'Editar',nameLbl:'Nome *',yourNamePh2:'O seu nome',usernameLbl:'Nome de utilizador *',usernameHint:'O teu utilizador é único e identifica-te.',myPlansTitle:'Meus planos',lightMode:'Modo claro',darkMode:'Modo escuro',
-icsDesc:'Plano criado com queda.',icsCode:'Código',summaryMsg:(y,t,l,no,n)=>`${y} de ${t} podem em ${l}${no>0?' · '+no+' não':''}.`,
+orContinueWith:'ou continue com',continueGoogle:'Continuar com Google',authAlreadyReg:'Este email já está registado. Inicie sessão.',authPassMin:'A palavra-passe deve ter pelo menos 6 caracteres',authResetInfo:'Introduza o seu email e enviaremos um link para redefinir a sua palavra-passe.',authEmailSent:'Email enviado. Verifique a sua caixa de entrada.',confirmEmailFirst:'Por favor confirme o seu email primeiro.',signInError:'Erro ao iniciar sessão.',createAccountError:'Erro ao criar conta.',sendEmailError:'Erro ao enviar email.',checkYourEmail:'Verifique o seu email!',sentConfirmTo:'Enviámos um link de confirmação Clique no link do email para ativar a sua conta. Depois volte aqui e inicie sessão.',checkSpam:'Se não o encontrar, verifique a pasta de spam.',goToSignIn:'Ir para Iniciar sessão →',yesLbl:'Sim',passwordsNoMatch:'As palavras-passe não coincidem.',passwordChangeError:'Erro ao alterar a palavra-passe.',connectionError:'Erro de conexão.',passwordUpdated:'Palavra-passe atualizada!',nowCanSignIn:'Já pode iniciar sessão.',newPassword:'Nova palavra-passe',chooseNewPassword:'Escolha uma nova palavra-passe para a sua conta.',repeatPassword:'Repetir palavra-passe',changePassword:'Alterar palavra-passe',reminderMsg:'Lembrete: *{name}* está a chegar!',newRespFrom:'Nova resposta de {name}',itsToday:'É hoje!',respondToPlan:'Responda a *{name}*!',
+draftRestored:'Rascunho restaurado',draftDiscard:'Descartar',autoConfirmTitle:'Confirmação automática',notYet:'Ainda não',saveLbl:'Guardar',doneLbl:'Feito',addToCalendar:'Adicionar ao calendário',
+createError:'Erro ao criar o plano. Verifique a sua conexão.',
+
+landingSignIn:'Iniciar sessão',landingHero1:'Mais planos,',landingHero2:'menos caos.',landingCTA2:'Começar',
+searchPlacePh:'Procurar um local... (Enter)',myProfile:'O meu perfil',editBtn:'Editar',nameLbl:'Nome *',yourNamePh2:'O seu nome',usernameLbl:'Nome de utilizador *',usernameHint:'O teu utilizador é único e identifica-te.',myPlansTitle:'Meus planos',
+icsDesc:'Plano criado com queda.',icsCode:'Código',
 pickOneDate:'Escolha apenas uma data',pickOneTime:'Escolha apenas um horário',pickOnePlace:'Escolha apenas um local',dontWorryDates:'Não se preocupe, pode adicionar ou editar mais datas depois.',dontWorryTimes:'Não se preocupe, pode adicionar ou editar mais horários depois.',dontWorryPoints:'Não se preocupe, pode adicionar ou editar mais pontos depois.',
-nextBtn:'Seguinte →',physicalPlace:'Físico',readyQ:'Pronto?',aboutToCreate:'Está prestes a criar o seu plano. Pode editar, adicionar e partilhar o que precisar depois.',creatingPlan:'A criar...',createPlanBtn:'Criar plano 🎉',planCreatedTitle:'Plano criado!',shareCodeMsg:'Partilhe o código para que o seu grupo possa participar.',reviewPlan:'Rever o seu plano →',createAnother:'Criar outro plano',homeBtn:'Início',shareJoinText:'Junta-te ao meu plano!',
-stepName:'Nome',stepSend:'Enviar',stepDates:'Datas',tapDates:'Toque nas datas em que pode ir',enterYourName:'Introduza o seu nome',meetingPointLbl2:'Ponto de encontro',beforeLbl:'antes',whenCanGoHere:'Quando pode vir aqui?',tapDateInstruction:'Toque numa data para marcar que pode ir.',timesLbl:'horários',whichOptionPref:'Qual opção prefere?',pointN:'Ponto',finishBtn:'Terminar',backBtn:'Voltar',
-editNameLbl:'Nome',editDescLbl:'Descrição',editDatesLbl:'Datas',editTimesLbl:'Horários',editPointsLbl:'Pontos',editHintMsg:'Para adicionar pontos e alternativas, edite na vista do plano.',
-cancelledStopsMsg:(n)=>`${n} ponto${n>1?'s':''} cancelado${n>1?'s':''}`,planStartsAt:'O plano começa às',cancelledMin:'Cancelado — mínimo não atingido',noDataYet:'Sem dados ainda',noDataHint:'Quando responderem, verá os dados aqui',chosenPlan:'Plano escolhido',bestOption:'Melhor opção',attendance:'participação',tieMsg:(n)=>`Empate — ${n} opções`,pickToConfirm:'Escolha uma para confirmar',cancelledDetail:(yc,min)=>`cancelado (${yc}/${min} mín)`,responsesLbl:'respostas',dateRanking:'Ranking de datas',maxDatesMsg:(n)=>`Máximo ${n} datas`,langLabel:'Idioma',
+nextBtn:'Seguinte →',physicalPlace:'Físico',readyQ:'Pronto?',aboutToCreate:'Está prestes a criar o seu plano. Pode editar, adicionar e partilhar o que precisar depois.',creatingPlan:'A criar...',createPlanBtn:'Criar plano 🎉',planCreatedTitle:'Plano criado!',shareCodeMsg:'Partilhe o código para que o seu grupo possa participar.',reviewPlan:'Rever o seu plano →',createAnhomeBtn:'Início',shareJoinText:'Junta-te ao meu plano!',
+meetingPointLbl2:'Ponto de encontro',beforeLbl:'antes',
+editNameLbl:'Nome',editDescLbl:'Descrição',editDatesLbl:'Datas',editTimesLbl:'Horários',
+noDataYet:'Sem dados ainda',noDataHint:'Quando responderem, verá os dados aqui',maxDatesMsg:(n)=>`Máximo ${n} datas`,
   },
   fr:{
-tagline:'Plus de plans, moins de chaos.',sub:'Dites adieu aux discussions sans fin.',
-create:'Créer un plan →',myPlans:'👤 Mes plans',discover:'🔍 Découvrir',orJoin:'ou rejoignez',codePh:'Code du plan',go:'Go',notFound:'Code introuvable.',
-back:'← Retour',cont:'Continuer →',datesStep:'Dates',extrasStep:'Extras',
-planName:'Nom du plan',desc:'Description (facultatif)',descPh:'Détails, notes...',yourName:'Votre nom',yourNamePh:'Comment vous appelez-vous ?',emailPh:'vous@email.com',stop:'Étape',estPer:'Estimation par personne',extrasTitle:'Extras',
-dcLbl:'👗 Dress code / Tenue vestimentaire',dcNote:'Note pour les invités (facultatif)...',dcCustomPh:'ex. Hawaïen, thème années 80...',dcNoneNote:'Pas de dress code. Demandez en cas de doute.',
-dressCodes:[{k:'smart',l:'👔 Chic'},{k:'casual',l:'👕 Décontracté'},{k:'beach',l:'🩱 Plage'},{k:'sport',l:'🥾 Sportif'},{k:'party',l:'🪩 Fête'},{k:'business',l:'💼 Formel'},{k:'costume',l:'🎭 Déguisement'},{k:'custom',l:'✏️ Personnalisé'}],
-gift:'🎁 Il y a un cadeau collectif',giftSub:'Anniversaire, mariage, départ...',giftName:'Nom du cadeau',giftLink:'Lien',giftPrice:'Prix total €',payLink:'Lien de paiement',bring:'🎒 Quoi apporter',addItem:'+ Ajouter',newItem:'ex. vin, parapluie...',payData:'💳 Coordonnées de paiement',payNote:"Laissez vide ce que vous n'utilisez pas.",bizumPh:'Téléphone Bizum',
-createBtn:'Créer le plan 🎉',saving:'Enregistrement...',planCreated:'Plan créé !',shareWith:'Partagez avec votre groupe',copyLink:'Copier le lien 🔗',copied:'✓ Copié !',viewRes:'Voir les résultats →',
-previewBy:'Organisé par',previewDates:'Dates proposées',previewBudget:'Budget estimé',previewJoin:'Indiquer mes disponibilités →',editAvail:'Modifier ma réponse →',yourAvail:'Quand êtes-vous disponible ?',avYes:'✅ Oui',avMaybe:'🤔 Peut-être',avNo:'❌ Pas disponible',markAtLeastOne:'Cochez au moins une date',
-maybeNote:"Ajouté à « peut-être » — l'organisateur le verra.",votingExplainYes:'Je compte sur votre présence, votre vote décide la date',votingExplainNo:"vous n'êtes pas disponible ce jour-là",votingExplainMaybe:"pas sûr d'y aller, vous ne comptez pas pour le choix de cette date",planFull:"Le plan est complet. Contactez l'organisateur.",chooseOption:'Choisissez votre option préférée',
-whichStops:'À quelles étapes participerez-vous ?',stopAttendHint:'Vous pouvez participer à une partie du plan',stopFull:'Cette étape est complète',howGet:'Comment vous y rendez-vous ?',howOpt:'(facultatif)',car:'🚗 En voiture',moto:'🏍️ En moto',transit:'🚇 Transport en commun',taxi:'🚕 Taxi/Uber',walk:'🚶 À pied',bike:'🚲 Vélo/Trottinette',other:'✏️ Autre',otherPh:'Comment vous y rendez-vous ?',
-commentLbl:'💬 Commentaire (facultatif)',commentPh:"J'ai hâte ! / Je serai un peu en retard / ...",saveAvail:'Enregistrer →',savedTitle:'Enregistré !',savedSub:'Votre disponibilité est enregistrée.',editingPrev:'Modification de votre réponse précédente',viralQ:'Vous avez aimé queda. ?',viralSub:'Créez votre propre plan gratuitement.',viralBtn:'Créer mon plan →',
-placeOkQ:'Le lieu vous convient ?',dateOkQ:'La date vous convient ?',timeOkQ:"L'heure vous convient ?",answerAll:'Répondez à toutes les questions',suggestAlt:'Suggérer une alternative',suggestAltHint:'Facultatif — suggérez un lieu que vous préférez',placeNamePh:'Nom du lieu...',yourAvailDates:'Quels jours pouvez-vous ?',yourAvailDatesHint:'Sélectionnez les dates qui vous conviennent',yourAvailTime:'Quelle plage horaire vous convient ?',fromLbl:'De',toLbl:'À',
-responses:'réponse',responsesP:'réponses',noResp:"Personne n'a encore répondu",noRespSub:'Partagez le code',bestOpt:'Meilleure option',CONFIRMED:'CONFIRMÉ',confirmThis:'📌 Confirmer cette date',confirming:'Confirmation...',confirmSmall:'Confirmer',perPerson:'Par personne',totalLbl:'Total',giftSec:'🎁 Cadeau collectif',totalPrice:'Prix total',perOf:'Par personne',seeGift:'Voir le cadeau ↗',payTitle:'Payer ma part',
-myPlansT:'Mes plans',noPlansUp:'Aucun plan à venir',noPlansUpS:'Créez ou rejoignez-en un',noPlansPast:'Aucun plan passé',upcoming:'📅 À venir',pastTab:'✅ Passés',organizer:'Organisateur',guest:'Invité',confirmedDate:'📌 Date confirmée',notifyGrp:'Notifier le groupe 💬',sendRem:'Rappel',remSent:'✓ Envoyé',makePublic:'🌍 Rendre public',isPublicLbl:'✓ Public',delConfirm:'Supprimer ce plan ?',delWarn:'Sera supprimé pour tout le monde.',delError:'Impossible de supprimer le plan',deleting:'Suppression...',leaveConfirm:'Quitter ce plan ?',leaveWarn:'Sera uniquement retiré de votre liste.',cancel:'Annuler',del:'Supprimer',leave:'Quitter',comments:'Commentaires',
-tabs:{plan:'📍 Plan',vote:'🗳️ Votes',result:'📋 Résultat',more:'💡 Plus'},changeHistoryLbl:'Historique',attendanceLbl:'Présence',screenshotBtn:'Télécharger en image',confirmPlanBtn:'Confirmer ce plan',planConfirmed:'Plan confirmé !',altDatesLbl:'Dates alternatives',deadlineLbl:'Date limite',deadlinePassed:'Délai dépassé',remainingLbl:'restant',removeDeadline:'Supprimer la date limite',lateArrivals:'En retard',voteWhen:'Quand ?',voteWhere:'Où ?',stopLbl:'Arrêt',codeLbl:'Code du plan',transportLbl:'Transport',addressLbl:'Adresse',notesLbl:'Notes',delConfirm2:'Supprimer cet arrêt ?',noMinCap:'Pas de capacité min.',noMaxCap:'Pas de capacité max.',onTimeQ:'Arrivez-vous à l\'heure ?',howLateQ:'Combien de retard ?',maxLateLbl:'Retard max.',onTimeLbl:"À l'heure",meetYes:'Point de rencontre',meetNo:'Je vais directement',respSaved:'✓ Enregistré — appuyez pour modifier',availStartTime:'À quelle heure pourriez-vous commencer ?',alternativeDates:'Dates alternatives',discoverT:'Découvrir',discoverS:'Plans publics ouverts à tous.',noPublic:'Aucun plan public pour le moment.',joinPlan:'Rejoindre →',yourRoleLbl:'Votre rôle',optionalLbl:'facultatif',otherRolePh:'Ou écrivez le vôtre...',surpriseMode_lbl:'🎭 Mode surprise',surpriseReveal:"C'est une surprise !",surpriseSub:"La destination est révélée quand la date est confirmée.",signOut:'Déconnexion',todayLbl:"Aujourd'hui !",tomorrowLbl:'Demain !',
-authSignInTab:'Se connecter',authRegisterTab:"S'inscrire",authPassword:'Mot de passe',authMinChars:'Au moins 6 caractères',authCreateAccount:'Créer un compte',authForgotPass:'Mot de passe oublié ?',authBackLogin:'← Retour à la connexion',authSendEmail:'Envoyer un email',authWrongPass:'Email ou mot de passe incorrect.',authConnError:'Erreur de connexion. Réessayez.',orContinueWith:'ou continuer avec',continueGoogle:'Continuer avec Google',authAlreadyReg:'Cet email est déjà enregistré. Connectez-vous.',authPassMin:'Le mot de passe doit contenir au moins 6 caractères',authResetInfo:'Entrez votre email et nous vous enverrons un lien.',authEmailSent:'Email envoyé. Vérifiez votre boîte de réception.',confirmEmailFirst:"Veuillez d'abord confirmer votre email.",signInError:'Erreur de connexion.',createAccountError:'Erreur lors de la création du compte.',sendEmailError:"Erreur lors de l'envoi.",checkYourEmail:'Vérifiez votre email !',sentConfirmTo:'Nous avons envoyé un lien de confirmation à :',clickToConfirm:"Cliquez sur le lien dans l'email pour activer votre compte.",checkSpam:'Vérifiez votre dossier spam.',goToSignIn:'Aller à la connexion →',yesLbl:'Oui',autoConfirmDesc:'Confirme automatiquement quand X personnes disent Oui',passwordsNoMatch:'Les mots de passe ne correspondent pas.',passwordChangeError:'Erreur lors du changement.',connectionError:'Erreur de connexion.',passwordUpdated:'Mot de passe mis à jour !',nowCanSignIn:'Vous pouvez maintenant vous connecter.',newPassword:'Nouveau mot de passe',chooseNewPassword:'Choisissez un nouveau mot de passe.',repeatPassword:'Répéter le mot de passe',changePassword:'Changer le mot de passe',notifyTo:'Notifier',reminderMsg:'Rappel : *{name}* approche !',newRespFrom:'Nouvelle réponse de {name}',itsToday:"C'est aujourd'hui !",respondToPlan:'Répondez à *{name}* !',editedTimes:'Modifié {n} fois',
-shareLangLbl:'Langue du message',copyCode:'Copier le code',codeCopied:'✓ Code copié !',draftRestored:'Brouillon restauré',draftDiscard:'Supprimer',autoConfirmTitle:'Confirmation automatique',peopleSaid:'personnes ont dit oui pour',autoConfirmQ:'Confirmer automatiquement ?',notYet:'Pas encore',editPlan:'Modifier le plan',saveLbl:'Enregistrer',doneLbl:'Terminé',addToCalendar:'Ajouter au calendrier',createError:'Erreur lors de la création. Vérifiez votre connexion.',someone:"Quelqu'un",noResponsesYet:"Personne n'a encore répondu",personResponded:n=>n===1?'personne a répondu':'personnes ont répondu',
-personalInfo:'Informations personnelles',genderLbl:'Genre',genderFemale:'Femme',genderMale:'Homme',genderOther:'Autre',genderCustomPh:'Comment vous identifiez-vous ?',birthdateLbl:'Date de naissance',locationLbl:'Localisation',yearsOld:'ans',
-landingSignIn:'Se connecter',landingHero1:'Plus de plans,',landingHero2:'moins de chaos.',landingSub2:'Dites adieu aux discussions sans fin.',landingCTA2:'Commencer',landingFooter:'Plans de groupe, zéro chaos.',whenTitle:'Quand ?',whereTitle:'Où ?',nameTitle:'Nom',organizedBy:'Par',planPreviewEmpty:'Votre plan apparaîtra ici...',searchPlacePh:'Chercher un lieu... (Entrée)',myProfile:'Mon profil',editBtn:'Modifier',nameLbl:'Nom *',yourNamePh2:'Votre nom',usernameLbl:"Nom d'utilisateur *",usernameHint:'Ton nom d\'utilisateur est unique et t\'identifie.',myPlansTitle:'Mes plans',lightMode:'Mode clair',darkMode:'Mode sombre',icsDesc:'Plan créé avec queda.',icsCode:'Code',summaryMsg:(y,t,l,no,n)=>`${y} sur ${t} peuvent le ${l}${no>0?' · '+no+' non':''}.`,
+sub:'Dites adieu aux discussions sans fin.',
+create:'Créer un plan →',myPlans:'👤 Mes plans',orJoin:'ou rejoignez',codePh:'Code du plan',go:'Go',notFound:'Code introuvable.',
+back:'← Retour',datesStep:'Dates',
+yourName:'Votre nom',yourNamePh:'Comment vous appelez-vous ?',emailPh:'vous@email.com',stop:'Étape',
+
+
+
+
+
+
+car:'🚗 En voiture',
+commentPh:"J'ai hâte ! / Je serai un peu en retard / ...",saveAvail:'Enregistrer →',savedTitle:'Enregistré !',
+placeOkQ:'Le lieu vous convient ?',dateOkQ:'La date vous convient ?',timeOkQ:"L'heure vous convient ?",yourAvailDates:'Quels jours pouvez-vous ?',fromLbl:'De',toLbl:'À',
+responses:'réponse',responsesP:'réponses',
+noPlansUp:'Aucun plan à venir',noPlansPast:'Aucun plan passé',upcoming:'📅 À venir',pastTab:'✅ Passés',organizer:'Organisateur',guest:'Invité',confirmedDate:'📌 Date confirmée',notifyGrp:'Notifier le groupe 💬',sendRem:'Rappel',remSent:'✓ Envoyé',delConfirm:'Supprimer ce plan ?',delWarn:'Sera supprimé pour tout le monde.',leaveConfirm:'Quitter ce plan ?',leaveWarn:'Sera uniquement retiré de votre liste.',cancel:'Annuler',del:'Supprimer',leave:'Quitter',comments:'Commentaires',
+tabs:{plan:'📍 Plan',vote:'🗳️ Votes',result:'📋 Résultat',more:'💡 Plus'},changeHistoryLbl:'Historique',attendanceLbl:'Présence',screenshotBtn:'Télécharger en image',confirmPlanBtn:'Confirmer ce plan',planConfirmed:'Plan confirmé !',altDatesLbl:'Dates alternatives',deadlineLbl:'Date limite',deadlinePassed:'Délai dépassé',removeDeadline:'Supprimer la date limite',lateArrivals:'En retard',stopLbl:'Arrêt',codeLbl:'Code du plan',transportLbl:'Transport',addressLbl:'Adresse',notesLbl:'Notes',delConfirm2:'Supprimer cet arrêt ?',noMinCap:'Pas de capacité min.',noMaxCap:'Pas de capacité max.',onTimeQ:'Arrivez-vous à l\'heure ?',howLateQ:'Combien de retard ?',maxLateLbl:'Retard max.',onTimeLbl:"À l'heure",meetYes:'Point de rencontre',meetNo:'Je vais directement',respSaved:'✓ Enregistré — appuyez pour modifier',availStartTime:'À quelle heure pourriez-vous commencer ?',signOut:'Déconnexion',todayLbl:"Aujourd'hui !",tomorrowLbl:'Demain !',
+authSignInTab:'Se connecter',authRegisterTab:"S'inscrire",authPassword:'Mot de passe',authMinChars:'Au moins 6 caractères',authCreateAccount:'Créer un compte',authForgotPass:'Mot de passe oublié ?',authBackLogin:'← Retour à la connexion',authSendEmail:'Envoyer un email',authWrongPass:'Email ou mot de passe incorrect.',authConnError:'Erreur de connexion. Réessayez.',orContinueWith:'ou continuer avec',continueGoogle:'Continuer avec Google',authAlreadyReg:'Cet email est déjà enregistré. Connectez-vous.',authPassMin:'Le mot de passe doit contenir au moins 6 caractères',authResetInfo:'Entrez votre email et nous vous enverrons un lien.',authEmailSent:'Email envoyé. Vérifiez votre boîte de réception.',confirmEmailFirst:"Veuillez d'abord confirmer votre email.",signInError:'Erreur de connexion.',createAccountError:'Erreur lors de la création du compte.',sendEmailError:"Erreur lors de l'envoi.",checkYourEmail:'Vérifiez votre email !',sentConfirmTo:'Nous avons envoyé un lien de confirmation à :',clickToConfirm:"Cliquez sur le lien dans l'email pour activer votre compte.",checkSpam:'Vérifiez votre dossier spam.',goToSignIn:'Aller à la connexion →',yesLbl:'Oui',passwordsNoMatch:'Les mots de passe ne correspondent pas.',passwordChangeError:'Erreur lors du changement.',connectionError:'Erreur de connexion.',passwordUpdated:'Mot de passe mis à jour !',nowCanSignIn:'Vous pouvez maintenant vous connecter.',newPassword:'Nouveau mot de passe',chooseNewPassword:'Choisissez un nouveau mot de passe.',repeatPassword:'Répéter le mot de passe',changePassword:'Changer le mot de passe',reminderMsg:'Rappel : *{name}* approche !',newRespFrom:'Nouvelle réponse de {name}',itsToday:"C'est aujourd'hui !",respondToPlan:'Répondez à *{name}* !',
+draftRestored:'Brouillon restauré',draftDiscard:'Supprimer',autoConfirmTitle:'Confirmation automatique',notYet:'Pas encore',saveLbl:'Enregistrer',doneLbl:'Terminé',addToCalendar:'Ajouter au calendrier',createError:'Erreur lors de la création. Vérifiez votre connexion.',
+
+landingSignIn:'Se connecter',landingHero1:'Plus de plans,',landingHero2:'moins de chaos.',landingCTA2:'Commencer',searchPlacePh:'Chercher un lieu... (Entrée)',myProfile:'Mon profil',editBtn:'Modifier',nameLbl:'Nom *',yourNamePh2:'Votre nom',usernameLbl:"Nom d'utilisateur *",usernameHint:'Ton nom d\'utilisateur est unique et t\'identifie.',myPlansTitle:'Mes plans',icsDesc:'Plan créé avec queda.',icsCode:'Code',
 pickOneDate:'Choisissez une seule date',pickOneTime:'Choisissez un seul horaire',pickOnePlace:'Choisissez un seul lieu',dontWorryDates:"Ne vous inquiétez pas, vous pourrez ajouter des dates plus tard.",dontWorryTimes:"Ne vous inquiétez pas, vous pourrez ajouter des horaires plus tard.",dontWorryPoints:"Ne vous inquiétez pas, vous pourrez ajouter des points plus tard.",
-nextBtn:'Suivant →',physicalPlace:'Physique',readyQ:'Prêt ?',aboutToCreate:'Vous êtes sur le point de créer votre plan. Vous pourrez tout modifier après.',creatingPlan:'Création...',createPlanBtn:'Créer le plan 🎉',planCreatedTitle:'Plan créé !',shareCodeMsg:'Partagez le code pour que votre groupe puisse rejoindre.',reviewPlan:'Consulter votre plan →',createAnother:'Créer un autre plan',homeBtn:'Accueil',shareJoinText:'Rejoins mon plan !',
-stepName:'Nom',stepSend:'Envoyer',stepDates:'Dates',tapDates:'Appuyez sur les dates disponibles',enterYourName:'Entrez votre nom',meetingPointLbl2:'Point de rencontre',beforeLbl:'avant',whenCanGoHere:'Quand pouvez-vous y aller ?',tapDateInstruction:'Appuyez sur une date pour indiquer votre disponibilité.',timesLbl:'horaires',whichOptionPref:'Quelle option préférez-vous ?',pointN:'Point',finishBtn:'Terminer',backBtn:'Retour',
-editNameLbl:'Nom',editDescLbl:'Description',editDatesLbl:'Dates',editTimesLbl:'Horaires',editPointsLbl:'Points',editHintMsg:'Pour ajouter des points et alternatives, modifiez depuis la vue du plan.',cancelledStopsMsg:(n)=>`${n} point${n>1?'s':''} annulé${n>1?'s':''}`,planStartsAt:'Le plan commence à',cancelledMin:'Annulé — minimum non atteint',noDataYet:'Pas encore de données',noDataHint:'Quand les invités répondront, vous verrez les données ici',chosenPlan:'Plan choisi',bestOption:'Meilleure option',attendance:'participation',tieMsg:(n)=>`Égalité — ${n} options`,pickToConfirm:'Choisissez-en une pour confirmer',cancelledDetail:(yc,min)=>`annulé (${yc}/${min} min)`,responsesLbl:'réponses',dateRanking:'Classement des dates',maxDatesMsg:(n)=>`Maximum ${n} dates`,langLabel:'Langue',
+nextBtn:'Suivant →',physicalPlace:'Physique',readyQ:'Prêt ?',aboutToCreate:'Vous êtes sur le point de créer votre plan. Vous pourrez tout modifier après.',creatingPlan:'Création...',createPlanBtn:'Créer le plan 🎉',planCreatedTitle:'Plan créé !',shareCodeMsg:'Partagez le code pour que votre groupe puisse rejoindre.',reviewPlan:'Consulter votre plan →',createAnhomeBtn:'Accueil',shareJoinText:'Rejoins mon plan !',
+meetingPointLbl2:'Point de rencontre',beforeLbl:'avant',
+editNameLbl:'Nom',editDescLbl:'Description',editDatesLbl:'Dates',editTimesLbl:'Horaires',noDataYet:'Pas encore de données',noDataHint:'Quand les invités répondront, vous verrez les données ici',maxDatesMsg:(n)=>`Maximum ${n} dates`,
     shareCodeMsg2:'Tu peux maintenant partager ton code avec qui tu veux. Consulte ton plan pour modifier ou ajouter ce dont tu as besoin.',sharePlanBtn:'Partage ton plan',
     tipLang:'Changer la langue',tipTheme:'Changer le thème',tipHome:'Accueil',tipProfile:'Ton profil',usernameTaken:'Ce nom d\'utilisateur est déjà pris.',untitled:'Sans titre',noDesc:'Sans description',seeMore:'voir plus',addNextPoint:'Ajoute le point suivant',seeDetails:'Voir',editLbl:'Modifier',
   },
   de:{
-tagline:'Mehr Pläne, weniger Chaos.',sub:'Schluss mit endlosen Chats.',
-create:'Plan erstellen →',myPlans:'👤 Meine Pläne',discover:'🔍 Entdecken',orJoin:'oder beitreten',codePh:'Plan-Code',go:'Los',notFound:'Code nicht gefunden.',
-back:'← Zurück',cont:'Weiter →',datesStep:'Termine',extrasStep:'Extras',
-planName:'Planname',desc:'Beschreibung (optional)',descPh:'Details, Notizen...',yourName:'Dein Name',yourNamePh:'Wie heißt du?',emailPh:'du@email.com',stop:'Station',estPer:'Geschätzt pro Person',extrasTitle:'Extras',
-dcLbl:'👗 Dresscode / Was anziehen',dcNote:'Hinweis für Gäste (optional)...',dcCustomPh:'z.B. Hawaii, 80er-Jahre-Motto...',dcNoneNote:'Kein Dresscode. Bei Unsicherheit nachfragen.',
-dressCodes:[{k:'smart',l:'👔 Schick'},{k:'casual',l:'👕 Lässig'},{k:'beach',l:'🩱 Strand'},{k:'sport',l:'🥾 Sportlich'},{k:'party',l:'🪩 Party'},{k:'business',l:'💼 Formell'},{k:'costume',l:'🎭 Kostüm'},{k:'custom',l:'✏️ Individuell'}],
-gift:'🎁 Es gibt ein Gemeinschaftsgeschenk',giftSub:'Geburtstag, Hochzeit, Abschied...',giftName:'Geschenkname',giftLink:'Link',giftPrice:'Gesamtpreis €',payLink:'Zahlungslink',bring:'🎒 Was mitbringen',addItem:'+ Hinzufügen',newItem:'z.B. Wein, Regenschirm...',payData:'💳 Zahlungsdaten',payNote:'Lass leer, was du nicht brauchst.',bizumPh:'Bizum-Telefon',
-createBtn:'Plan erstellen 🎉',saving:'Wird gespeichert...',planCreated:'Plan erstellt!',shareWith:'Teile ihn mit deiner Gruppe',copyLink:'Link kopieren 🔗',copied:'✓ Kopiert!',viewRes:'Ergebnisse ansehen →',
-previewBy:'Organisiert von',previewDates:'Vorgeschlagene Termine',previewBudget:'Geschätztes Budget',previewJoin:'Verfügbarkeit angeben →',editAvail:'Meine Antwort bearbeiten →',yourAvail:'Wann kannst du?',avYes:'✅ Ja',avMaybe:'🤔 Vielleicht',avNo:'❌ Kann nicht',markAtLeastOne:'Wähle mindestens einen Termin',
-maybeNote:'Zu « vielleicht » hinzugefügt — der Organisator sieht dies.',votingExplainYes:'Ich rechne mit dir, deine Stimme entscheidet den Termin',votingExplainNo:'du kannst an dem Tag nicht',votingExplainMaybe:'nicht sicher ob du kommst, du zählst nicht für die Wahl dieses Termins',planFull:'Der Plan ist voll. Kontaktiere den Organisator.',chooseOption:'Wähle deine bevorzugte Option',
-whichStops:'An welchen Stationen nimmst du teil?',stopAttendHint:'Du kannst an einem Teil des Plans teilnehmen',stopFull:'Diese Station ist voll',howGet:'Wie kommst du hin?',howOpt:'(optional)',car:'🚗 Mit dem Auto',moto:'🏍️ Mit dem Motorrad',transit:'🚇 Öffentliche Verkehrsmittel',taxi:'🚕 Taxi/Uber',walk:'🚶 Zu Fuß',bike:'🚲 Fahrrad/Roller',other:'✏️ Andere',otherPh:'Wie kommst du hin?',
-commentLbl:'💬 Kommentar (optional)',commentPh:'Kann es kaum erwarten! / Komme etwas später / ...',saveAvail:'Speichern →',savedTitle:'Gespeichert!',savedSub:'Deine Verfügbarkeit wurde gespeichert.',editingPrev:'Bearbeitung deiner vorherigen Antwort',viralQ:'Hat dir queda. gefallen?',viralSub:'Erstelle deinen eigenen Plan kostenlos.',viralBtn:'Meinen Plan erstellen →',
-placeOkQ:'Passt der Ort?',dateOkQ:'Passt das Datum?',timeOkQ:'Passt die Uhrzeit?',answerAll:'Beantworte alle Fragen',suggestAlt:'Alternative vorschlagen',suggestAltHint:'Optional — schlage einen Ort vor, den du bevorzugst',placeNamePh:'Name des Ortes...',yourAvailDates:'An welchen Tagen kannst du?',yourAvailDatesHint:'Wähle die Tage, die dir passen',yourAvailTime:'Welche Zeitspanne passt dir?',fromLbl:'Von',toLbl:'Bis',
-responses:'Antwort',responsesP:'Antworten',noResp:'Noch niemand hat geantwortet',noRespSub:'Teile den Code',bestOpt:'Beste Option',CONFIRMED:'BESTÄTIGT',confirmThis:'📌 Diesen Termin bestätigen',confirming:'Wird bestätigt...',confirmSmall:'Bestätigen',perPerson:'Pro Person',totalLbl:'Gesamt',giftSec:'🎁 Gemeinschaftsgeschenk',totalPrice:'Gesamtpreis',perOf:'Pro Person',seeGift:'Geschenk ansehen ↗',payTitle:'Meinen Anteil zahlen',
-myPlansT:'Meine Pläne',noPlansUp:'Keine kommenden Pläne',noPlansUpS:'Erstelle oder tritt einem bei',noPlansPast:'Keine vergangenen Pläne',upcoming:'📅 Kommende',pastTab:'✅ Vergangene',organizer:'Organisator',guest:'Gast',confirmedDate:'📌 Bestätigter Termin',notifyGrp:'Gruppe benachrichtigen 💬',sendRem:'Erinnerung',remSent:'✓ Gesendet',makePublic:'🌍 Öffentlich machen',isPublicLbl:'✓ Öffentlich',delConfirm:'Diesen Plan löschen?',delWarn:'Wird für alle gelöscht.',delError:'Plan konnte nicht gelöscht werden',deleting:'Wird gelöscht...',leaveConfirm:'Diesen Plan verlassen?',leaveWarn:'Wird nur von deiner Liste entfernt.',cancel:'Abbrechen',del:'Löschen',leave:'Verlassen',comments:'Kommentare',
-tabs:{plan:'📍 Plan',vote:'🗳️ Stimmen',result:'📋 Ergebnis',more:'💡 Mehr'},changeHistoryLbl:'Änderungsverlauf',attendanceLbl:'Teilnahme',screenshotBtn:'Als Bild herunterladen',confirmPlanBtn:'Plan bestätigen',planConfirmed:'Plan bestätigt!',altDatesLbl:'Alternative Termine',deadlineLbl:'Antwortfrist',deadlinePassed:'Frist abgelaufen',remainingLbl:'verbleibend',removeDeadline:'Frist entfernen',lateArrivals:'Kommen zu spät',voteWhen:'Wann?',voteWhere:'Wo?',stopLbl:'Halt',codeLbl:'Plan-Code',transportLbl:'Transport',addressLbl:'Adresse',notesLbl:'Notizen',delConfirm2:'Diesen Halt löschen?',noMinCap:'Keine Min.-Kapazität',noMaxCap:'Keine Max.-Kapazität',onTimeQ:'Kommst du pünktlich?',howLateQ:'Wie spät?',maxLateLbl:'Max. Verspätung',onTimeLbl:'Pünktlich',meetYes:'Treffpunkt',meetNo:'Gehe direkt hin',respSaved:'✓ Gespeichert — tippen zum Aktualisieren',availStartTime:'Um wie viel Uhr könntest du anfangen?',alternativeDates:'Alternative Termine',discoverT:'Entdecken',discoverS:'Öffentliche Pläne, offen für alle.',noPublic:'Derzeit keine öffentlichen Pläne.',joinPlan:'Beitreten →',yourRoleLbl:'Deine Rolle',optionalLbl:'optional',otherRolePh:'Oder schreibe deine eigene...',surpriseMode_lbl:'🎭 Überraschungsmodus',surpriseReveal:'Es ist eine Überraschung!',surpriseSub:'Das Ziel wird enthüllt, wenn der Termin bestätigt wird.',signOut:'Abmelden',todayLbl:'Heute!',tomorrowLbl:'Morgen!',
-authSignInTab:'Anmelden',authRegisterTab:'Registrieren',authPassword:'Passwort',authMinChars:'Mindestens 6 Zeichen',authCreateAccount:'Konto erstellen',authForgotPass:'Passwort vergessen?',authBackLogin:'← Zurück zur Anmeldung',authSendEmail:'E-Mail senden',authWrongPass:'E-Mail oder Passwort falsch.',authConnError:'Verbindungsfehler. Versuche es erneut.',orContinueWith:'oder weiter mit',continueGoogle:'Weiter mit Google',authAlreadyReg:'Diese E-Mail ist bereits registriert. Melde dich an.',authPassMin:'Das Passwort muss mindestens 6 Zeichen haben',authResetInfo:'Gib deine E-Mail ein und wir senden dir einen Link.',authEmailSent:'E-Mail gesendet. Überprüfe deinen Posteingang.',confirmEmailFirst:'Bitte bestätige zuerst deine E-Mail.',signInError:'Anmeldefehler.',createAccountError:'Fehler beim Erstellen des Kontos.',sendEmailError:'Fehler beim Senden der E-Mail.',checkYourEmail:'Überprüfe deine E-Mail!',sentConfirmTo:'Wir haben einen Bestätigungslink gesendet an:',clickToConfirm:'Klicke auf den Link in der E-Mail, um dein Konto zu aktivieren.',checkSpam:'Überprüfe deinen Spam-Ordner.',goToSignIn:'Zur Anmeldung →',yesLbl:'Ja',autoConfirmDesc:'Bestätigt automatisch, wenn X Personen Ja sagen',passwordsNoMatch:'Passwörter stimmen nicht überein.',passwordChangeError:'Fehler beim Ändern des Passworts.',connectionError:'Verbindungsfehler.',passwordUpdated:'Passwort aktualisiert!',nowCanSignIn:'Du kannst dich jetzt anmelden.',newPassword:'Neues Passwort',chooseNewPassword:'Wähle ein neues Passwort.',repeatPassword:'Passwort wiederholen',changePassword:'Passwort ändern',notifyTo:'Benachrichtigen',reminderMsg:'Erinnerung: *{name}* steht bevor!',newRespFrom:'Neue Antwort von {name}',itsToday:'Ist heute!',respondToPlan:'Antworte auf *{name}*!',editedTimes:'{n} Mal bearbeitet',
-shareLangLbl:'Nachrichtensprache',copyCode:'Code kopieren',codeCopied:'✓ Code kopiert!',draftRestored:'Entwurf wiederhergestellt',draftDiscard:'Verwerfen',autoConfirmTitle:'Automatische Bestätigung',peopleSaid:'Personen haben Ja gesagt für',autoConfirmQ:'Automatisch bestätigen?',notYet:'Noch nicht',editPlan:'Plan bearbeiten',saveLbl:'Speichern',doneLbl:'Fertig',addToCalendar:'Zum Kalender hinzufügen',createError:'Fehler beim Erstellen. Überprüfe deine Verbindung.',someone:'Jemand',noResponsesYet:'Noch niemand hat geantwortet',personResponded:n=>n===1?'Person hat geantwortet':'Personen haben geantwortet',
-personalInfo:'Persönliche Daten',genderLbl:'Geschlecht',genderFemale:'Frau',genderMale:'Mann',genderOther:'Andere',genderCustomPh:'Wie identifizierst du dich?',birthdateLbl:'Geburtsdatum',locationLbl:'Standort',yearsOld:'Jahre',
-landingSignIn:'Anmelden',landingHero1:'Mehr Pläne,',landingHero2:'weniger Chaos.',landingSub2:'Schluss mit endlosen Chats.',landingCTA2:'Loslegen',landingFooter:'Gruppenpläne, null Chaos.',whenTitle:'Wann?',whereTitle:'Wo?',nameTitle:'Name',organizedBy:'Von',planPreviewEmpty:'Dein Plan erscheint hier...',searchPlacePh:'Ort suchen... (Enter)',myProfile:'Mein Profil',editBtn:'Bearbeiten',nameLbl:'Name *',yourNamePh2:'Dein Name',usernameLbl:'Benutzername *',usernameHint:'Dein Benutzername ist einzigartig und identifiziert dich.',myPlansTitle:'Meine Pläne',lightMode:'Heller Modus',darkMode:'Dunkler Modus',icsDesc:'Plan erstellt mit queda.',icsCode:'Code',summaryMsg:(y,t,l,no,n)=>`${y} von ${t} können am ${l}${no>0?' · '+no+' nein':''}.`,
+sub:'Schluss mit endlosen Chats.',
+create:'Plan erstellen →',myPlans:'👤 Meine Pläne',orJoin:'oder beitreten',codePh:'Plan-Code',go:'Los',notFound:'Code nicht gefunden.',
+back:'← Zurück',datesStep:'Termine',
+yourName:'Dein Name',yourNamePh:'Wie heißt du?',emailPh:'du@email.com',stop:'Station',
+
+
+
+
+
+
+car:'🚗 Mit dem Auto',
+commentPh:'Kann es kaum erwarten! / Komme etwas später / ...',saveAvail:'Speichern →',savedTitle:'Gespeichert!',
+placeOkQ:'Passt der Ort?',dateOkQ:'Passt das Datum?',timeOkQ:'Passt die Uhrzeit?',yourAvailDates:'An welchen Tagen kannst du?',fromLbl:'Von',toLbl:'Bis',
+responses:'Antwort',responsesP:'Antworten',
+noPlansUp:'Keine kommenden Pläne',noPlansPast:'Keine vergangenen Pläne',upcoming:'📅 Kommende',pastTab:'✅ Vergangene',organizer:'Organisator',guest:'Gast',confirmedDate:'📌 Bestätigter Termin',notifyGrp:'Gruppe benachrichtigen 💬',sendRem:'Erinnerung',remSent:'✓ Gesendet',delConfirm:'Diesen Plan löschen?',delWarn:'Wird für alle gelöscht.',leaveConfirm:'Diesen Plan verlassen?',leaveWarn:'Wird nur von deiner Liste entfernt.',cancel:'Abbrechen',del:'Löschen',leave:'Verlassen',comments:'Kommentare',
+tabs:{plan:'📍 Plan',vote:'🗳️ Stimmen',result:'📋 Ergebnis',more:'💡 Mehr'},changeHistoryLbl:'Änderungsverlauf',attendanceLbl:'Teilnahme',screenshotBtn:'Als Bild herunterladen',confirmPlanBtn:'Plan bestätigen',planConfirmed:'Plan bestätigt!',altDatesLbl:'Alternative Termine',deadlineLbl:'Antwortfrist',deadlinePassed:'Frist abgelaufen',removeDeadline:'Frist entfernen',lateArrivals:'Kommen zu spät',stopLbl:'Halt',codeLbl:'Plan-Code',transportLbl:'Transport',addressLbl:'Adresse',notesLbl:'Notizen',delConfirm2:'Diesen Halt löschen?',noMinCap:'Keine Min.-Kapazität',noMaxCap:'Keine Max.-Kapazität',onTimeQ:'Kommst du pünktlich?',howLateQ:'Wie spät?',maxLateLbl:'Max. Verspätung',onTimeLbl:'Pünktlich',meetYes:'Treffpunkt',meetNo:'Gehe direkt hin',respSaved:'✓ Gespeichert — tippen zum Aktualisieren',availStartTime:'Um wie viel Uhr könntest du anfangen?',signOut:'Abmelden',todayLbl:'Heute!',tomorrowLbl:'Morgen!',
+authSignInTab:'Anmelden',authRegisterTab:'Registrieren',authPassword:'Passwort',authMinChars:'Mindestens 6 Zeichen',authCreateAccount:'Konto erstellen',authForgotPass:'Passwort vergessen?',authBackLogin:'← Zurück zur Anmeldung',authSendEmail:'E-Mail senden',authWrongPass:'E-Mail oder Passwort falsch.',authConnError:'Verbindungsfehler. Versuche es erneut.',orContinueWith:'oder weiter mit',continueGoogle:'Weiter mit Google',authAlreadyReg:'Diese E-Mail ist bereits registriert. Melde dich an.',authPassMin:'Das Passwort muss mindestens 6 Zeichen haben',authResetInfo:'Gib deine E-Mail ein und wir senden dir einen Link.',authEmailSent:'E-Mail gesendet. Überprüfe deinen Posteingang.',confirmEmailFirst:'Bitte bestätige zuerst deine E-Mail.',signInError:'Anmeldefehler.',createAccountError:'Fehler beim Erstellen des Kontos.',sendEmailError:'Fehler beim Senden der E-Mail.',checkYourEmail:'Überprüfe deine E-Mail!',sentConfirmTo:'Wir haben einen Bestätigungslink gesendet an:',clickToConfirm:'Klicke auf den Link in der E-Mail, um dein Konto zu aktivieren.',checkSpam:'Überprüfe deinen Spam-Ordner.',goToSignIn:'Zur Anmeldung →',yesLbl:'Ja',passwordsNoMatch:'Passwörter stimmen nicht überein.',passwordChangeError:'Fehler beim Ändern des Passworts.',connectionError:'Verbindungsfehler.',passwordUpdated:'Passwort aktualisiert!',nowCanSignIn:'Du kannst dich jetzt anmelden.',newPassword:'Neues Passwort',chooseNewPassword:'Wähle ein neues Passwort.',repeatPassword:'Passwort wiederholen',changePassword:'Passwort ändern',reminderMsg:'Erinnerung: *{name}* steht bevor!',newRespFrom:'Neue Antwort von {name}',itsToday:'Ist heute!',respondToPlan:'Antworte auf *{name}*!',
+draftRestored:'Entwurf wiederhergestellt',draftDiscard:'Verwerfen',autoConfirmTitle:'Automatische Bestätigung',notYet:'Noch nicht',saveLbl:'Speichern',doneLbl:'Fertig',addToCalendar:'Zum Kalender hinzufügen',createError:'Fehler beim Erstellen. Überprüfe deine Verbindung.',
+
+landingSignIn:'Anmelden',landingHero1:'Mehr Pläne,',landingHero2:'weniger Chaos.',landingCTA2:'Loslegen',searchPlacePh:'Ort suchen... (Enter)',myProfile:'Mein Profil',editBtn:'Bearbeiten',nameLbl:'Name *',yourNamePh2:'Dein Name',usernameLbl:'Benutzername *',usernameHint:'Dein Benutzername ist einzigartig und identifiziert dich.',myPlansTitle:'Meine Pläne',icsDesc:'Plan erstellt mit queda.',icsCode:'Code',
 pickOneDate:'Wähle nur einen Termin',pickOneTime:'Wähle nur eine Uhrzeit',pickOnePlace:'Wähle nur einen Ort',dontWorryDates:'Keine Sorge, du kannst später weitere Termine hinzufügen.',dontWorryTimes:'Keine Sorge, du kannst später weitere Uhrzeiten hinzufügen.',dontWorryPoints:'Keine Sorge, du kannst später weitere Punkte hinzufügen.',
-nextBtn:'Weiter →',physicalPlace:'Physisch',readyQ:'Bereit?',aboutToCreate:'Du bist dabei, deinen Plan zu erstellen. Du kannst später alles bearbeiten und teilen.',creatingPlan:'Wird erstellt...',createPlanBtn:'Plan erstellen 🎉',planCreatedTitle:'Plan erstellt!',shareCodeMsg:'Teile den Code, damit deine Gruppe beitreten kann.',reviewPlan:'Deinen Plan ansehen →',createAnother:'Weiteren Plan erstellen',homeBtn:'Startseite',shareJoinText:'Tritt meinem Plan bei!',
-stepName:'Name',stepSend:'Senden',stepDates:'Termine',tapDates:'Tippe auf die Termine, an denen du kannst',enterYourName:'Gib deinen Namen ein',meetingPointLbl2:'Treffpunkt',beforeLbl:'vorher',whenCanGoHere:'Wann kannst du hier hin?',tapDateInstruction:'Tippe auf einen Termin, um deine Verfügbarkeit zu markieren.',timesLbl:'Zeiten',whichOptionPref:'Welche Option bevorzugst du?',pointN:'Punkt',finishBtn:'Fertig',backBtn:'Zurück',
-editNameLbl:'Name',editDescLbl:'Beschreibung',editDatesLbl:'Termine',editTimesLbl:'Zeiten',editPointsLbl:'Punkte',editHintMsg:'Um Punkte und Alternativen hinzuzufügen, bearbeite aus der Planansicht.',cancelledStopsMsg:(n)=>`${n} Punkt${n>1?'e':''} storniert`,planStartsAt:'Plan beginnt um',cancelledMin:'Storniert — Minimum nicht erreicht',noDataYet:'Noch keine Daten',noDataHint:'Wenn Eingeladene antworten, siehst du die Daten hier',chosenPlan:'Gewählter Plan',bestOption:'Beste Option',attendance:'Teilnahme',tieMsg:(n)=>`Gleichstand — ${n} Optionen`,pickToConfirm:'Wähle eine aus, um zu bestätigen',cancelledDetail:(yc,min)=>`storniert (${yc}/${min} Min.)`,responsesLbl:'Antworten',dateRanking:'Termin-Ranking',maxDatesMsg:(n)=>`Maximal ${n} Termine`,langLabel:'Sprache',
+nextBtn:'Weiter →',physicalPlace:'Physisch',readyQ:'Bereit?',aboutToCreate:'Du bist dabei, deinen Plan zu erstellen. Du kannst später alles bearbeiten und teilen.',creatingPlan:'Wird erstellt...',createPlanBtn:'Plan erstellen 🎉',planCreatedTitle:'Plan erstellt!',shareCodeMsg:'Teile den Code, damit deine Gruppe beitreten kann.',reviewPlan:'Deinen Plan ansehen →',createAnhomeBtn:'Startseite',shareJoinText:'Tritt meinem Plan bei!',
+meetingPointLbl2:'Treffpunkt',beforeLbl:'vorher',
+editNameLbl:'Name',editDescLbl:'Beschreibung',editDatesLbl:'Termine',editTimesLbl:'Zeiten',noDataYet:'Noch keine Daten',noDataHint:'Wenn Eingeladene antworten, siehst du die Daten hier',maxDatesMsg:(n)=>`Maximal ${n} Termine`,
     shareCodeMsg2:'Du kannst jetzt deinen Code mit wem du willst teilen. Schau dir deinen Plan an, um zu bearbeiten oder hinzuzufügen.',sharePlanBtn:'Teile deinen Plan',
     tipLang:'Sprache ändern',tipTheme:'Thema wechseln',tipHome:'Startseite',tipProfile:'Dein Profil',usernameTaken:'Dieser Benutzername ist bereits vergeben.',untitled:'Ohne Titel',noDesc:'Keine Beschreibung',seeMore:'mehr sehen',addNextPoint:'Nächsten Punkt hinzufügen',seeDetails:'Ansehen',editLbl:'Bearbeiten',
   },
   it:{
-tagline:'Più piani, meno caos.',sub:'Dì addio alle chat infinite.',
-create:'Crea un piano →',myPlans:'👤 I miei piani',discover:'🔍 Scopri',orJoin:'o unisciti',codePh:'Codice del piano',go:'Vai',notFound:'Codice non trovato.',
-back:'← Indietro',cont:'Continua →',datesStep:'Date',extrasStep:'Extra',
-planName:'Nome del piano',desc:'Descrizione (facoltativo)',descPh:'Dettagli, note...',yourName:'Il tuo nome',yourNamePh:'Come ti chiami?',emailPh:'tu@email.com',stop:'Tappa',estPer:'Stimato a persona',extrasTitle:'Extra',
-dcLbl:'👗 Dress code / Come vestirsi',dcNote:'Nota per gli ospiti (facoltativo)...',dcCustomPh:'es. Hawaiano, tema anni 80...',dcNoneNote:'Nessun dress code. Chiedi in caso di dubbio.',
-dressCodes:[{k:'smart',l:'👔 Elegante'},{k:'casual',l:'👕 Casual'},{k:'beach',l:'🩱 Spiaggia'},{k:'sport',l:'🥾 Sportivo'},{k:'party',l:'🪩 Festa'},{k:'business',l:'💼 Formale'},{k:'costume',l:'🎭 Costume'},{k:'custom',l:'✏️ Personalizzato'}],
-gift:"🎁 C'è un regalo collettivo",giftSub:'Compleanno, matrimonio, addio...',giftName:'Nome del regalo',giftLink:'Link',giftPrice:'Prezzo totale €',payLink:'Link di pagamento',bring:'🎒 Cosa portare',addItem:'+ Aggiungi',newItem:'es. vino, ombrello...',payData:'💳 Dati di pagamento',payNote:'Lascia vuoto ciò che non usi.',bizumPh:'Telefono Bizum',
-createBtn:'Crea piano 🎉',saving:'Salvataggio...',planCreated:'Piano creato!',shareWith:'Condividi con il tuo gruppo',copyLink:'Copia link 🔗',copied:'✓ Copiato!',viewRes:'Vedi risultati →',
-previewBy:'Organizzato da',previewDates:'Date proposte',previewBudget:'Budget stimato',previewJoin:'Indica disponibilità →',editAvail:'Modifica la mia risposta →',yourAvail:'Quando sei disponibile?',avYes:'✅ Sì',avMaybe:'🤔 Forse',avNo:'❌ Non posso',markAtLeastOne:'Seleziona almeno una data',
-maybeNote:"Aggiunto a « forse » — l'organizzatore lo vedrà.",votingExplainYes:'Conto sulla tua presenza, il tuo voto decide la data',votingExplainNo:'non puoi quel giorno',votingExplainMaybe:'non sei sicuro di venire, non conti per la scelta di quella data',planFull:"Il piano è al completo. Contatta l'organizzatore.",chooseOption:'Scegli la tua opzione preferita',
-whichStops:'A quali tappe parteciperai?',stopAttendHint:'Puoi partecipare a una parte del piano',stopFull:'Questa tappa è al completo',howGet:'Come arrivi?',howOpt:'(facoltativo)',car:'🚗 In auto',moto:'🏍️ In moto',transit:'🚇 Mezzi pubblici',taxi:'🚕 Taxi/Uber',walk:'🚶 A piedi',bike:'🚲 Bici/Monopattino',other:'✏️ Altro',otherPh:'Come arrivi?',
-commentLbl:'💬 Commento (facoltativo)',commentPh:"Non vedo l'ora! / Arrivo un po' in ritardo / ...",saveAvail:'Salva →',savedTitle:'Salvato!',savedSub:'La tua disponibilità è stata registrata.',editingPrev:'Modifica della tua risposta precedente',viralQ:'Ti è piaciuto queda.?',viralSub:'Crea il tuo piano gratuitamente.',viralBtn:'Crea il mio piano →',
-placeOkQ:'Ti va il posto?',dateOkQ:'Ti va la data?',timeOkQ:"Ti va l'orario?",answerAll:'Rispondi a tutte le domande',suggestAlt:'Suggerisci alternativa',suggestAltHint:'Facoltativo — suggerisci un posto che preferisci',placeNamePh:'Nome del posto...',yourAvailDates:'Quali giorni puoi?',yourAvailDatesHint:'Seleziona i giorni che ti vanno bene',yourAvailTime:'Quale fascia oraria ti va bene?',fromLbl:'Da',toLbl:'A',
-responses:'risposta',responsesP:'risposte',noResp:'Nessuno ha ancora risposto',noRespSub:'Condividi il codice',bestOpt:'Migliore opzione',CONFIRMED:'CONFERMATO',confirmThis:'📌 Conferma questa data',confirming:'Conferma in corso...',confirmSmall:'Conferma',perPerson:'A persona',totalLbl:'Totale',giftSec:'🎁 Regalo collettivo',totalPrice:'Prezzo totale',perOf:'A persona',seeGift:'Vedi regalo ↗',payTitle:'Paga la mia parte',
-myPlansT:'I miei piani',noPlansUp:'Nessun piano in programma',noPlansUpS:'Creane o unisciti a uno',noPlansPast:'Nessun piano passato',upcoming:'📅 In programma',pastTab:'✅ Passati',organizer:'Organizzatore',guest:'Ospite',confirmedDate:'📌 Data confermata',notifyGrp:'Notifica il gruppo 💬',sendRem:'Promemoria',remSent:'✓ Inviato',makePublic:'🌍 Rendi pubblico',isPublicLbl:'✓ Pubblico',delConfirm:'Eliminare questo piano?',delWarn:'Verrà eliminato per tutti.',delError:'Impossibile eliminare il piano',deleting:'Eliminazione...',leaveConfirm:'Abbandonare questo piano?',leaveWarn:'Verrà rimosso solo dalla tua lista.',cancel:'Annulla',del:'Elimina',leave:'Abbandona',comments:'Commenti',
-tabs:{plan:'📍 Piano',vote:'🗳️ Voti',result:'📋 Risultato',more:'💡 Altro'},changeHistoryLbl:'Cronologia modifiche',attendanceLbl:'Partecipazione',screenshotBtn:'Scarica come immagine',confirmPlanBtn:'Conferma piano',planConfirmed:'Piano confermato!',altDatesLbl:'Date alternative',deadlineLbl:'Scadenza',deadlinePassed:'Scadenza superata',remainingLbl:'rimanente',removeDeadline:'Rimuovi scadenza',lateArrivals:'In ritardo',voteWhen:'Quando?',voteWhere:'Dove?',stopLbl:'Tappa',codeLbl:'Codice piano',transportLbl:'Trasporto',addressLbl:'Indirizzo',notesLbl:'Note',delConfirm2:'Eliminare questa tappa?',noMinCap:'Nessuna capienza min.',noMaxCap:'Nessuna capienza max.',onTimeQ:'Arrivi in orario?',howLateQ:'Quanto tardi?',maxLateLbl:'Ritardo max.',onTimeLbl:'In orario',meetYes:'Punto di incontro',meetNo:'Vado direttamente',respSaved:'✓ Salvato — tocca per aggiornare',availStartTime:'A che ora potresti iniziare?',alternativeDates:'Date alternative',discoverT:'Scopri',discoverS:'Piani pubblici aperti a tutti.',noPublic:'Nessun piano pubblico al momento.',joinPlan:'Unisciti →',yourRoleLbl:'Il tuo ruolo',optionalLbl:'facoltativo',otherRolePh:'Oppure scrivi il tuo...',surpriseMode_lbl:'🎭 Modalità sorpresa',surpriseReveal:'È una sorpresa!',surpriseSub:"La destinazione viene rivelata quando la data è confermata.",signOut:'Esci',todayLbl:'Oggi!',tomorrowLbl:'Domani!',
-authSignInTab:'Accedi',authRegisterTab:'Registrati',authPassword:'Password',authMinChars:'Almeno 6 caratteri',authCreateAccount:'Crea account',authForgotPass:'Password dimenticata?',authBackLogin:"← Torna all'accesso",authSendEmail:'Invia email',authWrongPass:'Email o password errati.',authConnError:'Errore di connessione. Riprova.',orContinueWith:'o continua con',continueGoogle:'Continua con Google',authAlreadyReg:'Questa email è già registrata. Accedi.',authPassMin:'La password deve avere almeno 6 caratteri',authResetInfo:'Inserisci la tua email e ti invieremo un link.',authEmailSent:'Email inviata. Controlla la tua casella di posta.',confirmEmailFirst:'Per favore conferma prima la tua email.',signInError:'Errore di accesso.',createAccountError:"Errore nella creazione dell'account.",sendEmailError:"Errore nell'invio dell'email.",checkYourEmail:'Controlla la tua email!',sentConfirmTo:'Abbiamo inviato un link di conferma a:',clickToConfirm:"Clicca sul link nell'email per attivare il tuo account.",checkSpam:'Controlla la cartella spam.',goToSignIn:"Vai all'accesso →",yesLbl:'Sì',autoConfirmDesc:'Conferma automaticamente quando X persone dicono Sì',passwordsNoMatch:'Le password non corrispondono.',passwordChangeError:'Errore nel cambio della password.',connectionError:'Errore di connessione.',passwordUpdated:'Password aggiornata!',nowCanSignIn:'Ora puoi accedere.',newPassword:'Nuova password',chooseNewPassword:'Scegli una nuova password.',repeatPassword:'Ripeti password',changePassword:'Cambia password',notifyTo:'Notifica',reminderMsg:'Promemoria: *{name}* si avvicina!',newRespFrom:'Nuova risposta da {name}',itsToday:'È oggi!',respondToPlan:'Rispondi a *{name}*!',editedTimes:'Modificato {n} volta/e',
-shareLangLbl:'Lingua del messaggio',copyCode:'Copia codice',codeCopied:'✓ Codice copiato!',draftRestored:'Bozza ripristinata',draftDiscard:'Elimina',autoConfirmTitle:'Conferma automatica',peopleSaid:'persone hanno detto sì per',autoConfirmQ:'Confermare automaticamente?',notYet:'Non ancora',editPlan:'Modifica piano',saveLbl:'Salva',doneLbl:'Fatto',addToCalendar:'Aggiungi al calendario',createError:'Errore nella creazione. Controlla la tua connessione.',someone:'Qualcuno',noResponsesYet:'Nessuno ha ancora risposto',personResponded:n=>n===1?'persona ha risposto':'persone hanno risposto',
-personalInfo:'Informazioni personali',genderLbl:'Genere',genderFemale:'Donna',genderMale:'Uomo',genderOther:'Altro',genderCustomPh:'Come ti identifichi?',birthdateLbl:'Data di nascita',locationLbl:'Posizione',yearsOld:'anni',
-landingSignIn:'Accedi',landingHero1:'Più piani,',landingHero2:'meno caos.',landingSub2:'Dì addio alle chat infinite.',landingCTA2:'Inizia',landingFooter:'Piani di gruppo, zero caos.',whenTitle:'Quando?',whereTitle:'Dove?',nameTitle:'Nome',organizedBy:'Da',planPreviewEmpty:'Il tuo piano apparirà qui...',searchPlacePh:'Cerca un luogo... (Invio)',myProfile:'Il mio profilo',editBtn:'Modifica',nameLbl:'Nome *',yourNamePh2:'Il tuo nome',usernameLbl:'Nome utente *',usernameHint:'Il tuo nome utente è unico e ti identifica.',myPlansTitle:'I miei piani',lightMode:'Modalità chiara',darkMode:'Modalità scura',icsDesc:'Piano creato con queda.',icsCode:'Codice',summaryMsg:(y,t,l,no,n)=>`${y} di ${t} possono il ${l}${no>0?' · '+no+' no':''}.`,
+sub:'Dì addio alle chat infinite.',
+create:'Crea un piano →',myPlans:'👤 I miei piani',orJoin:'o unisciti',codePh:'Codice del piano',go:'Vai',notFound:'Codice non trovato.',
+back:'← Indietro',datesStep:'Date',
+yourName:'Il tuo nome',yourNamePh:'Come ti chiami?',emailPh:'tu@email.com',stop:'Tappa',
+
+
+
+
+
+
+car:'🚗 In auto',
+commentPh:"Non vedo l'ora! / Arrivo un po' in ritardo / ...",saveAvail:'Salva →',savedTitle:'Salvato!',
+placeOkQ:'Ti va il posto?',dateOkQ:'Ti va la data?',timeOkQ:"Ti va l'orario?",yourAvailDates:'Quali giorni puoi?',fromLbl:'Da',toLbl:'A',
+responses:'risposta',responsesP:'risposte',
+noPlansUp:'Nessun piano in programma',noPlansPast:'Nessun piano passato',upcoming:'📅 In programma',pastTab:'✅ Passati',organizer:'Organizzatore',guest:'Ospite',confirmedDate:'📌 Data confermata',notifyGrp:'Notifica il gruppo 💬',sendRem:'Promemoria',remSent:'✓ Inviato',delConfirm:'Eliminare questo piano?',delWarn:'Verrà eliminato per tutti.',leaveConfirm:'Abbandonare questo piano?',leaveWarn:'Verrà rimosso solo dalla tua lista.',cancel:'Annulla',del:'Elimina',leave:'Abbandona',comments:'Commenti',
+tabs:{plan:'📍 Piano',vote:'🗳️ Voti',result:'📋 Risultato',more:'💡 Altro'},changeHistoryLbl:'Cronologia modifiche',attendanceLbl:'Partecipazione',screenshotBtn:'Scarica come immagine',confirmPlanBtn:'Conferma piano',planConfirmed:'Piano confermato!',altDatesLbl:'Date alternative',deadlineLbl:'Scadenza',deadlinePassed:'Scadenza superata',removeDeadline:'Rimuovi scadenza',lateArrivals:'In ritardo',stopLbl:'Tappa',codeLbl:'Codice piano',transportLbl:'Trasporto',addressLbl:'Indirizzo',notesLbl:'Note',delConfirm2:'Eliminare questa tappa?',noMinCap:'Nessuna capienza min.',noMaxCap:'Nessuna capienza max.',onTimeQ:'Arrivi in orario?',howLateQ:'Quanto tardi?',maxLateLbl:'Ritardo max.',onTimeLbl:'In orario',meetYes:'Punto di incontro',meetNo:'Vado direttamente',respSaved:'✓ Salvato — tocca per aggiornare',availStartTime:'A che ora potresti iniziare?',signOut:'Esci',todayLbl:'Oggi!',tomorrowLbl:'Domani!',
+authSignInTab:'Accedi',authRegisterTab:'Registrati',authPassword:'Password',authMinChars:'Almeno 6 caratteri',authCreateAccount:'Crea account',authForgotPass:'Password dimenticata?',authBackLogin:"← Torna all'accesso",authSendEmail:'Invia email',authWrongPass:'Email o password errati.',authConnError:'Errore di connessione. Riprova.',orContinueWith:'o continua con',continueGoogle:'Continua con Google',authAlreadyReg:'Questa email è già registrata. Accedi.',authPassMin:'La password deve avere almeno 6 caratteri',authResetInfo:'Inserisci la tua email e ti invieremo un link.',authEmailSent:'Email inviata. Controlla la tua casella di posta.',confirmEmailFirst:'Per favore conferma prima la tua email.',signInError:'Errore di accesso.',createAccountError:"Errore nella creazione dell'account.",sendEmailError:"Errore nell'invio dell'email.",checkYourEmail:'Controlla la tua email!',sentConfirmTo:'Abbiamo inviato un link di conferma a:',clickToConfirm:"Clicca sul link nell'email per attivare il tuo account.",checkSpam:'Controlla la cartella spam.',goToSignIn:"Vai all'accesso →",yesLbl:'Sì',passwordsNoMatch:'Le password non corrispondono.',passwordChangeError:'Errore nel cambio della password.',connectionError:'Errore di connessione.',passwordUpdated:'Password aggiornata!',nowCanSignIn:'Ora puoi accedere.',newPassword:'Nuova password',chooseNewPassword:'Scegli una nuova password.',repeatPassword:'Ripeti password',changePassword:'Cambia password',reminderMsg:'Promemoria: *{name}* si avvicina!',newRespFrom:'Nuova risposta da {name}',itsToday:'È oggi!',respondToPlan:'Rispondi a *{name}*!',
+draftRestored:'Bozza ripristinata',draftDiscard:'Elimina',autoConfirmTitle:'Conferma automatica',notYet:'Non ancora',saveLbl:'Salva',doneLbl:'Fatto',addToCalendar:'Aggiungi al calendario',createError:'Errore nella creazione. Controlla la tua connessione.',
+
+landingSignIn:'Accedi',landingHero1:'Più piani,',landingHero2:'meno caos.',landingCTA2:'Inizia',searchPlacePh:'Cerca un luogo... (Invio)',myProfile:'Il mio profilo',editBtn:'Modifica',nameLbl:'Nome *',yourNamePh2:'Il tuo nome',usernameLbl:'Nome utente *',usernameHint:'Il tuo nome utente è unico e ti identifica.',myPlansTitle:'I miei piani',icsDesc:'Piano creato con queda.',icsCode:'Codice',
 pickOneDate:'Scegli solo una data',pickOneTime:'Scegli solo un orario',pickOnePlace:'Scegli solo un luogo',dontWorryDates:'Non preoccuparti, potrai aggiungere altre date dopo.',dontWorryTimes:'Non preoccuparti, potrai aggiungere altri orari dopo.',dontWorryPoints:'Non preoccuparti, potrai aggiungere altri punti dopo.',
-nextBtn:'Avanti →',physicalPlace:'Fisico',readyQ:'Pronto?',aboutToCreate:'Stai per creare il tuo piano. Potrai modificare e condividere tutto dopo.',creatingPlan:'Creazione...',createPlanBtn:'Crea piano 🎉',planCreatedTitle:'Piano creato!',shareCodeMsg:'Condividi il codice così il tuo gruppo può unirsi.',reviewPlan:'Rivedi il tuo piano →',createAnother:'Crea un altro piano',homeBtn:'Home',shareJoinText:'Unisciti al mio piano!',
-stepName:'Nome',stepSend:'Invia',stepDates:'Date',tapDates:'Tocca le date in cui sei disponibile',enterYourName:'Inserisci il tuo nome',meetingPointLbl2:"Punto d'incontro",beforeLbl:'prima',whenCanGoHere:'Quando puoi venire qui?',tapDateInstruction:'Tocca una data per segnare la tua disponibilità.',timesLbl:'orari',whichOptionPref:'Quale opzione preferisci?',pointN:'Punto',finishBtn:'Fine',backBtn:'Indietro',
-editNameLbl:'Nome',editDescLbl:'Descrizione',editDatesLbl:'Date',editTimesLbl:'Orari',editPointsLbl:'Punti',editHintMsg:'Per aggiungere punti e alternative, modifica dalla vista del piano.',cancelledStopsMsg:(n)=>`${n} punt${n>1?'i':'o'} cancellat${n>1?'i':'o'}`,planStartsAt:'Il piano inizia alle',cancelledMin:'Cancellato — minimo non raggiunto',noDataYet:'Nessun dato ancora',noDataHint:'Quando gli invitati risponderanno, vedrai i dati qui',chosenPlan:'Piano scelto',bestOption:'Migliore opzione',attendance:'partecipazione',tieMsg:(n)=>`Parità — ${n} opzioni`,pickToConfirm:'Scegline una per confermare',cancelledDetail:(yc,min)=>`cancellato (${yc}/${min} min)`,responsesLbl:'risposte',dateRanking:'Classifica date',maxDatesMsg:(n)=>`Massimo ${n} date`,langLabel:'Lingua',
+nextBtn:'Avanti →',physicalPlace:'Fisico',readyQ:'Pronto?',aboutToCreate:'Stai per creare il tuo piano. Potrai modificare e condividere tutto dopo.',creatingPlan:'Creazione...',createPlanBtn:'Crea piano 🎉',planCreatedTitle:'Piano creato!',shareCodeMsg:'Condividi il codice così il tuo gruppo può unirsi.',reviewPlan:'Rivedi il tuo piano →',createAnhomeBtn:'Home',shareJoinText:'Unisciti al mio piano!',
+meetingPointLbl2:"Punto d'incontro",beforeLbl:'prima',
+editNameLbl:'Nome',editDescLbl:'Descrizione',editDatesLbl:'Date',editTimesLbl:'Orari',noDataYet:'Nessun dato ancora',noDataHint:'Quando gli invitati risponderanno, vedrai i dati qui',maxDatesMsg:(n)=>`Massimo ${n} date`,
     shareCodeMsg2:'Ora puoi condividere il tuo codice con chi vuoi. Rivedi il tuo piano per modificare o aggiungere ciò che ti serve.',sharePlanBtn:'Condividi il tuo piano',
     tipLang:'Cambia lingua',tipTheme:'Cambia tema',tipHome:'Home',tipProfile:'Il tuo profilo',usernameTaken:'Questo nome utente è già in uso.',untitled:'Senza titolo',noDesc:'Nessuna descrizione',seeMore:'vedi più',addNextPoint:'Aggiungi il prossimo punto',seeDetails:'Vedi',editLbl:'Modifica',
   },
