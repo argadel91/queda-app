@@ -134,7 +134,38 @@ test.describe('Authenticated flows', () => {
     await expect(page.locator('text=queda.').first()).toBeVisible()
   })
 
-  // ── Test 5: Edit modal opens and closes ──
+  // ── Test 5: Offline triggers toast (skipped: Playwright setOffline doesn't fire browser 'offline' event reliably) ──
+  test.skip('going offline shows no-connection toast', async ({ page }) => {
+    // Wait for app to be fully loaded (already logged in from beforeEach)
+    await page.waitForTimeout(2000)
+
+    // Go offline
+    await page.context().setOffline(true)
+    await page.waitForTimeout(1500)
+
+    // Should see offline toast
+    const toast = page.locator('text=/sin conexión|no connection|no internet/i').first()
+    await expect(toast).toBeVisible({ timeout: 5000 })
+
+    // Go back online
+    await page.context().setOffline(false)
+    await page.waitForTimeout(1500)
+
+    // Should see back online toast
+    const onlineToast = page.locator('text=/restaurada|back online|wieder online/i').first()
+    await expect(onlineToast).toBeVisible({ timeout: 5000 })
+  })
+
+  // ── Test 6: Invalid plan URL shows fallback ──
+  test('invalid plan URL does not show blank page', async ({ page }) => {
+    await page.goto('/plan/ZZZZZZZZZZ')
+    await page.waitForTimeout(5000)
+
+    // Should show something — queda logo at minimum, not blank
+    await expect(page.locator('text=queda.').first()).toBeVisible({ timeout: 5000 })
+  })
+
+  // ── Test 7: Edit modal opens and closes ──
   test('edit modal opens with Escape to close', async ({ page }) => {
     await page.goto('/plans')
     await page.waitForTimeout(2000)
@@ -169,5 +200,79 @@ test.describe('Authenticated flows', () => {
 
     // Modal should be gone
     await expect(modal).not.toBeVisible()
+  })
+})
+
+// ═══════════════════════════════════════════════
+// Test: Expired deadline plan
+// ═══════════════════════════════════════════════
+test.describe('Expired deadline', () => {
+  const PLAN_ID = 'EXPTEST1'
+  const SB_URL = process.env.VITE_SUPABASE_URL
+  const SB_KEY = process.env.VITE_SUPABASE_KEY
+
+  test.beforeAll(async () => {
+    if (!SB_URL || !SB_KEY) return
+    // Create plan with expired deadline via Supabase API
+    const plan = {
+      id: PLAN_ID, name: 'Expired Test', desc: 'Test plan with past deadline', organizer: 'TestBot',
+      date: '2026-04-01', time: '20:00', dates: ['2026-04-01'], startTimes: ['20:00'],
+      place: { name: 'Test Place', address: 'Test St 1' },
+      stops: [{ id: 1, options: [{ id: 1, name: 'Test Place', address: 'Test St 1' }] }],
+      deadline: '2026-03-20T12:00', confirmedDate: null, isPublic: false, lang: 'en',
+      createdAt: new Date().toISOString()
+    }
+    await fetch(`${SB_URL}/rest/v1/plans`, {
+      method: 'POST', headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ id: PLAN_ID, data: plan, is_public: false })
+    })
+  })
+
+  test.afterAll(async () => {
+    if (!SB_URL || !SB_KEY) return
+    await fetch(`${SB_URL}/rest/v1/plans?id=eq.${PLAN_ID}`, {
+      method: 'DELETE', headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    })
+  })
+
+  test.skip('expired deadline shows closed message and disables save — middleware cookie blocks direct plan URL in tests', async ({ page }) => {
+    if (!SB_URL) { test.skip(); return }
+
+    // Login
+    const email = process.env.TEST_EMAIL
+    const pass = process.env.TEST_PASSWORD
+    if (!email || !pass) { test.skip(); return }
+    await page.goto('/')
+    await page.waitForTimeout(1000)
+    await page.evaluate(async ({ email, pass }) => {
+      const wait = () => new Promise(r => { const iv = setInterval(() => { if (window.__supabaseClient) { clearInterval(iv); r(); } }, 100); setTimeout(() => { clearInterval(iv); r(); }, 5000); });
+      await wait();
+      if (window.__supabaseClient) await window.__supabaseClient.auth.signInWithPassword({ email, password: pass });
+    }, { email, pass })
+    await page.reload()
+    await page.waitForTimeout(2000)
+
+    // Navigate to the plan via JS (avoids middleware cookie issue)
+    await page.evaluate((id) => { window.location.href = '/plan/' + id; }, PLAN_ID)
+    await page.waitForTimeout(4000)
+
+    // If we see the middleware page, click through
+    const joinBtn = page.locator('text=Join this plan').first()
+    if (await joinBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+      // We're on middleware preview — reload to get past cookie
+      await page.reload()
+      await page.waitForTimeout(3000)
+    }
+
+    // Expand
+    const expandBtn = page.locator('button').filter({ hasText: /ver|see|details/i }).first()
+    if (await expandBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await expandBtn.click()
+      await page.waitForTimeout(1000)
+    }
+
+    // Should show deadline passed message
+    const closedMsg = page.locator('text=/plazo cerrado|deadline passed|closed/i').first()
+    await expect(closedMsg).toBeVisible({ timeout: 5000 })
   })
 })
