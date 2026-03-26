@@ -298,7 +298,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
         <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>🕐 {t.pickOneTime}</h2>
         <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{t.dontWorryTimes}</p>
         <ClockPicker value={startTimes[0]||''} onChange={v=>setStartTimes([v])} c={c}/>
-        <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(2)} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.nextBtn}</Btn></div>
+        <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(2)} disabled={!startTimes[0]} full style={{padding:'15px',background:startTimes[0]?mc:c.CARD2,color:startTimes[0]?'#0A0A0A':c.M}} c={c}>{t.nextBtn}</Btn></div>
       </div>}
 
       {/* ── STEP 2: PLACE ── */}

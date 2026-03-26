@@ -181,7 +181,7 @@ export default function App(){
     const saved=ls.get('q_state',null);
     if(saved?.planId){loadPlan(saved.planId).then(p=>{if(p){setPlan(p);const isOwner=saved.isOrg||(authUser&&p._owner===authUser?.id)||getMyPlans().find(x=>x.id===saved.planId)?.role==='organizer';setIsOrg(!!isOwner);setScreen(saved.screen||'home');}});}
   },[]);
-  const nav=(s,p=null,org=false)=>{setScreen(s);if(p)setPlan(p);if(!p&&s==='home'){setPlan(null);setIsOrg(false);}else setIsOrg(org);if(s!=='home')ls.set('q_state',{screen:s,planId:p?.id||plan?.id,isOrg:org});else ls.set('q_state',{});};
+  const nav=(s,p=null,org=false)=>{setScreen(s);if(p)setPlan(p);if(!p&&s==='home'){setPlan(null);setIsOrg(false);}else setIsOrg(org);if(s==='results'||s==='respond')ls.set('q_state',{screen:s,planId:p?.id||plan?.id,isOrg:org});else ls.set('q_state',{});};
   const handleJoin=async code=>{const p=await loadPlan(code);if(p){setPlan(p);setIsOrg(false);setScreen('respond');ls.set('q_state',{screen:'respond',planId:p.id,isOrg:false});return true;}return false;};
   const handleFromProfile=async id=>{const p=await loadPlan(id);if(p){const mine=getMyPlans().find(x=>x.id===id);const isOwner=mine?.role==='organizer'||(authUser&&p._owner===authUser.id);nav('results',p,isOwner);}};
 

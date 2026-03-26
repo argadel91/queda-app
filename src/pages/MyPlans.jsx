@@ -13,7 +13,7 @@ export default function MyPlans({onBack,onOpen,c,lang}){
   const[dates,setDates]=useState({});const[fullPlans,setFullPlans]=useState({});
   const now=dayStart();
 
-  useEffect(()=>{plans.forEach(async p=>{if(!dates[p.id]){const full=await loadPlan(p.id);if(full){setDates(prev=>({...prev,[p.id]:full.confirmedDate||full.dates?.[0]||null}));setFullPlans(prev=>({...prev,[p.id]:full}));}}})},[]);
+  useEffect(()=>{plans.forEach(async p=>{if(!dates[p.id]){const full=await loadPlan(p.id);if(full){setDates(prev=>({...prev,[p.id]:full.confirmedDate||full.dates?.[0]||null}));setFullPlans(prev=>({...prev,[p.id]:full}));}}})},[plans.length]);
 
   const isPast=id=>{const d=dates[id];if(!d)return false;return new Date(d+'T23:59:59')<now;};
   const sortByDate=arr=>[...arr].sort((a,b)=>(dates[a.id]||'9999').localeCompare(dates[b.id]||'9999'));
