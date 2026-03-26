@@ -63,7 +63,7 @@ export default function MyPlans({onBack,onOpen,c,lang}){
       return(<div key={p.id} onClick={()=>{ls.set('q_seen_'+p.id,Date.now());onOpen(p.id);}} style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'16px',padding:'16px',marginBottom:'12px',cursor:'pointer',opacity:isPast(p.id)?0.6:1}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'8px'}}>
           <div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'11px',color:mc,letterSpacing:'.08em',textTransform:'uppercase'}}>queda.</div>
-          <button onClick={e=>{e.stopPropagation();setConfirm(p);}} style={{background:'none',border:'1px solid #ff444430',borderRadius:'6px',color:'#ff6666',cursor:'pointer',fontSize:'13px',padding:'4px 8px'}}>×</button>
+          <button aria-label="Delete plan" onClick={e=>{e.stopPropagation();setConfirm(p);}} style={{background:'none',border:'1px solid #ff444430',borderRadius:'6px',color:'#ff6666',cursor:'pointer',fontSize:'13px',padding:'4px 8px'}}>×</button>
         </div>
         <div style={{marginBottom:'8px'}}>
           <div style={{fontSize:'16px',color:c.T,fontWeight:'700',marginBottom:'2px'}}>{truncate(title,60)||(t.untitled||'Sin título')}</div>
@@ -79,7 +79,7 @@ export default function MyPlans({onBack,onOpen,c,lang}){
           <span style={{fontSize:'13px',padding:'3px 12px',borderRadius:'10px',background:isSoon?`${mc}20`:c.CARD2,color:isSoon?mc:c.T,border:`1px solid ${isSoon?mc+'40':c.BD}`,fontWeight:'600',textTransform:'capitalize'}}>{isToday?(t.todayLbl||'Today'):isTmrw?(t.tomorrowLbl||'Tomorrow'):fmtShort(d,lang)}{fp?.startTimes?.[0]?' · '+fp.startTimes[0]:''}</span>
         </div>}
         {place?.name&&<div style={{display:'flex',alignItems:'center',gap:'6px',fontSize:'12px',color:c.M2,marginTop:'4px'}}>
-          {place.photo&&<img src={place.photo} alt="" style={{width:'20px',height:'20px',borderRadius:'4px',objectFit:'cover'}}/>}
+          {place.photo&&<img src={place.photo} alt={place.name||'Venue photo'} style={{width:'20px',height:'20px',borderRadius:'4px',objectFit:'cover'}}/>}
           <span>📍 {truncate(place.name,30)}</span>
           {place.rating&&<span style={{color:mc,fontSize:'10px'}}>⭐{place.rating}</span>}
         </div>}

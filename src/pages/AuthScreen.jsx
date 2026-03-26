@@ -130,13 +130,13 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
 
         <div>
           <div style={{fontSize:'13px',color:c.M,fontWeight:'600',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'5px'}}>Email</div>
-          <input id="email" name="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} type="email" placeholder={t.emailPh} autoFocus style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+          <input id="email" name="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value.slice(0,100))} maxLength={100} type="email" placeholder={t.emailPh} autoFocus style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
         </div>
 
         {mode!=='reset'&&<div>
           <div style={{fontSize:'13px',color:c.M,fontWeight:'600',letterSpacing:'.07em',textTransform:'uppercase',marginBottom:'5px'}}>{t.authPassword}</div>
           <div style={{position:'relative'}}>
-            <input id="password" name="password" autoComplete={mode==='register'?'new-password':'current-password'} value={password} onChange={e=>setPassword(e.target.value)} type={showPass?'text':'password'} placeholder={mode==='register'?(t.authMinChars):'••••••••'} style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 44px 12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+            <input id="password" name="password" autoComplete={mode==='register'?'new-password':'current-password'} value={password} onChange={e=>setPassword(e.target.value.slice(0,100))} maxLength={100} type={showPass?'text':'password'} placeholder={mode==='register'?(t.authMinChars):'••••••••'} style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'12px 44px 12px 14px',color:c.T,fontSize:'15px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
             <button type="button" onClick={()=>setShowPass(s=>!s)} style={{position:'absolute',right:'12px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'16px',padding:'4px'}}>{showPass?'🙈':'👁'}</button>
           </div>
         </div>}

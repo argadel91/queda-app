@@ -166,13 +166,13 @@ function AppInner(){
       <div onClick={()=>navigate('/')} style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'22px',cursor:'pointer',color:c.T,letterSpacing:'-.02em'}}>queda<span style={{color:c.A}}>.</span></div>
       <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
         <div style={{position:'relative'}} onClick={e=>e.stopPropagation()}>
-          <button title={T[lang]?.tipLang} onClick={()=>setLangOpen(o=>!o)} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 8px',cursor:'pointer',fontSize:'14px',color:c.T,fontFamily:'inherit'}}>{({es:'🇪🇸',en:'🇬🇧',pt:'🇵🇹',fr:'🇫🇷',de:'🇩🇪',it:'🇮🇹'})[lang]}</button>
+          <button title={T[lang]?.tipLang} aria-label="Change language" onClick={()=>setLangOpen(o=>!o)} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 8px',cursor:'pointer',fontSize:'14px',color:c.T,fontFamily:'inherit'}}>{({es:'🇪🇸',en:'🇬🇧',pt:'🇵🇹',fr:'🇫🇷',de:'🇩🇪',it:'🇮🇹'})[lang]}</button>
           {langOpen&&<div style={{position:'absolute',right:0,top:'calc(100% + 4px)',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',boxShadow:'0 8px 24px rgba(0,0,0,.3)',zIndex:100,overflow:'hidden'}}>
             {['es','en','pt','fr','de','it'].map(l=><button key={l} onClick={()=>{setLang(l);ls.set('q_lang',l);if(authUser)saveProfile(authUser.id,{...profile,lang:l}).catch(()=>{});setLangOpen(false);}} style={{display:'flex',alignItems:'center',gap:'8px',width:'100%',padding:'10px 14px',background:l===lang?`${c.A}15`:'transparent',border:'none',borderBottom:`1px solid ${c.BD}`,cursor:'pointer',fontSize:'13px',color:l===lang?c.A:c.T,fontWeight:l===lang?'700':'400',fontFamily:'inherit'}}>{({es:'🇪🇸',en:'🇬🇧',pt:'🇵🇹',fr:'🇫🇷',de:'🇩🇪',it:'🇮🇹'})[l]}</button>)}
           </div>}
         </div>
-        <button title={T[lang]?.tipTheme} onClick={tgTheme} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 8px',cursor:'pointer',fontSize:'14px',color:c.T,fontFamily:'inherit'}}>{theme==='dark'?'☀️':'🌙'}</button>
-        {!isHome&&<button title={T[lang]?.tipHome} onClick={()=>navigate('/')} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 10px',cursor:'pointer',fontSize:'12px',color:c.T,fontFamily:'inherit',fontWeight:'600'}}>🏠</button>}
+        <button title={T[lang]?.tipTheme} aria-label="Toggle theme" onClick={tgTheme} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 8px',cursor:'pointer',fontSize:'14px',color:c.T,fontFamily:'inherit'}}>{theme==='dark'?'☀️':'🌙'}</button>
+        {!isHome&&<button title={T[lang]?.tipHome} aria-label="Go home" onClick={()=>navigate('/')} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 10px',cursor:'pointer',fontSize:'12px',color:c.T,fontFamily:'inherit',fontWeight:'600'}}>🏠</button>}
         {plan&&location.pathname.startsWith('/plan/')&&<span style={{color:mc,fontWeight:'800',fontSize:'12px',letterSpacing:'.1em'}}>{plan.id}</span>}
         {authUser&&<div style={{position:'relative'}} onClick={e=>e.stopPropagation()}>
           <button title={T[lang]?.tipProfile} onClick={e=>{e.stopPropagation();setAvatarOpen(o=>!o);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 10px',cursor:'pointer',fontSize:'13px',color:c.T,fontFamily:'inherit',fontWeight:'500',display:'flex',alignItems:'center',gap:'5px'}}>
@@ -188,8 +188,9 @@ function AppInner(){
       </div>
     </div>
     <Routes>
-      <Route path="/" element={<Home onCreate={()=>navigate('/create')} onJoin={handleJoin} onProfile={()=>navigate('/plans')} c={c} lang={lang}/>}/>
+      <Route path="/" element={<Home onCreate={()=>navigate('/create/date')} onJoin={handleJoin} onProfile={()=>navigate('/plans')} c={c} lang={lang}/>}/>
       <Route path="/create" element={<Create onBack={()=>navigate('/')} onCreated={p=>{setPlan(p);setIsOrg(true);navigate('/plan/'+p.id);}} c={c} lang={lang} authUser={authUser} profile={profile}/>}/>
+      <Route path="/create/:step" element={<Create onBack={()=>navigate('/')} onCreated={p=>{setPlan(p);setIsOrg(true);navigate('/plan/'+p.id);}} c={c} lang={lang} authUser={authUser} profile={profile}/>}/>
       <Route path="/plans" element={<MyPlans onBack={()=>navigate('/')} onOpen={handleFromProfile} c={c} lang={lang}/>}/>
       <Route path="/plan/:code" element={<PlanPage/>}/>
       <Route path="/profile" element={<Profile onBack={()=>navigate('/')} c={c} lang={lang} authUser={authUser} profile={profile} onUpdateProfile={updateProfile} onSignOut={handleSignOut} onLangChange={l=>{setLang(l);ls.set('q_lang',l);if(authUser)saveProfile(authUser.id,{...profile,lang:l}).catch(()=>{});}} onThemeToggle={tgTheme} theme={theme}/>}/>

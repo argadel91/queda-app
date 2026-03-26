@@ -154,7 +154,7 @@ const initOverlay = async () => {
 const showResults = (items) => {
   const el = document.getElementById('gmap-results')
   if (!el) return
-  el.innerHTML = ''
+  while (el.firstChild) el.removeChild(el.firstChild)
   if (items.length === 0) { el.style.display = 'none'; return }
   el.style.display = 'block'
   items.forEach(r => {
@@ -243,7 +243,7 @@ const selectPlace = (sel) => {
       metaEl.textContent = meta
       wrap.appendChild(metaEl)
     }
-    bar.innerHTML = ''
+    while (bar.firstChild) bar.removeChild(bar.firstChild)
     bar.appendChild(wrap)
     const btn = document.createElement('button')
     btn.textContent = 'Select'
@@ -259,7 +259,7 @@ const showOverlay = (initQuery) => {
   const input = document.getElementById('gmap-input')
   if (input) { input.value = initQuery || ''; input.focus() }
   const results = document.getElementById('gmap-results')
-  if (results) { results.style.display = 'none'; results.innerHTML = '' }
+  if (results) { results.style.display = 'none'; while (results.firstChild) results.removeChild(results.firstChild) }
   const bar = document.getElementById('gmap-selbar')
   if (bar) { bar.style.display = 'none' }
   if (_marker) { _marker.setMap(null); _marker = null }

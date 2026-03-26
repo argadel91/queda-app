@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import T from '../constants/translations.js'
 import { savePlan, savePlanWithUser, showErr } from '../lib/supabase.js'
 import { ls, addMyPlan } from '../lib/storage.js'
@@ -32,9 +33,13 @@ const emptyStop = (id, suggestedStart) => ({
   maxCapacity: '', orgAttends: true, meetingPoint: '', meetingMinsBefore: '', minAttendees: '',
 });
 
+const STEPS=['date','time','place','confirm'];
 export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   const t=T[lang];const mc=c.A;
-  const[step,setStep]=useState(0);
+  const nav2=useNavigate();
+  const{step:stepParam}=useParams();
+  const step=Math.max(0,STEPS.indexOf(stepParam||'date'));
+  const setStep=(s)=>nav2('/create/'+STEPS[s],{replace:false});
   const[org,setOrg]=useState(profile?.name||ls.get('q_myname',''));
   const[selDates,setSelDates]=useState([]);
   const[startTimes,setStartTimes]=useState(['']);
@@ -72,7 +77,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
     if(d.org)setOrg(d.org);
     if(d.selDates)setSelDates(d.selDates);
     if(d.startTimes)setStartTimes(d.startTimes);
-    if(d.stops)setStops(d.stops);if(d.step)setStep(d.step);
+    if(d.stops)setStops(d.stops);if(d.step!=null&&STEPS[d.step])nav2('/create/'+STEPS[d.step],{replace:true});
     setDraftRestored(true);
   },[]);// eslint-disable-line react-hooks/exhaustive-deps
 
@@ -83,7 +88,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   const clearDraft=()=>{try{localStorage.removeItem(draftKey)}catch{}};
   const discardDraft=()=>{clearDraft();setDraftRestored(false);window.location.reload();};
   // Save on step change
-  const changeStep=(s)=>{saveDraft(s);if(s!==2){inlineMapObj.current=null;}setStep(s);};
+  const changeStep=(s)=>{saveDraft(s);if(s!==2){inlineMapObj.current=null;}nav2('/create/'+STEPS[s],{replace:false});};
 
   // Stop helpers
   const addStop=()=>{
@@ -154,7 +159,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
     const loadGM=()=>{if(window.__loadGoogleMaps)window.__loadGoogleMaps();return new Promise(r=>{if(window.google?.maps)return r();const ch=setInterval(()=>{if(window.google?.maps){clearInterval(ch);r();}},100);setTimeout(()=>clearInterval(ch),10000);});};
     const mapDiv=document.createElement('div');
     mapDiv.style.cssText='width:100%;height:100%;min-height:250px;';
-    inlineMapRef.current.innerHTML='';
+    while(inlineMapRef.current.firstChild)inlineMapRef.current.removeChild(inlineMapRef.current.firstChild);
     inlineMapRef.current.appendChild(mapDiv);
     loadGM().then(async()=>{
       if(google.maps.importLibrary)await google.maps.importLibrary('maps');
@@ -266,7 +271,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
           </div>}
         </div>
         <Btn onClick={()=>onCreated(created)} v="secondary" full style={{padding:'14px'}} c={c}>{t.reviewPlan}</Btn>
-        <Btn onClick={()=>{setCreated(null);setShareOpen(false);setStep(0);setSelDates([]);setStartTimes(['']);setStops([emptyStop(1,'')]);}} v="secondary" full style={{padding:'14px'}} c={c}>{t.createAnother}</Btn>
+        <Btn onClick={()=>{setCreated(null);setShareOpen(false);nav2('/create/date');setSelDates([]);setStartTimes(['']);setStops([emptyStop(1,'')]);}} v="secondary" full style={{padding:'14px'}} c={c}>{t.createAnother}</Btn>
         <button onClick={onBack} style={{padding:'12px',background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'14px'}}>🏠 {t.homeBtn}</button>
       </div>
     </div>;
@@ -282,7 +287,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
           <button onClick={()=>setDraftRestored(false)} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'16px',lineHeight:1}}>x</button>
         </div>
       </div>}
-      <Back onClick={step===0?onBack:()=>changeStep(step-1)} label={t.back} c={c}/>
+      <Back onClick={step===0?onBack:()=>nav2(-1)} label={t.back} c={c}/>
       <Stepper cur={step} labels={stepLabels} c={c} accent={mc}/>
 
       {/* ── STEP 0: DATE ── */}
@@ -316,7 +321,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
         {stops.filter(s=>(s.options||[]).some(o=>o.name)).map((s)=>{
           const opt=(s.options||[])[0]||{};
           return<div key={s.id} style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px',background:c.CARD,border:`1px solid ${mc}30`,borderRadius:'12px',marginBottom:'8px'}}>
-            {opt.photo&&<img src={opt.photo} alt="" style={{width:'44px',height:'44px',borderRadius:'10px',objectFit:'cover',flexShrink:0}}/>}
+            {opt.photo&&<img src={opt.photo} alt={opt.name||'Venue photo'} style={{width:'44px',height:'44px',borderRadius:'10px',objectFit:'cover',flexShrink:0}}/>}
             <div style={{flex:1,minWidth:0}}>
               <div style={{fontSize:'15px',color:c.T,fontWeight:'600',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{opt.name}</div>
               {opt.address&&<div style={{fontSize:'12px',color:c.M2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>📍 {opt.address}</div>}

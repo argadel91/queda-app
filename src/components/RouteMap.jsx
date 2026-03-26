@@ -25,7 +25,7 @@ export default function RouteMap({stops,c}){
     // Create map div outside React
     const mapDiv=document.createElement('div');
     mapDiv.style.cssText='width:100%;height:280px;border-radius:12px;overflow:hidden;';
-    containerRef.current.innerHTML='';
+    while(containerRef.current.firstChild)containerRef.current.removeChild(containerRef.current.firstChild);
     containerRef.current.appendChild(mapDiv);
 
     loadGM().then(async()=>{

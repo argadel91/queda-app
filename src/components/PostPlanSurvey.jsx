@@ -29,7 +29,7 @@ export default function PostPlanSurvey({plan, c, lang, mc}){
         {[{v:true,l:t.yesLbl||'Yes'},{v:false,l:'No'},{v:'maybe',l:t.maybeLbl}].map(o=><button key={String(o.v)} onClick={()=>setRepeat(o.v)} style={{flex:1,padding:'8px',borderRadius:'10px',border:`1px solid ${repeat===o.v?mc+'60':c.BD}`,background:repeat===o.v?`${mc}20`:c.CARD,color:repeat===o.v?mc:c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:repeat===o.v?'700':'400'}}>{o.l}</button>)}
       </div>
     </div>
-    <textarea value={feedback} onChange={e=>setFeedback(e.target.value)} placeholder={t.improveNext} rows={2} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',resize:'none',boxSizing:'border-box',marginBottom:'10px',lineHeight:1.5}}/>
+    <textarea value={feedback} onChange={e=>setFeedback(e.target.value.slice(0,500))} maxLength={500} placeholder={t.improveNext} rows={2} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',resize:'none',boxSizing:'border-box',marginBottom:'10px',lineHeight:1.5}}/>
     <Btn onClick={submit} disabled={!rating||repeat===null} full style={{background:mc,color:'#0A0A0A',padding:'12px'}} c={c}>{t.submitSurvey}</Btn>
     <button onClick={()=>setDone(true)} style={{display:'block',width:'100%',background:'none',border:'none',color:c.M,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',marginTop:'8px'}}>{t.skipSurvey}</button>
   </div>);

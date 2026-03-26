@@ -53,7 +53,7 @@ export default function Profile({onBack,c,lang,authUser,profile,onUpdateProfile,
         <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
           <div>
             <div style={{fontSize:'13px',color:c.M,marginBottom:'4px'}}>{t.nameLbl||'Name *'}</div>
-            <input value={newName} onChange={e=>setNewName(e.target.value)} placeholder={t.yourNamePh2||'Your name'} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
+            <input value={newName} onChange={e=>setNewName(e.target.value.slice(0,50))} maxLength={50} placeholder={t.yourNamePh2||'Your name'} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'10px 12px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
           </div>
           <div>
             <div style={{fontSize:'13px',color:c.M,marginBottom:'4px'}}>{t.usernameLbl||'Username *'}</div>

@@ -215,7 +215,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
         {/* Edit title */}
         {editMode==='title'&&<>
           <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>{t.editNameLbl}</div>
-          <div style={{marginBottom:'16px'}}><input value={editName} onChange={e=>setEditName(e.target.value)} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/></div>
+          <div style={{marginBottom:'16px'}}><input value={editName} onChange={e=>setEditName(e.target.value.slice(0,100))} maxLength={100} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/></div>
           <div style={{display:'flex',gap:'8px'}}>
             <button onClick={()=>setEditMode(false)} style={{flex:1,padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontWeight:'600',fontSize:'14px'}}>{t.cancel||'Cancel'}</button>
             <button onClick={async()=>{const up={...plan,name:editName.trim()||null};await updatePlan(up);setPlan(up);setEditMode(false);}} style={{flex:1,padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.saveLbl||'Save'}</button>
@@ -225,7 +225,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
         {/* Edit description */}
         {editMode==='desc'&&<>
           <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>{t.editDescLbl}</div>
-          <div style={{marginBottom:'16px'}}><textarea value={editDesc} onChange={e=>setEditDesc(e.target.value)} rows={3} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box',resize:'vertical'}}/></div>
+          <div style={{marginBottom:'16px'}}><textarea value={editDesc} onChange={e=>setEditDesc(e.target.value.slice(0,500))} maxLength={500} rows={3} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',boxSizing:'border-box',resize:'vertical'}}/></div>
           <div style={{display:'flex',gap:'8px'}}>
             <button onClick={()=>setEditMode(false)} style={{flex:1,padding:'12px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',color:c.T,cursor:'pointer',fontFamily:'inherit',fontWeight:'600',fontSize:'14px'}}>{t.cancel||'Cancel'}</button>
             <button onClick={async()=>{const up={...plan,desc:editDesc.trim()||null};await updatePlan(up);setPlan(up);setEditMode(false);}} style={{flex:1,padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.saveLbl||'Save'}</button>
@@ -296,7 +296,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
           };
           return<>
             <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>{t.editLbl} — {t.stopLbl||'Stop'} {si+1}</div>
-            {opt.photo&&<img src={opt.photo} alt="" style={{width:'100%',height:'100px',objectFit:'cover',borderRadius:'10px',marginBottom:'10px'}}/>}
+            {opt.photo&&<img src={opt.photo} alt={opt.name||'Venue photo'} style={{width:'100%',height:'100px',objectFit:'cover',borderRadius:'10px',marginBottom:'10px'}}/>}
             {isOrgRef.current?<>
               <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.editNameLbl}</div><input defaultValue={opt.name||''} onBlur={e=>updateStop('name',e.target.value.trim(),true)} style={inpSt}/></div>
               <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>📍 {t.addressLbl||'Address'}</div><input defaultValue={opt.address||''} onBlur={e=>updateStop('address',e.target.value.trim(),true)} style={inpSt}/></div>
@@ -373,14 +373,14 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
           <div style={{flex:1,minWidth:0}}>
             <h2 style={{fontFamily:"'Syne',serif",fontSize:'24px',fontWeight:'800',color:plan.name?c.T:c.M,margin:0,lineHeight:1.2}}>{plan.name&&plan.name.length>60?plan.name.slice(0,60)+'…':plan.name||t.untitled}{plan.name&&plan.name.length>60?<span onClick={()=>setEditMode('view_title')} style={{fontSize:'12px',fontWeight:'500',color:mc,cursor:'pointer',marginLeft:'4px'}}>{t.seeMore||'see more'}</span>:null}</h2>
           </div>
-          {isOrgRef.current&&<button onClick={()=>{setEditName(plan.name||'');setEditMode('title');}} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',flexShrink:0,marginLeft:'8px',marginTop:'2px'}}>✏️</button>}
+          {isOrgRef.current&&<button aria-label="Edit title" onClick={()=>{setEditName(plan.name||'');setEditMode('title');}} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',flexShrink:0,marginLeft:'8px',marginTop:'2px'}}>✏️</button>}
         </div>
         <div style={{display:'flex',alignItems:'flex-start',marginTop:'4px'}}>
           <div style={{flex:1,minWidth:0}}>
             <span style={{fontSize:'13px',color:plan.desc?c.M2:c.M,fontStyle:plan.desc?'normal':'italic',lineHeight:1.4}}>{plan.desc&&plan.desc.length>120?plan.desc.slice(0,120)+'…':plan.desc||(t.noDesc||'No description')}</span>
             {plan.desc&&plan.desc.length>120&&<span onClick={()=>setEditMode('view_desc')} style={{fontSize:'12px',color:mc,cursor:'pointer',marginLeft:'4px'}}>{t.seeMore||'see more'}</span>}
           </div>
-          {isOrgRef.current&&<button onClick={()=>{setEditDesc(plan.desc||'');setEditMode('desc');}} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',flexShrink:0,marginLeft:'8px'}}>✏️</button>}
+          {isOrgRef.current&&<button aria-label="Edit description" onClick={()=>{setEditDesc(plan.desc||'');setEditMode('desc');}} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',flexShrink:0,marginLeft:'8px'}}>✏️</button>}
         </div>
       </div>
       <div style={{fontSize:'13px',color:c.M2,margin:'6px 0 12px'}}>{total} {total===1?t.responses:t.responsesP} · <span style={{color:mc,fontWeight:'700',letterSpacing:'.1em'}}>{plan.id}</span></div>
@@ -526,7 +526,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
             </div>
             <div style={{display:'flex',gap:'4px',flexShrink:0}}>
               <button onClick={()=>setOpenSection(p=>({...p,_planView:!p._planView}))} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>{viewOpen?'▾':t.seeDetails||'Ver'}</button>
-              {isOrgRef.current&&<button onClick={()=>setEditMode('stop_'+stop.id)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px'}}>✏️</button>}
+              {isOrgRef.current&&<button aria-label="Edit stop" onClick={()=>setEditMode('stop_'+stop.id)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px'}}>✏️</button>}
             </div>
           </div>
 
@@ -534,7 +534,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
           {viewOpen&&<div className="fade-in">
             {/* Place info + vote */}
             {(()=>{const placeOk=myPlaceOk;return planPlace&&<div style={{background:placeOk===true?'#22c55e10':placeOk===false?'#ef444410':c.CARD2,border:`1px solid ${placeOk===true?'#22c55e40':placeOk===false?'#ef444440':c.BD}`,borderRadius:'10px',padding:'12px',marginBottom:'8px'}}>
-              {planPlace?.photo&&<img src={planPlace.photo} alt="" style={{width:'100%',height:'100px',objectFit:'cover',borderRadius:'8px',marginBottom:'8px'}}/>}
+              {planPlace?.photo&&<img src={planPlace.photo} alt={planPlace?.name||'Venue photo'} style={{width:'100%',height:'100px',objectFit:'cover',borderRadius:'8px',marginBottom:'8px'}}/>}
               <div style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>{planPlace?.name||'—'}</div>
               {planPlace?.address&&<div style={{fontSize:'12px',color:c.M2,marginTop:'2px'}}>📍 {planPlace.address}</div>}
               {planPlace?.rating&&<div style={{fontSize:'11px',color:c.M2,marginTop:'2px'}}>⭐ {planPlace.rating}{planPlace?.priceLevel?' · '+'€'.repeat(planPlace.priceLevel):''}</div>}
@@ -548,7 +548,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
               </div>}
               {placeOk===false&&openSection._placeNoPopup&&<div className="fade-in" style={{marginTop:'8px',padding:'10px',background:'#ef444408',border:'1px solid #ef444420',borderRadius:'8px'}}>
                 <div style={{fontSize:'12px',color:'#ef4444',fontWeight:'600',marginBottom:'6px'}}>{t.placeNoMsg||'Want to tell the organizer?'}</div>
-                <input value={myPlaceComment} onChange={e=>setMyPlaceComment(e.target.value)} placeholder={t.commentPh||'Write a comment...'} style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box',marginBottom:'6px'}}/>
+                <input value={myPlaceComment} onChange={e=>setMyPlaceComment(e.target.value.slice(0,200))} maxLength={200} placeholder={t.commentPh||'Write a comment...'} style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box',marginBottom:'6px'}}/>
                 <button onClick={()=>{window.location.href='/create';}} style={{width:'100%',padding:'8px',background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px'}}>{t.createOwnPlan||'Or create your own plan →'}</button>
               </div>}
             </div>;})()}
@@ -646,12 +646,12 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
                 <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>🕐</div>
                 <div style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>{fmtTime(planTime)}</div>
               </div>}
-              <button onClick={()=>setEditMode('dates')} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',alignSelf:'center'}}>✏️</button>
+              <button aria-label="Edit dates" onClick={()=>setEditMode('dates')} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',alignSelf:'center'}}>✏️</button>
             </div>}
 
             {/* Save response (invitee) */}
             {!isOrgRef.current&&<div style={{marginTop:'10px'}}>
-              {!mySaved&&<div style={{marginBottom:'8px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.yourName}</div><input value={myName} onChange={e=>{setMyName(e.target.value);ls.set('q_myname',e.target.value);}} placeholder={t.yourNamePh||'Your name'} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/></div>}
+              {!mySaved&&<div style={{marginBottom:'8px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.yourName}</div><input value={myName} onChange={e=>{const v=e.target.value.slice(0,50);setMyName(v);ls.set('q_myname',v);}} maxLength={50} placeholder={t.yourNamePh||'Your name'} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/></div>}
               {(()=>{
                 const deadlinePassed=plan.deadline&&new Date(plan.deadline)<new Date();
                 const placeAnswered=myPlaceOk!==undefined&&myPlaceOk!==null;
@@ -868,7 +868,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
           {/* Plan details card */}
           <Card c={c} style={{marginBottom:'12px'}}>
             <div style={{display:'flex',gap:'10px',alignItems:'center',marginBottom:'10px'}}>
-              {planPlace?.photo&&<img src={planPlace.photo} alt="" style={{width:'50px',height:'50px',borderRadius:'10px',objectFit:'cover',flexShrink:0}}/>}
+              {planPlace?.photo&&<img src={planPlace.photo} alt={planPlace?.name||'Venue photo'} style={{width:'50px',height:'50px',borderRadius:'10px',objectFit:'cover',flexShrink:0}}/>}
               <div>
                 <div style={{fontSize:'15px',color:c.T,fontWeight:'700'}}>{planPlace?.name||'—'}</div>
                 {planPlace?.address&&<div style={{fontSize:'11px',color:c.M2}}>📍 {planPlace.address}</div>}
