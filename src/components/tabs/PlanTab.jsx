@@ -183,6 +183,43 @@ export default function PlanTab(){
       </div>
     </div>}
 
+    {/* Organizer logistics */}
+    {isOrg&&<div style={{background:c.CARD,border:`1px solid ${mc}30`,borderRadius:'14px',padding:'14px',marginBottom:'10px'}}>
+      <div style={{fontSize:'13px',color:mc,fontWeight:'700',marginBottom:'10px'}}>👤 {plan.organizer} ({t.organizer})</div>
+      {/* Attending? */}
+      <div style={{marginBottom:'8px'}}>
+        <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>{t.orgAttendingQ||'Are you going?'}</div>
+        {ynBtn(myVote.attending!==false?true:false,v=>{setMyVote('attending',v);if(!v){setMyVote('meetOk',null);setMyVote('lateMin',0);}},t.yesLbl||'Yes',t.noLbl||'No')}
+      </div>
+      {/* Meeting point — only if attending and first stop has one */}
+      {myVote.attending!==false&&firstStop.meetingPoint&&(()=>{
+        const mpMins=parseInt(firstStop.meetingMinsBefore)||0;
+        const mpTime=mpMins>0&&planTime?addMins(planTime,-mpMins):planTime;
+        return<div style={{marginBottom:'8px'}}>
+          <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>📍 {firstStop.meetingPoint}</div>
+          {ynBtn(myVote.meetOk,v=>setMyVote('meetOk',v),t.meetYes,t.meetNo)}
+          {myVote.meetOk===true&&mpTime&&<div style={{marginTop:'6px',textAlign:'center',fontSize:'16px',fontWeight:'800',color:'#22c55e'}}>🕐 {mpTime}</div>}
+        </div>;
+      })()}
+      {/* Late arrival — only if attending and first stop has tolerance */}
+      {myVote.attending!==false&&tolerance>0&&(()=>{
+        const isLate=myVote.lateMin>0;
+        return<div style={{marginBottom:'8px'}}>
+          <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>⏰ {t.onTimeQ}</div>
+          {ynBtn(!isLate,v=>{if(v)setMyVote('lateMin',0);else setMyVote('lateMin',5);},t.yesLbl,t.noLbl||'No')}
+          {isLate&&<div style={{marginTop:'6px',display:'flex',alignItems:'center',gap:'6px'}}>
+            <span style={{fontSize:'11px',color:c.M}}>+</span>
+            <input type="number" inputMode="numeric" min="1" max={tolerance} value={myVote.lateMin} onChange={e=>setMyVote('lateMin',Math.min(Math.max(parseInt(e.target.value)||1,1),tolerance))} style={{width:'60px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'6px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',textAlign:'center'}}/>
+            <span style={{fontSize:'11px',color:c.M}}>min</span>
+            <span style={{fontSize:'11px',color:'#f59e0b',fontWeight:'600'}}>{addMins(planTime,myVote.lateMin)}</span>
+          </div>}
+        </div>;
+      })()}
+      {/* Save */}
+      <button onClick={()=>saveMyResp(true)} disabled={myVote.saving} style={{width:'100%',padding:'10px',background:myVote.saved?'#22c55e':mc,border:'none',borderRadius:'10px',color:myVote.saved?'#fff':'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'13px',marginTop:'4px'}}>{myVote.saving?'...':(myVote.saved?(t.respSaved):(t.saveAvail))}</button>
+      {myVote.saveConfirm&&<div className="fade-in" style={{marginTop:'6px',padding:'8px',background:'#22c55e15',border:'1px solid #22c55e40',borderRadius:'8px',textAlign:'center',fontSize:'12px',color:'#22c55e',fontWeight:'600'}}>✓ {t.savedTitle}</div>}
+    </div>}
+
     {/* Require login gate */}
     {!isOrg&&plan.requireLogin&&!authUser&&<div style={{marginTop:'10px',padding:'16px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px',textAlign:'center'}}>
       <div style={{fontSize:'14px',color:c.T,fontWeight:'600',marginBottom:'6px'}}>{t.loginRequiredTitle||'Login required'}</div>

@@ -64,7 +64,8 @@ export default function ResultsProvider({plan:ip,isOrg,c,lang,authUser,profile,c
     placeOk:myPrev?.placeOk??null,dateOk:myPrev?.dateOk??null,timeOk:myPrev?.timeOk??null,
     meetOk:myPrev?.meetOk??null,lateMin:myPrev?.lateMin||0,
     altDates:myPrev?.availDates||[],timeFrom:myPrev?.availTimeFrom||'',timeTo:myPrev?.availTimeTo||'',
-    name:myPrev?.name||ls.get('q_myname',''),placeComment:myPrev?.placeComment||'',
+    name:myPrev?.name||(isOrg?ip.organizer:'')||ls.get('q_myname',''),placeComment:myPrev?.placeComment||'',
+    attending:myPrev?.attending!==false,
     saving:false,saved:!!myPrev,saveConfirm:false
   });
   const setMyVote=(k,v)=>setMyVoteRaw(p=>({...p,[k]:v}));
@@ -108,24 +109,35 @@ export default function ResultsProvider({plan:ip,isOrg,c,lang,authUser,profile,c
     await updatePlan(up);setPlan(up);setEditState('conf',false);
   };
 
-  // Save inline response
-  const saveMyResp=async()=>{
-    if(!myVote.name.trim())return;
+  // Save inline response (invitee or organizer)
+  const saveMyResp=async(asOrg=false)=>{
+    const name=asOrg?(plan.organizer||'Organizer'):myVote.name.trim();
+    if(!name)return;
     if(!navigator.onLine){showErr(t.offlineMsg||'No connection — changes not saved');return;}
     setMyVote('saving',true);
-    const placeOk=myVote.placeOk===true;
     const changeLog=[...(myPrev?.changeLog||[])];
     if(myPrev)changeLog.unshift({at:new Date().toISOString(),desc:'Updated'});
-    const resp={name:myVote.name.trim(),username:profile?.username||null,dateOk:myVote.dateOk,timeOk:myVote.timeOk,meetOk:myVote.meetOk,lateMin:myVote.lateMin,
+    const resp=asOrg?{
+      name,username:profile?.username||null,isOrganizer:true,
+      dateOk:true,timeOk:true,placeOk:true,
+      meetOk:myVote.meetOk,lateMin:myVote.lateMin,
+      attending:myVote.attending!==false,
+      availDates:[],availTimeFrom:'',availTimeTo:'',placeComment:'',
+      avail:{[planTime?`${planDate}_${planTime}`:planDate]:'yes'},
+      how:'',comment:myPrev?.comment||'',changeLog,at:new Date().toISOString()
+    }:{
+      name,username:profile?.username||null,
+      dateOk:myVote.dateOk,timeOk:myVote.timeOk,meetOk:myVote.meetOk,lateMin:myVote.lateMin,
+      placeOk:myVote.placeOk===true,placeComment:myVote.placeComment,
       availDates:myVote.dateOk===false?myVote.altDates:[],availTimeFrom:myVote.timeOk===false?myVote.timeFrom:'',availTimeTo:myVote.timeOk===false?myVote.timeTo:'',
-      placeOk,placeComment:myVote.placeComment,
       avail:myVote.dateOk&&myVote.timeOk?{[planTime?`${planDate}_${planTime}`:planDate]:'yes'}:{},
-      how:'',comment:myPrev?.comment||'',changeLog,at:new Date().toISOString()};
+      how:'',comment:myPrev?.comment||'',changeLog,at:new Date().toISOString()
+    };
     try{
-      await saveResp(plan.id,myVote.name.trim(),resp);
+      await saveResp(plan.id,name,resp);
       const{data:{user}}=await db.auth.getSession().then(s=>({data:{user:s.data?.session?.user}}));
-      if(user)db.from('responses').update({user_id:user.id}).eq('plan_id',plan.id).eq('name',myVote.name.trim()).then(()=>{},()=>{});
-      addMyPlan(plan.id,plan.name,'invited');ls.set(myRespKey,resp);setMyPrev(resp);ls.set('q_myname',myVote.name.trim());
+      if(user)db.from('responses').update({user_id:user.id}).eq('plan_id',plan.id).eq('name',name).then(()=>{},()=>{});
+      addMyPlan(plan.id,plan.name,asOrg?'organizer':'invited');ls.set(myRespKey,resp);setMyPrev(resp);if(!asOrg)ls.set('q_myname',name);
       setMyVote('saved',true);setMyVote('saveConfirm',true);setTimeout(()=>setMyVote('saveConfirm',false),3000);refresh(true);
     }catch(e){console.error('Save failed:',e);setMyVote('saveConfirm',false);alert(t.saveError||'Could not save.');}
     setMyVote('saving',false);
