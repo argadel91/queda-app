@@ -6,6 +6,8 @@ const SB_KEY = import.meta.env.VITE_SUPABASE_KEY
 export const db = createClient(SB_URL, SB_KEY, {
   auth: { flowType: 'pkce', autoRefreshToken: true, persistSession: true, detectSessionInUrl: true }
 })
+// Expose for E2E tests
+if (typeof window !== 'undefined') window.__supabaseClient = db
 
 // Toast error system
 let _toastFn = null
