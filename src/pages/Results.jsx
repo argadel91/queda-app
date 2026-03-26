@@ -153,7 +153,12 @@ function ResultsInner({onBack}){
               {/* 2. Name + Address (editable, auto-filled by search) */}
               <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.editNameLbl}</div><input defaultValue={opt.name||''} onBlur={e=>updateStop('name',e.target.value.trim(),true)} style={inpSt}/></div>
               <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>📍 {t.addressLbl||'Address'}</div><input defaultValue={opt.address||''} onBlur={e=>updateStop('address',e.target.value.trim(),true)} style={inpSt}/></div>
-              {/* 3. Start time + Duration + Tolerance in one row */}
+              {/* 3. Date + Time display */}
+              <div style={{display:'flex',gap:'6px',marginBottom:'8px'}}>
+                {planDate&&<div style={{flex:1,padding:'8px',background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'8px',textAlign:'center'}}><div style={{fontSize:'10px',color:c.M}}>📅</div><div style={{fontSize:'13px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtShort(planDate,lang)}</div></div>}
+                <div style={{flex:1,padding:'8px',background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'8px',textAlign:'center'}}><div style={{fontSize:'10px',color:c.M}}>🕐</div><div style={{fontSize:'13px',color:c.T,fontWeight:'600'}}>{si>0?(s.startTime||'—'):fmtTime(planTime)}</div></div>
+              </div>
+              {/* 4. Start time (stop 2+) + Duration + Tolerance in one row */}
               <div style={{display:'flex',gap:'6px',marginBottom:'10px',flexWrap:'wrap'}}>
                 {si>0&&<div style={{flex:'1 1 80px',minWidth:'80px'}}><div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>🕐 {t.startTimeLbl||'Start'}</div><input type="time" value={s.startTime||''} onChange={e=>updateStop('startTime',e.target.value)} style={{...inpSt,width:'100%',padding:'6px 8px',fontSize:'12px'}}/></div>}
                 <div style={{flex:'1 1 90px',minWidth:'90px'}}><div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>⏱️ {t.durationLbl||'Duration'}</div><select value={s.duration||''} onChange={e=>updateStop('duration',e.target.value)} style={{...inpSt,width:'100%',padding:'6px 8px',fontSize:'12px',cursor:'pointer'}}><option value="">—</option><option value="30min">30m</option><option value="1h">1h</option><option value="1h30">1h30</option><option value="2h">2h</option><option value="3h">3h</option><option value="4h+">4h+</option></select></div>
