@@ -148,11 +148,24 @@ export default function PlanTab(){
           </>}
         </>}
 
-        {/* Organizer date/time info — only on first stop */}
-        {isFirst&&isOrg&&<div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
-          {planDate&&<div style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px'}}><div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>📅</div><div style={{fontSize:'14px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtShort(planDate,lang)}</div></div>}
-          {planTime&&<div style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px'}}><div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>🕐</div><div style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>{fmtTime(planTime)}</div></div>}
-          <button aria-label="Edit dates" onClick={()=>setEditState('mode','dates')} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',alignSelf:'center'}}>✏️</button>
+        {/* Organizer details — visible without editing */}
+        {isOrg&&<div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px',marginBottom:'8px'}}>
+          {/* Date + Time */}
+          <div style={{display:'flex',gap:'8px',marginBottom:s.duration||s.tolerance||(isFirst&&s.meetingPoint)?'8px':0}}>
+            {planDate&&<div style={{flex:1,textAlign:'center'}}><span style={{fontSize:'11px',color:c.M}}>📅</span> <span style={{fontSize:'13px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtShort(planDate,lang)}</span></div>}
+            {sTime&&<div style={{flex:1,textAlign:'center'}}><span style={{fontSize:'11px',color:c.M}}>🕐</span> <span style={{fontSize:'13px',color:c.T,fontWeight:'600'}}>{fmtTime(sTime)}{s.duration?` — ${calcEnd(sTime,s.duration)}`:''}</span></div>}
+            {isFirst&&<button aria-label="Edit dates" onClick={()=>setEditState('mode','dates')} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',alignSelf:'center',flexShrink:0}}>✏️</button>}
+          </div>
+          {/* Duration + Tolerance */}
+          {(s.duration||s.tolerance)&&<div style={{display:'flex',gap:'12px',fontSize:'11px',color:c.M2,marginBottom:(isFirst&&s.meetingPoint)?'8px':0}}>
+            {s.duration&&<span>⏱️ {durLabel(s.duration)}</span>}
+            {s.tolerance&&<span>⏰ {t.toleranceLbl||'Tolerance'}: {s.tolerance} min</span>}
+          </div>}
+          {/* Meeting point — only first stop */}
+          {isFirst&&s.meetingPoint&&<div style={{fontSize:'11px',color:'#f59e0b',marginTop:'4px'}}>
+            📍 {s.meetingPoint}
+            {parseInt(s.meetingMinsBefore)>0&&<span> · {s.meetingMinsBefore} min {t.beforeLbl||'before'}{planTime?` (${addMins(planTime,-(parseInt(s.meetingMinsBefore)))})`:''}</span>}
+          </div>}
         </div>}
       </div>}
     </div>;
