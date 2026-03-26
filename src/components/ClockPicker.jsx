@@ -1,7 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
+import useFocusTrap from '../hooks/useFocusTrap.js'
 
 export default function ClockPicker({value,onChange,c}){
   const[open,setOpen]=useState(false);
+  const modalRef=useRef(null);
+  useFocusTrap(open?modalRef:null);
   const[mode,setMode]=useState('hour'); // 'hour' or 'min'
   const[selH,setSelH]=useState(value?parseInt(value.split(':')[0]):null);
   const[selM,setSelM]=useState(value?parseInt(value.split(':')[1]):0);
@@ -24,8 +27,8 @@ export default function ClockPicker({value,onChange,c}){
       <span style={{fontSize:'18px'}}>🕐</span>
     </button>
 
-    {open&&<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:300,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setOpen(false)}>
-      <div onClick={e=>e.stopPropagation()} style={{background:c?.CARD||'#1A1A1A',borderRadius:'20px',padding:'24px',width:'100%',maxWidth:'300px'}}>
+    {open&&<div role="dialog" aria-modal="true" onKeyDown={e=>{if(e.key==='Escape')setOpen(false);}} style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:300,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setOpen(false)}>
+      <div ref={modalRef} onClick={e=>e.stopPropagation()} style={{background:c?.CARD||'#1A1A1A',borderRadius:'20px',padding:'24px',width:'100%',maxWidth:'300px'}}>
         {/* Display */}
         <div style={{display:'flex',justifyContent:'center',alignItems:'center',gap:'4px',marginBottom:'20px'}}>
           <button onClick={()=>setMode('hour')} style={{fontSize:'36px',fontWeight:'800',fontFamily:'monospace',background:'none',border:'none',color:mode==='hour'?c?.A||'#CDFF6C':c?.M||'#666',cursor:'pointer',padding:'4px 8px',borderRadius:'8px'}}>{selH!==null?fmt(selH):'--'}</button>

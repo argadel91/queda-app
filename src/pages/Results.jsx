@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
+import useFocusTrap from '../hooks/useFocusTrap.js'
 import T from '../constants/translations.js'
 import { updatePlan } from '../lib/supabase.js'
 import { fmtShort, fmtTime, fmtDate, daysUntil } from '../lib/utils.js'
@@ -14,6 +15,7 @@ import ResultTab from '../components/tabs/ResultTab.jsx'
 import MoreTab from '../components/tabs/MoreTab.jsx'
 
 function ResultsInner({onBack}){
+  const autoConfirmRef=useRef(null);const editModalRef=useRef(null);
   const{planState,editState,setEditState,ui,helpers,myVote}=useResults();
   const{plan,setPlan,rs,total,isOrg,ldg}=planState;
   const{tab,setTab,openSection,setOpenSection,newRespAlert,autoConfirmPending,setAutoConfirmPending,remSent}=ui;
@@ -24,6 +26,9 @@ function ResultsInner({onBack}){
   const TABS=['plan','vote','result','more'];
   const tlbl=k=>t.tabs?.[k]||k;
 
+  useFocusTrap(autoConfirmPending?autoConfirmRef:null);
+  useFocusTrap(editState.mode?editModalRef:null);
+
   // Edit modal helpers
   const{mode:editMode}=editState;
   const setEditMode=v=>setEditState('mode',v);
@@ -31,7 +36,7 @@ function ResultsInner({onBack}){
   return(<>
     {/* Auto-confirm modal */}
     {autoConfirmPending&&<div role="dialog" aria-modal="true" onKeyDown={e=>{if(e.key==='Escape')setAutoConfirmPending(null);}} style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setAutoConfirmPending(null)}>
-      <div onClick={e=>e.stopPropagation()} className="fade-in" style={{background:c.CARD,borderRadius:'16px',padding:'24px',width:'100%',maxWidth:'340px',textAlign:'center'}}>
+      <div ref={autoConfirmRef} onClick={e=>e.stopPropagation()} className="fade-in" style={{background:c.CARD,borderRadius:'16px',padding:'24px',width:'100%',maxWidth:'340px',textAlign:'center'}}>
         <div style={{fontSize:'32px',marginBottom:'10px'}}>📌</div>
         <div style={{fontSize:'15px',color:c.T,fontWeight:'700',marginBottom:'6px'}}>{t.autoConfirmTitle}</div>
         <div style={{fontSize:'13px',color:c.M2,marginBottom:'16px'}}>{autoConfirmPending.date} {autoConfirmPending.startTime}</div>
@@ -44,7 +49,7 @@ function ResultsInner({onBack}){
 
     {/* Edit modals */}
     {editMode&&<div role="dialog" aria-modal="true" onKeyDown={e=>{if(e.key==='Escape')setEditMode(false);}} style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setEditMode(false)}>
-      <div onClick={e=>e.stopPropagation()} className="fade-in" style={{background:c.CARD,borderRadius:'16px',padding:'24px',width:'100%',maxWidth:'400px',maxHeight:'80vh',overflowY:'auto'}}>
+      <div ref={editModalRef} onClick={e=>e.stopPropagation()} className="fade-in" style={{background:c.CARD,borderRadius:'16px',padding:'24px',width:'100%',maxWidth:'400px',maxHeight:'80vh',overflowY:'auto'}}>
         {/* View title */}
         {editMode==='view_title'&&<>
           <div style={{fontSize:'11px',color:c.M,fontWeight:'600',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'8px'}}>{t.editNameLbl}</div>

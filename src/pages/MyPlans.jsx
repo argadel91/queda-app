@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import T from '../constants/translations.js'
 import { ls, getMyPlans, removeMyPlan } from '../lib/storage.js'
 import { loadPlan, deletePlan } from '../lib/supabase.js'
 import { daysUntil, fmtShort, dayStart } from '../lib/utils.js'
 import { Back } from '../components/ui.jsx'
+import useFocusTrap from '../hooks/useFocusTrap.js'
 
 export default function MyPlans({onBack,onOpen,c,lang}){
   const t=T[lang];
   const[plans,setPlans]=useState(getMyPlans());
   const[confirm,setConfirm]=useState(null);
+  const confirmRef=useRef(null);
+  useFocusTrap(confirm?confirmRef:null);
   const[tab,setTab]=useState('upcoming');
   const[dates,setDates]=useState({});const[fullPlans,setFullPlans]=useState({});
   const now=dayStart();
@@ -31,7 +34,7 @@ export default function MyPlans({onBack,onOpen,c,lang}){
     <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'20px'}}>{t.myPlansTitle||'My plans'}</h2>
 
     {confirm&&<div role="dialog" aria-modal="true" onKeyDown={e=>{if(e.key==='Escape')setConfirm(null);}} style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:100,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setConfirm(null)}>
-      <div onClick={e=>e.stopPropagation()} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'16px',padding:'24px',width:'100%',maxWidth:'340px'}}>
+      <div ref={confirmRef} onClick={e=>e.stopPropagation()} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'16px',padding:'24px',width:'100%',maxWidth:'340px'}}>
         <div style={{fontSize:'32px',textAlign:'center',marginBottom:'12px'}}>{confirm.role==='organizer'?'🗑️':'👋'}</div>
         <div style={{fontSize:'16px',fontWeight:'700',color:c.T,textAlign:'center',marginBottom:'8px'}}>{confirm.role==='organizer'?(t.delConfirm||'Delete plan?'):(t.leaveConfirm||'Leave plan?')}</div>
         <div style={{fontSize:'13px',color:c.M2,textAlign:'center',marginBottom:'20px'}}>{confirm.role==='organizer'?(t.delWarn||'This cannot be undone'):(t.leaveWarn||'You will be removed')}</div>
