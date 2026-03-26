@@ -7,6 +7,7 @@ import { Btn, Back } from '../components/ui.jsx'
 import PostPlanSurvey from '../components/PostPlanSurvey.jsx'
 import { generateICS, generateGCalURL } from '../lib/ics.js'
 import VenueInfo from '../components/VenueInfo.jsx'
+import CalendarPicker from '../components/CalendarPicker.jsx'
 import ClockPicker from '../components/ClockPicker.jsx'
 import ResultsProvider, { useResults, addMins, fmtMinsToH } from '../components/ResultsContext.jsx'
 import PlanTab from '../components/tabs/PlanTab.jsx'
@@ -85,7 +86,7 @@ function ResultsInner({onBack}){
           <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>{t.editDatesLbl}</div>
           <div style={{marginBottom:'12px'}}>
             <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>📅 ({(plan.dates||[]).length}/3)</div>
-            {(plan.dates||[]).length<3&&<input type="date" min={new Date().toISOString().split('T')[0]} onChange={async e=>{if(!e.target.value||(plan.dates||[]).includes(e.target.value))return;const up={...plan,dates:[...(plan.dates||[]),e.target.value].sort()};await updatePlan(up);setPlan(up);e.target.value='';}} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box',marginBottom:'10px'}}/>}
+            {(plan.dates||[]).length<3&&<CalendarPicker selected={plan.dates||[]} onChange={async d=>{const newDate=d.find(x=>!(plan.dates||[]).includes(x));if(!newDate)return;const up={...plan,dates:[...(plan.dates||[]),newDate].sort()};await updatePlan(up);setPlan(up);}} max={(plan.dates||[]).length+1} c={c} lang={lang}/>}
           </div>
           {(plan.dates||[]).map(d=>{const dt=plan.dateTimes||{};const times2=(dt[d]||(plan.startTimes||[])).filter(Boolean);return<div key={d} style={{marginBottom:'14px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'12px'}}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'8px'}}>
@@ -153,10 +154,15 @@ function ResultsInner({onBack}){
               {/* 2. Name + Address (editable, auto-filled by search) */}
               <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.editNameLbl}</div><input defaultValue={opt.name||''} onBlur={e=>updateStop('name',e.target.value.trim(),true)} style={inpSt}/></div>
               <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>📍 {t.addressLbl||'Address'}</div><input defaultValue={opt.address||''} onBlur={e=>updateStop('address',e.target.value.trim(),true)} style={inpSt}/></div>
-              {/* 3. Date + Time editable */}
-              <div style={{display:'flex',gap:'6px',marginBottom:'8px'}}>
-                <div style={{flex:1}}><div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>📅 {t.editDatesLbl||'Date'}</div><input type="date" value={planDate||''} onChange={async e=>{if(!e.target.value)return;const newDates=(plan.dates||[]).map(d=>d===planDate?e.target.value:d);if(!newDates.includes(e.target.value))newDates[0]=e.target.value;const up={...plan,dates:newDates.sort(),date:newDates[0]};await updatePlan(up);setPlan(up);}} style={{...inpSt,width:'100%',padding:'6px 8px',fontSize:'12px'}}/></div>
-                <div style={{flex:1}}><div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>🕐 {si>0?(t.startTimeLbl||'Start'):(t.editTimesLbl||'Time')}</div><input type="time" value={si>0?(s.startTime||''):(planTime||'')} onChange={async e=>{if(si>0){updateStop('startTime',e.target.value);}else{const up={...plan,startTimes:[e.target.value,...(plan.startTimes||[]).slice(1)],time:e.target.value};await updatePlan(up);setPlan(up);}}} style={{...inpSt,width:'100%',padding:'6px 8px',fontSize:'12px'}}/></div>
+              {/* 3. Date (CalendarPicker) */}
+              <div style={{marginBottom:'10px'}}>
+                <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>📅 {t.editDatesLbl||'Date'}</div>
+                <CalendarPicker selected={planDate?[planDate]:[]} onChange={async d=>{const sel=d[d.length-1];if(!sel)return;const newDates=(plan.dates||[]).map(x=>x===planDate?sel:x);if(!newDates.includes(sel))newDates[0]=sel;const up={...plan,dates:newDates.sort(),date:newDates[0]};await updatePlan(up);setPlan(up);}} max={1} c={c} lang={lang}/>
+              </div>
+              {/* 4. Time (ClockPicker) */}
+              <div style={{marginBottom:'10px'}}>
+                <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>🕐 {si>0?(t.startTimeLbl||'Start'):(t.editTimesLbl||'Time')}{(si>0?s.startTime:planTime)?` → ${si>0?s.startTime:planTime}`:''}</div>
+                <ClockPicker value={si>0?(s.startTime||''):(planTime||'')} onChange={async v=>{if(si>0){updateStop('startTime',v);}else{const up={...plan,startTimes:[v,...(plan.startTimes||[]).slice(1)],time:v};await updatePlan(up);setPlan(up);}}} c={c}/>
               </div>
               {/* 4. Duration + Tolerance in one row */}
               <div style={{display:'flex',gap:'6px',marginBottom:'10px',flexWrap:'wrap'}}>
