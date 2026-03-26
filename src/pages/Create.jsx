@@ -273,9 +273,9 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
             <button onClick={()=>{navigator.clipboard?.writeText(shareUrl);}} style={{flex:1,padding:'12px',background:c.CARD2,color:c.T,border:`1px solid ${c.BD}`,borderRadius:'12px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>🔗</button>
           </div>}
         </div>
-        <Btn onClick={()=>onCreated(created)} v="secondary" full style={{padding:'14px'}} c={c}>{t.reviewPlan}</Btn>
-        <Btn onClick={()=>{setCreated(null);setShareOpen(false);nav2('/create/date');setSelDates([]);setStartTimes(['']);setStops([emptyStop(1,'')]);}} v="secondary" full style={{padding:'14px'}} c={c}>{t.createAnother}</Btn>
-        <button onClick={onBack} style={{padding:'12px',background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'14px'}}>🏠 {t.homeBtn}</button>
+        <Btn onClick={()=>onCreated(created)} v="secondary" full style={{padding:'14px',color:c.T}} c={c}>{t.reviewPlan||'Review plan →'}</Btn>
+        <Btn onClick={()=>{setCreated(null);setShareOpen(false);nav2('/create/date');setSelDates([]);setStartTimes(['']);setStops([emptyStop(1,'')]);}} v="secondary" full style={{padding:'14px',color:c.T}} c={c}>{t.createAnother||'Crear otro plan'}</Btn>
+        <button onClick={onBack} style={{padding:'12px',background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'14px'}}>🏠 {t.homeBtn||'Home'}</button>
       </div>
     </div>;
   }
