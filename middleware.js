@@ -4,7 +4,8 @@
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.VITE_SUPABASE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-const CRAWLERS = /whatsapp|telegrambot|twitterbot|facebookexternalhit|linkedinbot|slackbot|discordbot|googlebot|bingbot|pinterest|snapchat/i;
+// Real browsers that should get the SPA (not the meta-tag HTML)
+const BROWSERS = /mozilla.*applewebkit|chrome|safari|firefox|edg|opera|vivaldi/i;
 
 export const config = {
   matcher: '/plan/:path*',
@@ -13,8 +14,8 @@ export const config = {
 export default async function middleware(request) {
   const ua = request.headers.get('user-agent') || '';
 
-  // Only intercept crawlers
-  if (!CRAWLERS.test(ua)) {
+  // Real browsers get the SPA — everything else (crawlers, bots, validators) gets meta tags
+  if (BROWSERS.test(ua) && !/bot|crawl|spider|preview|fetch|curl/i.test(ua)) {
     return; // Let the SPA handle it
   }
 
