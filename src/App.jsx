@@ -183,7 +183,7 @@ function AppInner(){
   const isHome=location.pathname==='/';
   return(<React.Suspense fallback={<Fallback/>}><div style={{minHeight:'100vh',background:c.BG,color:c.T,fontFamily:"'DM Sans',system-ui,sans-serif"}} onClick={()=>{setLangOpen(false);setAvatarOpen(false);}}>
     {toast&&<div style={{position:'fixed',bottom:'24px',left:'50%',transform:'translateX(-50%)',background:toast.type==='success'?'#22c55e':toast.type==='info'?c.A:'#ef4444',color:toast.type==='info'?'#0A0A0A':'#fff',padding:'12px 20px',borderRadius:'30px',fontWeight:'600',fontSize:'13px',zIndex:300,boxShadow:'0 4px 20px rgba(0,0,0,.4)',whiteSpace:'nowrap',animation:'slideDown .3s ease'}}>{toast.type==='success'?'✓':toast.type==='info'?'ℹ':'⚠️'} {toast.msg}</div>}
-    <div style={{borderBottom:`1px solid ${c.BD}`,padding:'14px 24px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,background:c.BG+'F0',backdropFilter:'blur(10px)',zIndex:10}}>
+    <div style={{borderBottom:`1px solid ${c.BD}`,padding:'10px 12px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,background:c.BG+'F0',backdropFilter:'blur(10px)',zIndex:10}}>
       <div onClick={()=>navigate('/')} style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'22px',cursor:'pointer',color:c.T,letterSpacing:'-.02em'}}>queda<span style={{color:c.A}}>.</span></div>
       <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
         <div style={{position:'relative'}} onClick={e=>e.stopPropagation()}>
@@ -196,9 +196,8 @@ function AppInner(){
         {!isHome&&<button title={T[lang]?.tipHome} aria-label="Go home" onClick={()=>navigate('/')} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 10px',cursor:'pointer',fontSize:'12px',color:c.T,fontFamily:'inherit',fontWeight:'600'}}>🏠</button>}
         {plan&&location.pathname.startsWith('/plan/')&&<span style={{color:mc,fontWeight:'800',fontSize:'12px',letterSpacing:'.1em'}}>{plan.id}</span>}
         {authUser&&<div style={{position:'relative'}} onClick={e=>e.stopPropagation()}>
-          <button title={T[lang]?.tipProfile} onClick={e=>{e.stopPropagation();setAvatarOpen(o=>!o);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 10px',cursor:'pointer',fontSize:'13px',color:c.T,fontFamily:'inherit',fontWeight:'500',display:'flex',alignItems:'center',gap:'5px'}}>
+          <button title={T[lang]?.tipProfile} onClick={e=>{e.stopPropagation();setAvatarOpen(o=>!o);}} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'5px 8px',cursor:'pointer',fontSize:'13px',color:c.T,fontFamily:'inherit',fontWeight:'500',display:'flex',alignItems:'center',gap:'4px'}}>
             <span style={{width:'22px',height:'22px',borderRadius:'50%',background:c.A,color:'#0A0A0A',display:'inline-flex',alignItems:'center',justifyContent:'center',fontSize:'11px',fontWeight:'800',flexShrink:0}}>{(profile?.name||authUser.email||'?')[0].toUpperCase()}</span>
-            <span style={{maxWidth:'80px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{profile?.name||authUser.email}</span>
             <span style={{fontSize:'10px',color:c.M}}>▾</span>
           </button>
           {avatarOpen&&<div style={{position:'absolute',right:0,top:'calc(100% + 4px)',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',boxShadow:'0 8px 24px rgba(0,0,0,.3)',zIndex:100,overflow:'hidden',minWidth:'150px'}}>
