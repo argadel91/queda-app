@@ -66,8 +66,3 @@ button:active {
 .fade-in {
   animation: fadeIn 0.25s ease-out;
 }
-
-/* Safe area for phones with home indicator */
-.safe-bottom {
-  padding-bottom: max(16px, env(safe-area-inset-bottom));
-}
