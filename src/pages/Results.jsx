@@ -123,31 +123,58 @@ function ResultsInner({onBack}){
           const pickVenue=async(r)=>{const stops2=[...(plan.stops||[])];const idx2=stops2.findIndex(x=>x.id==stopId||String(x.id)===stopId);if(idx2<0)return;const fields2=['name','address','lat','lng','rating','ratingCount','priceLevel','photo','website','googleMapsURI','types'];const newOpt={...stops2[idx2].options[0]};fields2.forEach(k=>{if(r[k]!==undefined&&r[k]!==null)newOpt[k]=r[k];});stops2[idx2]={...stops2[idx2],options:[newOpt,...stops2[idx2].options.slice(1)]};const up={...plan,stops:stops2};await updatePlan(up);setPlan(up);setEditState('venueResults',[]);setEditState('venueSearch','');};
           const searchMP=async(q)=>searchPlace(q,'mpResults');
           const pickMP=async(r)=>{const stops2=[...(plan.stops||[])];const idx=stops2.findIndex(x=>x.id==stopId||String(x.id)===stopId);if(idx<0)return;stops2[idx]={...stops2[idx],meetingPoint:r.name+(r.address?' — '+r.address:''),meetingPointLat:r.lat,meetingPointLng:r.lng};const up={...plan,stops:stops2};await updatePlan(up);setPlan(up);setEditState('mpResults',[]);setEditState('mpSearch','');};
+          const isFirstStop=si===0;
+          const cancelStop=async()=>{
+            const stopsNamed=(plan.stops||[]).filter(x=>(x.options||[]).some(o=>o.name));
+            const isFirst=stopsNamed[0]&&(stopsNamed[0].id==stopId||String(stopsNamed[0].id)===stopId);
+            const msg=isFirst&&stopsNamed.length>1
+              ?(t.cancelFirstStopWarn||'The next stop will become #1. It keeps its own start time. The meeting point will be removed.')
+              :(t.delConfirm2||'Delete this stop?');
+            if(!confirm(msg))return;
+            const newStops=(plan.stops||[]).filter(x=>x.id!=stopId&&String(x.id)!==stopId);
+            // If first stop was canceled, remove meeting point from old stop (it's gone) — new first stop has no meeting point by default
+            if(isFirst&&newStops.length>0){
+              newStops[0]={...newStops[0],meetingPoint:'',meetingPointLat:null,meetingPointLng:null,meetingMinsBefore:''};
+            }
+            const log=[...(plan.changeLog||[]),{at:new Date().toISOString(),type:'cancel_stop',desc:`Canceled stop: ${opt.name||si+1}`}];
+            const up={...plan,stops:newStops,changeLog:log};
+            await updatePlan(up);setPlan(up);setEditMode(false);
+          };
           return<>
             <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>{t.editLbl} — {t.stopLbl||'Stop'} {si+1}</div>
             {opt.photo&&<img src={opt.photo} alt={opt.name||'Venue'} style={{width:'100%',height:'100px',objectFit:'cover',borderRadius:'10px',marginBottom:'10px'}}/>}
             {isOrg?<>
-              <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.editNameLbl}</div><input defaultValue={opt.name||''} onBlur={e=>updateStop('name',e.target.value.trim(),true)} style={inpSt}/></div>
-              <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>📍 {t.addressLbl||'Address'}</div><input defaultValue={opt.address||''} onBlur={e=>updateStop('address',e.target.value.trim(),true)} style={inpSt}/></div>
+              {/* 1. Google Maps search */}
               <div style={{marginBottom:'10px'}}>
                 <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>🔍 {t.searchPlacePh||'Search a place...'}</div>
                 <div style={{display:'flex',gap:'6px'}}><input value={editState.venueSearch||''} onChange={e=>setEditState('venueSearch',e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();searchPlace(editState.venueSearch,'venueResults');}}} placeholder={t.searchPlacePh||'Search...'} style={{...inpSt,flex:1}}/><button onClick={()=>searchPlace(editState.venueSearch,'venueResults')} style={{background:mc,border:'none',borderRadius:'8px',padding:'8px 12px',color:'#0A0A0A',cursor:'pointer',fontWeight:'700',fontSize:'14px'}}>🔍</button></div>
                 {(editState.venueResults||[]).length>0&&<div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',marginTop:'4px',maxHeight:'180px',overflowY:'auto'}}>{editState.venueResults.map((r,ri)=><div key={ri} onClick={()=>pickVenue(r)} style={{padding:'8px 12px',cursor:'pointer',borderBottom:ri<editState.venueResults.length-1?`1px solid ${c.BD}`:'none',fontSize:'12px'}} onMouseEnter={e=>e.currentTarget.style.background=c.CARD2} onMouseLeave={e=>e.currentTarget.style.background='transparent'}><div style={{display:'flex',alignItems:'center',gap:'6px'}}><div style={{color:c.T,fontWeight:'500'}}>{r.name}</div>{r.rating&&<span style={{fontSize:'10px',color:mc}}>⭐{r.rating}</span>}</div><div style={{color:c.M2,fontSize:'11px'}}>{r.address}</div></div>)}</div>}
               </div>
-              <div style={{display:'flex',gap:'8px',marginBottom:'10px'}}>
-                <div style={{flex:1}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>👥 {t.minCapLbl||'Min'}</div><input type="number" min="0" defaultValue={s.minAttendees||''} onBlur={e=>updateStop('minAttendees',e.target.value)} placeholder="—" style={{...inpSt,width:'100%'}}/></div>
-                <div style={{flex:1}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>👥 {t.maxCapLbl||'Max'}</div><input type="number" min="0" defaultValue={s.maxCapacity||''} onBlur={e=>updateStop('maxCapacity',e.target.value)} placeholder="—" style={{...inpSt,width:'100%'}}/></div>
+              {/* 2. Name + Address (editable, auto-filled by search) */}
+              <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.editNameLbl}</div><input defaultValue={opt.name||''} onBlur={e=>updateStop('name',e.target.value.trim(),true)} style={inpSt}/></div>
+              <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>📍 {t.addressLbl||'Address'}</div><input defaultValue={opt.address||''} onBlur={e=>updateStop('address',e.target.value.trim(),true)} style={inpSt}/></div>
+              {/* 3. Start time + Duration + Tolerance in one row */}
+              <div style={{display:'flex',gap:'6px',marginBottom:'10px',flexWrap:'wrap'}}>
+                {si>0&&<div style={{flex:'1 1 80px',minWidth:'80px'}}><div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>🕐 {t.startTimeLbl||'Start'}</div><input type="time" value={s.startTime||''} onChange={e=>updateStop('startTime',e.target.value)} style={{...inpSt,width:'100%',padding:'6px 8px',fontSize:'12px'}}/></div>}
+                <div style={{flex:'1 1 90px',minWidth:'90px'}}><div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>⏱️ {t.durationLbl||'Duration'}</div><select value={s.duration||''} onChange={e=>updateStop('duration',e.target.value)} style={{...inpSt,width:'100%',padding:'6px 8px',fontSize:'12px',cursor:'pointer'}}><option value="">—</option><option value="30min">30m</option><option value="1h">1h</option><option value="1h30">1h30</option><option value="2h">2h</option><option value="3h">3h</option><option value="4h+">4h+</option></select></div>
+                {isFirstStop&&<div style={{flex:'1 1 80px',minWidth:'80px'}}><div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>⏰ {t.toleranceLbl||'Tolerance'}</div><div style={{display:'flex',alignItems:'center',gap:'4px'}}><input type="number" min="0" max="120" defaultValue={s.tolerance||''} onBlur={e=>updateStop('tolerance',e.target.value)} placeholder="15" style={{...inpSt,width:'100%',padding:'6px 8px',fontSize:'12px'}}/></div></div>}
               </div>
-              {si>0&&<div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>🕐 {t.startTimeLbl||'Start time'}</div><input type="time" value={s.startTime||''} onChange={e=>updateStop('startTime',e.target.value)} style={{...inpSt,width:'auto'}}/>{!s.startTime&&<div style={{fontSize:'10px',color:'#f59e0b',marginTop:'4px'}}>⚠️ {t.noStartTimeHint||'Set duration on previous stop'}</div>}</div>}
-              <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>⏱️ {t.durationLbl||'Duration'}</div><select value={s.duration||''} onChange={e=>updateStop('duration',e.target.value)} style={{...inpSt,width:'auto',cursor:'pointer'}}><option value="">—</option><option value="30min">30 min</option><option value="1h">1h</option><option value="1h30">1h30</option><option value="2h">2h</option><option value="3h">3h</option><option value="4h+">4h+</option></select>{s.duration&&(s.startTime||planTime)&&(()=>{const st2=s.startTime||planTime;const[h2,m2]=st2.split(':').map(Number);const mins2={['30min']:30,['1h']:60,['1h30']:90,['2h']:120,['3h']:180,['4h+']:240}[s.duration]||0;const ed=new Date(2000,0,1,h2,m2+mins2);return<span style={{fontSize:'11px',color:c.M2,marginLeft:'8px'}}>{t.endsAtLbl||'Ends'}: {String(ed.getHours()).padStart(2,'0')}:{String(ed.getMinutes()).padStart(2,'0')}</span>;})()}</div>
-              <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>⏰ {t.toleranceLbl||'Tolerance'}</div><div style={{display:'flex',alignItems:'center',gap:'6px'}}><input type="number" min="0" max="120" defaultValue={s.tolerance||''} onBlur={e=>updateStop('tolerance',e.target.value)} placeholder="15" style={{...inpSt,width:'80px'}}/><span style={{fontSize:'11px',color:c.M}}>min</span>{s.tolerance&&<span style={{fontSize:'11px',color:c.M2}}>{fmtMinsToH(parseInt(s.tolerance))}</span>}</div></div>
-              <div style={{marginBottom:'10px'}}>
+              {s.duration&&(s.startTime||planTime)&&(()=>{const st2=s.startTime||planTime;const[h2,m2]=st2.split(':').map(Number);const mins2={['30min']:30,['1h']:60,['1h30']:90,['2h']:120,['3h']:180,['4h+']:240}[s.duration]||0;const ed=new Date(2000,0,1,h2,m2+mins2);return<div style={{fontSize:'11px',color:c.M2,marginBottom:'10px'}}>{t.endsAtLbl||'Ends'}: {String(ed.getHours()).padStart(2,'0')}:{String(ed.getMinutes()).padStart(2,'0')}</div>;})()}
+              {si>0&&!s.startTime&&<div style={{fontSize:'10px',color:'#f59e0b',marginBottom:'10px'}}>⚠️ {t.noStartTimeHint||'Set duration on previous stop'}</div>}
+              {/* 4. Meeting point — only first stop */}
+              {isFirstStop&&<div style={{marginBottom:'10px'}}>
                 <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>📍 {t.meetingPointLbl2||'Meeting point'}</div>
                 {s.meetingPoint&&<div style={{display:'flex',alignItems:'center',gap:'8px',padding:'8px 12px',background:'#f59e0b10',border:'1px solid #f59e0b30',borderRadius:'8px',marginBottom:'6px'}}><span style={{flex:1,fontSize:'13px',color:c.T}}>{s.meetingPoint}</span><button onClick={()=>updateStop('meetingPoint','')} style={{background:'none',border:'none',color:'#ff4444',cursor:'pointer',fontSize:'14px'}}>×</button></div>}
                 <div style={{display:'flex',gap:'6px'}}><input value={editState.mpSearch} onChange={e=>setEditState('mpSearch',e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();searchMP(editState.mpSearch);}}} placeholder={t.searchPlacePh||'Search...'} style={{...inpSt,flex:1}}/><button onClick={()=>searchMP(editState.mpSearch)} style={{background:mc,border:'none',borderRadius:'8px',padding:'8px 12px',color:'#0A0A0A',cursor:'pointer',fontWeight:'700',fontSize:'14px'}}>🔍</button></div>
                 {editState.mpResults.length>0&&<div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',marginTop:'4px',maxHeight:'150px',overflowY:'auto'}}>{editState.mpResults.map((r,i)=><div key={i} onClick={()=>pickMP(r)} style={{padding:'8px 12px',cursor:'pointer',borderBottom:i<editState.mpResults.length-1?`1px solid ${c.BD}`:'none',fontSize:'12px'}}><div style={{color:c.T,fontWeight:'500'}}>{r.name}</div><div style={{color:c.M2,fontSize:'11px'}}>{r.address}</div></div>)}</div>}
                 {s.meetingPoint&&<div style={{marginTop:'6px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.minBeforeLbl||'Min before'}</div><input type="number" min="0" max="120" defaultValue={s.meetingMinsBefore||''} onBlur={e=>updateStop('meetingMinsBefore',e.target.value)} placeholder="10" style={{...inpSt,width:'80px'}}/></div>}
+              </div>}
+              {/* 5. Capacity — last */}
+              <div style={{display:'flex',gap:'8px',marginBottom:'10px'}}>
+                <div style={{flex:1}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>👥 {t.minCapLbl||'Min'}</div><input type="number" min="0" defaultValue={s.minAttendees||''} onBlur={e=>updateStop('minAttendees',e.target.value)} placeholder="—" style={{...inpSt,width:'100%'}}/></div>
+                <div style={{flex:1}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>👥 {t.maxCapLbl||'Max'}</div><input type="number" min="0" defaultValue={s.maxCapacity||''} onBlur={e=>updateStop('maxCapacity',e.target.value)} placeholder="—" style={{...inpSt,width:'100%'}}/></div>
               </div>
+              {/* Notes */}
               <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.notesLbl||'Notes'}</div><input defaultValue={s.notes||''} onBlur={e=>updateStop('notes',e.target.value.trim())} style={inpSt}/></div>
             </>:<>
               {opt.name&&<div style={{fontSize:'14px',color:c.T,fontWeight:'600',marginBottom:'6px'}}>{opt.name}</div>}
@@ -156,7 +183,7 @@ function ResultsInner({onBack}){
             </>}
             {opt.googleMapsURI&&<a href={opt.googleMapsURI} target="_blank" rel="noreferrer" style={{display:'inline-block',marginTop:'6px',marginBottom:'10px',fontSize:'12px',color:mc,textDecoration:'none'}}>Google Maps ↗</a>}
             <div style={{display:'flex',gap:'8px',marginTop:'12px'}}>
-              {isOrg&&<button onClick={async()=>{if(!confirm(t.delConfirm2||'Delete?'))return;const up={...plan,stops:(plan.stops||[]).filter(x=>x.id!=stopId&&String(x.id)!==stopId)};await updatePlan(up);setPlan(up);setEditMode(false);}} style={{padding:'10px 16px',background:'#ff444420',border:'1px solid #ff444440',borderRadius:'10px',color:'#ff4444',cursor:'pointer',fontFamily:'inherit',fontWeight:'600',fontSize:'13px'}}>🗑️</button>}
+              {isOrg&&<button onClick={cancelStop} style={{padding:'10px 16px',background:'#ff444420',border:'1px solid #ff444440',borderRadius:'10px',color:'#ff4444',cursor:'pointer',fontFamily:'inherit',fontWeight:'600',fontSize:'13px'}}>🗑️</button>}
               <button onClick={()=>setEditMode(false)} style={{flex:1,padding:'10px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.doneLbl||'Done'}</button>
             </div>
           </>;

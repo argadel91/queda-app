@@ -148,13 +148,6 @@ export default function PlanTab(){
           </>}
         </>}
 
-        {/* Meeting point info for non-first stops (no voting, just informational) */}
-        {!isFirst&&s.meetingPoint&&<div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px',marginBottom:'8px'}}>
-          <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>📍 {t.meetingPointLbl2}</div>
-          <div style={{fontSize:'13px',color:c.T,fontWeight:'600'}}>{s.meetingPoint}</div>
-          {parseInt(s.meetingMinsBefore)>0&&sTime&&<div style={{fontSize:'11px',color:c.M2,marginTop:'2px'}}>{s.meetingMinsBefore} min {t.beforeLbl}</div>}
-        </div>}
-
         {/* Organizer date/time info — only on first stop */}
         {isFirst&&isOrg&&<div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
           {planDate&&<div style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px'}}><div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>📅</div><div style={{fontSize:'14px',color:c.T,fontWeight:'600',textTransform:'capitalize'}}>{fmtShort(planDate,lang)}</div></div>}
