@@ -33,7 +33,12 @@ export default function ResultsProvider({plan:ip,isOrg,c,lang,children}){
   const total=rs.length;
   const best=total>0&&slots.length>0?slots.reduce((b,s)=>score(s.key)>score(b.key)?s:b,slots[0]):null;
 
-  // Derived plan fields
+  // Plan data model:
+  // - dates[] and startTimes[] are the source of truth for scheduling
+  // - date and time are shortcuts for dates[0] and startTimes[0] (quick read access)
+  // - dateTimes{} maps each date to its own array of times (independent hours per date)
+  // - stops[] contains all point details (venue, meeting point, tolerance, capacity, etc.)
+  // - place is a shortcut for stops[0].options[0] (quick read access to first venue)
   const planDate=plan.date||plan.dates?.[0]||null;
   const planTime=plan.time||plan.startTimes?.[0]||null;
   const planPlace=plan.place||plan.stops?.[0]?.options?.[0]||null;
