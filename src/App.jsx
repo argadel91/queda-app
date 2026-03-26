@@ -110,17 +110,32 @@ function AppInner(){
   const handleJoin=async code=>{const p=await loadPlan(code);if(p){setPlan(p);setIsOrg(false);navigate('/plan/'+p.id);return true;}return false;};
   const handleFromProfile=async id=>{const p=await loadPlan(id);if(p){const mine=getMyPlans().find(x=>x.id===id);const isOwner=mine?.role==='organizer'||(authUser&&p._owner===authUser.id);setPlan(p);setIsOrg(isOwner);navigate('/plan/'+id);}};
 
-  // SEO
+  // SEO — update all meta tags per page
   useEffect(()=>{
+    const set=(sel,attr,val)=>{const el=document.querySelector(sel);if(el)el[attr]=val;};
     if(plan){
-      document.title=`${plan.name||'Plan'} — queda.`;
-      const desc=document.querySelector('meta[name="description"]');if(desc)desc.content=`${plan.organizer} te invita a ${plan.name}.`;
-      const ogUrl=document.querySelector('meta[property="og:url"]');if(ogUrl)ogUrl.content=`https://www.queda.xyz/plan/${plan.id}`;
-      const canonical=document.querySelector('link[rel="canonical"]');if(canonical)canonical.href=`https://www.queda.xyz/plan/${plan.id}`;
+      const title=`${plan.name||'Plan'} — queda.`;
+      const desc=`${plan.organizer} invites you to ${plan.name||'a plan'}. Vote now!`;
+      const url=`https://www.queda.xyz/plan/${plan.id}`;
+      document.title=title;
+      set('meta[name="description"]','content',desc);
+      set('meta[property="og:title"]','content',title);
+      set('meta[property="og:description"]','content',desc);
+      set('meta[property="og:url"]','content',url);
+      set('meta[name="twitter:title"]','content',title);
+      set('meta[name="twitter:description"]','content',desc);
+      set('link[rel="canonical"]','href',url);
     }else{
+      const title='queda. — Group plans, zero chaos';
+      const desc='One date, one time, one place — everyone votes. Free.';
       document.title='queda.';
-      const ogUrl=document.querySelector('meta[property="og:url"]');if(ogUrl)ogUrl.content='https://www.queda.xyz';
-      const canonical=document.querySelector('link[rel="canonical"]');if(canonical)canonical.href='https://www.queda.xyz';
+      set('meta[name="description"]','content',desc);
+      set('meta[property="og:title"]','content',title);
+      set('meta[property="og:description"]','content',desc);
+      set('meta[property="og:url"]','content','https://www.queda.xyz');
+      set('meta[name="twitter:title"]','content',title);
+      set('meta[name="twitter:description"]','content',desc);
+      set('link[rel="canonical"]','href','https://www.queda.xyz');
     }
   },[plan,location.pathname]);
 
