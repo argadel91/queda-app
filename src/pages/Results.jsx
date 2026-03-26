@@ -29,6 +29,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
   const myRespKey='q_myresp_'+ip.id;
   const[myPrev,setMyPrev]=useState(ls.get(myRespKey,null));
   const[myPlaceOk,setMyPlaceOk]=useState(myPrev?.placeOk??null);
+  const[myPlaceComment,setMyPlaceComment]=useState(myPrev?.placeComment||'');
   const[myDateOk,setMyDateOk]=useState(myPrev?.dateOk??null);
   const[myTimeOk,setMyTimeOk]=useState(myPrev?.timeOk??null);
   const[myMeetOk,setMyMeetOk]=useState(myPrev?.meetOk??null);
@@ -41,8 +42,8 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
   const[mySaving,setMySaving]=useState(false);
   const[mySaved,setMySaved]=useState(!!myPrev);
   const[mySaveConfirm,setMySaveConfirm]=useState(false);
-  const[tick,setTick]=useState(0);
-  useEffect(()=>{if(!ip.deadline)return;const iv=setInterval(()=>setTick(t2=>t2+1),1000);return()=>clearInterval(iv);},[ip.deadline]);
+  const[,forceUpdate]=useState(0);
+  useEffect(()=>{if(!ip.deadline)return;const iv=setInterval(()=>forceUpdate(n=>n+1),1000);return()=>clearInterval(iv);},[ip.deadline]);
   const[planRating,setPlanRating]=useState(0);
   const[ratingDone,setRatingDone]=useState(false);
   const isOrgRef=useRef(isOrg);
@@ -150,7 +151,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
     if(myPrev)changeLog.unshift({at:new Date().toISOString(),desc:'Updated'});
     const resp={name:myName.trim(),dateOk:myDateOk,timeOk:myTimeOk,meetOk:myMeetOk,lateMin:myLateMin,
       availDates:myDateOk===false?myAltDates:[],availTimeFrom:myTimeOk===false?myTimeFrom:'',availTimeTo:myTimeOk===false?myTimeTo:'',
-      placeOk,placeComment:openSection._placeComment||'',
+      placeOk,placeComment:myPlaceComment,
       avail:myDateOk&&myTimeOk?{[planTime?`${planDate}_${planTime}`:planDate]:'yes'}:{},
       how:'',comment:myPrev?.comment||'',changeLog,at:new Date().toISOString()};
     try{
@@ -158,7 +159,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
       const{data:{user}}=await db.auth.getSession().then(s=>({data:{user:s.data?.session?.user}}));
       if(user)db.from('responses').update({user_id:user.id}).eq('plan_id',plan.id).eq('name',myName.trim()).then(()=>{},()=>{});
       addMyPlan(plan.id,plan.name,'invited');ls.set(myRespKey,resp);setMyPrev(resp);ls.set('q_myname',myName.trim());setMySaved(true);setMySaveConfirm(true);setTimeout(()=>setMySaveConfirm(false),3000);refresh(true);
-    }catch{}
+    }catch(e){console.error('Save failed:',e);setMySaveConfirm(false);alert(t.saveError||'Could not save. Check your connection.');}
     setMySaving(false);
   };
 
@@ -258,7 +259,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
           {/* Deadline */}
           <div style={{marginBottom:'14px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'12px'}}>
             <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>⏰ {t.deadlineLbl||'Deadline to respond'}</div>
-            <input type="datetime-local" min={new Date().toISOString().slice(0,16)} max={plan.date||plan.dates?.[0]||''} value={plan.deadline||''} onChange={async e=>{const up={...plan,deadline:e.target.value||null};await updatePlan(up);setPlan(up);}} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
+            <input type="datetime-local" min={new Date().toISOString().slice(0,16)} max={(plan.date||plan.dates?.[0]||'')+'T23:59'} value={plan.deadline||''} onChange={async e=>{const up={...plan,deadline:e.target.value||null};await updatePlan(up);setPlan(up);}} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
             {plan.deadline&&<button onClick={async()=>{const up={...plan,deadline:null};await updatePlan(up);setPlan(up);}} style={{marginTop:'4px',background:'none',border:'none',color:'#ef4444',cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>× {t.removeDeadline||'Remove deadline'}</button>}
           </div>
           <button onClick={()=>setEditMode(false)} style={{width:'100%',padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.doneLbl||'Done'}</button>
@@ -547,7 +548,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
               </div>}
               {placeOk===false&&openSection._placeNoPopup&&<div className="fade-in" style={{marginTop:'8px',padding:'10px',background:'#ef444408',border:'1px solid #ef444420',borderRadius:'8px'}}>
                 <div style={{fontSize:'12px',color:'#ef4444',fontWeight:'600',marginBottom:'6px'}}>{t.placeNoMsg||'Want to tell the organizer?'}</div>
-                <input value={openSection._placeComment||''} onChange={e=>setOpenSection(p=>({...p,_placeComment:e.target.value}))} placeholder={t.commentPh||'Write a comment...'} style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box',marginBottom:'6px'}}/>
+                <input value={myPlaceComment} onChange={e=>setMyPlaceComment(e.target.value)} placeholder={t.commentPh||'Write a comment...'} style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box',marginBottom:'6px'}}/>
                 <button onClick={()=>window.open(location.href.split('?')[0]+'#create','_blank')} style={{width:'100%',padding:'8px',background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px'}}>{t.createOwnPlan||'Or create your own plan →'}</button>
               </div>}
             </div>;})()}
