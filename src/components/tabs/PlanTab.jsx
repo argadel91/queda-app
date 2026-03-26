@@ -42,7 +42,8 @@ export default function PlanTab(){
           <div style={{fontSize:'15px',color:c.T,fontWeight:'700',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{opt.name||'—'}</div>
           <div style={{display:'flex',gap:'6px',fontSize:'11px',color:c.M2,marginTop:'2px',flexWrap:'wrap'}}>
             {planDate&&<span style={{textTransform:'capitalize'}}>📅 {fmtShort(planDate,lang)}</span>}
-            {sTime&&<span>🕐 {fmtTime(sTime)}{s.duration?` — ${calcEnd(sTime,s.duration)} (${durLabel(s.duration)})`:''}</span>}
+            {sTime?<span>🕐 {fmtTime(sTime)}{s.duration?` — ${calcEnd(sTime,s.duration)} (${durLabel(s.duration)})`:''}</span>
+            :(!isFirst&&<span style={{color:'#f59e0b',fontSize:'10px'}}>⚠️ {t.noStartTimeHint||'Set duration on previous stop'}</span>)}
           </div>
         </div>
         <div style={{display:'flex',gap:'4px',flexShrink:0}}>
@@ -199,7 +200,19 @@ export default function PlanTab(){
     </div>}
 
     {/* Add point */}
-    {isOrg&&<button onClick={async()=>{const ns={id:Date.now(),options:[{id:Date.now(),name:'',address:'',lat:null,lng:null,rating:null,photo:null,googleMapsURI:null,types:[]}],startTime:'',duration:'',notes:'',maxCapacity:'',meetingPoint:'',minAttendees:'',tolerance:''};const up={...plan,stops:[...(plan.stops||[]),ns]};await updatePlan(up);setPlan(up);setEditState('mode','stop_'+ns.id);}} style={{width:'100%',padding:'12px',background:'none',border:`2px dashed ${c.BD}`,borderRadius:'12px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'600',marginBottom:'8px',marginTop:'8px'}}>+ {t.addNextPoint}</button>}
+    {isOrg&&<button onClick={async()=>{
+      const existing=(plan.stops||[]).filter(s2=>(s2.options||[]).some(o=>o.name));
+      const last=existing[existing.length-1];
+      let sugStart='';
+      if(last){
+        const prevTime=last.startTime||planTime;
+        if(prevTime&&last.duration){
+          sugStart=calcEnd(prevTime,last.duration);
+        }
+      }
+      const ns={id:Date.now(),options:[{id:Date.now(),name:'',address:'',lat:null,lng:null,rating:null,photo:null,googleMapsURI:null,types:[]}],startTime:sugStart,duration:'',notes:'',maxCapacity:'',meetingPoint:'',minAttendees:'',tolerance:''};
+      const up={...plan,stops:[...(plan.stops||[]),ns]};await updatePlan(up);setPlan(up);setEditState('mode','stop_'+ns.id);
+    }} style={{width:'100%',padding:'12px',background:'none',border:`2px dashed ${c.BD}`,borderRadius:'12px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'600',marginBottom:'8px',marginTop:'8px'}}>+ {t.addNextPoint}</button>}
 
     {/* Map — show all stops as route */}
     {(()=>{

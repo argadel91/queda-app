@@ -24,6 +24,30 @@ export default function ResultTab({plan,rs,total,c,mc,lang,t,isOrg,confirmDate,c
       {plan.desc&&<div style={{fontSize:'13px',color:c.M2,lineHeight:1.4}}>{plan.desc}</div>}
     </div>
 
+    {/* Meeting point (before first stop — chronological order) */}
+    {firstStop.meetingPoint&&(()=>{
+      const mpMins=parseInt(firstStop.meetingMinsBefore)||0;
+      const mpTime=mpMins>0&&planTime?addMins(planTime,-mpMins):null;
+      return<Card c={c} style={{marginBottom:'12px',background:`#f59e0b08`,border:'1px solid #f59e0b30'}}>
+        <Lbl c={c}>📍 {t.meetingPointLbl2||'Meeting point'}</Lbl>
+        <div style={{fontSize:'13px',color:c.T,fontWeight:'600',marginBottom:'6px'}}>{firstStop.meetingPoint}</div>
+        {mpMins>0&&mpTime&&<div style={{fontSize:'13px',color:'#f59e0b',fontWeight:'700',marginBottom:'8px'}}>🕐 {mpTime} <span style={{fontSize:'11px',fontWeight:'500'}}>({mpMins} min {t.beforeLbl||'before'})</span></div>}
+        {!mpMins&&planTime&&<div style={{fontSize:'13px',color:'#f59e0b',fontWeight:'700',marginBottom:'8px'}}>🕐 {planTime}</div>}
+        {meetPoint.length>0&&<div style={{marginBottom:'6px'}}>
+          <div style={{fontSize:'11px',color:'#f59e0b',fontWeight:'600',marginBottom:'4px'}}>{t.meetYes} ({meetPoint.length})</div>
+          <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
+            {meetPoint.map((r,i)=><span key={i} style={{fontSize:'11px',padding:'3px 8px',borderRadius:'14px',background:'#f59e0b15',color:'#f59e0b',border:'1px solid #f59e0b30'}}>{r.name}{r.username?<span style={{opacity:0.7}}> @{r.username}</span>:''}</span>)}
+          </div>
+        </div>}
+        {goingDirect.length>0&&<div>
+          <div style={{fontSize:'11px',color:'#22c55e',fontWeight:'600',marginBottom:'4px'}}>{t.meetNo} ({goingDirect.length})</div>
+          <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
+            {goingDirect.map((r,i)=><span key={i} style={{fontSize:'11px',padding:'3px 8px',borderRadius:'14px',background:'#22c55e15',color:'#22c55e',border:'1px solid #22c55e30'}}>{r.name}{r.username?<span style={{opacity:0.7}}> @{r.username}</span>:''}</span>)}
+          </div>
+        </div>}
+      </Card>;
+    })()}
+
     {/* Stops */}
     {allStops.map((s,i)=>{
       const opt=s.options?.[0]||{};
@@ -82,28 +106,6 @@ export default function ResultTab({plan,rs,total,c,mc,lang,t,isOrg,confirmDate,c
       </div>:<div style={{fontSize:'12px',color:c.M2,fontStyle:'italic'}}>{t.noDataYet}</div>}
     </Card>
 
-    {/* Meeting point (first stop) */}
-    {firstStop.meetingPoint&&(()=>{
-      const mpMins=parseInt(firstStop.meetingMinsBefore)||0;
-      const mpTime=mpMins>0&&planTime?addMins(planTime,-mpMins):null;
-      return<Card c={c} style={{marginBottom:'12px'}}>
-        <Lbl c={c}>📍 {t.meetingPointLbl2||'Meeting point'}</Lbl>
-        <div style={{fontSize:'13px',color:c.T,fontWeight:'600',marginBottom:'6px'}}>{firstStop.meetingPoint}</div>
-        {mpMins>0&&<div style={{fontSize:'12px',color:'#f59e0b',fontWeight:'600',marginBottom:'8px'}}>🕐 {mpTime} ({mpMins} min {t.beforeLbl||'before'})</div>}
-        {meetPoint.length>0&&<div style={{marginBottom:'6px'}}>
-          <div style={{fontSize:'11px',color:'#f59e0b',fontWeight:'600',marginBottom:'4px'}}>{t.meetYes} ({meetPoint.length})</div>
-          <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
-            {meetPoint.map((r,i)=><span key={i} style={{fontSize:'11px',padding:'3px 8px',borderRadius:'14px',background:'#f59e0b15',color:'#f59e0b',border:'1px solid #f59e0b30'}}>{r.name}{r.username?<span style={{opacity:0.7}}> @{r.username}</span>:''}</span>)}
-          </div>
-        </div>}
-        {goingDirect.length>0&&<div>
-          <div style={{fontSize:'11px',color:'#22c55e',fontWeight:'600',marginBottom:'4px'}}>{t.meetNo} ({goingDirect.length})</div>
-          <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
-            {goingDirect.map((r,i)=><span key={i} style={{fontSize:'11px',padding:'3px 8px',borderRadius:'14px',background:'#22c55e15',color:'#22c55e',border:'1px solid #22c55e30'}}>{r.name}{r.username?<span style={{opacity:0.7}}> @{r.username}</span>:''}</span>)}
-          </div>
-        </div>}
-      </Card>;
-    })()}
 
     {/* Late arrivals */}
     {lateOnes.length>0&&<Card c={c} style={{marginBottom:'12px'}}>
