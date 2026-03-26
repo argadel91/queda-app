@@ -30,6 +30,7 @@ export default function RouteMap({stops,c}){
 
     loadGM().then(async()=>{
       if(cancelled)return;
+      if(!window.google?.maps){if(containerRef.current)containerRef.current.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:280px;color:#888;font-size:13px">Map unavailable</div>';return;}
       if(google.maps.importLibrary)await google.maps.importLibrary('maps');
       if(google.maps.importLibrary)await google.maps.importLibrary('geometry');
 

@@ -46,6 +46,12 @@ function AppInner(){
   useEffect(()=>{applyTheme(theme);},[theme]);
   useEffect(()=>{setToastFn((msg,type='error')=>{setToast({msg,type});setTimeout(()=>setToast(null),4000);});},[]);
   useEffect(()=>{const handler=e=>{e.preventDefault();setInstallPrompt(e);if(!ls.get('q_install_dismissed',false))setShowInstall(true);};window.addEventListener('beforeinstallprompt',handler);return()=>window.removeEventListener('beforeinstallprompt',handler);},[]);
+  useEffect(()=>{
+    const off=()=>setToast({msg:T[lang]?.offlineMsg||'No internet connection',type:'error'});
+    const on=()=>setToast({msg:T[lang]?.onlineMsg||'Back online',type:'success'});
+    window.addEventListener('offline',off);window.addEventListener('online',on);
+    return()=>{window.removeEventListener('offline',off);window.removeEventListener('online',on);};
+  },[lang]);
   const tgTheme=()=>setTheme(t=>{const n=t==='dark'?'light':'dark';applyTheme(n);ls.set('q_theme',n);return n;});
 
   // Auth

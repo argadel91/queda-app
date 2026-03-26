@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
 import T from '../constants/translations.js'
-import { db, updatePlan, loadResps, saveResp, savePlan } from '../lib/supabase.js'
+import { db, updatePlan, loadResps, saveResp, savePlan, showErr } from '../lib/supabase.js'
 import { ls, addMyPlan } from '../lib/storage.js'
 import { daysUntil, fmtDate, fmtShort, fmtTime, genId } from '../lib/utils.js'
 
@@ -111,6 +111,7 @@ export default function ResultsProvider({plan:ip,isOrg,c,lang,children}){
   // Save inline response
   const saveMyResp=async()=>{
     if(!myVote.name.trim())return;
+    if(!navigator.onLine){showErr(t.offlineMsg||'No connection — changes not saved');return;}
     setMyVote('saving',true);
     const placeOk=myVote.placeOk===true;
     const changeLog=[...(myPrev?.changeLog||[])];

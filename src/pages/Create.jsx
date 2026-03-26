@@ -161,8 +161,10 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
     mapDiv.style.cssText='width:100%;height:100%;min-height:250px;';
     while(inlineMapRef.current.firstChild)inlineMapRef.current.removeChild(inlineMapRef.current.firstChild);
     inlineMapRef.current.appendChild(mapDiv);
-    loadGM().then(async()=>{
-      if(google.maps.importLibrary)await google.maps.importLibrary('maps');
+    loadGM().catch(()=>{}).then(()=>{
+      if(!window.google?.maps){if(inlineMapRef.current)inlineMapRef.current.textContent=t.mapFailed||'Could not load map';return;}
+      if(google.maps.importLibrary)google.maps.importLibrary('maps');}).then(()=>{
+      if(!window.google?.maps)return;
       const map=new google.maps.Map(mapDiv,{center:{lat:40.4168,lng:-3.7038},zoom:6,disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy',backgroundColor:'#1A1A1A'});
       inlineMapObj.current=map;
       // Click to select
@@ -347,7 +349,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
               <div style={{fontSize:'12px',color:c.M2}}>{r.address}</div>
             </div>)}
           </div>}
-          <div ref={inlineMapRef} style={{width:'100%',height:'250px',borderRadius:'12px',overflow:'hidden',border:`1px solid ${c.BD}`,background:c.CARD2}}/>
+          <div ref={inlineMapRef} style={{width:'100%',height:'250px',borderRadius:'12px',overflow:'hidden',border:`1px solid ${c.BD}`,background:c.CARD2,display:'flex',alignItems:'center',justifyContent:'center',color:c.M2,fontSize:'13px'}}>{!inlineMapObj.current&&(t.loadingMap||'Loading map...')}</div>
         </div>}
 
         {/* Place selected — go to confirm */}
