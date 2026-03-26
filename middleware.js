@@ -43,10 +43,13 @@ export default async function middleware(request) {
   }
 
   // Build meta tags
-  const title = plan ? `${plan.name || 'Plan'} — queda.` : 'queda. — Group plans, zero chaos';
+  const place = plan?.place?.name || plan?.stops?.[0]?.options?.[0]?.name || '';
+  const title = plan
+    ? `${plan.name || 'Plan'} — queda. More plans, less chaos`
+    : 'queda. — More plans, less chaos';
   const desc = plan
-    ? `${plan.organizer || ''} invites you${plan.name ? ' to ' + plan.name : ''}. ${plan.date || ''} ${plan.time || ''}`.trim()
-    : 'One date, one time, one place — everyone votes. Free.';
+    ? `${plan.organizer || 'Someone'} invites you${plan.name ? ' to ' + plan.name : ''}. ${plan.date ? '📅 ' + plan.date : ''} ${plan.time ? '🕐 ' + plan.time : ''} ${place ? '📍 ' + place : ''}. Vote now on queda!`.trim()
+    : 'One date, one time, one place — everyone votes. Organize group plans without the chaos. Free.';
   const planUrl = `https://www.queda.xyz/plan/${code}`;
   const image = 'https://www.queda.xyz/og.png';
 
@@ -68,10 +71,12 @@ export default async function middleware(request) {
   <meta name="twitter:description" content="${esc(desc)}">
   <meta name="twitter:image" content="${image}">
   <link rel="canonical" href="${planUrl}">
-  <meta http-equiv="refresh" content="0;url=${planUrl}">
+
 </head>
 <body>
-  <p>${esc(title)} — <a href="${planUrl}">Open plan</a></p>
+  <h1>${esc(title)}</h1>
+  <p>${esc(desc)}</p>
+  <p><a href="${planUrl}">Open plan on queda.</a></p>
 </body>
 </html>`;
 
