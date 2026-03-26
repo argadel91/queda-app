@@ -27,7 +27,8 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
   const[openSection,setOpenSection]=useState({});
   // Inline response state (invitee votes from Plan tab)
   const myRespKey='q_myresp_'+ip.id;
-  const myPrev=ls.get(myRespKey,null);
+  const[myPrev,setMyPrev]=useState(ls.get(myRespKey,null));
+  const[myPlaceOk,setMyPlaceOk]=useState(myPrev?.placeOk??null);
   const[myDateOk,setMyDateOk]=useState(myPrev?.dateOk??null);
   const[myTimeOk,setMyTimeOk]=useState(myPrev?.timeOk??null);
   const[myMeetOk,setMyMeetOk]=useState(myPrev?.meetOk??null);
@@ -144,7 +145,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
     if(!myName.trim())return;
     setMySaving(true);
     const planDate=plan.date||plan.dates?.[0];const planTime=plan.time||plan.startTimes?.[0];
-    const placeOk=openSection._placeOk!==false;
+    const placeOk=myPlaceOk===true;
     const changeLog=[...(myPrev?.changeLog||[])];
     if(myPrev)changeLog.unshift({at:new Date().toISOString(),desc:'Updated'});
     const resp={name:myName.trim(),dateOk:myDateOk,timeOk:myTimeOk,meetOk:myMeetOk,lateMin:myLateMin,
@@ -156,7 +157,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
       await saveResp(plan.id,myName.trim(),resp);
       const{data:{user}}=await db.auth.getSession().then(s=>({data:{user:s.data?.session?.user}}));
       if(user)db.from('responses').update({user_id:user.id}).eq('plan_id',plan.id).eq('name',myName.trim()).then(()=>{},()=>{});
-      addMyPlan(plan.id,plan.name,'invited');ls.set(myRespKey,resp);ls.set('q_myname',myName.trim());setMySaved(true);setMySaveConfirm(true);setTimeout(()=>setMySaveConfirm(false),3000);refresh(true);
+      addMyPlan(plan.id,plan.name,'invited');ls.set(myRespKey,resp);setMyPrev(resp);ls.set('q_myname',myName.trim());setMySaved(true);setMySaveConfirm(true);setTimeout(()=>setMySaveConfirm(false),3000);refresh(true);
     }catch{}
     setMySaving(false);
   };
@@ -531,7 +532,7 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
           {/* Expanded view with voting */}
           {viewOpen&&<div className="fade-in">
             {/* Place info + vote */}
-            {(()=>{const placeOk=openSection._placeOk;return<div style={{background:placeOk===true?'#22c55e10':placeOk===false?'#ef444410':c.CARD2,border:`1px solid ${placeOk===true?'#22c55e40':placeOk===false?'#ef444440':c.BD}`,borderRadius:'10px',padding:'12px',marginBottom:'8px'}}>
+            {(()=>{const placeOk=myPlaceOk;return planPlace&&<div style={{background:placeOk===true?'#22c55e10':placeOk===false?'#ef444410':c.CARD2,border:`1px solid ${placeOk===true?'#22c55e40':placeOk===false?'#ef444440':c.BD}`,borderRadius:'10px',padding:'12px',marginBottom:'8px'}}>
               {planPlace?.photo&&<img src={planPlace.photo} alt="" style={{width:'100%',height:'100px',objectFit:'cover',borderRadius:'8px',marginBottom:'8px'}}/>}
               <div style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>{planPlace?.name||'—'}</div>
               {planPlace?.address&&<div style={{fontSize:'12px',color:c.M2,marginTop:'2px'}}>📍 {planPlace.address}</div>}
@@ -542,30 +543,97 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
               {planPlace?.googleMapsURI&&<a href={planPlace.googleMapsURI} target="_blank" rel="noreferrer" style={{display:'inline-block',marginTop:'6px',fontSize:'11px',color:mc,textDecoration:'none'}}>Google Maps ↗</a>}
               {!isOrgRef.current&&<div style={{marginTop:'8px'}}>
                 <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>{t.placeOkQ||'Does the place work?'}</div>
-                {ynBtnInline(placeOk,v=>{setOpenSection(p=>({...p,_placeOk:v}));if(!v)setOpenSection(p=>({...p,_placeNoPopup:true}));},t.yesLbl||'Sí','No')}
+                {ynBtnInline(placeOk,v=>{setMyPlaceOk(v);if(!v){setMyDateOk(null);setMyTimeOk(null);setMyLateMin(0);setMyMeetOk(null);setOpenSection(p=>({...p,_placeNoPopup:true,_onTime:undefined}));}else{setOpenSection(p=>({...p,_placeNoPopup:undefined}));}},t.yesLbl||'Sí','No')}
               </div>}
               {placeOk===false&&openSection._placeNoPopup&&<div className="fade-in" style={{marginTop:'8px',padding:'10px',background:'#ef444408',border:'1px solid #ef444420',borderRadius:'8px'}}>
                 <div style={{fontSize:'12px',color:'#ef4444',fontWeight:'600',marginBottom:'6px'}}>{t.placeNoMsg||'Want to tell the organizer?'}</div>
                 <input value={openSection._placeComment||''} onChange={e=>setOpenSection(p=>({...p,_placeComment:e.target.value}))} placeholder={t.commentPh||'Write a comment...'} style={{width:'100%',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box',marginBottom:'6px'}}/>
-                <button onClick={()=>window.open(location.href.split('?')[0],'_blank')} style={{width:'100%',padding:'8px',background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px'}}>{t.createOwnPlan||'Or create your own plan →'}</button>
+                <button onClick={()=>window.open(location.href.split('?')[0]+'#create','_blank')} style={{width:'100%',padding:'8px',background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'12px'}}>{t.createOwnPlan||'Or create your own plan →'}</button>
               </div>}
             </div>;})()}
 
-            {/* Date + Time side by side with voting */}
-            {!isOrgRef.current&&<div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
-              {/* Date */}
-              {planDate&&<div style={{flex:1,background:myDateOk===true?'#22c55e10':myDateOk===false?'#ef444410':c.CARD2,border:`1px solid ${myDateOk===true?'#22c55e40':myDateOk===false?'#ef444440':c.BD}`,borderRadius:'10px',padding:'10px'}}>
-                <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>📅 {t.dateOkQ||'Date'}</div>
-                <div style={{fontSize:'14px',color:c.T,fontWeight:'600',textTransform:'capitalize',marginBottom:'6px'}}>{fmtShort(planDate,lang)}</div>
-                {ynBtnInline(myDateOk,setMyDateOk,t.yesLbl||'Sí','No')}
+            {/* Date + Time — cascading: only if place=Yes */}
+            {!isOrgRef.current&&myPlaceOk===true&&<>
+              <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
+                {/* Date */}
+                {planDate&&<div style={{flex:1,background:myDateOk===true?'#22c55e10':myDateOk===false?'#ef444410':c.CARD2,border:`1px solid ${myDateOk===true?'#22c55e40':myDateOk===false?'#ef444440':c.BD}`,borderRadius:'10px',padding:'10px'}}>
+                  <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>📅 {t.dateOkQ}</div>
+                  <div style={{fontSize:'14px',color:c.T,fontWeight:'600',textTransform:'capitalize',marginBottom:'6px'}}>{fmtShort(planDate,lang)}</div>
+                  {ynBtnInline(myDateOk,v=>{setMyDateOk(v);if(!v){setMyTimeOk(null);setMyLateMin(0);setMyMeetOk(null);setOpenSection(p=>({...p,_onTime:undefined}));}},t.yesLbl,'No')}
+                </div>}
+                {/* Time — only if date is Yes */}
+                {planTime&&<div style={{flex:1,background:myDateOk!==true?c.CARD2:myTimeOk===true?'#22c55e10':myTimeOk===false?'#ef444410':c.CARD2,border:`1px solid ${myDateOk!==true?c.BD:myTimeOk===true?'#22c55e40':myTimeOk===false?'#ef444440':c.BD}`,borderRadius:'10px',padding:'10px',opacity:myDateOk===true?1:0.4}}>
+                  <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>🕐 {t.timeOkQ}</div>
+                  <div style={{fontSize:'14px',color:c.T,fontWeight:'600',marginBottom:'6px'}}>{fmtTime(planTime)}</div>
+                  {myDateOk===true&&ynBtnInline(myTimeOk,v=>{setMyTimeOk(v);if(!v){setMyLateMin(0);setMyMeetOk(null);setOpenSection(p=>({...p,_onTime:undefined}));}},t.yesLbl,'No')}
+                </div>}
+              </div>
+
+              {/* Alt dates (No to date) */}
+              {myDateOk===false&&<div style={{background:'#ef444408',border:'1px solid #ef444420',borderRadius:'10px',padding:'10px',marginBottom:'8px'}}>
+                <div style={{fontSize:'12px',color:'#ef4444',fontWeight:'600',marginBottom:'6px'}}>{t.yourAvailDates} ({myAltDates.length}/3)</div>
+                <CalendarPicker selected={myAltDates} onChange={d=>setMyAltDates(d.filter(x=>x!==planDate).slice(-3))} max={3} c={c} lang={lang}/>
+                {myAltDates.includes(planDate)&&<div style={{fontSize:'11px',color:'#ef4444',marginTop:'4px'}}>{t.cantSelectOrigDate||"You can't select the original date"}</div>}
+                {/* Time for alt dates */}
+                {myAltDates.length>0&&<div style={{marginTop:'8px'}}>
+                  <div style={{fontSize:'12px',color:'#f59e0b',fontWeight:'600',marginBottom:'4px'}}>{t.availStartTime}</div>
+                  <div style={{fontSize:'11px',color:c.M2,marginBottom:'6px'}}>{t.availStartHint}</div>
+                  <div style={{marginBottom:'6px'}}><div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>{t.fromLbl}{myTimeFrom&&` → ${myTimeFrom}`}</div><ClockPicker value={myTimeFrom} onChange={v=>setMyTimeFrom(v)} c={c}/></div>
+                  <div><div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>{t.toLbl}{myTimeTo&&` → ${myTimeTo}`}</div><ClockPicker value={myTimeTo} onChange={v=>setMyTimeTo(v)} c={c}/></div>
+                  {myTimeFrom&&myTimeTo&&<div style={{fontSize:'12px',color:mc,marginTop:'6px',textAlign:'center',fontWeight:'600'}}>{myTimeFrom} → {myTimeTo}</div>}
+                </div>}
               </div>}
-              {/* Time */}
-              {planTime&&<div style={{flex:1,background:myTimeOk===true?'#22c55e10':myTimeOk===false?'#ef444410':c.CARD2,border:`1px solid ${myTimeOk===true?'#22c55e40':myTimeOk===false?'#ef444440':c.BD}`,borderRadius:'10px',padding:'10px'}}>
-                <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>🕐 {t.timeOkQ||'Time'}</div>
-                <div style={{fontSize:'14px',color:c.T,fontWeight:'600',marginBottom:'6px'}}>{fmtTime(planTime)}</div>
-                {ynBtnInline(myTimeOk,setMyTimeOk,t.yesLbl||'Sí','No')}
-              </div>}
-            </div>}
+
+              {/* Alt time range (No to time, but Yes to date) */}
+              {myDateOk===true&&myTimeOk===false&&(()=>{
+                const rangeIncludesOrig=myTimeFrom&&myTimeTo&&planTime&&planTime>=myTimeFrom&&planTime<=myTimeTo;
+                return<div style={{background:'#f59e0b08',border:'1px solid #f59e0b20',borderRadius:'10px',padding:'10px',marginBottom:'8px'}}>
+                <div style={{fontSize:'12px',color:'#f59e0b',fontWeight:'600',marginBottom:'4px'}}>{t.availStartTime}</div>
+                <div style={{fontSize:'11px',color:c.M2,marginBottom:'8px'}}>{t.availStartHint}</div>
+                <div style={{marginBottom:'8px'}}><div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>{t.fromLbl}{myTimeFrom&&` → ${myTimeFrom}`}</div><ClockPicker value={myTimeFrom} onChange={v=>setMyTimeFrom(v)} c={c}/></div>
+                <div><div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>{t.toLbl}{myTimeTo&&` → ${myTimeTo}`}</div><ClockPicker value={myTimeTo} onChange={v=>setMyTimeTo(v)} c={c}/></div>
+                {myTimeFrom&&myTimeTo&&<div style={{fontSize:'12px',color:mc,marginTop:'6px',textAlign:'center',fontWeight:'600'}}>{myTimeFrom} → {myTimeTo}</div>}
+                {rangeIncludesOrig&&<div style={{marginTop:'6px',padding:'6px 10px',background:'#ef444410',border:'1px solid #ef444430',borderRadius:'8px',fontSize:'11px',color:'#ef4444',fontWeight:'600'}}>{t.rangeIncludesOriginal||'Your range includes the original time — if you can make it, select Yes above'}</div>}
+              </div>;})()}
+
+              {/* On time + Meeting point — ONLY if date=Yes AND time=Yes */}
+              {myDateOk===true&&myTimeOk===true&&<>
+                {/* On time? */}
+                {tolerance>0&&(()=>{
+                  const isLate=myLateMin>0;const isOnTime=openSection._onTime===true;
+                  return<div style={{background:isOnTime?'#22c55e10':isLate?'#f59e0b10':c.CARD2,border:`1px solid ${isOnTime?'#22c55e40':isLate?'#f59e0b40':c.BD}`,borderRadius:'10px',padding:'10px',marginBottom:'8px'}}>
+                    <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>⏰ {t.onTimeQ} <span style={{fontSize:'10px',color:c.M2}}>({t.maxLateLbl}: {tolerance} min = {addMins(planTime,tolerance)})</span></div>
+                    <div style={{display:'flex',gap:'6px'}}>
+                      <button onClick={()=>{setMyLateMin(0);setOpenSection(p=>({...p,_onTime:true}));}} style={{flex:1,padding:'8px',borderRadius:'8px',border:`1px solid ${isOnTime?'#22c55e50':c.BD}`,background:isOnTime?'#22c55e18':'transparent',color:isOnTime?'#22c55e':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:isOnTime?'700':'500'}}>{isOnTime?'✓ ':''}{t.yesLbl}</button>
+                      <button onClick={()=>{setMyLateMin(5);setOpenSection(p=>({...p,_onTime:false}));}} style={{flex:1,padding:'8px',borderRadius:'8px',border:`1px solid ${isLate?'#f59e0b50':c.BD}`,background:isLate?'#f59e0b18':'transparent',color:isLate?'#f59e0b':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:isLate?'700':'500'}}>{isLate?'⏰ ':''}{t.noLbl||'No'}</button>
+                    </div>
+                    {isLate&&<div style={{marginTop:'8px'}}>
+                      <div style={{fontSize:'11px',color:'#f59e0b',marginBottom:'4px'}}>{t.howLateQ}</div>
+                      <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
+                        <span style={{fontSize:'12px',color:c.M}}>+</span>
+                        <input type="number" inputMode="numeric" min="1" max={tolerance} value={myLateMin} onChange={e=>{const v=Math.min(Math.max(parseInt(e.target.value)||1,1),tolerance);setMyLateMin(v);}} style={{width:'70px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',textAlign:'center'}}/>
+                        <span style={{fontSize:'12px',color:c.M}}>min</span>
+                        <span style={{fontSize:'12px',color:'#f59e0b',fontWeight:'600'}}>{fmtMinsToH(myLateMin)} = {addMins(planTime,myLateMin)}</span>
+                      </div>
+                    </div>}
+                  </div>;
+                })()}
+
+                {/* Meeting point — hidden if late */}
+                {stop.meetingPoint&&myLateMin===0&&(()=>{
+                  const mpMins=parseInt(stop.meetingMinsBefore)||0;
+                  const mpTime=mpMins>0&&planTime?addMins(planTime,-mpMins):planTime;
+                  return<div style={{background:myMeetOk===true?'#22c55e10':myMeetOk===false?'#f59e0b10':c.CARD2,border:`1px solid ${myMeetOk===true?'#22c55e40':myMeetOk===false?'#f59e0b40':c.BD}`,borderRadius:'10px',padding:'10px',marginBottom:'8px'}}>
+                    <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>📍 {t.meetingPointLbl2}</div>
+                    <div style={{fontSize:'13px',color:c.T,fontWeight:'600'}}>{stop.meetingPoint}</div>
+                    {mpMins>0&&<div style={{fontSize:'11px',color:c.M2,marginTop:'2px'}}>{mpMins} min {t.beforeLbl} ({fmtMinsToH(-mpMins)})</div>}
+                    <div style={{marginTop:'8px'}}>{ynBtnInline(myMeetOk,setMyMeetOk,t.meetYes,t.meetNo)}</div>
+                    {myMeetOk===true&&mpTime&&<div style={{marginTop:'8px',textAlign:'center',fontSize:'20px',fontWeight:'800',color:'#22c55e'}}>🕐 {mpTime}</div>}
+                    {myMeetOk===false&&planTime&&<div style={{marginTop:'8px',textAlign:'center',fontSize:'20px',fontWeight:'800',color:'#f59e0b'}}>🕐 {planTime}</div>}
+                  </div>;
+                })()}
+              </>}
+            </>}
 
             {/* Organizer sees date/time as info + edit */}
             {isOrgRef.current&&<div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
@@ -580,71 +648,18 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
               <button onClick={()=>setEditMode('dates')} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',alignSelf:'center'}}>✏️</button>
             </div>}
 
-            {/* Alt dates (if invitee said No to date) — CalendarPicker */}
-            {!isOrgRef.current&&myDateOk===false&&<div style={{background:'#ef444408',border:'1px solid #ef444420',borderRadius:'10px',padding:'10px',marginBottom:'8px'}}>
-              <div style={{fontSize:'12px',color:'#ef4444',fontWeight:'600',marginBottom:'6px'}}>{t.yourAvailDates||'Which days can you?'} ({myAltDates.length}/3)</div>
-              <CalendarPicker selected={myAltDates} onChange={d=>setMyAltDates(d.slice(-3))} max={3} c={c} lang={lang}/>
-              {myAltDates.length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:'4px',marginTop:'6px'}}>
-                {myAltDates.map(d2=><span key={d2} style={{fontSize:'11px',padding:'3px 8px',borderRadius:'12px',background:'#22c55e18',color:'#22c55e',border:'1px solid #22c55e40'}}>✓ {fmtShort(d2,lang)}</span>)}
-              </div>}
-            </div>}
-
-            {/* Alt time range (if invitee said No to time) — ClockPickers */}
-            {!isOrgRef.current&&myTimeOk===false&&<div style={{background:'#f59e0b08',border:'1px solid #f59e0b20',borderRadius:'10px',padding:'10px',marginBottom:'8px'}}>
-              <div style={{fontSize:'12px',color:'#f59e0b',fontWeight:'600',marginBottom:'4px'}}>{t.availStartTime||'What time range could you start?'}</div>
-              <div style={{fontSize:'11px',color:c.M2,marginBottom:'8px'}}>{t.availStartHint||'Select your availability range. The organizer will consider it to propose an alternative start time.'}</div>
-              <div style={{marginBottom:'8px'}}>
-                <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>{t.fromLbl||'From'}{myTimeFrom&&` → ${myTimeFrom}`}</div>
-                <ClockPicker value={myTimeFrom} onChange={v=>setMyTimeFrom(v)} c={c}/>
-              </div>
-              <div>
-                <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>{t.toLbl||'To'}{myTimeTo&&` → ${myTimeTo}`}</div>
-                <ClockPicker value={myTimeTo} onChange={v=>setMyTimeTo(v)} c={c}/>
-              </div>
-              {myTimeFrom&&myTimeTo&&<div style={{fontSize:'12px',color:mc,marginTop:'6px',textAlign:'center',fontWeight:'600'}}>{myTimeFrom} → {myTimeTo}</div>}
-            </div>}
-
-            {/* On time? (if organizer set tolerance) */}
-            {!isOrgRef.current&&tolerance>0&&(()=>{
-              const isLate=myLateMin>0;const isOnTime=openSection._onTime===true;
-              return<div style={{background:isOnTime?'#22c55e10':isLate?'#f59e0b10':c.CARD2,border:`1px solid ${isOnTime?'#22c55e40':isLate?'#f59e0b40':c.BD}`,borderRadius:'10px',padding:'10px',marginBottom:'8px'}}>
-                <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>⏰ {t.onTimeQ||'Will you be on time?'} <span style={{fontSize:'10px',color:c.M2}}>({t.maxLateLbl||'Max late'}: {tolerance} min = {addMins(planTime,tolerance)})</span></div>
-                <div style={{display:'flex',gap:'6px'}}>
-                  <button onClick={()=>{setMyLateMin(0);setOpenSection(p=>({...p,_onTime:true}));}} style={{flex:1,padding:'8px',borderRadius:'8px',border:`1px solid ${isOnTime?'#22c55e50':c.BD}`,background:isOnTime?'#22c55e18':'transparent',color:isOnTime?'#22c55e':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:isOnTime?'700':'500'}}>{isOnTime?'✓ ':''}{t.yesLbl||'Sí'}</button>
-                  <button onClick={()=>{setMyLateMin(5);setOpenSection(p=>({...p,_onTime:false}));}} style={{flex:1,padding:'8px',borderRadius:'8px',border:`1px solid ${isLate?'#f59e0b50':c.BD}`,background:isLate?'#f59e0b18':'transparent',color:isLate?'#f59e0b':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:isLate?'700':'500'}}>{isLate?'⏰ ':''}{t.noLbl||'No'}</button>
-                </div>
-                {isLate&&<div style={{marginTop:'8px'}}>
-                  <div style={{fontSize:'11px',color:'#f59e0b',marginBottom:'4px'}}>{t.howLateQ||'How many minutes late?'}</div>
-                  <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
-                    <span style={{fontSize:'12px',color:c.M}}>+</span>
-                    <input type="number" inputMode="numeric" min="1" max={tolerance} value={myLateMin} onChange={e=>{const v=Math.min(Math.max(parseInt(e.target.value)||1,1),tolerance);setMyLateMin(v);}} style={{width:'70px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',textAlign:'center'}}/>
-                    <span style={{fontSize:'12px',color:c.M}}>min</span>
-                    <span style={{fontSize:'12px',color:'#f59e0b',fontWeight:'600'}}>{fmtMinsToH(myLateMin)} = {addMins(planTime,myLateMin)}</span>
-                  </div>
-                </div>}
-              </div>;
-            })()}
-
-            {/* Meeting point (hidden if invitee is late) */}
-            {stop.meetingPoint&&myLateMin===0&&(()=>{
-              const mpMins=parseInt(stop.meetingMinsBefore)||0;
-              const mpTime=mpMins>0&&planTime?addMins(planTime,-mpMins):planTime;
-              return<div style={{background:myMeetOk===true?'#f59e0b10':myMeetOk===false?'#22c55e10':c.CARD2,border:`1px solid ${myMeetOk===true?'#f59e0b40':myMeetOk===false?'#22c55e40':c.BD}`,borderRadius:'10px',padding:'10px',marginBottom:'8px'}}>
-                <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>📍 {t.meetingPointLbl2||'Meeting point'}</div>
-                <div style={{fontSize:'13px',color:c.T,fontWeight:'600'}}>{stop.meetingPoint}</div>
-                {mpMins>0&&<div style={{fontSize:'11px',color:c.M2,marginTop:'2px'}}>{mpMins} min {t.beforeLbl||'before'} ({fmtMinsToH(-mpMins)})</div>}
-                {!isOrgRef.current&&<>
-                  <div style={{marginTop:'8px'}}>{ynBtnInline(myMeetOk,setMyMeetOk,t.meetYes||"I'll be there!",t.meetNo||'Going directly')}</div>
-                  {myMeetOk===true&&mpTime&&<div style={{marginTop:'8px',textAlign:'center',fontSize:'20px',fontWeight:'800',color:'#f59e0b'}}>🕐 {mpTime}</div>}
-                  {myMeetOk===false&&planTime&&<div style={{marginTop:'8px',textAlign:'center',fontSize:'20px',fontWeight:'800',color:'#22c55e'}}>🕐 {planTime}</div>}
-                </>}
-              </div>;
-            })()}
-
             {/* Save response (invitee) */}
             {!isOrgRef.current&&<div style={{marginTop:'10px'}}>
               {!mySaved&&<div style={{marginBottom:'8px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.yourName}</div><input value={myName} onChange={e=>{setMyName(e.target.value);ls.set('q_myname',e.target.value);}} placeholder={t.yourNamePh||'Your name'} style={{width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/></div>}
-              <button onClick={saveMyResp} disabled={mySaving||!myName.trim()||(myDateOk===null&&planDate)||(myTimeOk===null&&planTime)||(plan.deadline&&new Date(plan.deadline)<new Date())} style={{width:'100%',padding:'12px',background:mySaved?'#22c55e':mc,border:'none',borderRadius:'10px',color:mySaved?'#fff':'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px',opacity:(mySaving||!myName.trim())?0.5:1}}>{mySaving?'...':(mySaved?(t.respSaved||'✓ Saved — tap to update'):(t.saveAvail||'Save'))}</button>
+              {(()=>{
+                const deadlinePassed=plan.deadline&&new Date(plan.deadline)<new Date();
+                const placeAnswered=myPlaceOk!==undefined&&myPlaceOk!==null;
+                const dateAnswered=myPlaceOk===false||myDateOk!==null;
+                const timeAnswered=myPlaceOk===false||myDateOk===false||(myDateOk===true&&myTimeOk!==null);
+                const allAnswered=placeAnswered&&dateAnswered&&timeAnswered&&myName.trim();
+                const canSave=allAnswered&&!mySaving&&!deadlinePassed;
+                return<button onClick={saveMyResp} disabled={!canSave} style={{width:'100%',padding:'12px',background:mySaved?'#22c55e':canSave?mc:c.CARD2,border:canSave||mySaved?'none':`1px solid ${c.BD}`,borderRadius:'10px',color:mySaved?'#fff':canSave?'#0A0A0A':c.M,cursor:canSave?'pointer':'default',fontFamily:'inherit',fontWeight:'700',fontSize:'14px',opacity:canSave||mySaved?1:0.5}}>{mySaving?'...':(mySaved?t.respSaved:(allAnswered?t.saveAvail:(t.answerAllToSave||'Answer all to save')))}</button>;
+              })()}
               {mySaveConfirm&&<div className="fade-in" style={{marginTop:'8px',padding:'10px',background:'#22c55e15',border:'1px solid #22c55e40',borderRadius:'10px',textAlign:'center',fontSize:'13px',color:'#22c55e',fontWeight:'600'}}>✓ {t.savedTitle||'Saved!'}</div>}
               {/* Deadline */}
               {(()=>{
@@ -851,12 +866,6 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
             {altDates.map((r,i)=><div key={i} style={{marginBottom:'2px'}}>{r.name}: {r.availDates.map(d=>fmtShort(d,lang)).join(', ')}</div>)}
           </div>}
 
-          {/* Time ranges details */}
-          {timeRanges.length>0&&<div style={{marginBottom:'12px',fontSize:'12px',color:c.M2}}>
-            <div style={{fontWeight:'600',color:mc,marginBottom:'4px'}}>🕐 {t.availabilityLbl||'Availability'}</div>
-            {timeRanges.map((r,i)=><div key={i}>{r.name}: {fmtTime(r.from)} → {fmtTime(r.to)}</div>)}
-          </div>}
-
           {/* Availability ranges + suggested time */}
           {timeRanges.length>0&&(()=>{
             // Find intersection
@@ -879,21 +888,25 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
           })()}
 
           {/* Meeting point — with names */}
-          {rs.some(r=>r.meetOk!==undefined)&&<div style={{marginBottom:'16px'}}>
-            <div style={{fontSize:'14px',fontWeight:'700',color:'#f59e0b',marginBottom:'8px'}}>📍 {t.meetingPointLbl2||'Meeting point'}</div>
+          {rs.some(r=>r.meetOk!==undefined&&r.meetOk!==null)&&(()=>{
+            const goingRs=rs.filter(r=>r.placeOk!==false&&r.dateOk===true&&r.timeOk===true);
+            const mpYes=goingRs.filter(r=>r.meetOk===true);const mpNo=goingRs.filter(r=>r.meetOk===false);
+            return<div style={{marginBottom:'16px'}}>
+            <div style={{fontSize:'14px',fontWeight:'700',color:'#f59e0b',marginBottom:'4px'}}>📍 {t.meetingPointLbl2}</div>
+            <div style={{fontSize:'13px',color:c.T,fontWeight:'600',marginBottom:'8px'}}>{mpYes.length} {t.ofLbl||'of'} {goingRs.length} {t.goingLbl||'going'}</div>
             <div style={{display:'flex',gap:'8px',marginBottom:'6px'}}>
               <div style={{flex:1,padding:'10px',background:'#f59e0b15',border:'1px solid #f59e0b30',borderRadius:'10px'}}>
-                <div style={{fontSize:'16px',fontWeight:'700',color:'#f59e0b',textAlign:'center'}}>{rs.filter(r=>r.meetOk===true).length}</div>
-                <div style={{fontSize:'10px',color:'#f59e0b',textAlign:'center',marginBottom:'4px'}}>{t.meetYes||"I'll be there!"}</div>
-                {rs.filter(r=>r.meetOk===true).map((r,i)=><div key={i} style={{fontSize:'11px',color:c.M2}}>{r.name}</div>)}
+                <div style={{fontSize:'16px',fontWeight:'700',color:'#f59e0b',textAlign:'center'}}>{mpYes.length}</div>
+                <div style={{fontSize:'10px',color:'#f59e0b',textAlign:'center',marginBottom:'4px'}}>{t.meetYes}</div>
+                {mpYes.map((r,i)=><div key={i} style={{fontSize:'11px',color:c.M2}}>{r.name}</div>)}
               </div>
               <div style={{flex:1,padding:'10px',background:'#22c55e15',border:'1px solid #22c55e30',borderRadius:'10px'}}>
-                <div style={{fontSize:'16px',fontWeight:'700',color:'#22c55e',textAlign:'center'}}>{rs.filter(r=>r.meetOk===false).length}</div>
-                <div style={{fontSize:'10px',color:'#22c55e',textAlign:'center',marginBottom:'4px'}}>{t.meetNo||'Going directly'}</div>
-                {rs.filter(r=>r.meetOk===false).map((r,i)=><div key={i} style={{fontSize:'11px',color:c.M2}}>{r.name}</div>)}
+                <div style={{fontSize:'16px',fontWeight:'700',color:'#22c55e',textAlign:'center'}}>{mpNo.length}</div>
+                <div style={{fontSize:'10px',color:'#22c55e',textAlign:'center',marginBottom:'4px'}}>{t.meetNo}</div>
+                {mpNo.map((r,i)=><div key={i} style={{fontSize:'11px',color:c.M2}}>{r.name}</div>)}
               </div>
             </div>
-          </div>}
+          </div>})()}
 
           {/* Late arrivals */}
           {rs.some(r=>r.lateMin>0)&&<div style={{marginBottom:'16px'}}>
@@ -901,27 +914,50 @@ export default function Results({plan:ip,onBack,isOrg,c,lang,showShare,onCloseSh
             {rs.filter(r=>r.lateMin>0).map((r,i)=><div key={i} style={{fontSize:'12px',color:c.M2,marginBottom:'2px'}}>⏰ {r.name}: +{r.lateMin} min</div>)}
           </div>}
 
-          {/* Per-person */}
-          <div style={{fontSize:'12px',color:c.M2,fontWeight:'600',marginBottom:'8px'}}>👥 {total} {t.responsesLbl}</div>
-          {rs.map((r,i)=>{
-            const allOk=hasV4?(r.dateOk&&r.timeOk):(r.avail&&Object.values(r.avail).some(v=>v==='yes'));
-            const expanded2=openSection['vp_'+i];
-            return<div key={i} style={{marginBottom:'4px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',overflow:'hidden'}}>
-              <div onClick={()=>setOpenSection(p=>({...p,['vp_'+i]:!p['vp_'+i]}))} style={{display:'flex',alignItems:'center',gap:'8px',padding:'8px 12px',cursor:'pointer'}}>
-                <div style={{width:'8px',height:'8px',borderRadius:'50%',background:allOk?'#22c55e':'#ef4444',flexShrink:0}}/>
-                <span style={{flex:1,fontSize:'13px',color:c.T,fontWeight:allOk?'600':'400'}}>{r.name}</span>
-                {hasV4&&<span style={{fontSize:'11px',color:c.M2}}>{[r.dateOk?'📅✓':'📅✗',r.timeOk?'🕐✓':'🕐✗'].join(' ')}</span>}
-                {r.lateMin>0&&<span style={{fontSize:'10px',color:'#f59e0b'}}>+{r.lateMin}min</span>}
-                <span style={{fontSize:'11px',color:c.M2}}>{expanded2?'▾':'▸'}</span>
-              </div>
-              {expanded2&&<div style={{padding:'6px 12px 10px',borderTop:`1px solid ${c.BD}`,fontSize:'12px',color:c.M2}}>
-                {r.dateOk===false&&r.availDates?.length>0&&<div style={{marginBottom:'4px'}}>📅 {t.yourAvailDates}: {r.availDates.map(d=>fmtShort(d,lang)).join(', ')}</div>}
-                {r.timeOk===false&&r.availTimeFrom&&<div style={{marginBottom:'4px'}}>🕐 {r.availTimeFrom} → {r.availTimeTo}</div>}
-                {r.meetOk!==undefined&&<div style={{marginBottom:'4px'}}>📍 {r.meetOk?t.meetYes:t.meetNo}</div>}
-                {r.comment&&<div style={{fontStyle:'italic',padding:'4px 8px',background:c.CARD2,borderRadius:'6px'}}>"{r.comment}"</div>}
-              </div>}
-            </div>;
-          })}
+          {/* Per-person — GOING vs NOT GOING */}
+          {(()=>{
+            const going=rs.filter(r=>hasV4?(r.placeOk!==false&&r.dateOk===true&&r.timeOk===true):(r.avail&&Object.values(r.avail).some(v=>v==='yes')));
+            const notGoing=rs.filter(r=>hasV4?(r.placeOk===false||r.dateOk===false||r.timeOk===false||r.dateOk===null||r.timeOk===null):(!(r.avail&&Object.values(r.avail).some(v=>v==='yes'))));
+            return<>
+            <div style={{fontSize:'14px',fontWeight:'700',color:'#22c55e',marginBottom:'8px'}}>✓ {t.goingLbl||'Going'} ({going.length} {t.ofLbl||'of'} {total})</div>
+            {going.map((r,i)=>{
+              const expanded2=openSection['vg_'+i];
+              return<div key={i} style={{marginBottom:'4px',background:'#22c55e08',border:'1px solid #22c55e30',borderRadius:'8px',overflow:'hidden'}}>
+                <div onClick={()=>setOpenSection(p=>({...p,['vg_'+i]:!p['vg_'+i]}))} style={{display:'flex',alignItems:'center',gap:'8px',padding:'8px 12px',cursor:'pointer'}}>
+                  <div style={{width:'8px',height:'8px',borderRadius:'50%',background:'#22c55e',flexShrink:0}}/>
+                  <span style={{flex:1,fontSize:'13px',color:c.T,fontWeight:'600'}}>{r.name}</span>
+                  {r.lateMin>0&&<span style={{fontSize:'10px',color:'#f59e0b',fontWeight:'600'}}>+{r.lateMin}min</span>}
+                  {r.meetOk===true&&<span style={{fontSize:'10px',color:'#22c55e'}}>📍</span>}
+                  <span style={{fontSize:'11px',color:c.M2}}>{expanded2?'▾':'▸'}</span>
+                </div>
+                {expanded2&&<div style={{padding:'6px 12px 10px',borderTop:'1px solid #22c55e20',fontSize:'12px',color:c.M2}}>
+                  {r.meetOk!==undefined&&<div style={{marginBottom:'4px'}}>📍 {r.meetOk?t.meetYes:t.meetNo}</div>}
+                  {r.lateMin>0&&<div style={{marginBottom:'4px'}}>⏰ +{r.lateMin} min ({addMins(planTime,r.lateMin)})</div>}
+                  {r.comment&&<div style={{fontStyle:'italic',padding:'4px 8px',background:c.CARD2,borderRadius:'6px'}}>"{r.comment}"</div>}
+                </div>}
+              </div>;
+            })}
+            {notGoing.length>0&&<>
+              <div style={{fontSize:'14px',fontWeight:'700',color:'#ef4444',marginTop:'12px',marginBottom:'8px'}}>✗ {t.notGoingLbl||'Not going'} ({notGoing.length})</div>
+              {notGoing.map((r,i)=>{
+                const expanded2=openSection['vn_'+i];
+                return<div key={i} style={{marginBottom:'4px',background:'#ef444408',border:'1px solid #ef444430',borderRadius:'8px',overflow:'hidden'}}>
+                  <div onClick={()=>setOpenSection(p=>({...p,['vn_'+i]:!p['vn_'+i]}))} style={{display:'flex',alignItems:'center',gap:'8px',padding:'8px 12px',cursor:'pointer'}}>
+                    <div style={{width:'8px',height:'8px',borderRadius:'50%',background:'#ef4444',flexShrink:0}}/>
+                    <span style={{flex:1,fontSize:'13px',color:c.M2}}>{r.name}</span>
+                    <span style={{fontSize:'10px',color:c.M2}}>{r.placeOk===false?'📍✗ ':''}{r.dateOk===false?'📅✗ ':''}{r.timeOk===false?'🕐✗':''}</span>
+                    <span style={{fontSize:'11px',color:c.M2}}>{expanded2?'▾':'▸'}</span>
+                  </div>
+                  {expanded2&&<div style={{padding:'6px 12px 10px',borderTop:'1px solid #ef444420',fontSize:'12px',color:c.M2}}>
+                    {r.dateOk===false&&r.availDates?.length>0&&<div style={{marginBottom:'4px'}}>📅 {r.availDates.map(d=>fmtShort(d,lang)).join(', ')}</div>}
+                    {r.timeOk===false&&r.availTimeFrom&&<div style={{marginBottom:'4px'}}>🕐 {r.availTimeFrom} → {r.availTimeTo}</div>}
+                    {r.placeOk===false&&r.placeComment&&<div style={{marginBottom:'4px'}}>📍 "{r.placeComment}"</div>}
+                    {r.comment&&<div style={{fontStyle:'italic',padding:'4px 8px',background:c.CARD2,borderRadius:'6px'}}>"{r.comment}"</div>}
+                  </div>}
+                </div>;
+              })}
+            </>}
+          </>;})()}
         </>}
       </>})()}
 
