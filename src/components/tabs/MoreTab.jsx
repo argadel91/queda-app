@@ -9,7 +9,7 @@ export default function MoreTab({plan,rs,c,mc,lang,t,shareUrl,waShare,copyShare}
       <div style={{display:'flex',gap:'8px'}}>
         <button onClick={waShare} style={{flex:1,padding:'12px',background:'#25D366',color:'#fff',border:'none',borderRadius:'12px',fontSize:'13px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>WhatsApp</button>
         <button onClick={()=>{window.open('https://t.me/share/url?url='+encodeURIComponent(shareUrl),'_blank');}} style={{flex:1,padding:'12px',background:'#0088cc',color:'#fff',border:'none',borderRadius:'12px',fontSize:'13px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>Telegram</button>
-        <button onClick={copyShare} style={{flex:1,padding:'12px',background:c.CARD2,color:c.T,border:`1px solid ${c.BD}`,borderRadius:'12px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>🔗</button>
+        <button aria-label="Copy link" onClick={copyShare} style={{flex:1,padding:'12px',background:c.CARD2,color:c.T,border:`1px solid ${c.BD}`,borderRadius:'12px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>🔗</button>
       </div>
     </Card>
 

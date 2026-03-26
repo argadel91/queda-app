@@ -30,7 +30,7 @@ export default function MyPlans({onBack,onOpen,c,lang}){
     <Back onClick={onBack} label={t.back} c={c}/>
     <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'20px'}}>{t.myPlansTitle||'My plans'}</h2>
 
-    {confirm&&<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:100,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setConfirm(null)}>
+    {confirm&&<div role="dialog" aria-modal="true" onKeyDown={e=>{if(e.key==='Escape')setConfirm(null);}} style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:100,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setConfirm(null)}>
       <div onClick={e=>e.stopPropagation()} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'16px',padding:'24px',width:'100%',maxWidth:'340px'}}>
         <div style={{fontSize:'32px',textAlign:'center',marginBottom:'12px'}}>{confirm.role==='organizer'?'🗑️':'👋'}</div>
         <div style={{fontSize:'16px',fontWeight:'700',color:c.T,textAlign:'center',marginBottom:'8px'}}>{confirm.role==='organizer'?(t.delConfirm||'Delete plan?'):(t.leaveConfirm||'Leave plan?')}</div>
@@ -60,7 +60,7 @@ export default function MyPlans({onBack,onOpen,c,lang}){
       const desc=fp?.desc||null;
       const truncate=(s,n)=>s&&s.length>n?s.slice(0,n)+'…':s;/*60 title, 120 desc*/
       const place=fp?.place||fp?.stops?.[0]?.options?.[0]||null;
-      return(<div key={p.id} onClick={()=>{ls.set('q_seen_'+p.id,Date.now());onOpen(p.id);}} style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'16px',padding:'16px',marginBottom:'12px',cursor:'pointer',opacity:isPast(p.id)?0.6:1}}>
+      return(<div key={p.id} role="button" tabIndex={0} onKeyDown={e=>{if(e.key==='Enter')onOpen(p.id);}} onClick={()=>{ls.set('q_seen_'+p.id,Date.now());onOpen(p.id);}} style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'16px',padding:'16px',marginBottom:'12px',cursor:'pointer',opacity:isPast(p.id)?0.6:1}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'8px'}}>
           <div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'11px',color:mc,letterSpacing:'.08em',textTransform:'uppercase'}}>queda.</div>
           <button aria-label="Delete plan" onClick={e=>{e.stopPropagation();setConfirm(p);}} style={{background:'none',border:'1px solid #ff444430',borderRadius:'6px',color:'#ff6666',cursor:'pointer',fontSize:'13px',padding:'4px 8px'}}>×</button>

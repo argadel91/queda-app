@@ -30,7 +30,7 @@ function ResultsInner({onBack}){
 
   return(<>
     {/* Auto-confirm modal */}
-    {autoConfirmPending&&<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setAutoConfirmPending(null)}>
+    {autoConfirmPending&&<div role="dialog" aria-modal="true" onKeyDown={e=>{if(e.key==='Escape')setAutoConfirmPending(null);}} style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setAutoConfirmPending(null)}>
       <div onClick={e=>e.stopPropagation()} className="fade-in" style={{background:c.CARD,borderRadius:'16px',padding:'24px',width:'100%',maxWidth:'340px',textAlign:'center'}}>
         <div style={{fontSize:'32px',marginBottom:'10px'}}>📌</div>
         <div style={{fontSize:'15px',color:c.T,fontWeight:'700',marginBottom:'6px'}}>{t.autoConfirmTitle}</div>
@@ -43,7 +43,7 @@ function ResultsInner({onBack}){
     </div>}
 
     {/* Edit modals */}
-    {editMode&&<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setEditMode(false)}>
+    {editMode&&<div role="dialog" aria-modal="true" onKeyDown={e=>{if(e.key==='Escape')setEditMode(false);}} style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setEditMode(false)}>
       <div onClick={e=>e.stopPropagation()} className="fade-in" style={{background:c.CARD,borderRadius:'16px',padding:'24px',width:'100%',maxWidth:'400px',maxHeight:'80vh',overflowY:'auto'}}>
         {/* View title */}
         {editMode==='view_title'&&<>
@@ -158,9 +158,9 @@ function ResultsInner({onBack}){
       </div>}
       {/* Action buttons */}
       <div style={{display:'flex',gap:'5px',marginBottom:'10px'}}>
-        <button onClick={()=>{const url=shareUrl;const txt=`${t.respondToPlan?.replace('{name}',plan.name||'queda.')}\n${url}`;window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}} title={t.shareWATitle} style={{background:'#25D36618',border:'1px solid #25D36640',borderRadius:'8px',padding:'6px 10px',color:'#25D366',cursor:'pointer',fontSize:'13px'}}>💬</button>
-        <button onClick={copyShare} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}} title={t.copyLinkTitle}>🔗</button>
-        <button onClick={()=>helpers.refresh()} title={t.refreshResp} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}}>↻</button>
+        <button aria-label="Share on WhatsApp" onClick={()=>{const url=shareUrl;const txt=`${t.respondToPlan?.replace('{name}',plan.name||'queda.')}\n${url}`;window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}} title={t.shareWATitle} style={{background:'#25D36618',border:'1px solid #25D36640',borderRadius:'8px',padding:'6px 10px',color:'#25D366',cursor:'pointer',fontSize:'13px'}}>💬</button>
+        <button aria-label="Copy link" onClick={copyShare} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}} title={t.copyLinkTitle}>🔗</button>
+        <button aria-label="Refresh" onClick={()=>helpers.refresh()} title={t.refreshResp} style={{background:'none',border:`1px solid ${c.BD}`,color:c.M2,cursor:'pointer',fontSize:'12px',padding:'6px 10px',borderRadius:'8px',fontFamily:'inherit'}}>↻</button>
       </div>
       {/* Title + Description */}
       <div style={{marginBottom:'4px'}}>

@@ -67,7 +67,7 @@ export default function VoteTab({plan,rs,total,c,mc,lang,t,openSection,setOpenSe
       {notGoing.map((r,i)=>{
         const expanded2=openSection['vn_'+i];
         return<div key={i} style={{marginBottom:'4px',background:'#ef444408',border:'1px solid #ef444430',borderRadius:'8px',overflow:'hidden'}}>
-          <div onClick={()=>setOpenSection(p=>({...p,['vn_'+i]:!p['vn_'+i]}))} style={{display:'flex',alignItems:'center',gap:'8px',padding:'8px 12px',cursor:'pointer'}}>
+          <div role="button" tabIndex={0} aria-expanded={!!expanded2} onKeyDown={e=>{if(e.key==='Enter')setOpenSection(p=>({...p,['vn_'+i]:!p['vn_'+i]}));}} onClick={()=>setOpenSection(p=>({...p,['vn_'+i]:!p['vn_'+i]}))} style={{display:'flex',alignItems:'center',gap:'8px',padding:'8px 12px',cursor:'pointer'}}>
             <div style={{width:'8px',height:'8px',borderRadius:'50%',background:'#ef4444',flexShrink:0}}/>
             <span style={{flex:1,fontSize:'13px',color:c.M2}}>{r.name}</span>
             <span style={{fontSize:'10px',color:c.M2}}>{r.placeOk===false?'📍✗ ':''}{r.dateOk===false?'📅✗ ':''}{r.timeOk===false?'🕐✗':''}</span>
