@@ -5,7 +5,7 @@ import { updatePlan } from '../lib/supabase.js'
 import { fmtShort, fmtTime, fmtDate, daysUntil } from '../lib/utils.js'
 import { Btn, Back } from '../components/ui.jsx'
 import PostPlanSurvey from '../components/PostPlanSurvey.jsx'
-import { generateICS } from '../lib/ics.js'
+import { generateICS, generateGCalURL } from '../lib/ics.js'
 import VenueInfo from '../components/VenueInfo.jsx'
 import ClockPicker from '../components/ClockPicker.jsx'
 import ResultsProvider, { useResults, addMins, fmtMinsToH } from '../components/ResultsContext.jsx'
@@ -101,6 +101,10 @@ function ResultsInner({onBack}){
             <input type="datetime-local" min={new Date().toISOString().slice(0,16)} max={(plan.date||plan.dates?.[0]||'')+'T23:59'} value={plan.deadline||''} onChange={async e=>{const up={...plan,deadline:e.target.value||null};await updatePlan(up);setPlan(up);}} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
             {plan.deadline&&<button onClick={async()=>{const up={...plan,deadline:null};await updatePlan(up);setPlan(up);}} style={{marginTop:'4px',background:'none',border:'none',color:'#ef4444',cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>× {t.removeDeadline||'Remove'}</button>}
           </div>
+          <label style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',marginBottom:'14px',cursor:'pointer'}}>
+            <input type="checkbox" checked={!!plan.requireLogin} onChange={async e=>{const up={...plan,requireLogin:e.target.checked};await updatePlan(up);setPlan(up);}} style={{width:'18px',height:'18px',accentColor:mc,cursor:'pointer'}}/>
+            <div><div style={{fontSize:'12px',color:c.T,fontWeight:'600'}}>{t.requireLoginLbl||'Require login'}</div><div style={{fontSize:'11px',color:c.M2}}>{t.requireLoginHint||'Invitees must sign in'}</div></div>
+          </label>
           <button onClick={()=>setEditMode(false)} style={{width:'100%',padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.doneLbl||'Done'}</button>
         </>}
         {/* Edit stop */}
@@ -115,7 +119,9 @@ function ResultsInner({onBack}){
             else{stops[idx]={...stops[idx],[field]:val};}
             const up={...plan,stops};await updatePlan(up);setPlan(up);
           };
-          const searchMP=async(q)=>{if(!q||q.length<2){setEditState('mpResults',[]);return;}try{const Place=window.google?.maps?.places?.Place;if(Place){const{places}=await Place.searchByText({textQuery:q,fields:['displayName','formattedAddress','location'],maxResultCount:5});setEditState('mpResults',(places||[]).map(p=>({name:p.displayName,address:p.formattedAddress,lat:p.location?.lat(),lng:p.location?.lng()})));}else{const svc=new window.google.maps.places.PlacesService(document.createElement('div'));svc.textSearch({query:q},(r2,st)=>{if(st==='OK')setEditState('mpResults',(r2||[]).slice(0,5).map(p=>({name:p.name,address:p.formatted_address,lat:p.geometry?.location?.lat(),lng:p.geometry?.location?.lng()})));});}}catch{setEditState('mpResults',[]);}};
+          const searchPlace=async(q,field)=>{if(!q||q.length<2){setEditState(field,[]);return;}try{const Place=window.google?.maps?.places?.Place;if(Place){if(google.maps.importLibrary)await google.maps.importLibrary('places');const{places}=await Place.searchByText({textQuery:q,fields:['displayName','formattedAddress','location','rating','userRatingCount','priceLevel','photos','websiteURI','googleMapsURI','types'],maxResultCount:5});setEditState(field,(places||[]).map(p=>({name:p.displayName||'',address:p.formattedAddress||'',lat:p.location?.lat(),lng:p.location?.lng(),rating:p.rating||null,ratingCount:p.userRatingCount||null,priceLevel:p.priceLevel??null,photo:p.photos?.[0]?.getURI?.({maxWidth:400})||null,website:p.websiteURI||null,googleMapsURI:p.googleMapsURI||null,types:p.types||[]})));}else{const svc=new window.google.maps.places.PlacesService(document.createElement('div'));svc.textSearch({query:q},(r2,st)=>{if(st==='OK')setEditState(field,(r2||[]).slice(0,5).map(p=>({name:p.name||'',address:p.formatted_address||'',lat:p.geometry?.location?.lat(),lng:p.geometry?.location?.lng(),rating:p.rating||null,ratingCount:p.user_ratings_total||null,photo:p.photos?.[0]?.getUrl?.({maxWidth:400})||null})));});}}catch{setEditState(field,[]);}};
+          const pickVenue=async(r)=>{const stops2=[...(plan.stops||[])];const idx2=stops2.findIndex(x=>x.id==stopId||String(x.id)===stopId);if(idx2<0)return;const fields2=['name','address','lat','lng','rating','ratingCount','priceLevel','photo','website','googleMapsURI','types'];const newOpt={...stops2[idx2].options[0]};fields2.forEach(k=>{if(r[k]!==undefined&&r[k]!==null)newOpt[k]=r[k];});stops2[idx2]={...stops2[idx2],options:[newOpt,...stops2[idx2].options.slice(1)]};const up={...plan,stops:stops2};await updatePlan(up);setPlan(up);setEditState('venueResults',[]);setEditState('venueSearch','');};
+          const searchMP=async(q)=>searchPlace(q,'mpResults');
           const pickMP=async(r)=>{const stops2=[...(plan.stops||[])];const idx=stops2.findIndex(x=>x.id==stopId||String(x.id)===stopId);if(idx<0)return;stops2[idx]={...stops2[idx],meetingPoint:r.name+(r.address?' — '+r.address:''),meetingPointLat:r.lat,meetingPointLng:r.lng};const up={...plan,stops:stops2};await updatePlan(up);setPlan(up);setEditState('mpResults',[]);setEditState('mpSearch','');};
           return<>
             <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>{t.editLbl} — {t.stopLbl||'Stop'} {si+1}</div>
@@ -123,10 +129,16 @@ function ResultsInner({onBack}){
             {isOrg?<>
               <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.editNameLbl}</div><input defaultValue={opt.name||''} onBlur={e=>updateStop('name',e.target.value.trim(),true)} style={inpSt}/></div>
               <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>📍 {t.addressLbl||'Address'}</div><input defaultValue={opt.address||''} onBlur={e=>updateStop('address',e.target.value.trim(),true)} style={inpSt}/></div>
+              <div style={{marginBottom:'10px'}}>
+                <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>🔍 {t.searchPlacePh||'Search a place...'}</div>
+                <div style={{display:'flex',gap:'6px'}}><input value={editState.venueSearch||''} onChange={e=>setEditState('venueSearch',e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();searchPlace(editState.venueSearch,'venueResults');}}} placeholder={t.searchPlacePh||'Search...'} style={{...inpSt,flex:1}}/><button onClick={()=>searchPlace(editState.venueSearch,'venueResults')} style={{background:mc,border:'none',borderRadius:'8px',padding:'8px 12px',color:'#0A0A0A',cursor:'pointer',fontWeight:'700',fontSize:'14px'}}>🔍</button></div>
+                {(editState.venueResults||[]).length>0&&<div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',marginTop:'4px',maxHeight:'180px',overflowY:'auto'}}>{editState.venueResults.map((r,ri)=><div key={ri} onClick={()=>pickVenue(r)} style={{padding:'8px 12px',cursor:'pointer',borderBottom:ri<editState.venueResults.length-1?`1px solid ${c.BD}`:'none',fontSize:'12px'}} onMouseEnter={e=>e.currentTarget.style.background=c.CARD2} onMouseLeave={e=>e.currentTarget.style.background='transparent'}><div style={{display:'flex',alignItems:'center',gap:'6px'}}><div style={{color:c.T,fontWeight:'500'}}>{r.name}</div>{r.rating&&<span style={{fontSize:'10px',color:mc}}>⭐{r.rating}</span>}</div><div style={{color:c.M2,fontSize:'11px'}}>{r.address}</div></div>)}</div>}
+              </div>
               <div style={{display:'flex',gap:'8px',marginBottom:'10px'}}>
                 <div style={{flex:1}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>👥 {t.minCapLbl||'Min'}</div><input type="number" min="0" defaultValue={s.minAttendees||''} onBlur={e=>updateStop('minAttendees',e.target.value)} placeholder="—" style={{...inpSt,width:'100%'}}/></div>
                 <div style={{flex:1}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>👥 {t.maxCapLbl||'Max'}</div><input type="number" min="0" defaultValue={s.maxCapacity||''} onBlur={e=>updateStop('maxCapacity',e.target.value)} placeholder="—" style={{...inpSt,width:'100%'}}/></div>
               </div>
+              <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>⏱️ {t.durationLbl||'Duration'}</div><select value={s.duration||''} onChange={e=>updateStop('duration',e.target.value)} style={{...inpSt,width:'auto',cursor:'pointer'}}><option value="">—</option><option value="30min">30 min</option><option value="1h">1h</option><option value="1h30">1h30</option><option value="2h">2h</option><option value="3h">3h</option><option value="4h+">4h+</option></select>{s.duration&&s.startTime&&(()=>{const[h2,m2]=(s.startTime||planTime||'').split(':').map(Number);const mins2={['30min']:30,['1h']:60,['1h30']:90,['2h']:120,['3h']:180,['4h+']:240}[s.duration]||0;const ed=new Date(2000,0,1,h2,m2+mins2);return<span style={{fontSize:'11px',color:c.M2,marginLeft:'8px'}}>{t.endsAtLbl||'Ends'}: {String(ed.getHours()).padStart(2,'0')}:{String(ed.getMinutes()).padStart(2,'0')}</span>;})()}</div>
               <div style={{marginBottom:'10px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>⏰ {t.toleranceLbl||'Tolerance'}</div><div style={{display:'flex',alignItems:'center',gap:'6px'}}><input type="number" min="0" max="120" defaultValue={s.tolerance||''} onBlur={e=>updateStop('tolerance',e.target.value)} placeholder="15" style={{...inpSt,width:'80px'}}/><span style={{fontSize:'11px',color:c.M}}>min</span>{s.tolerance&&<span style={{fontSize:'11px',color:c.M2}}>{fmtMinsToH(parseInt(s.tolerance))}</span>}</div></div>
               <div style={{marginBottom:'10px'}}>
                 <div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>📍 {t.meetingPointLbl2||'Meeting point'}</div>
@@ -186,7 +198,8 @@ function ResultsInner({onBack}){
         <div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>
           {isOrg&&<button onClick={waConfirm} style={{background:'#25D366',border:'none',borderRadius:'10px',padding:'8px 12px',color:'#fff',fontSize:'12px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>{t.notifyGrp}</button>}
           <button onClick={waRem} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'8px 12px',color:remSent?mc:c.M2,fontSize:'12px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>{remSent?t.remSent:t.sendRem}</button>
-          <button onClick={()=>generateICS(plan,lang)} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'8px 10px',color:c.M2,fontSize:'12px',cursor:'pointer',fontFamily:'inherit'}} title={t.addToCalendar}>📅</button>
+          <button onClick={()=>generateICS(plan,lang)} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'8px 10px',color:c.M2,fontSize:'12px',cursor:'pointer',fontFamily:'inherit'}} title={t.addToCalendar}>📅 .ics</button>
+          {generateGCalURL(plan)&&<button onClick={()=>window.open(generateGCalURL(plan),'_blank')} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'8px 10px',color:c.M2,fontSize:'12px',cursor:'pointer',fontFamily:'inherit'}} title={t.addToGCal||'Google Calendar'}>📅 Google</button>}
         </div>
       </div>}
       {/* Tabs */}
@@ -202,8 +215,8 @@ function ResultsInner({onBack}){
   </>);
 }
 
-export default function Results({plan,onBack,isOrg,c,lang,showShare,onCloseShare}){
-  return<ResultsProvider plan={plan} isOrg={isOrg} c={c} lang={lang}>
+export default function Results({plan,onBack,isOrg,c,lang,showShare,onCloseShare,authUser,profile}){
+  return<ResultsProvider plan={plan} isOrg={isOrg} c={c} lang={lang} authUser={authUser} profile={profile}>
     <ResultsInner onBack={onBack}/>
   </ResultsProvider>;
 }

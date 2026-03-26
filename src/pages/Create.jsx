@@ -51,6 +51,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
   const[stops,setStops]=useState([emptyStop(1,'')]);
   const[mapTarget,setMapTarget]=useState(null);
   const[saving,setSaving]=useState(false);
+  const[requireLogin,setRequireLogin]=useState(false);
   const[draftRestored,setDraftRestored]=useState(false);
   const draftKey='q_draft';
 
@@ -77,12 +78,12 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
     if(d.org)setOrg(d.org);
     if(d.selDates)setSelDates(d.selDates);
     if(d.startTimes)setStartTimes(d.startTimes);
-    if(d.stops)setStops(d.stops);if(d.step!=null&&STEPS[d.step])nav2('/create/'+STEPS[d.step],{replace:true});
+    if(d.stops)setStops(d.stops);if(d.requireLogin)setRequireLogin(d.requireLogin);if(d.step!=null&&STEPS[d.step])nav2('/create/'+STEPS[d.step],{replace:true});
     setDraftRestored(true);
   },[]);// eslint-disable-line react-hooks/exhaustive-deps
 
   // Save draft helper
-  const saveDraft=(s)=>ls.set(draftKey,{org,selDates,startTimes,stops,step:s!==undefined?s:step});
+  const saveDraft=(s)=>ls.set(draftKey,{org,selDates,startTimes,stops,requireLogin,step:s!==undefined?s:step});
   // Auto-save every 30s
   useEffect(()=>{const id=setInterval(()=>saveDraft(),30000);return()=>clearInterval(id);});
   const clearDraft=()=>{try{localStorage.removeItem(draftKey)}catch{}};
@@ -142,7 +143,7 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
       const cleanStops=stops.filter(s=>(s.options||[]).some(o=>o.name));
       const theDate=selDates[0]||null;const theTime=startTimes[0]||null;const thePlace=cleanStops[0]?.options?.[0]||null;
       const dateTimes=theDate&&theTime?{[theDate]:[theTime]}:{};
-      const plan={id:genId(),name:null,desc:null,organizer:profile?.name||org.trim()||'',date:theDate,time:theTime,place:thePlace,dates:theDate?[theDate]:[],startTimes:theTime?[theTime]:[],dateTimes,stops:cleanStops,timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,confirmedDate:null,alternatives:[],isPublic:false,lang,createdAt:new Date().toISOString()};
+      const plan={id:genId(),name:null,desc:null,organizer:profile?.name||org.trim()||'',organizerUsername:profile?.username||null,date:theDate,time:theTime,place:thePlace,dates:theDate?[theDate]:[],startTimes:theTime?[theTime]:[],dateTimes,stops:cleanStops,timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,confirmedDate:null,alternatives:[],isPublic:false,requireLogin,lang,createdAt:new Date().toISOString()};
       if(authUser)await savePlanWithUser(plan,authUser.id);else await savePlan(plan);
       addMyPlan(plan.id,plan.name,'organizer');
       clearDraft();setCreated(plan);
@@ -364,7 +365,11 @@ export default function Create({onBack,onCreated,c,lang,authUser,profile}){
           {(()=>{const opt=stops.find(s=>(s.options||[]).some(o=>o.name))?.options?.[0];return opt?<div style={{fontSize:'16px',color:c.T,fontWeight:'700'}}>{opt.name}</div>:null;})()}
           <div style={{fontSize:'12px',color:c.M2,marginTop:'4px'}}>@ {profile?.name||org}</div>
         </div>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'20px'}}>{t.aboutToCreate}</p>
+        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{t.aboutToCreate}</p>
+        <label style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px 14px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',marginBottom:'16px',cursor:'pointer'}}>
+          <input type="checkbox" checked={requireLogin} onChange={e=>setRequireLogin(e.target.checked)} style={{width:'18px',height:'18px',accentColor:mc,cursor:'pointer'}}/>
+          <div><div style={{fontSize:'13px',color:c.T,fontWeight:'600'}}>{t.requireLoginLbl||'Require login to respond'}</div><div style={{fontSize:'11px',color:c.M2}}>{t.requireLoginHint||'Invitees must sign in before voting'}</div></div>
+        </label>
         <Btn onClick={create} disabled={saving} full style={{padding:'16px',fontSize:'16px',background:mc,color:'#0A0A0A'}} c={c}>{saving?(t.creatingPlan):(t.createPlanBtn)}</Btn>
       </div>}
 

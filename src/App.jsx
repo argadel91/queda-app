@@ -170,7 +170,7 @@ function AppInner(){
       }
     },[code]);
     if(!plan||plan.id!==code)return<Fallback/>;
-    return<Results plan={plan} onBack={()=>navigate('/plans')} isOrg={isOrg} c={c} lang={lang} showShare={showShareModal} onCloseShare={()=>setShowShareModal(false)}/>;
+    return<Results plan={plan} onBack={()=>navigate('/plans')} isOrg={isOrg} c={c} lang={lang} showShare={showShareModal} onCloseShare={()=>setShowShareModal(false)} authUser={authUser} profile={profile}/>;
   };
 
   // Preview loader for legacy ?code= URLs

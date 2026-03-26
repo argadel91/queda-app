@@ -10,7 +10,7 @@ export const fmtMinsToH=(mins)=>{const h=Math.floor(Math.abs(mins)/60);const m=M
 const Ctx=createContext();
 export const useResults=()=>useContext(Ctx);
 
-export default function ResultsProvider({plan:ip,isOrg,c,lang,children}){
+export default function ResultsProvider({plan:ip,isOrg,c,lang,authUser,profile,children}){
   const t=T[lang];const mc=c.A;
 
   // Plan + responses
@@ -54,7 +54,7 @@ export default function ResultsProvider({plan:ip,isOrg,c,lang,children}){
   const[remSent,setRem]=useState(false);
 
   // Edit state
-  const[editState,setEditStateRaw]=useState({mode:false,name:ip.name,desc:ip.desc||'',conf:false,mpSearch:'',mpResults:[]});
+  const[editState,setEditStateRaw]=useState({mode:false,name:ip.name,desc:ip.desc||'',conf:false,mpSearch:'',mpResults:[],venueSearch:'',venueResults:[]});
   const setEditState=(k,v)=>setEditStateRaw(p=>({...p,[k]:v}));
 
   // My vote state
@@ -116,7 +116,7 @@ export default function ResultsProvider({plan:ip,isOrg,c,lang,children}){
     const placeOk=myVote.placeOk===true;
     const changeLog=[...(myPrev?.changeLog||[])];
     if(myPrev)changeLog.unshift({at:new Date().toISOString(),desc:'Updated'});
-    const resp={name:myVote.name.trim(),dateOk:myVote.dateOk,timeOk:myVote.timeOk,meetOk:myVote.meetOk,lateMin:myVote.lateMin,
+    const resp={name:myVote.name.trim(),username:profile?.username||null,dateOk:myVote.dateOk,timeOk:myVote.timeOk,meetOk:myVote.meetOk,lateMin:myVote.lateMin,
       availDates:myVote.dateOk===false?myVote.altDates:[],availTimeFrom:myVote.timeOk===false?myVote.timeFrom:'',availTimeTo:myVote.timeOk===false?myVote.timeTo:'',
       placeOk,placeComment:myVote.placeComment,
       avail:myVote.dateOk&&myVote.timeOk?{[planTime?`${planDate}_${planTime}`:planDate]:'yes'}:{},
@@ -139,7 +139,7 @@ export default function ResultsProvider({plan:ip,isOrg,c,lang,children}){
   const waRem=()=>{window.open('https://wa.me/?text='+encodeURIComponent(`⏰ ${t.reminderMsg?.replace('{name}',plan.name)}\n${shareUrl}`),'_blank');setRem(true);};
 
   const value={
-    planState:{plan,setPlan,rs,total,isOrg:isOrgRef.current,slots,best,cntY,score,cancelledStops,ldg},
+    planState:{plan,setPlan,rs,total,isOrg:isOrgRef.current,slots,best,cntY,score,cancelledStops,ldg,authUser},
     myVote,setMyVote,myPrev,
     editState,setEditState,
     ui:{tab,setTab,openSection,setOpenSection,newRespAlert,autoConfirmPending,setAutoConfirmPending,remSent},

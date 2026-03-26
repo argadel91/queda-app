@@ -3,12 +3,14 @@ import { fmtDate, fmtTime } from '../../lib/utils.js'
 import { Card, Lbl } from '../ui.jsx'
 
 const addMins=(time,mins)=>{if(!time)return'';const[h,m]=time.split(':').map(Number);const total=h*60+m+mins;const nh=Math.floor(((total%1440)+1440)%1440/60);const nm=((total%1440)+1440)%1440%60;return`${String(nh).padStart(2,'0')}:${String(nm).padStart(2,'0')}`;};
+const calcEnd=(start,dur)=>{if(!start||!dur)return'';const mins={['30min']:30,['1h']:60,['1h30']:90,['2h']:120,['3h']:180,['4h+']:240}[dur]||0;if(!mins)return'';const[h,m]=start.split(':').map(Number);const d=new Date(2000,0,1,h,m+mins);return`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;};
+const durLabel=(d)=>({['30min']:'30 min',['1h']:'1h',['1h30']:'1h30',['2h']:'2h',['3h']:'3h',['4h+']:'4h+'}[d]||'');
 
 export default function ResultTab({plan,rs,total,c,mc,lang,t,isOrg,confirmDate,conf}){
   const planDate=plan.date||plan.dates?.[0]||null;
   const planTime=plan.time||plan.startTimes?.[0]||null;
-  const planPlace=plan.place||plan.stops?.[0]?.options?.[0]||null;
-  const stop=plan.stops?.[0]||{};
+  const allStops=(plan.stops||[]).filter(s=>(s.options||[]).some(o=>o.name));
+  const firstStop=plan.stops?.[0]||{};
   const attending=rs.filter(r=>{const v4=r.dateOk!==undefined;return v4?(r.dateOk&&r.timeOk):r.avail&&Object.values(r.avail).some(v=>v==='yes');});
   const meetPoint=rs.filter(r=>r.meetOk===true);
   const goingDirect=rs.filter(r=>r.meetOk===false);
@@ -22,15 +24,41 @@ export default function ResultTab({plan,rs,total,c,mc,lang,t,isOrg,confirmDate,c
       {plan.desc&&<div style={{fontSize:'13px',color:c.M2,lineHeight:1.4}}>{plan.desc}</div>}
     </div>
 
-    {/* Plan details */}
-    <Card c={c} style={{marginBottom:'12px'}}>
-      <div style={{display:'flex',gap:'10px',alignItems:'center',marginBottom:'10px'}}>
-        {planPlace?.photo&&<img src={planPlace.photo} alt={planPlace?.name||'Venue'} style={{width:'50px',height:'50px',borderRadius:'10px',objectFit:'cover',flexShrink:0}}/>}
-        <div>
-          <div style={{fontSize:'15px',color:c.T,fontWeight:'700'}}>{planPlace?.name||'—'}</div>
-          {planPlace?.address&&<div style={{fontSize:'11px',color:c.M2}}>📍 {planPlace.address}</div>}
+    {/* Stops */}
+    {allStops.map((s,i)=>{
+      const opt=s.options?.[0]||{};
+      const sTime=s.startTime||planTime;
+      return<Card key={s.id} c={c} style={{marginBottom:'12px'}}>
+        <div style={{display:'flex',gap:'10px',alignItems:'center',marginBottom:'10px'}}>
+          <div style={{width:'28px',height:'28px',borderRadius:'50%',background:`${mc}20`,border:`2px solid ${mc}60`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',fontWeight:'800',color:mc,flexShrink:0}}>{i+1}</div>
+          {opt.photo&&<img src={opt.photo} alt={opt.name||'Venue'} style={{width:'50px',height:'50px',borderRadius:'10px',objectFit:'cover',flexShrink:0}}/>}
+          <div>
+            <div style={{fontSize:'15px',color:c.T,fontWeight:'700'}}>{opt.name||'—'}</div>
+            {opt.address&&<div style={{fontSize:'11px',color:c.M2}}>📍 {opt.address}</div>}
+          </div>
         </div>
-      </div>
+        <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
+          {planDate&&<div style={{flex:1,padding:'10px',background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'10px',textAlign:'center'}}>
+            <div style={{fontSize:'11px',color:c.M}}>📅</div>
+            <div style={{fontSize:'14px',color:c.T,fontWeight:'700',textTransform:'capitalize'}}>{fmtDate(planDate,lang)}</div>
+          </div>}
+          {sTime&&<div style={{flex:1,padding:'10px',background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'10px',textAlign:'center'}}>
+            <div style={{fontSize:'11px',color:c.M}}>🕐</div>
+            <div style={{fontSize:'14px',color:c.T,fontWeight:'700'}}>{fmtTime(sTime)}{s.duration?` — ${calcEnd(sTime,s.duration)}`:''}</div>
+            {s.duration&&<div style={{fontSize:'10px',color:c.M2}}>{durLabel(s.duration)}</div>}
+          </div>}
+        </div>
+        <div style={{fontSize:'12px',color:c.M2}}>
+          {i===0&&<><span>👤 {plan.organizer}{plan.organizerUsername&&<span style={{color:mc,fontSize:'11px',fontWeight:'500'}}> @{plan.organizerUsername}</span>}</span> · <span style={{color:mc,fontWeight:'700',fontFamily:'monospace'}}>{plan.id}</span></>}
+          {s.minAttendees&&<span>{i===0?' · ':''}👥 min {s.minAttendees}</span>}
+          {s.maxCapacity&&<span>{s.minAttendees?'':i===0?' · ':''}{s.minAttendees?' / ':' · 👥 '}max {s.maxCapacity}</span>}
+          {s.notes&&<div style={{fontSize:'11px',color:c.M2,marginTop:'4px',fontStyle:'italic'}}>{s.notes}</div>}
+        </div>
+      </Card>;
+    })}
+
+    {/* Fallback if no stops */}
+    {allStops.length===0&&<Card c={c} style={{marginBottom:'12px'}}>
       <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
         {planDate&&<div style={{flex:1,padding:'10px',background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'10px',textAlign:'center'}}>
           <div style={{fontSize:'11px',color:c.M}}>📅</div>
@@ -43,34 +71,39 @@ export default function ResultTab({plan,rs,total,c,mc,lang,t,isOrg,confirmDate,c
       </div>
       <div style={{fontSize:'12px',color:c.M2}}>
         <span>👤 {plan.organizer}</span> · <span style={{color:mc,fontWeight:'700',fontFamily:'monospace'}}>{plan.id}</span>
-        {stop.maxCapacity&&<span> · 👥 max {stop.maxCapacity}</span>}
       </div>
-    </Card>
+    </Card>}
 
     {/* Attendance */}
     <Card c={c} style={{marginBottom:'12px'}}>
       <Lbl c={c}>👥 {t.attendanceLbl||'Attendance'} ({attending.length}/{total})</Lbl>
       {attending.length>0?<div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
-        {attending.map((r,i)=><span key={i} style={{fontSize:'12px',padding:'4px 10px',borderRadius:'20px',background:'#22c55e18',color:'#22c55e',border:'1px solid #22c55e40'}}>{r.name}{r.lateMin>0?` (+${r.lateMin}min)`:''}</span>)}
+        {attending.map((r,i)=><span key={i} style={{fontSize:'12px',padding:'4px 10px',borderRadius:'20px',background:'#22c55e18',color:'#22c55e',border:'1px solid #22c55e40'}}>{r.name}{r.username?<span style={{opacity:0.7}}> @{r.username}</span>:''}{r.lateMin>0?` (+${r.lateMin}min)`:''}</span>)}
       </div>:<div style={{fontSize:'12px',color:c.M2,fontStyle:'italic'}}>{t.noDataYet}</div>}
     </Card>
 
-    {/* Meeting point */}
-    {stop.meetingPoint&&<Card c={c} style={{marginBottom:'12px'}}>
-      <Lbl c={c}>📍 {stop.meetingPoint}</Lbl>
-      {meetPoint.length>0&&<div style={{marginBottom:'6px'}}>
-        <div style={{fontSize:'11px',color:'#f59e0b',fontWeight:'600',marginBottom:'4px'}}>{t.meetYes} ({meetPoint.length})</div>
-        <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
-          {meetPoint.map((r,i)=><span key={i} style={{fontSize:'11px',padding:'3px 8px',borderRadius:'14px',background:'#f59e0b15',color:'#f59e0b',border:'1px solid #f59e0b30'}}>{r.name}</span>)}
-        </div>
-      </div>}
-      {goingDirect.length>0&&<div>
-        <div style={{fontSize:'11px',color:'#22c55e',fontWeight:'600',marginBottom:'4px'}}>{t.meetNo} ({goingDirect.length})</div>
-        <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
-          {goingDirect.map((r,i)=><span key={i} style={{fontSize:'11px',padding:'3px 8px',borderRadius:'14px',background:'#22c55e15',color:'#22c55e',border:'1px solid #22c55e30'}}>{r.name}</span>)}
-        </div>
-      </div>}
-    </Card>}
+    {/* Meeting point (first stop) */}
+    {firstStop.meetingPoint&&(()=>{
+      const mpMins=parseInt(firstStop.meetingMinsBefore)||0;
+      const mpTime=mpMins>0&&planTime?addMins(planTime,-mpMins):null;
+      return<Card c={c} style={{marginBottom:'12px'}}>
+        <Lbl c={c}>📍 {t.meetingPointLbl2||'Meeting point'}</Lbl>
+        <div style={{fontSize:'13px',color:c.T,fontWeight:'600',marginBottom:'6px'}}>{firstStop.meetingPoint}</div>
+        {mpMins>0&&<div style={{fontSize:'12px',color:'#f59e0b',fontWeight:'600',marginBottom:'8px'}}>🕐 {mpTime} ({mpMins} min {t.beforeLbl||'before'})</div>}
+        {meetPoint.length>0&&<div style={{marginBottom:'6px'}}>
+          <div style={{fontSize:'11px',color:'#f59e0b',fontWeight:'600',marginBottom:'4px'}}>{t.meetYes} ({meetPoint.length})</div>
+          <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
+            {meetPoint.map((r,i)=><span key={i} style={{fontSize:'11px',padding:'3px 8px',borderRadius:'14px',background:'#f59e0b15',color:'#f59e0b',border:'1px solid #f59e0b30'}}>{r.name}{r.username?<span style={{opacity:0.7}}> @{r.username}</span>:''}</span>)}
+          </div>
+        </div>}
+        {goingDirect.length>0&&<div>
+          <div style={{fontSize:'11px',color:'#22c55e',fontWeight:'600',marginBottom:'4px'}}>{t.meetNo} ({goingDirect.length})</div>
+          <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
+            {goingDirect.map((r,i)=><span key={i} style={{fontSize:'11px',padding:'3px 8px',borderRadius:'14px',background:'#22c55e15',color:'#22c55e',border:'1px solid #22c55e30'}}>{r.name}{r.username?<span style={{opacity:0.7}}> @{r.username}</span>:''}</span>)}
+          </div>
+        </div>}
+      </Card>;
+    })()}
 
     {/* Late arrivals */}
     {lateOnes.length>0&&<Card c={c} style={{marginBottom:'12px'}}>
