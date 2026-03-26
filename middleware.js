@@ -1,25 +1,22 @@
-// Vercel Edge Middleware — injects dynamic OG meta tags for crawlers on /plan/:id
-// Browsers get the normal SPA. Crawlers (WhatsApp, Twitter, etc.) get static HTML with correct meta.
+// Vercel Edge Middleware — dynamic OG meta tags for /plan/:id
+// Always serves HTML with meta tags first. Browsers redirect to SPA via JS + cookie.
+// Crawlers (no JS) read the meta tags and stop.
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.VITE_SUPABASE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-// Real browsers that should get the SPA (not the meta-tag HTML)
-const BROWSERS = /mozilla.*applewebkit|chrome|safari|firefox|edg|opera|vivaldi/i;
 
 export const config = {
   matcher: '/plan/:path*',
 };
 
 export default async function middleware(request) {
-  const ua = request.headers.get('user-agent') || '';
-
-  // Real browsers get the SPA — everything else (crawlers, bots, validators) gets meta tags
-  if (BROWSERS.test(ua) && !/bot|crawl|spider|preview|fetch|curl/i.test(ua)) {
-    return; // Let the SPA handle it
+  // If cookie _q=1 exists, user already saw meta tags — let SPA handle
+  const cookies = request.headers.get('cookie') || '';
+  if (cookies.includes('_q=1')) {
+    return; // Pass through to SPA
   }
 
-  // Extract plan code from URL
+  // Extract plan code
   const url = new URL(request.url);
   const code = url.pathname.split('/plan/')[1]?.split('/')[0]?.split('?')[0];
   if (!code) return;
@@ -42,7 +39,7 @@ export default async function middleware(request) {
     } catch {}
   }
 
-  // Build meta tags
+  // Build meta content
   const place = plan?.place?.name || plan?.stops?.[0]?.options?.[0]?.name || '';
   const title = plan
     ? `${plan.name || 'Plan'} — queda. More plans, less chaos`
@@ -71,12 +68,12 @@ export default async function middleware(request) {
   <meta name="twitter:description" content="${esc(desc)}">
   <meta name="twitter:image" content="${image}">
   <link rel="canonical" href="${planUrl}">
-
+  <script>document.cookie='_q=1;path=/;max-age=60';window.location.replace('${planUrl}');</script>
 </head>
 <body>
   <h1>${esc(title)}</h1>
   <p>${esc(desc)}</p>
-  <p><a href="${planUrl}">Open plan on queda.</a></p>
+  <noscript><a href="${planUrl}">Open plan on queda.</a></noscript>
 </body>
 </html>`;
 
