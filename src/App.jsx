@@ -63,12 +63,12 @@ function AppInner(){
         db.auth.exchangeCodeForSession(params.get('code')).then(()=>{navigate('/',{replace:true});}).catch(()=>{navigate('/',{replace:true});});
       }else{navigate('/',{replace:true});}
     }
-    const timeout=setTimeout(()=>setAuthLoading(false),5000);
+    const timeout=setTimeout(()=>{setAuthLoading(false);},3000);
     getSession().then(async session=>{
       clearTimeout(timeout);
       if(session?.user){
         let prof=null;
-        try{prof=await loadProfile(session.user.id);}catch{}
+        try{prof=await Promise.race([loadProfile(session.user.id),new Promise((_,rej)=>setTimeout(rej,3000))]);}catch{}
         if(!prof){prof={name:session.user.email?.split('@')[0]||'User',email:session.user.email||'',contacts:[]};try{await saveProfile(session.user.id,prof);}catch{}}
         setAuthUser(session.user);setProfile(prof);if(prof?.lang)setLang(prof.lang);Sentry.setUser({id:session.user.id,email:session.user.email});
         syncMyPlans(session.user.id).catch(()=>{});
