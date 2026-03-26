@@ -56,15 +56,22 @@ export default function MyPlans({onBack,onOpen,c,lang}){
       const mc=c.A;const d=dates[p.id];
       const du=d?daysUntil(d):null;const isToday=du===0;const isTmrw=du===1;const isSoon=du!=null&&du<=3&&du>=0;
       const fp=fullPlans[p.id];
+      const loading=!fp;
       const title=fp?.name||p.name||null;
       const desc=fp?.desc||null;
-      const truncate=(s,n)=>s&&s.length>n?s.slice(0,n)+'…':s;/*60 title, 120 desc*/
+      const truncate=(s,n)=>s&&s.length>n?s.slice(0,n)+'…':s;
       const place=fp?.place||fp?.stops?.[0]?.options?.[0]||null;
       return(<div key={p.id} role="button" tabIndex={0} onKeyDown={e=>{if(e.key==='Enter')onOpen(p.id);}} onClick={()=>{ls.set('q_seen_'+p.id,Date.now());onOpen(p.id);}} style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'16px',padding:'16px',marginBottom:'12px',cursor:'pointer',opacity:isPast(p.id)?0.6:1}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'8px'}}>
           <div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'11px',color:mc,letterSpacing:'.08em',textTransform:'uppercase'}}>queda.</div>
           <button aria-label="Delete plan" onClick={e=>{e.stopPropagation();setConfirm(p);}} style={{background:'none',border:'1px solid #ff444430',borderRadius:'6px',color:'#ff6666',cursor:'pointer',fontSize:'13px',padding:'4px 8px'}}>×</button>
         </div>
+        {loading?<div style={{marginBottom:'8px'}}>
+          <div style={{height:'16px',background:c.CARD2,borderRadius:'6px',width:'70%',marginBottom:'6px',animation:'pulse 1.5s ease infinite'}}/>
+          <div style={{height:'12px',background:c.CARD2,borderRadius:'6px',width:'50%',marginBottom:'6px',animation:'pulse 1.5s ease infinite'}}/>
+          <div style={{height:'10px',background:c.CARD2,borderRadius:'6px',width:'30%',animation:'pulse 1.5s ease infinite'}}/>
+        </div>
+        :<>
         <div style={{marginBottom:'8px'}}>
           <div style={{fontSize:'16px',color:c.T,fontWeight:'700',marginBottom:'2px'}}>{truncate(title,60)||(t.untitled||'Sin título')}</div>
           <div style={{fontSize:'12px',color:c.M2,marginBottom:'4px'}}>{truncate(desc,120)||(t.noDesc||'Sin descripción')}</div>
@@ -83,6 +90,7 @@ export default function MyPlans({onBack,onOpen,c,lang}){
           <span>📍 {truncate(place.name,30)}</span>
           {place.rating&&<span style={{color:mc,fontSize:'10px'}}>⭐{place.rating}</span>}
         </div>}
+        </>}
       </div>);
     })}
   </div>);
