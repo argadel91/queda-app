@@ -25,6 +25,8 @@ export default function PlanTab(){
   const[editingMP,setEditingMP]=useState(false);
   const[mpSearch,setMpSearch]=useState('');
   const[mpResults,setMpResults]=useState([]);
+  const[editingCap,setEditingCap]=useState(null); // stopId or null
+  const[editingDur,setEditingDur]=useState(null); // stopId or null
 
   // Show alt dates / avail range toggles
   const[showAltDates,setShowAltDates]=useState(false);
@@ -33,6 +35,19 @@ export default function PlanTab(){
   const updateFirstStop=async(fields)=>{
     const stops=[...(plan.stops||[])];if(!stops[0])return;
     stops[0]={...stops[0],...fields};
+    const up={...plan,stops};await updatePlan(up);setPlan(up);
+  };
+
+  const updateStop=async(stopId,fields)=>{
+    const stops=[...(plan.stops||[])];
+    const idx=stops.findIndex(x=>x.id==stopId||String(x.id)===String(stopId));
+    if(idx<0)return;
+    stops[idx]={...stops[idx],...fields};
+    // Cascade duration to next stop
+    if(fields.duration){
+      const cur=stops[idx];const curStart=cur.startTime||(idx===0?(plan.time||plan.startTimes?.[0]):null);
+      if(curStart){const endT=calcEnd(curStart,fields.duration);if(endT&&idx+1<stops.length){stops[idx+1]={...stops[idx+1],startTime:endT};}}
+    }
     const up={...plan,stops};await updatePlan(up);setPlan(up);
   };
 
@@ -109,13 +124,48 @@ export default function PlanTab(){
           </div>}
         </div>}
 
-        {/* Organizer time info */}
-        {isOrg&&<div style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px',marginBottom:'8px'}}>
-          <div style={{display:'flex',gap:'8px'}}>
-            {sTime&&<div style={{flex:1,textAlign:'center'}}><span style={{fontSize:'11px',color:c.M}}>🕐</span> <span style={{fontSize:'13px',color:c.T,fontWeight:'600'}}>{fmtTime(sTime)}{s.duration?` — ${calcEnd(sTime,s.duration)}`:''}</span></div>}
+        {/* Capacity + Duration cards side by side */}
+        <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
+          {/* Capacity card */}
+          <div style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px'}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:editingCap===s.id?'8px':0}}>
+              <div>
+                <div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>👥 {t.minCapLbl||'Capacity'}</div>
+                <div style={{fontSize:'12px',color:c.T,fontWeight:'600'}}>{minCap?`${minCap}`:(t.noMinCap||'—')}{' · '}{maxCap?`${maxCap}`:(t.noMaxCap||'—')}</div>
+              </div>
+              {isOrg&&<button onClick={()=>setEditingCap(p=>p===s.id?null:s.id)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'2px 6px',color:c.M2,cursor:'pointer',fontSize:'11px',flexShrink:0}}>✏️</button>}
+            </div>
+            {editingCap===s.id&&<div className="fade-in">
+              <div style={{display:'flex',gap:'6px'}}>
+                <div style={{flex:1}}><div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>Min</div><input type="number" min="0" defaultValue={s.minAttendees||''} onBlur={e=>updateStop(s.id,{minAttendees:e.target.value})} placeholder="—" style={{...inpSt,padding:'6px 8px',fontSize:'12px'}}/></div>
+                <div style={{flex:1}}><div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>Max</div><input type="number" min="0" defaultValue={s.maxCapacity||''} onBlur={e=>updateStop(s.id,{maxCapacity:e.target.value})} placeholder="—" style={{...inpSt,padding:'6px 8px',fontSize:'12px'}}/></div>
+              </div>
+            </div>}
           </div>
-          {s.duration&&<div style={{fontSize:'11px',color:c.M2,marginTop:'4px'}}>⏱️ {durLabel(s.duration)}</div>}
-        </div>}
+
+          {/* Duration card */}
+          <div style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px'}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:editingDur===s.id?'8px':0}}>
+              <div>
+                <div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>⏱️ {t.durationLbl||'Duration'}</div>
+                <div style={{fontSize:'12px',color:c.T,fontWeight:'600'}}>{s.duration?durLabel(s.duration):'—'}</div>
+                {s.duration&&sTime&&<div style={{fontSize:'10px',color:c.M2,marginTop:'1px'}}>{fmtTime(sTime)} — {calcEnd(sTime,s.duration)}</div>}
+              </div>
+              {isOrg&&<button onClick={()=>setEditingDur(p=>p===s.id?null:s.id)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'2px 6px',color:c.M2,cursor:'pointer',fontSize:'11px',flexShrink:0}}>✏️</button>}
+            </div>
+            {editingDur===s.id&&<div className="fade-in">
+              <select value={s.duration||''} onChange={e=>updateStop(s.id,{duration:e.target.value})} style={{...inpSt,padding:'6px 8px',fontSize:'12px',cursor:'pointer'}}>
+                <option value="">—</option>
+                <option value="30min">30 min</option>
+                <option value="1h">1h</option>
+                <option value="1h30">1h30</option>
+                <option value="2h">2h</option>
+                <option value="3h">3h</option>
+                <option value="4h+">4h+</option>
+              </select>
+            </div>}
+          </div>
+        </div>
       </div>}
     </div>;
   };
