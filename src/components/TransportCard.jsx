@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { addMinsToTime } from '../lib/utils.js'
 
 const loadGM = () => {
   if (window.__loadGoogleMaps) window.__loadGoogleMaps()
@@ -12,13 +13,34 @@ const loadGM = () => {
 }
 
 const MODES = [
-  { key: 'DRIVING', emoji: '\u{1F697}' },
-  { key: 'TRANSIT', emoji: '\u{1F68C}' },
-  { key: 'WALKING', emoji: '\u{1F6B6}' },
-  { key: 'BICYCLING', emoji: '\u{1F6B2}' },
+  { key: 'DRIVING', emoji: '🚗' },
+  { key: 'TRANSIT', emoji: '🚌' },
+  { key: 'WALKING', emoji: '🚶' },
+  { key: 'BICYCLING', emoji: '🚲' },
 ]
 
-export default function TransportCard({ origin, destination, c, t }) {
+// Parse duration text like "25 mins", "1 hour 10 mins", "2 hours" to total minutes
+const parseDurationMins = (text) => {
+  if (!text) return null
+  let mins = 0
+  const hMatch = text.match(/(\d+)\s*hour/i)
+  const mMatch = text.match(/(\d+)\s*min/i)
+  if (hMatch) mins += parseInt(hMatch[1]) * 60
+  if (mMatch) mins += parseInt(mMatch[1])
+  return mins || null
+}
+
+/**
+ * @param {object} props
+ * @param {{lat,lng,name}} props.origin
+ * @param {{lat,lng,name}} props.destination
+ * @param {string} props.fromLabel - e.g. "📍 Punto de encuentro" or "1) Bar Cremaet"
+ * @param {string} props.toLabel - e.g. "1) Bar Cremaet" or "2) Mya"
+ * @param {string} [props.departureTime] - HH:MM to calculate arrival times
+ * @param {object} props.c - colors
+ * @param {object} props.t - translations
+ */
+export default function TransportCard({ origin, destination, fromLabel, toLabel, departureTime, c, t }) {
   const [results, setResults] = useState({})
   const [flightInfo, setFlightInfo] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -56,7 +78,11 @@ export default function TransportCard({ origin, destination, c, t }) {
               else reject(status)
             })
           })
-          if (!cancelled) res[mode.key] = { duration: result.duration.text, distance: result.distance.text }
+          if (!cancelled) res[mode.key] = {
+            duration: result.duration.text,
+            distance: result.distance.text,
+            durationMins: Math.round((result.duration.value || 0) / 60)
+          }
         } catch { /* mode unavailable in this region */ }
       }
       if (!cancelled) { setResults(res); setLoading(false) }
@@ -76,19 +102,33 @@ export default function TransportCard({ origin, destination, c, t }) {
       background: c.CARD2, border: `1px dashed ${c.BD}`, borderRadius: '10px',
       padding: '10px 12px', marginBottom: '10px', fontSize: '11px', color: c.M2
     }}>
-      <div style={{ fontSize: '10px', color: c.M, fontWeight: '600', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '.05em' }}>
-        {t.tBetweenStops || 'Travel between stops'}
+      <div style={{ fontSize: '10px', color: c.M, fontWeight: '600', marginBottom: '8px', letterSpacing: '.03em' }}>
+        {fromLabel} → {toLabel}
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
         {MODES.map(mode => results[mode.key] ? (
-          <span key={mode.key} style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '12px' }}>
-            {mode.emoji} {results[mode.key].duration}
-          </span>
+          <div key={mode.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              {mode.emoji} {results[mode.key].duration}
+            </span>
+            {departureTime && results[mode.key].durationMins > 0 && (
+              <span style={{ fontSize: '11px', color: c.M, fontWeight: '600' }}>
+                → {addMinsToTime(departureTime, results[mode.key].durationMins)}
+              </span>
+            )}
+          </div>
         ) : null)}
         {flightInfo && (
-          <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '12px' }}>
-            {'\u2708\uFE0F'} ~{flightInfo.mins}min ({flightInfo.distKm}km)
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              ✈️ ~{flightInfo.mins}min ({flightInfo.distKm}km)
+            </span>
+            {departureTime && flightInfo.mins > 0 && (
+              <span style={{ fontSize: '11px', color: c.M, fontWeight: '600' }}>
+                → {addMinsToTime(departureTime, flightInfo.mins)}
+              </span>
+            )}
+          </div>
         )}
       </div>
     </div>
