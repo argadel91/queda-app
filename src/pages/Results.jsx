@@ -81,31 +81,17 @@ function ResultsInner({onBack}){
             <button onClick={async()=>{const up={...plan,desc:(editState.desc||'').trim()||null};await updatePlan(up);setPlan(up);setEditMode(false);}} style={{flex:1,padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.saveLbl||'Save'}</button>
           </div>
         </>}
-        {/* Edit dates */}
+        {/* Edit dates — ONLY dates */}
         {editMode==='dates'&&<>
-          <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>{t.editDatesLbl}</div>
+          <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>📅 {t.editDatesLbl}</div>
           <div style={{marginBottom:'12px'}}>
-            <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>📅 ({(plan.dates||[]).length}/3)</div>
+            <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>({(plan.dates||[]).length}/3)</div>
             {(plan.dates||[]).length<3&&<CalendarPicker selected={plan.dates||[]} onChange={async d=>{const newDate=d.find(x=>!(plan.dates||[]).includes(x));if(!newDate)return;const up={...plan,dates:[...(plan.dates||[]),newDate].sort()};await updatePlan(up);setPlan(up);}} max={(plan.dates||[]).length+1} c={c} lang={lang}/>}
           </div>
-          {(plan.dates||[]).map(d=>{const dt=plan.dateTimes||{};const times2=(dt[d]||(plan.startTimes||[])).filter(Boolean);return<div key={d} style={{marginBottom:'14px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'12px'}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'8px'}}>
-              <span style={{fontSize:'13px',color:mc,fontWeight:'600',textTransform:'capitalize'}}>📅 {fmtShort(d,lang)}</span>
-              <button onClick={async()=>{if((plan.dates||[]).length<=1)return;const newDt={...(plan.dateTimes||{})};delete newDt[d];const up={...plan,dates:plan.dates.filter(x=>x!==d),dateTimes:newDt};await updatePlan(up);setPlan(up);}} style={{background:'none',border:'none',color:'#ff4444',cursor:'pointer',fontSize:'14px',padding:'8px',minWidth:'36px',minHeight:'36px'}}>{(plan.dates||[]).length>1?'×':''}</button>
-            </div>
-            <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>🕐 {t.editTimesLbl} ({times2.length}/2)</div>
-            <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'8px'}}>{times2.map(t2=><span key={t2} style={{fontSize:'12px',padding:'4px 10px',borderRadius:'20px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`,display:'flex',alignItems:'center',gap:'4px'}}>{fmtTime(t2)}<button onClick={async()=>{const newDt={...(plan.dateTimes||{}),[d]:times2.filter(x=>x!==t2)};const up={...plan,dateTimes:newDt};await updatePlan(up);setPlan(up);}} style={{background:'none',border:'none',color:mc,cursor:'pointer',fontSize:'12px',padding:'0 0 0 2px'}}>×</button></span>)}</div>
-            {times2.length<2&&<ClockPicker value='' onChange={async v=>{if(!v||times2.includes(v))return;const newDt={...(plan.dateTimes||{}),[d]:[...times2,v]};const up={...plan,dateTimes:newDt};await updatePlan(up);setPlan(up);}} c={c}/>}
-          </div>;})}
-          <div style={{marginBottom:'14px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'12px'}}>
-            <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>⏰ {t.deadlineLbl||'Deadline'}</div>
-            <input type="datetime-local" min={new Date().toISOString().slice(0,16)} max={(plan.date||plan.dates?.[0]||'')+'T23:59'} value={plan.deadline||''} onChange={async e=>{const up={...plan,deadline:e.target.value||null};await updatePlan(up);setPlan(up);}} style={{background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',width:'100%',boxSizing:'border-box'}}/>
-            {plan.deadline&&<button onClick={async()=>{const up={...plan,deadline:null};await updatePlan(up);setPlan(up);}} style={{marginTop:'4px',background:'none',border:'none',color:'#ef4444',cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>× {t.removeDeadline||'Remove'}</button>}
-          </div>
-          <label style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',marginBottom:'14px',cursor:'pointer'}}>
-            <input type="checkbox" checked={!!plan.requireLogin} onChange={async e=>{const up={...plan,requireLogin:e.target.checked};await updatePlan(up);setPlan(up);}} style={{width:'18px',height:'18px',accentColor:mc,cursor:'pointer'}}/>
-            <div><div style={{fontSize:'12px',color:c.T,fontWeight:'600'}}>{t.requireLoginLbl||'Require login'}</div><div style={{fontSize:'11px',color:c.M2}}>{t.requireLoginHint||'Invitees must sign in'}</div></div>
-          </label>
+          {(plan.dates||[]).map(d=><div key={d} style={{marginBottom:'10px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'12px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <span style={{fontSize:'13px',color:mc,fontWeight:'600',textTransform:'capitalize'}}>📅 {fmtShort(d,lang)}</span>
+            <button onClick={async()=>{if((plan.dates||[]).length<=1)return;const newDt={...(plan.dateTimes||{})};delete newDt[d];const up={...plan,dates:plan.dates.filter(x=>x!==d),dateTimes:newDt};await updatePlan(up);setPlan(up);}} style={{background:'none',border:'none',color:'#ff4444',cursor:'pointer',fontSize:'14px',padding:'8px',minWidth:'36px',minHeight:'36px'}}>{(plan.dates||[]).length>1?'×':''}</button>
+          </div>)}
           <button onClick={()=>setEditMode(false)} style={{width:'100%',padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.doneLbl||'Done'}</button>
         </>}
         {/* Edit stop */}
