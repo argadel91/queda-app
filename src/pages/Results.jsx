@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react'
 import useFocusTrap from '../hooks/useFocusTrap.js'
 import T from '../constants/translations.js'
 import { updatePlan } from '../lib/supabase.js'
-import { fmtShort, fmtTime, fmtDate, daysUntil } from '../lib/utils.js'
+import { fmtShort, fmtTime, fmtDate, daysUntil, calcEnd } from '../lib/utils.js'
 import { Btn, Back } from '../components/ui.jsx'
 import PostPlanSurvey from '../components/PostPlanSurvey.jsx'
 import { generateICS, generateGCalURL } from '../lib/ics.js'
@@ -118,6 +118,8 @@ function ResultsInner({onBack}){
             const stops=[...(plan.stops||[])];const idx=stops.findIndex(x=>x.id==stopId||String(x.id)===stopId);if(idx<0)return;
             if(optField){stops[idx]={...stops[idx],options:stops[idx].options.map((o,oi)=>oi===0?{...o,[field]:val}:o)};}
             else{stops[idx]={...stops[idx],[field]:val};}
+            // Cascade: when duration changes, auto-update next stop's startTime
+            if(field==='duration'&&val){const cur=stops[idx];const curStart=cur.startTime||(idx===0?(plan.time||plan.startTimes?.[0]):null);if(curStart){const endT=calcEnd(curStart,val);if(endT&&idx+1<stops.length){stops[idx+1]={...stops[idx+1],startTime:endT};}}}
             const up={...plan,stops};await updatePlan(up);setPlan(up);
           };
           const searchPlace=async(q,field)=>{if(!q||q.length<2){setEditState(field,[]);return;}try{const Place=window.google?.maps?.places?.Place;if(Place){if(google.maps.importLibrary)await google.maps.importLibrary('places');const{places}=await Place.searchByText({textQuery:q,fields:['displayName','formattedAddress','location','rating','userRatingCount','priceLevel','photos','websiteURI','googleMapsURI','types'],maxResultCount:5});setEditState(field,(places||[]).map(p=>({name:p.displayName||'',address:p.formattedAddress||'',lat:p.location?.lat(),lng:p.location?.lng(),rating:p.rating||null,ratingCount:p.userRatingCount||null,priceLevel:p.priceLevel??null,photo:p.photos?.[0]?.getURI?.({maxWidth:400})||null,website:p.websiteURI||null,googleMapsURI:p.googleMapsURI||null,types:p.types||[]})));}else{const svc=new window.google.maps.places.PlacesService(document.createElement('div'));svc.textSearch({query:q},(r2,st)=>{if(st==='OK')setEditState(field,(r2||[]).slice(0,5).map(p=>({name:p.name||'',address:p.formatted_address||'',lat:p.geometry?.location?.lat(),lng:p.geometry?.location?.lng(),rating:p.rating||null,ratingCount:p.user_ratings_total||null,photo:p.photos?.[0]?.getUrl?.({maxWidth:400})||null})));});}}catch{setEditState(field,[]);}};
