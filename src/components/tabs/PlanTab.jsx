@@ -17,7 +17,7 @@ export default function PlanTab(){
   const{openSection,setOpenSection,setTab}=ui;
   const{mc,c,t,lang,planDate,planTime,planPlace,stop:firstStop,tolerance,saveMyResp}=helpers;
   const allStops=(plan.stops||[]).filter(s=>(s.options||[]).some(o=>o.name));
-  const canVote=!isOrg&&(!plan.requireLogin||authUser);
+  const canVote=isOrg||(!plan.requireLogin||authUser);
   const sTolerance=parseInt(firstStop?.tolerance)||0;
   const firstOpt=firstStop?.options?.[0]||{};
 
@@ -72,8 +72,8 @@ export default function PlanTab(){
 
   const ynBtn=(val,setVal,yesLbl,noLbl)=>(
     <div style={{display:'flex',gap:'6px'}}>
-      <button onClick={()=>setVal(true)} style={{flex:1,padding:'8px',borderRadius:'8px',border:`1px solid ${val===true?'#22c55e50':c.BD}`,background:val===true?'#22c55e18':'transparent',color:val===true?'#22c55e':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:val===true?'700':'500'}}>{val===true?'✓ ':''}{yesLbl}</button>
-      <button onClick={()=>setVal(false)} style={{flex:1,padding:'8px',borderRadius:'8px',border:`1px solid ${val===false?'#ef444450':c.BD}`,background:val===false?'#ef444418':'transparent',color:val===false?'#ef4444':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:val===false?'700':'500'}}>{val===false?'✗ ':''}{noLbl}</button>
+      <button onClick={()=>setVal(val===true?null:true)} style={{flex:1,padding:'8px',borderRadius:'8px',border:`1px solid ${val===true?'#22c55e50':c.BD}`,background:val===true?'#22c55e18':'transparent',color:val===true?'#22c55e':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:val===true?'700':'500'}}>{val===true?'✓ ':''}{yesLbl}</button>
+      <button onClick={()=>setVal(val===false?null:false)} style={{flex:1,padding:'8px',borderRadius:'8px',border:`1px solid ${val===false?'#ef444450':c.BD}`,background:val===false?'#ef444418':'transparent',color:val===false?'#ef4444':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:val===false?'700':'500'}}>{val===false?'✗ ':''}{noLbl}</button>
     </div>
   );
 
@@ -232,10 +232,10 @@ export default function PlanTab(){
 
     {/* ── 3. LATE ARRIVAL CARD ── */}
     {(()=>{
-      const show=(canVote&&myVote.dateOk===true&&myVote.timeOk===true)||isOrg;
+      const show=canVote&&(myVote.dateOk===true&&myVote.timeOk===true);
       if(!show)return null;
       const hasTolerance=sTolerance>0;
-      const isLate=myVote.lateMin>0;const isOnTime=openSection._onTime===true||(isOrg&&!isLate);
+      const isLate=myVote.lateMin>0;const isOnTime=openSection._onTime===true||(!isLate&&myVote.lateMin===0);
 
       return<div style={cardSt}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:hasTolerance?'8px':0}}>
@@ -276,7 +276,7 @@ export default function PlanTab(){
 
     {/* ── 4. MEETING POINT CARD ── */}
     {(()=>{
-      const show=(canVote&&myVote.dateOk===true&&myVote.timeOk===true&&myVote.lateMin===0)||isOrg;
+      const show=canVote&&myVote.dateOk===true&&myVote.timeOk===true&&myVote.lateMin===0;
       if(!show)return null;
       const hasMp=!!firstStop?.meetingPoint;
 
@@ -360,30 +360,21 @@ export default function PlanTab(){
       </div>
     </div>}
 
-    {/* Organizer logistics */}
-    {isOrg&&<div style={{background:c.CARD,border:`1px solid ${mc}30`,borderRadius:'14px',padding:'14px',marginBottom:'10px'}}>
-      <div style={{fontSize:'13px',color:mc,fontWeight:'700',marginBottom:'10px'}}>👤 {plan.organizer} ({t.organizer})</div>
-      <div style={{marginBottom:'8px'}}>
-        <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>{t.orgAttendingQ||'Are you going?'}</div>
-        {ynBtn(myVote.attending!==false?true:false,v=>{setMyVote('attending',v);if(!v){setMyVote('meetOk',null);setMyVote('lateMin',0);}},t.yesLbl||'Yes',t.noLbl||'No')}
-      </div>
-      <button onClick={()=>saveMyResp(true)} disabled={myVote.saving} style={{width:'100%',padding:'10px',background:myVote.saved?'#22c55e':mc,border:'none',borderRadius:'10px',color:myVote.saved?'#fff':'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'13px',marginTop:'4px'}}>{myVote.saving?'...':(myVote.saved?(t.respSaved):(t.saveAvail))}</button>
-      {myVote.saveConfirm&&<div className="fade-in" style={{marginTop:'6px',padding:'8px',background:'#22c55e15',border:'1px solid #22c55e40',borderRadius:'8px',textAlign:'center',fontSize:'12px',color:'#22c55e',fontWeight:'600'}}>✓ {t.savedTitle}</div>}
-      {/* Deadline card — organizer */}
-      <div style={{marginTop:'8px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px'}}>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:editingDeadline?'8px':0}}>
-          <div>
-            <div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>⏰ {t.deadlineLbl||'Deadline'}</div>
-            <div style={{fontSize:'12px',color:plan.deadline?c.T:c.M2,fontWeight:'600'}}>{plan.deadline?new Date(plan.deadline).toLocaleString():'—'}</div>
-          </div>
-          <button onClick={()=>setEditingDeadline(p=>!p)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'2px 6px',color:c.M2,cursor:'pointer',fontSize:'11px',flexShrink:0}}>✏️</button>
+    {/* Deadline card — below save, for everyone */}
+    <div style={{...cardSt}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:editingDeadline?'8px':0}}>
+        <div>
+          <div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>⏰ {t.deadlineLbl||'Deadline'}</div>
+          <div style={{fontSize:'12px',color:plan.deadline?c.T:c.M2,fontWeight:'600'}}>{plan.deadline?new Date(plan.deadline).toLocaleString():'—'}</div>
         </div>
-        {editingDeadline&&<div className="fade-in">
-          <input type="datetime-local" min={new Date().toISOString().slice(0,16)} value={plan.deadline||''} onChange={async e=>{const up={...plan,deadline:e.target.value||null};await updatePlan(up);setPlan(up);}} style={{...inpSt,padding:'6px 8px',fontSize:'12px'}}/>
-          {plan.deadline&&<button onClick={async()=>{const up={...plan,deadline:null};await updatePlan(up);setPlan(up);}} style={{marginTop:'4px',background:'none',border:'none',color:'#ef4444',cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>× {t.removeDeadline||'Remove'}</button>}
-        </div>}
+        {isOrg&&<button onClick={()=>setEditingDeadline(p=>!p)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'2px 6px',color:c.M2,cursor:'pointer',fontSize:'11px',flexShrink:0}}>✏️</button>}
       </div>
-    </div>}
+      {isOrg&&editingDeadline&&<div className="fade-in">
+        <input type="datetime-local" min={new Date().toISOString().slice(0,16)} value={plan.deadline||''} onChange={async e=>{const up={...plan,deadline:e.target.value||null};await updatePlan(up);setPlan(up);}} style={{...inpSt,padding:'6px 8px',fontSize:'12px'}}/>
+        {plan.deadline&&<button onClick={async()=>{const up={...plan,deadline:null};await updatePlan(up);setPlan(up);}} style={{marginTop:'4px',background:'none',border:'none',color:'#ef4444',cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>× {t.removeDeadline||'Remove'}</button>}
+      </div>}
+      {plan.deadline&&<Countdown deadline={plan.deadline} lang={lang} c={c} t={t} mc={mc} onExpired={()=>setTab('vote')}/>}
+    </div>
 
     {/* Require login gate */}
     {!isOrg&&plan.requireLogin&&!authUser&&<div style={{marginTop:'10px',padding:'16px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px',textAlign:'center'}}>
@@ -392,24 +383,19 @@ export default function PlanTab(){
       <button onClick={()=>{window.location.href='/auth';}} style={{padding:'10px 24px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'13px'}}>{t.authSignInTab||'Sign in'}</button>
     </div>}
 
-    {/* Save (invitee) */}
+    {/* Save response */}
     {canVote&&<div style={{marginTop:'10px'}}>
-      {!myVote.saved&&<div style={{marginBottom:'8px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.yourName}</div><input value={myVote.name} onChange={e=>setMyVote('name',e.target.value.slice(0,50))} maxLength={50} placeholder={t.yourNamePh} style={{...inpSt}}/></div>}
+      {!myVote.saved&&!isOrg&&<div style={{marginBottom:'8px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.yourName}</div><input value={myVote.name} onChange={e=>setMyVote('name',e.target.value.slice(0,50))} maxLength={50} placeholder={t.yourNamePh} style={{...inpSt}}/></div>}
       {(()=>{
         const dl=plan.deadline&&new Date(plan.deadline)<new Date();
+        const hasName=isOrg||myVote.name.trim();
         const pa=myVote.placeOk!==undefined&&myVote.placeOk!==null;
         const da=myVote.dateOk!==null;
         const ta=myVote.dateOk===false||(myVote.dateOk===true&&myVote.timeOk!==null);
-        const ok=pa&&da&&ta&&myVote.name.trim();const can=ok&&!myVote.saving&&!dl;
-        return<button onClick={saveMyResp} disabled={!can} style={{width:'100%',padding:'12px',background:myVote.saved?'#22c55e':can?mc:c.CARD2,border:can||myVote.saved?'none':`1px solid ${c.BD}`,borderRadius:'10px',color:myVote.saved?'#fff':can?'#0A0A0A':c.M,cursor:can?'pointer':'default',fontFamily:'inherit',fontWeight:'700',fontSize:'14px',opacity:can||myVote.saved?1:0.5}}>{myVote.saving?'...':(myVote.saved?t.respSaved:(ok?t.saveAvail:(t.answerAllToSave)))}</button>;
+        const ok=pa&&da&&ta&&hasName;const can=ok&&!myVote.saving&&!dl;
+        return<button onClick={()=>saveMyResp(isOrg)} disabled={!can} style={{width:'100%',padding:'12px',background:myVote.saved?'#22c55e':can?mc:c.CARD2,border:can||myVote.saved?'none':`1px solid ${c.BD}`,borderRadius:'10px',color:myVote.saved?'#fff':can?'#0A0A0A':c.M,cursor:can?'pointer':'default',fontFamily:'inherit',fontWeight:'700',fontSize:'14px',opacity:can||myVote.saved?1:0.5}}>{myVote.saving?'...':(myVote.saved?t.respSaved:(ok?t.saveAvail:(t.answerAllToSave)))}</button>;
       })()}
       {myVote.saveConfirm&&<div className="fade-in" style={{marginTop:'8px',padding:'10px',background:'#22c55e15',border:'1px solid #22c55e40',borderRadius:'10px',textAlign:'center',fontSize:'13px',color:'#22c55e',fontWeight:'600'}}>✓ {t.savedTitle}</div>}
-      {/* Deadline card — invitee (visible, read-only) */}
-      {plan.deadline&&<div style={{marginTop:'8px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px'}}>
-        <div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>⏰ {t.deadlineLbl||'Deadline'}</div>
-        <div style={{fontSize:'12px',color:c.T,fontWeight:'600'}}>{new Date(plan.deadline).toLocaleString()}</div>
-        <Countdown deadline={plan.deadline} lang={lang} c={c} t={t} mc={mc} onExpired={()=>setTab('vote')}/>
-      </div>}
     </div>}
 
     {/* Add point */}
