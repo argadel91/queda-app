@@ -1,15 +1,14 @@
 import React, { useState } from 'react'
 import { useResults, addMins, fmtMinsToH } from '../ResultsContext.jsx'
-import { fmtShort, fmtTime, fmtDate, calcEnd } from '../../lib/utils.js'
+import { fmtShort, fmtTime, fmtDate, calcEnd, durToMins } from '../../lib/utils.js'
 import { updatePlan } from '../../lib/supabase.js'
 import CalendarPicker from '../CalendarPicker.jsx'
 import ClockPicker from '../ClockPicker.jsx'
 import Countdown from '../Countdown.jsx'
 import TransportCard from '../TransportCard.jsx'
-import TimeRangeBar from '../TimeRangeBar.jsx'
 const RouteMap = React.lazy(() => import('../RouteMap.jsx'))
 
-const durLabel=(d)=>({['30min']:'30 min',['1h']:'1h',['1h30']:'1h30',['2h']:'2h',['3h']:'3h',['4h+']:'4h+'}[d]||'');
+const fmtMins=(m)=>{if(!m)return'';const h=Math.floor(m/60);const mm=m%60;return h>0?`${h}h${mm>0?` ${mm}min`:''}`:m?`${m} min`:'';}
 
 export default function PlanTab(){
   const{planState,myVote,setMyVote,editState,setEditState,ui,helpers}=useResults();
@@ -21,19 +20,14 @@ export default function PlanTab(){
   const sTolerance=parseInt(firstStop?.tolerance)||0;
   const firstOpt=firstStop?.options?.[0]||{};
 
-  // Inline edit states for organizer
   const[editingTolerance,setEditingTolerance]=useState(false);
   const[editingMP,setEditingMP]=useState(false);
   const[mpSearch,setMpSearch]=useState('');
   const[mpResults,setMpResults]=useState([]);
-  const[editingCap,setEditingCap]=useState(null); // stopId or null
-  const[editingDur,setEditingDur]=useState(null); // stopId or null
+  const[editingCap,setEditingCap]=useState(null);
+  const[editingDur,setEditingDur]=useState(null);
   const[editingTime,setEditingTime]=useState(false);
   const[editingDeadline,setEditingDeadline]=useState(false);
-
-  // Show alt dates / avail range toggles
-  const[showAltDates,setShowAltDates]=useState(false);
-  const[showAvailRange,setShowAvailRange]=useState(false);
 
   const updateFirstStop=async(fields)=>{
     const stops=[...(plan.stops||[])];if(!stops[0])return;
@@ -46,10 +40,9 @@ export default function PlanTab(){
     const idx=stops.findIndex(x=>x.id==stopId||String(x.id)===String(stopId));
     if(idx<0)return;
     stops[idx]={...stops[idx],...fields};
-    // Cascade duration to next stop
-    if(fields.duration){
+    if(fields.duration!==undefined){
       const cur=stops[idx];const curStart=cur.startTime||(idx===0?(plan.time||plan.startTimes?.[0]):null);
-      if(curStart){const endT=calcEnd(curStart,fields.duration);if(endT&&idx+1<stops.length){stops[idx+1]={...stops[idx+1],startTime:endT};}}
+      if(curStart&&fields.duration){const endT=calcEnd(curStart,fields.duration);if(endT&&idx+1<stops.length){stops[idx+1]={...stops[idx+1],startTime:endT};}}
     }
     const up={...plan,stops};await updatePlan(up);setPlan(up);
   };
@@ -66,7 +59,7 @@ export default function PlanTab(){
     }catch{setMpResults([]);}
   };
   const pickMP=async(r)=>{
-    await updateFirstStop({meetingPoint:r.name+(r.address?' — '+r.address:''),meetingPointLat:r.lat,meetingPointLng:r.lng});
+    await updateFirstStop({meetingPoint:r.name+(r.address?' — '+r.address:''),meetingPointLat:r.lat,meetingPointLng:r.lng,meetingMinsBefore:firstStop?.meetingMinsBefore||'0'});
     setMpResults([]);setMpSearch('');
   };
 
@@ -79,8 +72,9 @@ export default function PlanTab(){
 
   const cardSt={background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'14px',padding:'14px',marginBottom:'8px'};
   const inpSt={width:'100%',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px 12px',color:c.T,fontSize:'13px',fontFamily:'inherit',outline:'none',boxSizing:'border-box'};
+  const toggleSt=(on)=>({width:'40px',height:'22px',borderRadius:'11px',border:'none',background:on?'#22c55e':c.BD,cursor:'pointer',position:'relative',transition:'background .2s',flexShrink:0});
+  const dotSt=(on)=>({position:'absolute',top:'3px',left:on?'20px':'3px',width:'16px',height:'16px',borderRadius:'50%',background:'#fff',transition:'left .2s',boxShadow:'0 1px 3px rgba(0,0,0,.3)'});
 
-  // Render a single stop card
   const renderStop=(s,idx)=>{
     const opt=s.options?.[0]||{};
     const isFirst=idx===0;
@@ -88,6 +82,7 @@ export default function PlanTab(){
     const viewOpen=openSection[viewKey]!==undefined?openSection[viewKey]:(idx===0);
     const sTime=s.startTime||planTime;
     const minCap=s.minAttendees||'';const maxCap=s.maxCapacity||'';
+    const durMins=s.duration?durToMins(s.duration):null;
 
     return<div key={s.id} style={{...cardSt,marginBottom:'10px'}}>
       <div style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:viewOpen?'12px':0}}>
@@ -95,7 +90,7 @@ export default function PlanTab(){
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontSize:'15px',color:c.T,fontWeight:'700',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{opt.name||'—'}</div>
           <div style={{display:'flex',gap:'6px',fontSize:'11px',color:c.M2,marginTop:'2px',flexWrap:'wrap'}}>
-            {sTime?<span>🕐 {fmtTime(sTime)}{s.duration?` — ${calcEnd(sTime,s.duration)} (${durLabel(s.duration)})`:''}</span>
+            {sTime?<span>🕐 {fmtTime(sTime)}{durMins?` — ${calcEnd(sTime,s.duration)} (${fmtMins(durMins)})`:''}</span>
             :(!isFirst&&<span style={{color:'#f59e0b',fontSize:'10px'}}>⚠️ {t.noStartTimeHint||'Set duration on previous stop'}</span>)}
           </div>
         </div>
@@ -111,13 +106,12 @@ export default function PlanTab(){
           <div style={{fontSize:'14px',color:c.T,fontWeight:'600'}}>{opt.name||'—'}</div>
           {opt.address&&<div style={{fontSize:'12px',color:c.M2,marginTop:'2px'}}>📍 {opt.address}</div>}
           {opt.rating&&<div style={{fontSize:'11px',color:c.M2,marginTop:'2px'}}>⭐ {opt.rating}{opt.priceLevel?' · '+'€'.repeat(opt.priceLevel):''}</div>}
-          <div style={{fontSize:'11px',color:c.M,marginTop:'6px'}}>{minCap?`👥 min: ${minCap}`:(t.noMinCap||'No min capacity')}{' · '}{maxCap?`max: ${maxCap}`:(t.noMaxCap||'No max capacity')}</div>
           {opt.googleMapsURI&&<a href={opt.googleMapsURI} target="_blank" rel="noreferrer" style={{display:'inline-block',marginTop:'6px',fontSize:'11px',color:mc,textDecoration:'none'}}>Google Maps ↗</a>}
           {s.notes&&<div style={{fontSize:'11px',color:c.M2,marginTop:'6px',fontStyle:'italic'}}>{s.notes}</div>}
 
-          {/* Place voting — only on first stop */}
+          {/* Place voting */}
           {isFirst&&canVote&&<div style={{marginTop:'8px'}}>
-            <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>{t.placeOkQ}</div>
+            <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>{t.attendQ||'¿Acudirás?'}</div>
             {ynBtn(myVote.placeOk,v=>{setMyVote('placeOk',v);if(!v){setOpenSection(p=>({...p,_placeNoPopup:true}));}else{setOpenSection(p=>({...p,_placeNoPopup:undefined}));}},t.yesLbl||'Sí','No')}
           </div>}
           {isFirst&&myVote.placeOk===false&&openSection._placeNoPopup&&<div className="fade-in" style={{marginTop:'8px',padding:'10px',background:'#ef444408',border:'1px solid #ef444420',borderRadius:'8px'}}>
@@ -127,45 +121,45 @@ export default function PlanTab(){
           </div>}
         </div>}
 
-        {/* Capacity + Duration cards side by side */}
+        {/* Capacity + Duration side by side */}
         <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
-          {/* Capacity card */}
+          {/* Capacity */}
           <div style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px'}}>
             <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:editingCap===s.id?'8px':0}}>
               <div>
                 <div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>👥 {t.capacityLbl||'Aforo'}</div>
-                <div style={{fontSize:'12px',color:c.T,fontWeight:'600'}}>{minCap?`${minCap}`:(t.noMinCap||'—')}{' · '}{maxCap?`${maxCap}`:(t.noMaxCap||'—')}</div>
+                <div style={{fontSize:'12px',color:c.T,fontWeight:'600'}}>
+                  {minCap&&maxCap?`${minCap} — ${maxCap}`:minCap?`min ${minCap}`:maxCap?`max ${maxCap}`:'—'}
+                </div>
               </div>
               {isOrg&&<button onClick={()=>setEditingCap(p=>p===s.id?null:s.id)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'2px 6px',color:c.M2,cursor:'pointer',fontSize:'11px',flexShrink:0}}>✏️</button>}
             </div>
             {editingCap===s.id&&<div className="fade-in">
-              <div style={{display:'flex',gap:'6px'}}>
-                <div style={{flex:1}}><div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>Min</div><input type="number" min="0" defaultValue={s.minAttendees||''} onBlur={e=>updateStop(s.id,{minAttendees:e.target.value})} placeholder="—" style={{...inpSt,padding:'6px 8px',fontSize:'12px'}}/></div>
-                <div style={{flex:1}}><div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>Max</div><input type="number" min="0" defaultValue={s.maxCapacity||''} onBlur={e=>updateStop(s.id,{maxCapacity:e.target.value})} placeholder="—" style={{...inpSt,padding:'6px 8px',fontSize:'12px'}}/></div>
+              <div style={{fontSize:'9px',color:c.M2,marginBottom:'6px'}}>{t.capMinHint||'Mínimo de personas para confirmar la actividad'}</div>
+              <div style={{display:'flex',gap:'6px',marginBottom:'4px'}}>
+                <div style={{flex:1}}><div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>Min</div><input type="number" min="0" value={s.minAttendees||''} onChange={e=>updateStop(s.id,{minAttendees:e.target.value})} placeholder="0" style={{...inpSt,padding:'6px 8px',fontSize:'12px'}}/></div>
+                <div style={{flex:1}}><div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>Max</div><input type="number" min="0" value={s.maxCapacity||''} onChange={e=>updateStop(s.id,{maxCapacity:e.target.value})} placeholder="0" style={{...inpSt,padding:'6px 8px',fontSize:'12px'}}/></div>
               </div>
+              <div style={{fontSize:'9px',color:c.M2}}>{t.capMaxHint||'Máximo de personas que pueden acudir'}</div>
             </div>}
           </div>
 
-          {/* Duration card */}
+          {/* Duration */}
           <div style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px'}}>
             <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:editingDur===s.id?'8px':0}}>
               <div>
-                <div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>⏱️ {t.durationLbl||'Duration'}</div>
-                <div style={{fontSize:'12px',color:c.T,fontWeight:'600'}}>{s.duration?durLabel(s.duration):'—'}</div>
-                {s.duration&&sTime&&<div style={{fontSize:'10px',color:c.M2,marginTop:'1px'}}>{fmtTime(sTime)} — {calcEnd(sTime,s.duration)}</div>}
+                <div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>⏱️ {t.durationLbl||'Duración'}</div>
+                <div style={{fontSize:'12px',color:c.T,fontWeight:'600'}}>{durMins?fmtMins(durMins):'—'}</div>
+                {durMins&&sTime&&<div style={{fontSize:'10px',color:c.M2,marginTop:'1px'}}>{fmtTime(sTime)} — {calcEnd(sTime,s.duration)}</div>}
               </div>
               {isOrg&&<button onClick={()=>setEditingDur(p=>p===s.id?null:s.id)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'2px 6px',color:c.M2,cursor:'pointer',fontSize:'11px',flexShrink:0}}>✏️</button>}
             </div>
             {editingDur===s.id&&<div className="fade-in">
-              <select value={s.duration||''} onChange={e=>updateStop(s.id,{duration:e.target.value})} style={{...inpSt,padding:'6px 8px',fontSize:'12px',cursor:'pointer'}}>
-                <option value="">—</option>
-                <option value="30min">30 min</option>
-                <option value="1h">1h</option>
-                <option value="1h30">1h30</option>
-                <option value="2h">2h</option>
-                <option value="3h">3h</option>
-                <option value="4h+">4h+</option>
-              </select>
+              <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
+                <input type="number" inputMode="numeric" min="0" max="600" value={durMins||''} onChange={e=>{const v=parseInt(e.target.value);if(!e.target.value){updateStop(s.id,{duration:''});}else if(v>=0){const d=v<=30?'30min':v<=60?'1h':v<=90?'1h30':v<=120?'2h':v<=180?'3h':'4h+';updateStop(s.id,{duration:d});}}} placeholder="0" style={{...inpSt,width:'70px',padding:'6px 8px',fontSize:'12px',textAlign:'center'}}/>
+                <span style={{fontSize:'11px',color:c.M}}>min</span>
+                {durMins>0&&<span style={{fontSize:'11px',color:c.M2}}>= {fmtMins(durMins)}</span>}
+              </div>
             </div>}
           </div>
         </div>
@@ -175,11 +169,11 @@ export default function PlanTab(){
 
   const mpMins=parseInt(firstStop?.meetingMinsBefore)||0;
   const mpTime=mpMins>0&&planTime?addMins(planTime,-mpMins):planTime;
-
-  const toggleSt=(on)=>({width:'40px',height:'22px',borderRadius:'11px',border:'none',background:on?'#22c55e':c.BD,cursor:'pointer',position:'relative',transition:'background .2s',flexShrink:0});
-  const dotSt=(on)=>({position:'absolute',top:'3px',left:on?'20px':'3px',width:'16px',height:'16px',borderRadius:'50%',background:'#fff',transition:'left .2s',boxShadow:'0 1px 3px rgba(0,0,0,.3)'});
   const allowAlt=!!plan.allowAltDates;
   const allowAvail=!!plan.allowAltTimes;
+  const hasDeadline=!!plan.deadline;
+  const hasMp=!!firstStop?.meetingPoint;
+  const hasTolerance=sTolerance>0;
 
   return<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><>
 
@@ -198,18 +192,18 @@ export default function PlanTab(){
       </div>
 
       {/* TIME */}
-      <div style={{...cardSt,flex:1,marginBottom:0,opacity:myVote.dateOk===true||isOrg?1:0.4}}>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:myVote.dateOk===true||isOrg?'10px':0}}>
+      <div style={{...cardSt,flex:1,marginBottom:0}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'10px'}}>
           <div>
-            <div style={{fontSize:'11px',color:c.M,marginBottom:'2px'}}>🕐 {t.timeOkQ||'Hora'}</div>
+            <div style={{fontSize:'11px',color:c.M,marginBottom:'2px'}}>🕐 {t.datesStep2||'Hora'}</div>
             <div style={{fontSize:'14px',color:c.T,fontWeight:'700'}}>{planTime?fmtTime(planTime):'—'}</div>
           </div>
           {isOrg&&<button onClick={()=>setEditingTime(p=>!p)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',flexShrink:0}}>✏️</button>}
         </div>
         {isOrg&&editingTime&&<div className="fade-in" style={{marginBottom:'8px'}}>
-          <ClockPicker value={planTime||''} onChange={async v=>{const up={...plan,startTimes:[v,...(plan.startTimes||[]).slice(1)],time:v};await updatePlan(up);setPlan(up);}} c={c}/>
+          <ClockPicker value={planTime||''} onChange={async v=>{const up={...plan,startTimes:[v,...(plan.startTimes||[]).slice(1)],time:v};await updatePlan(up);setPlan(up);setEditingTime(false);}} c={c}/>
         </div>}
-        {ynBtn(myVote.timeOk,v=>{setMyVote('timeOk',v);if(v===false){setMyVote('lateMin',0);setMyVote('meetOk',null);setOpenSection(p=>({...p,_onTime:undefined}));}},t.yesLbl,'No')}
+        {!editingTime&&ynBtn(myVote.timeOk,v=>{setMyVote('timeOk',v);if(v===false){setMyVote('lateMin',0);setMyVote('meetOk',null);setOpenSection(p=>({...p,_onTime:undefined}));}},t.yesLbl,'No')}
       </div>
     </div>
 
@@ -217,35 +211,36 @@ export default function PlanTab(){
     <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
       {/* ALT DATES */}
       <div style={{...cardSt,flex:1,marginBottom:0,opacity:allowAlt?1:0.5}}>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:allowAlt?'8px':0}}>
-          <div style={{fontSize:'11px',color:c.M}}>📅 {t.altDatesLbl||'Fechas alternativas'}</div>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:allowAlt?'6px':0}}>
+          <div style={{fontSize:'11px',color:c.M}}>📅 {t.altDatesLbl||'Fechas alt.'}</div>
           {isOrg&&<button onClick={async()=>{const up={...plan,allowAltDates:!allowAlt};await updatePlan(up);setPlan(up);}} style={toggleSt(allowAlt)}><div style={dotSt(allowAlt)}/></button>}
         </div>
         {allowAlt&&<>
-          <div style={{fontSize:'10px',color:c.M2,marginBottom:'6px'}}>({myVote.altDates.length}/3)</div>
-          <div style={{transform:'scale(0.85)',transformOrigin:'top left',marginBottom:'-20px'}}><CalendarPicker selected={myVote.altDates} onChange={d=>setMyVote('altDates',d.filter(x=>x!==planDate).slice(-3))} max={3} c={c} lang={lang}/></div>
+          <div style={{fontSize:'9px',color:c.M2,marginBottom:'4px'}}>{t.altDatesHint||'Elige hasta 3 fechas alternativas (opcional)'}</div>
+          <div style={{fontSize:'10px',color:c.M2,marginBottom:'4px'}}>({myVote.altDates.length}/3)</div>
+          <div style={{transform:'scale(0.85)',transformOrigin:'top left',marginBottom:'-20px'}}><CalendarPicker selected={myVote.altDates} onChange={d=>{const filtered=d.filter(x=>x!==planDate);if(filtered.length===d.length){setMyVote('altDates',filtered.slice(-3));}else{setOpenSection(p=>({...p,_altDateWarn:true}));}}} max={3} c={c} lang={lang}/></div>
+          {openSection._altDateWarn&&<div style={{marginTop:'24px',padding:'4px 8px',background:'#f59e0b10',border:'1px solid #f59e0b30',borderRadius:'6px',fontSize:'10px',color:'#f59e0b'}}>{t.altDateIsPlan||'Esa fecha ya es la del plan'}</div>}
         </>}
-        {!allowAlt&&<div style={{fontSize:'10px',color:c.M2,fontStyle:'italic'}}>{t.altDatesDisabled||'El organizador no permite fechas alternativas'}</div>}
+        {!allowAlt&&<div style={{fontSize:'9px',color:c.M2,fontStyle:'italic'}}>{t.altDatesDisabled}</div>}
       </div>
 
-      {/* AVAILABILITY RANGE */}
+      {/* AVAILABILITY */}
       <div style={{...cardSt,flex:1,marginBottom:0,opacity:allowAvail?1:0.5}}>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:allowAvail?'8px':0}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:allowAvail?'6px':0}}>
           <div style={{fontSize:'11px',color:c.M}}>🕐 {t.availLbl||'Disponibilidad'}</div>
           {isOrg&&<button onClick={async()=>{const up={...plan,allowAltTimes:!allowAvail};await updatePlan(up);setPlan(up);}} style={toggleSt(allowAvail)}><div style={dotSt(allowAvail)}/></button>}
         </div>
         {allowAvail&&<>
-          <div style={{fontSize:'10px',color:c.M2,marginBottom:'6px'}}>{t.availStartHint}</div>
+          <div style={{fontSize:'9px',color:c.M2,marginBottom:'6px'}}>{t.availHint2||'Rango de horas en el que podrías empezar el plan (opcional)'}</div>
           <div style={{marginBottom:'6px'}}><div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>{t.fromLbl}{myVote.timeFrom&&` → ${myVote.timeFrom}`}</div><ClockPicker value={myVote.timeFrom||''} onChange={v=>setMyVote('timeFrom',v)} c={c}/></div>
           <div><div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>{t.toLbl}{myVote.timeTo&&` → ${myVote.timeTo}`}</div><ClockPicker value={myVote.timeTo||''} onChange={v=>setMyVote('timeTo',v)} c={c}/></div>
         </>}
-        {!allowAvail&&<div style={{fontSize:'10px',color:c.M2,fontStyle:'italic'}}>{t.availDisabled||'El organizador no permite elegir horas alternativas'}</div>}
+        {!allowAvail&&<div style={{fontSize:'9px',color:c.M2,fontStyle:'italic'}}>{t.availDisabled}</div>}
       </div>
     </div>
 
-    {/* ── 3. LATE ARRIVAL ── */}
+    {/* ── LATE ARRIVAL ── */}
     {(isOrg||(myVote.dateOk===true&&myVote.timeOk===true))&&(()=>{
-      const hasTolerance=sTolerance>0;
       const isLate=myVote.lateMin>0;const isOnTime=openSection._onTime===true||(!isLate&&myVote.lateMin===0);
 
       return<div style={cardSt}>
@@ -255,8 +250,8 @@ export default function PlanTab(){
         </div>
         {isOrg&&hasTolerance&&<div style={{marginBottom:'8px',display:'flex',alignItems:'center',gap:'8px'}}>
           <div style={{fontSize:'11px',color:c.M}}>{t.maxLateLbl}:</div>
-          <input type="number" min="1" max="120" value={firstStop?.tolerance||''} onChange={e=>updateFirstStop({tolerance:e.target.value})} placeholder="15" style={{...inpSt,width:'60px',padding:'4px 8px',fontSize:'12px',textAlign:'center'}}/>
-          <span style={{fontSize:'11px',color:c.M2}}>min = {addMins(planTime,sTolerance)}</span>
+          <input type="number" min="0" max="120" value={firstStop?.tolerance||''} onChange={e=>updateFirstStop({tolerance:e.target.value})} placeholder="0" style={{...inpSt,width:'60px',padding:'4px 8px',fontSize:'12px',textAlign:'center'}}/>
+          <span style={{fontSize:'11px',color:c.M2}}>min{sTolerance>0&&` = ${addMins(planTime,sTolerance)}`}</span>
         </div>}
         {hasTolerance&&<>
           <div style={{display:'flex',gap:'6px'}}>
@@ -267,9 +262,9 @@ export default function PlanTab(){
             <div style={{fontSize:'11px',color:'#f59e0b',marginBottom:'4px'}}>{t.howLateQ}</div>
             <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
               <span style={{fontSize:'12px',color:c.M}}>+</span>
-              <input type="number" inputMode="numeric" min="1" max={sTolerance} value={myVote.lateMin||''} onChange={e=>{const v=parseInt(e.target.value);if(!e.target.value)setMyVote('lateMin',0);else if(v>0)setMyVote('lateMin',Math.min(v,sTolerance));}} placeholder="5" style={{width:'70px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',textAlign:'center'}}/>
+              <input type="number" inputMode="numeric" min="0" max={sTolerance} value={myVote.lateMin||''} onChange={e=>{const v=parseInt(e.target.value);if(!e.target.value)setMyVote('lateMin',0);else if(v>=0)setMyVote('lateMin',Math.min(v,sTolerance));}} placeholder="0" style={{width:'70px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',textAlign:'center'}}/>
               <span style={{fontSize:'12px',color:c.M}}>min</span>
-              <span style={{fontSize:'12px',color:'#f59e0b',fontWeight:'600'}}>{fmtMinsToH(myVote.lateMin)} = {addMins(planTime,myVote.lateMin)}</span>
+              {myVote.lateMin>0&&<span style={{fontSize:'12px',color:'#f59e0b',fontWeight:'600'}}>= {addMins(planTime,myVote.lateMin)}</span>}
             </div>
           </div>}
         </>}
@@ -277,41 +272,39 @@ export default function PlanTab(){
       </div>;
     })()}
 
-    {/* ── 4. MEETING POINT ── */}
+    {/* ── MEETING POINT ── */}
     {(isOrg||(myVote.dateOk===true&&myVote.timeOk===true&&myVote.lateMin===0))&&(()=>{
-      const hasMp=!!firstStop?.meetingPoint;
-
       return<div style={cardSt}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'8px'}}>
           <div style={{fontSize:'11px',color:c.M}}>📍 {t.meetingPointLbl2||'Punto de encuentro'}</div>
           {isOrg&&<button onClick={async()=>{if(hasMp){await updateFirstStop({meetingPoint:'',meetingPointLat:null,meetingPointLng:null,meetingMinsBefore:''});setEditingMP(false);}else{setEditingMP(p=>!p);}}} style={toggleSt(hasMp||editingMP)}><div style={dotSt(hasMp||editingMP)}/></button>}
         </div>
 
-        {/* Org: configure when enabled */}
+        {/* Config when enabled */}
         {isOrg&&hasMp&&<div style={{marginBottom:'8px',padding:'10px',background:c.CARD2,borderRadius:'8px',border:`1px solid ${c.BD}`}}>
           <div style={{fontSize:'12px',color:c.T,fontWeight:'600',marginBottom:'4px'}}>{firstStop.meetingPoint}</div>
           <div style={{display:'flex',gap:'6px',marginBottom:'6px'}}>
-            <input value={mpSearch} onChange={e=>setMpSearch(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();searchMP(mpSearch);}}} placeholder={t.searchPlacePh||'Search...'} style={{...inpSt,flex:1,padding:'6px 8px',fontSize:'12px'}}/>
+            <input value={mpSearch} onChange={e=>setMpSearch(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();searchMP(mpSearch);}}} placeholder={t.searchPlacePh||'Buscar...'} style={{...inpSt,flex:1,padding:'6px 8px',fontSize:'12px'}}/>
             <button onClick={()=>searchMP(mpSearch)} style={{background:mc,border:'none',borderRadius:'8px',padding:'6px 10px',color:'#0A0A0A',cursor:'pointer',fontWeight:'700',fontSize:'13px'}}>🔍</button>
           </div>
           {mpResults.length>0&&<div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',marginBottom:'6px',maxHeight:'120px',overflowY:'auto'}}>{mpResults.map((r,i)=><div key={i} onClick={()=>pickMP(r)} style={{padding:'8px 12px',cursor:'pointer',borderBottom:i<mpResults.length-1?`1px solid ${c.BD}`:'none',fontSize:'12px'}}><div style={{color:c.T,fontWeight:'500'}}>{r.name}</div><div style={{color:c.M2,fontSize:'11px'}}>{r.address}</div></div>)}</div>}
           <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
             <div style={{fontSize:'11px',color:c.M}}>{t.minBeforeLbl||'Min antes'}:</div>
-            <input type="number" min="0" max="120" value={firstStop?.meetingMinsBefore||''} onChange={e=>updateFirstStop({meetingMinsBefore:e.target.value})} placeholder="10" style={{...inpSt,width:'60px',padding:'4px 8px',fontSize:'12px',textAlign:'center'}}/>
+            <input type="number" min="0" max="120" value={firstStop?.meetingMinsBefore||''} onChange={e=>updateFirstStop({meetingMinsBefore:e.target.value})} placeholder="0" style={{...inpSt,width:'60px',padding:'4px 8px',fontSize:'12px',textAlign:'center'}}/>
             <span style={{fontSize:'11px',color:c.M2}}>min</span>
           </div>
         </div>}
 
-        {/* Org: search when just activated */}
+        {/* Search when just activated */}
         {isOrg&&!hasMp&&editingMP&&<div className="fade-in" style={{marginBottom:'8px',padding:'10px',background:c.CARD2,borderRadius:'8px',border:`1px solid ${c.BD}`}}>
           <div style={{display:'flex',gap:'6px',marginBottom:'6px'}}>
-            <input value={mpSearch} onChange={e=>setMpSearch(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();searchMP(mpSearch);}}} placeholder={t.searchPlacePh||'Search...'} style={{...inpSt,flex:1,padding:'6px 8px',fontSize:'12px'}}/>
+            <input value={mpSearch} onChange={e=>setMpSearch(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();searchMP(mpSearch);}}} placeholder={t.searchPlacePh||'Buscar...'} style={{...inpSt,flex:1,padding:'6px 8px',fontSize:'12px'}}/>
             <button onClick={()=>searchMP(mpSearch)} style={{background:mc,border:'none',borderRadius:'8px',padding:'6px 10px',color:'#0A0A0A',cursor:'pointer',fontWeight:'700',fontSize:'13px'}}>🔍</button>
           </div>
           {mpResults.length>0&&<div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',maxHeight:'120px',overflowY:'auto'}}>{mpResults.map((r,i)=><div key={i} onClick={()=>pickMP(r)} style={{padding:'8px 12px',cursor:'pointer',borderBottom:i<mpResults.length-1?`1px solid ${c.BD}`:'none',fontSize:'12px'}}><div style={{color:c.T,fontWeight:'500'}}>{r.name}</div><div style={{color:c.M2,fontSize:'11px'}}>{r.address}</div></div>)}</div>}
         </div>}
 
-        {/* Vote — two green options */}
+        {/* Vote */}
         {hasMp&&<>
           {mpMins>0&&<div style={{fontSize:'11px',color:c.M2,marginBottom:'6px'}}>{mpMins} min {t.beforeLbl} → {mpTime}</div>}
           <div style={{display:'flex',gap:'6px'}}>
@@ -329,68 +322,31 @@ export default function PlanTab(){
       </div>;
     })()}
 
-    {/* ── Transport: Meeting point → Stop 1 ── */}
-    {firstStop?.meetingPoint&&firstStop?.meetingPointLat&&firstOpt?.lat&&(()=>{
-      return<TransportCard
-        origin={{lat:firstStop.meetingPointLat,lng:firstStop.meetingPointLng}}
-        destination={{lat:firstOpt.lat,lng:firstOpt.lng}}
-        fromLabel={`📍 ${(firstStop.meetingPoint||'').split(' — ')[0]}`}
-        toLabel={`1) ${firstOpt.name||''}`}
-        departureTime={mpTime}
-        c={c} t={t}/>;
-    })()}
+    {/* Transport: Meeting point → Stop 1 */}
+    {hasMp&&firstStop?.meetingPointLat&&firstOpt?.lat&&<TransportCard
+      origin={{lat:firstStop.meetingPointLat,lng:firstStop.meetingPointLng}}
+      destination={{lat:firstOpt.lat,lng:firstOpt.lng}}
+      fromLabel={`📍 ${(firstStop.meetingPoint||'').split(' — ')[0]}`}
+      toLabel={`1) ${firstOpt.name||''}`}
+      departureTime={mpTime}
+      c={c} t={t}/>}
 
-    {/* ── 5. STOP CARDS with transport between them ── */}
+    {/* STOP CARDS + transport */}
     {allStops.map((s,i)=><React.Fragment key={s.id}>
       {renderStop(s,i)}
       {i<allStops.length-1&&(()=>{
         const curOpt=s.options?.[0];
         const nextOpt=allStops[i+1]?.options?.[0];
         if(!curOpt?.lat||!nextOpt?.lat)return null;
-        const sTime=s.startTime||planTime;
-        const depTime=sTime&&s.duration?calcEnd(sTime,s.duration):null;
-        return<TransportCard
-          origin={{lat:curOpt.lat,lng:curOpt.lng}}
-          destination={{lat:nextOpt.lat,lng:nextOpt.lng}}
-          fromLabel={`${i+1}) ${curOpt.name||''}`}
-          toLabel={`${i+2}) ${nextOpt.name||''}`}
-          departureTime={depTime}
-          c={c} t={t}/>;
+        const sTime2=s.startTime||planTime;
+        const depTime=sTime2&&s.duration?calcEnd(sTime2,s.duration):null;
+        return<TransportCard origin={{lat:curOpt.lat,lng:curOpt.lng}} destination={{lat:nextOpt.lat,lng:nextOpt.lng}} fromLabel={`${i+1}) ${curOpt.name||''}`} toLabel={`${i+2}) ${nextOpt.name||''}`} departureTime={depTime} c={c} t={t}/>;
       })()}
     </React.Fragment>)}
 
-    {/* Fallback if no stops */}
-    {allStops.length===0&&<div style={{...cardSt}}>
-      <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
-        <div style={{width:'30px',height:'30px',borderRadius:'50%',background:`${mc}20`,border:`2px solid ${mc}60`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',fontWeight:'800',color:mc,flexShrink:0}}>1</div>
-        <div style={{fontSize:'14px',color:c.M2,fontStyle:'italic'}}>{t.noDataYet||'—'}</div>
-      </div>
-    </div>}
+    {allStops.length===0&&<div style={{...cardSt}}><div style={{display:'flex',alignItems:'center',gap:'10px'}}><div style={{width:'30px',height:'30px',borderRadius:'50%',background:`${mc}20`,border:`2px solid ${mc}60`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',fontWeight:'800',color:mc,flexShrink:0}}>1</div><div style={{fontSize:'14px',color:c.M2,fontStyle:'italic'}}>{t.noDataYet||'—'}</div></div></div>}
 
-    {/* Deadline card — below save, for everyone */}
-    <div style={{...cardSt}}>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:editingDeadline?'8px':0}}>
-        <div>
-          <div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>⏰ {t.deadlineLbl||'Deadline'}</div>
-          <div style={{fontSize:'12px',color:plan.deadline?c.T:c.M2,fontWeight:'600'}}>{plan.deadline?new Date(plan.deadline).toLocaleString():'—'}</div>
-        </div>
-        {isOrg&&<button onClick={()=>setEditingDeadline(p=>!p)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'2px 6px',color:c.M2,cursor:'pointer',fontSize:'11px',flexShrink:0}}>✏️</button>}
-      </div>
-      {isOrg&&editingDeadline&&<div className="fade-in">
-        <input type="datetime-local" min={new Date().toISOString().slice(0,16)} value={plan.deadline||''} onChange={async e=>{const up={...plan,deadline:e.target.value||null};await updatePlan(up);setPlan(up);}} style={{...inpSt,padding:'6px 8px',fontSize:'12px'}}/>
-        {plan.deadline&&<button onClick={async()=>{const up={...plan,deadline:null};await updatePlan(up);setPlan(up);}} style={{marginTop:'4px',background:'none',border:'none',color:'#ef4444',cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>× {t.removeDeadline||'Remove'}</button>}
-      </div>}
-      {plan.deadline&&<Countdown deadline={plan.deadline} lang={lang} c={c} t={t} mc={mc} onExpired={()=>setTab('vote')}/>}
-    </div>
-
-    {/* Require login gate */}
-    {!isOrg&&plan.requireLogin&&!authUser&&<div style={{marginTop:'10px',padding:'16px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px',textAlign:'center'}}>
-      <div style={{fontSize:'14px',color:c.T,fontWeight:'600',marginBottom:'6px'}}>{t.loginRequiredTitle||'Login required'}</div>
-      <div style={{fontSize:'12px',color:c.M2,marginBottom:'12px'}}>{t.loginRequiredMsg||'The organizer requires you to sign in before responding.'}</div>
-      <button onClick={()=>{window.location.href='/auth';}} style={{padding:'10px 24px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'13px'}}>{t.authSignInTab||'Sign in'}</button>
-    </div>}
-
-    {/* Save response */}
+    {/* Save */}
     {canVote&&<div style={{marginTop:'10px'}}>
       {!myVote.saved&&!isOrg&&<div style={{marginBottom:'8px'}}><div style={{fontSize:'12px',color:c.M,marginBottom:'4px'}}>{t.yourName}</div><input value={myVote.name} onChange={e=>setMyVote('name',e.target.value.slice(0,50))} maxLength={50} placeholder={t.yourNamePh} style={{...inpSt}}/></div>}
       {(()=>{
@@ -405,15 +361,44 @@ export default function PlanTab(){
       {myVote.saveConfirm&&<div className="fade-in" style={{marginTop:'8px',padding:'10px',background:'#22c55e15',border:'1px solid #22c55e40',borderRadius:'10px',textAlign:'center',fontSize:'13px',color:'#22c55e',fontWeight:'600'}}>✓ {t.savedTitle}</div>}
     </div>}
 
+    {/* DEADLINE — toggle on/off + calendar/clock */}
+    <div style={cardSt}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'6px'}}>
+        <div style={{fontSize:'11px',color:c.M}}>⏰ {t.deadlineLbl||'Fecha límite'}</div>
+        {isOrg&&<button onClick={async()=>{if(hasDeadline){const up={...plan,deadline:null};await updatePlan(up);setPlan(up);setEditingDeadline(false);}else{setEditingDeadline(true);}}} style={toggleSt(hasDeadline||editingDeadline)}><div style={dotSt(hasDeadline||editingDeadline)}/></button>}
+      </div>
+      {hasDeadline&&<>
+        <div style={{fontSize:'12px',color:c.T,fontWeight:'600',marginBottom:'4px'}}>{new Date(plan.deadline).toLocaleString()}</div>
+        <div style={{fontSize:'9px',color:c.M2,marginBottom:'6px'}}>{t.deadlineHint||'Después de esta fecha el plan quedará confirmado y no podrá cambiarse a no ser que el organizador extienda el plazo.'}</div>
+        {isOrg&&<button onClick={()=>setEditingDeadline(p=>!p)} style={{background:'none',border:'none',color:mc,cursor:'pointer',fontFamily:'inherit',fontSize:'11px',padding:'2px 0',marginBottom:'4px'}}>{editingDeadline?'▾':'▸'} {t.editLbl||'Editar'}</button>}
+        {isOrg&&editingDeadline&&<div className="fade-in" style={{marginBottom:'6px'}}>
+          <div style={{fontSize:'10px',color:c.M,marginBottom:'4px'}}>📅</div>
+          <CalendarPicker selected={plan.deadline?[plan.deadline.slice(0,10)]:[]} onChange={async d=>{const sel=d[d.length-1];if(!sel)return;const time=plan.deadline?plan.deadline.slice(11,16):'23:59';const up={...plan,deadline:sel+'T'+time};await updatePlan(up);setPlan(up);}} max={2} c={c} lang={lang}/>
+          <div style={{fontSize:'10px',color:c.M,marginTop:'8px',marginBottom:'4px'}}>🕐</div>
+          <ClockPicker value={plan.deadline?plan.deadline.slice(11,16):''} onChange={async v=>{const date=plan.deadline?plan.deadline.slice(0,10):(planDate||new Date().toISOString().slice(0,10));const up={...plan,deadline:date+'T'+v};await updatePlan(up);setPlan(up);}} c={c}/>
+        </div>}
+        <Countdown deadline={plan.deadline} lang={lang} c={c} t={t} mc={mc} onExpired={()=>setTab('vote')}/>
+      </>}
+      {!hasDeadline&&!editingDeadline&&<div style={{fontSize:'9px',color:c.M2,fontStyle:'italic'}}>{t.noDeadlineHint||'El organizador no ha puesto fecha límite. El plan se podrá cambiar hasta la hora de inicio.'}</div>}
+      {!hasDeadline&&editingDeadline&&<div className="fade-in">
+        <div style={{fontSize:'10px',color:c.M,marginBottom:'4px'}}>📅</div>
+        <CalendarPicker selected={[]} onChange={async d=>{const sel=d[d.length-1];if(!sel)return;const up={...plan,deadline:sel+'T23:59'};await updatePlan(up);setPlan(up);}} max={1} c={c} lang={lang}/>
+      </div>}
+    </div>
+
+    {/* Require login gate */}
+    {!isOrg&&plan.requireLogin&&!authUser&&<div style={{marginTop:'10px',padding:'16px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'12px',textAlign:'center'}}>
+      <div style={{fontSize:'14px',color:c.T,fontWeight:'600',marginBottom:'6px'}}>{t.loginRequiredTitle||'Login required'}</div>
+      <div style={{fontSize:'12px',color:c.M2,marginBottom:'12px'}}>{t.loginRequiredMsg||'The organizer requires you to sign in before responding.'}</div>
+      <button onClick={()=>{window.location.href='/auth';}} style={{padding:'10px 24px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'13px'}}>{t.authSignInTab||'Sign in'}</button>
+    </div>}
+
     {/* Add point */}
     {isOrg&&<button onClick={async()=>{
       const existing=(plan.stops||[]).filter(s2=>(s2.options||[]).some(o=>o.name));
       const last=existing[existing.length-1];
       let sugStart='';
-      if(last){
-        const prevTime=last.startTime||planTime;
-        if(prevTime&&last.duration){sugStart=calcEnd(prevTime,last.duration);}
-      }
+      if(last){const prevTime=last.startTime||planTime;if(prevTime&&last.duration){sugStart=calcEnd(prevTime,last.duration);}}
       const ns={id:Date.now(),options:[{id:Date.now(),name:'',address:'',lat:null,lng:null,rating:null,photo:null,googleMapsURI:null,types:[]}],startTime:sugStart,duration:'',notes:'',maxCapacity:'',meetingPoint:'',minAttendees:'',tolerance:''};
       const up={...plan,stops:[...(plan.stops||[]),ns]};await updatePlan(up);setPlan(up);setEditState('mode','stop_'+ns.id);
     }} style={{width:'100%',padding:'12px',background:'none',border:`2px dashed ${c.BD}`,borderRadius:'12px',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'600',marginBottom:'8px',marginTop:'8px'}}>+ {t.addNextPoint}</button>}
@@ -421,12 +406,7 @@ export default function PlanTab(){
     {/* Map */}
     {(()=>{
       const mapStops=[];
-      allStops.forEach(s=>{
-        const opt=s.options?.[0];
-        if(!opt?.lat||!opt?.lng)return;
-        if(s.meetingPoint){mapStops.push({lat:s.meetingPointLat||opt.lat,lng:s.meetingPointLng||opt.lng,name:'📍 '+s.meetingPoint,isMeetingPoint:true});}
-        mapStops.push({...opt,lat:opt.lat,lng:opt.lng,name:opt.name,address:opt.address});
-      });
+      allStops.forEach(s=>{const opt=s.options?.[0];if(!opt?.lat||!opt?.lng)return;if(s.meetingPoint){mapStops.push({lat:s.meetingPointLat||opt.lat,lng:s.meetingPointLng||opt.lng,name:'📍 '+s.meetingPoint,isMeetingPoint:true});}mapStops.push({...opt,lat:opt.lat,lng:opt.lng,name:opt.name,address:opt.address});});
       return mapStops.length>0?<RouteMap stops={mapStops} c={c}/>:null;
     })()}
   </></React.Suspense>;
