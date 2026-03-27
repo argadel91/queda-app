@@ -200,10 +200,7 @@ export default function PlanTab(){
           </div>
           {isOrg&&<button onClick={()=>setEditingTime(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',flexShrink:0}}>✏️</button>}
         </div>}
-        {editingTime&&<div className="fade-in" style={{marginBottom:'8px'}}>
-          <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>🕐 {t.datesStep2||'Hora'}</div>
-          <ClockPicker value={planTime||''} onChange={async v=>{const up={...plan,startTimes:[v,...(plan.startTimes||[]).slice(1)],time:v};await updatePlan(up);setPlan(up);setEditingTime(false);}} c={c}/>
-        </div>}
+        {editingTime&&<ClockPicker autoOpen value={planTime||''} onChange={async v=>{const up={...plan,startTimes:[v,...(plan.startTimes||[]).slice(1)],time:v};await updatePlan(up);setPlan(up);setEditingTime(false);}} c={c}/>}
         {!editingTime&&ynBtn(myVote.timeOk,v=>{setMyVote('timeOk',v);if(v===false){setMyVote('lateMin',0);setMyVote('meetOk',null);setOpenSection(p=>({...p,_onTime:undefined}));}},t.yesLbl,'No')}
       </div>
     </div>
