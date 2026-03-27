@@ -19,27 +19,6 @@ const MODES = [
   { key: 'BICYCLING', emoji: '🚲' },
 ]
 
-// Parse duration text like "25 mins", "1 hour 10 mins", "2 hours" to total minutes
-const parseDurationMins = (text) => {
-  if (!text) return null
-  let mins = 0
-  const hMatch = text.match(/(\d+)\s*hour/i)
-  const mMatch = text.match(/(\d+)\s*min/i)
-  if (hMatch) mins += parseInt(hMatch[1]) * 60
-  if (mMatch) mins += parseInt(mMatch[1])
-  return mins || null
-}
-
-/**
- * @param {object} props
- * @param {{lat,lng,name}} props.origin
- * @param {{lat,lng,name}} props.destination
- * @param {string} props.fromLabel - e.g. "📍 Punto de encuentro" or "1) Bar Cremaet"
- * @param {string} props.toLabel - e.g. "1) Bar Cremaet" or "2) Mya"
- * @param {string} [props.departureTime] - HH:MM to calculate arrival times
- * @param {object} props.c - colors
- * @param {object} props.t - translations
- */
 export default function TransportCard({ origin, destination, fromLabel, toLabel, departureTime, c, t }) {
   const [results, setResults] = useState({})
   const [flightInfo, setFlightInfo] = useState(null)
@@ -58,7 +37,6 @@ export default function TransportCard({ origin, destination, fromLabel, toLabel,
       const o = new google.maps.LatLng(origin.lat, origin.lng)
       const d = new google.maps.LatLng(destination.lat, destination.lng)
 
-      // Flight estimate via straight-line distance
       try {
         const distM = google.maps.geometry.spherical.computeDistanceBetween(o, d)
         const distKm = Math.round(distM / 1000)
@@ -83,7 +61,7 @@ export default function TransportCard({ origin, destination, fromLabel, toLabel,
             distance: result.distance.text,
             durationMins: Math.round((result.duration.value || 0) / 60)
           }
-        } catch { /* mode unavailable in this region */ }
+        } catch { /* mode unavailable */ }
       }
       if (!cancelled) { setResults(res); setLoading(false) }
     })
@@ -97,39 +75,38 @@ export default function TransportCard({ origin, destination, fromLabel, toLabel,
   const hasAny = Object.keys(results).length > 0 || flightInfo
   if (!hasAny) return null
 
+  const items = [
+    ...MODES.filter(m => results[m.key]).map(m => ({
+      emoji: m.emoji,
+      dur: results[m.key].duration,
+      arrival: departureTime && results[m.key].durationMins > 0 ? addMinsToTime(departureTime, results[m.key].durationMins) : null
+    })),
+    ...(flightInfo ? [{
+      emoji: '✈️',
+      dur: `~${flightInfo.mins}min`,
+      arrival: departureTime && flightInfo.mins > 0 ? addMinsToTime(departureTime, flightInfo.mins) : null
+    }] : [])
+  ]
+
   return (
     <div style={{
       background: c.CARD2, border: `1px dashed ${c.BD}`, borderRadius: '10px',
-      padding: '10px 12px', marginBottom: '10px', fontSize: '11px', color: c.M2
+      padding: '10px 12px', marginBottom: '10px'
     }}>
-      <div style={{ fontSize: '10px', color: c.M, fontWeight: '600', marginBottom: '8px', letterSpacing: '.03em' }}>
+      <div style={{ fontSize: '10px', color: c.M, fontWeight: '600', marginBottom: '4px', letterSpacing: '.03em' }}>
+        {t.tHowToGet || 'Cómo llegar'}
+      </div>
+      <div style={{ fontSize: '10px', color: c.M2, marginBottom: '8px' }}>
         {fromLabel} → {toLabel}
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-        {MODES.map(mode => results[mode.key] ? (
-          <div key={mode.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              {mode.emoji} {results[mode.key].duration}
-            </span>
-            {departureTime && results[mode.key].durationMins > 0 && (
-              <span style={{ fontSize: '11px', color: c.M, fontWeight: '600' }}>
-                → {addMinsToTime(departureTime, results[mode.key].durationMins)}
-              </span>
-            )}
+      <div style={{ display: 'flex', justifyContent: 'space-around', gap: '4px' }}>
+        {items.map((it, i) => (
+          <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', minWidth: '48px' }}>
+            <div style={{ fontSize: '18px' }}>{it.emoji}</div>
+            <div style={{ fontSize: '10px', color: c.M2, whiteSpace: 'nowrap' }}>{it.dur}</div>
+            {it.arrival && <div style={{ fontSize: '10px', color: c.M, fontWeight: '600', whiteSpace: 'nowrap' }}>→ {it.arrival}</div>}
           </div>
-        ) : null)}
-        {flightInfo && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              ✈️ ~{flightInfo.mins}min ({flightInfo.distKm}km)
-            </span>
-            {departureTime && flightInfo.mins > 0 && (
-              <span style={{ fontSize: '11px', color: c.M, fontWeight: '600' }}>
-                → {addMinsToTime(departureTime, flightInfo.mins)}
-              </span>
-            )}
-          </div>
-        )}
+        ))}
       </div>
     </div>
   )
