@@ -209,7 +209,7 @@ export default function PlanTab(){
         {isOrg&&editingTime&&<div className="fade-in" style={{marginBottom:'8px'}}>
           <ClockPicker value={planTime||''} onChange={async v=>{const up={...plan,startTimes:[v,...(plan.startTimes||[]).slice(1)],time:v};await updatePlan(up);setPlan(up);}} c={c}/>
         </div>}
-        {(myVote.dateOk===true)&&ynBtn(myVote.timeOk,v=>{setMyVote('timeOk',v);if(v===false){setMyVote('lateMin',0);setMyVote('meetOk',null);setOpenSection(p=>({...p,_onTime:undefined}));}},t.yesLbl,'No')}
+        {ynBtn(myVote.timeOk,v=>{setMyVote('timeOk',v);if(v===false){setMyVote('lateMin',0);setMyVote('meetOk',null);setOpenSection(p=>({...p,_onTime:undefined}));}},t.yesLbl,'No')}
       </div>
     </div>
 
@@ -223,7 +223,7 @@ export default function PlanTab(){
         </div>
         {allowAlt&&<>
           <div style={{fontSize:'10px',color:c.M2,marginBottom:'6px'}}>({myVote.altDates.length}/3)</div>
-          <CalendarPicker selected={myVote.altDates} onChange={d=>setMyVote('altDates',d.filter(x=>x!==planDate).slice(-3))} max={3} c={c} lang={lang}/>
+          <div style={{transform:'scale(0.85)',transformOrigin:'top left',marginBottom:'-20px'}}><CalendarPicker selected={myVote.altDates} onChange={d=>setMyVote('altDates',d.filter(x=>x!==planDate).slice(-3))} max={3} c={c} lang={lang}/></div>
         </>}
         {!allowAlt&&<div style={{fontSize:'10px',color:c.M2,fontStyle:'italic'}}>{t.altDatesDisabled||'El organizador no permite fechas alternativas'}</div>}
       </div>
@@ -255,7 +255,7 @@ export default function PlanTab(){
         </div>
         {isOrg&&hasTolerance&&<div style={{marginBottom:'8px',display:'flex',alignItems:'center',gap:'8px'}}>
           <div style={{fontSize:'11px',color:c.M}}>{t.maxLateLbl}:</div>
-          <input type="number" min="1" max="120" value={firstStop?.tolerance||''} onChange={e=>{const v=e.target.value;if(v&&parseInt(v)>0)updateFirstStop({tolerance:v});}} style={{...inpSt,width:'60px',padding:'4px 8px',fontSize:'12px',textAlign:'center'}}/>
+          <input type="number" min="1" max="120" value={firstStop?.tolerance||''} onChange={e=>updateFirstStop({tolerance:e.target.value})} placeholder="15" style={{...inpSt,width:'60px',padding:'4px 8px',fontSize:'12px',textAlign:'center'}}/>
           <span style={{fontSize:'11px',color:c.M2}}>min = {addMins(planTime,sTolerance)}</span>
         </div>}
         {hasTolerance&&<>
@@ -267,7 +267,7 @@ export default function PlanTab(){
             <div style={{fontSize:'11px',color:'#f59e0b',marginBottom:'4px'}}>{t.howLateQ}</div>
             <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
               <span style={{fontSize:'12px',color:c.M}}>+</span>
-              <input type="number" inputMode="numeric" min="1" max={sTolerance} value={myVote.lateMin} onChange={e=>setMyVote('lateMin',Math.min(Math.max(parseInt(e.target.value)||1,1),sTolerance))} style={{width:'70px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',textAlign:'center'}}/>
+              <input type="number" inputMode="numeric" min="1" max={sTolerance} value={myVote.lateMin||''} onChange={e=>{const v=parseInt(e.target.value);if(!e.target.value)setMyVote('lateMin',0);else if(v>0)setMyVote('lateMin',Math.min(v,sTolerance));}} placeholder="5" style={{width:'70px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'8px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none',textAlign:'center'}}/>
               <span style={{fontSize:'12px',color:c.M}}>min</span>
               <span style={{fontSize:'12px',color:'#f59e0b',fontWeight:'600'}}>{fmtMinsToH(myVote.lateMin)} = {addMins(planTime,myVote.lateMin)}</span>
             </div>
@@ -284,7 +284,7 @@ export default function PlanTab(){
       return<div style={cardSt}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'8px'}}>
           <div style={{fontSize:'11px',color:c.M}}>📍 {t.meetingPointLbl2||'Punto de encuentro'}</div>
-          {isOrg&&<button onClick={async()=>{if(hasMp){await updateFirstStop({meetingPoint:'',meetingPointLat:null,meetingPointLng:null,meetingMinsBefore:''});setEditingMP(false);}else{setEditingMP(true);}}} style={toggleSt(hasMp)}><div style={dotSt(hasMp)}/></button>}
+          {isOrg&&<button onClick={async()=>{if(hasMp){await updateFirstStop({meetingPoint:'',meetingPointLat:null,meetingPointLng:null,meetingMinsBefore:''});setEditingMP(false);}else{setEditingMP(p=>!p);}}} style={toggleSt(hasMp||editingMP)}><div style={dotSt(hasMp||editingMP)}/></button>}
         </div>
 
         {/* Org: configure when enabled */}

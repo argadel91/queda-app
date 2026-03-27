@@ -81,18 +81,11 @@ function ResultsInner({onBack}){
             <button onClick={async()=>{const up={...plan,desc:(editState.desc||'').trim()||null};await updatePlan(up);setPlan(up);setEditMode(false);}} style={{flex:1,padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.saveLbl||'Save'}</button>
           </div>
         </>}
-        {/* Edit dates — ONLY dates */}
+        {/* Edit date — replace the single date */}
         {editMode==='dates'&&<>
           <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>📅 {t.editDatesLbl}</div>
-          <div style={{marginBottom:'12px'}}>
-            <div style={{fontSize:'12px',color:c.M,marginBottom:'6px'}}>({(plan.dates||[]).length}/3)</div>
-            {(plan.dates||[]).length<3&&<CalendarPicker selected={plan.dates||[]} onChange={async d=>{const newDate=d.find(x=>!(plan.dates||[]).includes(x));if(!newDate)return;const up={...plan,dates:[...(plan.dates||[]),newDate].sort()};await updatePlan(up);setPlan(up);}} max={(plan.dates||[]).length+1} c={c} lang={lang}/>}
-          </div>
-          {(plan.dates||[]).map(d=><div key={d} style={{marginBottom:'10px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',padding:'12px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-            <span style={{fontSize:'13px',color:mc,fontWeight:'600',textTransform:'capitalize'}}>📅 {fmtShort(d,lang)}</span>
-            <button onClick={async()=>{if((plan.dates||[]).length<=1)return;const newDt={...(plan.dateTimes||{})};delete newDt[d];const up={...plan,dates:plan.dates.filter(x=>x!==d),dateTimes:newDt};await updatePlan(up);setPlan(up);}} style={{background:'none',border:'none',color:'#ff4444',cursor:'pointer',fontSize:'14px',padding:'8px',minWidth:'36px',minHeight:'36px'}}>{(plan.dates||[]).length>1?'×':''}</button>
-          </div>)}
-          <button onClick={()=>setEditMode(false)} style={{width:'100%',padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.doneLbl||'Done'}</button>
+          <CalendarPicker selected={plan.dates||[]} onChange={async d=>{const sel=d[d.length-1];if(!sel)return;const up={...plan,dates:[sel],date:sel};await updatePlan(up);setPlan(up);}} max={1} c={c} lang={lang}/>
+          <button onClick={()=>setEditMode(false)} style={{width:'100%',marginTop:'12px',padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.doneLbl||'Done'}</button>
         </>}
         {/* Edit stop */}
         {typeof editMode==='string'&&editMode.startsWith('stop_')&&(()=>{
