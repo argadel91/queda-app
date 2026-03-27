@@ -133,7 +133,7 @@ export default function PlanTab(){
           <div style={{flex:1,background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px'}}>
             <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:editingCap===s.id?'8px':0}}>
               <div>
-                <div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>👥 {t.minCapLbl||'Capacity'}</div>
+                <div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>👥 {t.capacityLbl||'Aforo'}</div>
                 <div style={{fontSize:'12px',color:c.T,fontWeight:'600'}}>{minCap?`${minCap}`:(t.noMinCap||'—')}{' · '}{maxCap?`${maxCap}`:(t.noMaxCap||'—')}</div>
               </div>
               {isOrg&&<button onClick={()=>setEditingCap(p=>p===s.id?null:s.id)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'2px 6px',color:c.M2,cursor:'pointer',fontSize:'11px',flexShrink:0}}>✏️</button>}
@@ -231,7 +231,7 @@ export default function PlanTab(){
     </div>}
 
     {/* ── 3. LATE ARRIVAL CARD ── */}
-    {canVote&&myVote.dateOk===true&&myVote.timeOk===true&&(()=>{
+    {(isOrg||(canVote&&myVote.dateOk===true&&myVote.timeOk===true))&&(()=>{
       const hasTolerance=sTolerance>0;
       const isLate=myVote.lateMin>0;const isOnTime=openSection._onTime===true||(!isLate&&myVote.lateMin===0);
 
@@ -272,7 +272,7 @@ export default function PlanTab(){
     })()}
 
     {/* ── 4. MEETING POINT CARD ── */}
-    {canVote&&myVote.dateOk===true&&myVote.timeOk===true&&myVote.lateMin===0&&(()=>{
+    {(isOrg||(canVote&&myVote.dateOk===true&&myVote.timeOk===true&&myVote.lateMin===0))&&(()=>{
       const hasMp=!!firstStop?.meetingPoint;
 
       const toggleSt=(on)=>({width:'40px',height:'22px',borderRadius:'11px',border:'none',background:on?'#22c55e':c.BD,cursor:'pointer',position:'relative',transition:'background .2s',flexShrink:0});
