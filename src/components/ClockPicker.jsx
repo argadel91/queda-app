@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react'
 import useFocusTrap from '../hooks/useFocusTrap.js'
 
-export default function ClockPicker({value,onChange,c,autoOpen}){
+export default function ClockPicker({value,onChange,c,autoOpen,onClose}){
   const[open,setOpen]=useState(!!autoOpen);
+  const close=()=>{setOpen(false);if(onClose)onClose();};
   const modalRef=useRef(null);
   useFocusTrap(open?modalRef:null);
   const[mode,setMode]=useState('hour'); // 'hour' or 'min'
@@ -10,7 +11,7 @@ export default function ClockPicker({value,onChange,c,autoOpen}){
   const[selM,setSelM]=useState(value?parseInt(value.split(':')[1]):0);
 
   const fmt=v=>String(v).padStart(2,'0');
-  const confirm=()=>{if(selH!==null){onChange(`${fmt(selH)}:${fmt(selM)}`);setOpen(false);}};
+  const confirm=()=>{if(selH!==null){onChange(`${fmt(selH)}:${fmt(selM)}`);close();}};
 
   const hours=Array.from({length:24},(_,i)=>i);
   const mins=[0,5,10,15,20,25,30,35,40,45,50,55];
@@ -27,7 +28,7 @@ export default function ClockPicker({value,onChange,c,autoOpen}){
       <span style={{fontSize:'18px'}}>🕐</span>
     </button>}
 
-    {open&&<div role="dialog" aria-modal="true" onKeyDown={e=>{if(e.key==='Escape')setOpen(false);}} style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:300,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>setOpen(false)}>
+    {open&&<div role="dialog" aria-modal="true" onKeyDown={e=>{if(e.key==='Escape')close();}} style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:300,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}} onClick={()=>close()}>
       <div ref={modalRef} onClick={e=>e.stopPropagation()} style={{background:c?.CARD||'#1A1A1A',borderRadius:'20px',padding:'24px',width:'100%',maxWidth:'300px'}}>
         {/* Display */}
         <div style={{display:'flex',justifyContent:'center',alignItems:'center',gap:'4px',marginBottom:'20px'}}>
@@ -79,7 +80,7 @@ export default function ClockPicker({value,onChange,c,autoOpen}){
 
         {/* Buttons */}
         <div style={{display:'flex',gap:'8px'}}>
-          <button onClick={()=>setOpen(false)} style={{flex:1,padding:'12px',background:c?.CARD2||'#222',border:`1px solid ${c?.BD||'#333'}`,borderRadius:'10px',color:c?.T||'#fff',cursor:'pointer',fontFamily:'inherit',fontSize:'14px'}}>✕</button>
+          <button onClick={()=>close()} style={{flex:1,padding:'12px',background:c?.CARD2||'#222',border:`1px solid ${c?.BD||'#333'}`,borderRadius:'10px',color:c?.T||'#fff',cursor:'pointer',fontFamily:'inherit',fontSize:'14px'}}>✕</button>
           <button onClick={confirm} disabled={selH===null} style={{flex:2,padding:'12px',background:selH!==null?c?.A||'#CDFF6C':'#333',border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:selH!==null?'pointer':'not-allowed',fontFamily:'inherit',fontSize:'14px',fontWeight:'700',opacity:selH===null?.4:1}}>✓ {selH!==null?`${fmt(selH)}:${fmt(selM)}`:''}</button>
         </div>
       </div>
