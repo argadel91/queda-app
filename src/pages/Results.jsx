@@ -84,7 +84,7 @@ function ResultsInner({onBack}){
         {/* Edit date — replace the single date */}
         {editMode==='dates'&&<>
           <div style={{fontSize:'16px',fontWeight:'700',color:c.T,marginBottom:'16px'}}>📅 {t.editDatesLbl}</div>
-          <CalendarPicker selected={plan.dates||[]} onChange={async d=>{const sel=d[d.length-1];if(!sel)return;const up={...plan,dates:[sel],date:sel};await updatePlan(up);setPlan(up);}} max={1} c={c} lang={lang}/>
+          <CalendarPicker selected={plan.dates||[]} onChange={async d=>{const sel=d.find(x=>!(plan.dates||[]).includes(x));if(!sel)return;const up={...plan,dates:[sel],date:sel};await updatePlan(up);setPlan(up);}} max={2} c={c} lang={lang}/>
           <button onClick={()=>setEditMode(false)} style={{width:'100%',marginTop:'12px',padding:'12px',background:mc,border:'none',borderRadius:'10px',color:'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'14px'}}>{t.doneLbl||'Done'}</button>
         </>}
         {/* Edit stop */}
