@@ -176,85 +176,91 @@ export default function PlanTab(){
   const mpMins=parseInt(firstStop?.meetingMinsBefore)||0;
   const mpTime=mpMins>0&&planTime?addMins(planTime,-mpMins):planTime;
 
+  const toggleSt=(on)=>({width:'40px',height:'22px',borderRadius:'11px',border:'none',background:on?'#22c55e':c.BD,cursor:'pointer',position:'relative',transition:'background .2s',flexShrink:0});
+  const dotSt=(on)=>({position:'absolute',top:'3px',left:on?'20px':'3px',width:'16px',height:'16px',borderRadius:'50%',background:'#fff',transition:'left .2s',boxShadow:'0 1px 3px rgba(0,0,0,.3)'});
+  const allowAlt=!!plan.allowAltDates;
+  const allowAvail=!!plan.allowAltTimes;
+
   return<React.Suspense fallback={<div style={{textAlign:'center',padding:'20px',color:c.M}}>...</div>}><>
 
-    {/* ── 1. DATE CARD ── */}
+    {/* ── ROW 1: DATE + TIME ── */}
     <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
+      {/* DATE */}
       <div style={{...cardSt,flex:1,marginBottom:0}}>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:canVote?'10px':0}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'10px'}}>
           <div>
-            <div style={{fontSize:'11px',color:c.M,marginBottom:'2px'}}>📅 {t.dateOkQ||'Date'}</div>
+            <div style={{fontSize:'11px',color:c.M,marginBottom:'2px'}}>📅 {t.datesStep||'Fecha'}</div>
             <div style={{fontSize:'14px',color:c.T,fontWeight:'700',textTransform:'capitalize'}}>{planDate?fmtShort(planDate,lang):'—'}</div>
           </div>
           {isOrg&&<button onClick={()=>setEditState('mode','dates')} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',flexShrink:0}}>✏️</button>}
         </div>
-        {canVote&&<>
-          {ynBtn(myVote.dateOk,v=>{setMyVote('dateOk',v);if(!v){setMyVote('timeOk',null);setMyVote('lateMin',0);setMyVote('meetOk',null);setOpenSection(p=>({...p,_onTime:undefined}));setShowAltDates(true);}},t.yesLbl,'No')}
-          {/* Alt dates toggle — available even if Yes */}
-          {myVote.dateOk!==null&&<button onClick={()=>setShowAltDates(p=>!p)} style={{width:'100%',marginTop:'6px',background:'none',border:'none',color:mc,cursor:'pointer',fontFamily:'inherit',fontSize:'11px',padding:'4px 0',textAlign:'left'}}>{showAltDates?'▾':'▸'} {t.altDatesEvenYes}</button>}
-        </>}
+        {ynBtn(myVote.dateOk,v=>{setMyVote('dateOk',v);if(v===false){setMyVote('timeOk',null);setMyVote('lateMin',0);setMyVote('meetOk',null);setOpenSection(p=>({...p,_onTime:undefined}));}},t.yesLbl,'No')}
       </div>
 
-      {/* ── 2. TIME CARD ── */}
+      {/* TIME */}
       <div style={{...cardSt,flex:1,marginBottom:0,opacity:myVote.dateOk===true||isOrg?1:0.4}}>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:canVote&&myVote.dateOk===true?'10px':editingTime?'10px':0}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:myVote.dateOk===true||isOrg?'10px':0}}>
           <div>
-            <div style={{fontSize:'11px',color:c.M,marginBottom:'2px'}}>🕐 {t.timeOkQ||'Time'}</div>
+            <div style={{fontSize:'11px',color:c.M,marginBottom:'2px'}}>🕐 {t.timeOkQ||'Hora'}</div>
             <div style={{fontSize:'14px',color:c.T,fontWeight:'700'}}>{planTime?fmtTime(planTime):'—'}</div>
           </div>
           {isOrg&&<button onClick={()=>setEditingTime(p=>!p)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',flexShrink:0}}>✏️</button>}
         </div>
-        {/* Organizer inline time edit */}
         {isOrg&&editingTime&&<div className="fade-in" style={{marginBottom:'8px'}}>
           <ClockPicker value={planTime||''} onChange={async v=>{const up={...plan,startTimes:[v,...(plan.startTimes||[]).slice(1)],time:v};await updatePlan(up);setPlan(up);}} c={c}/>
         </div>}
-        {canVote&&myVote.dateOk===true&&<>
-          {ynBtn(myVote.timeOk,v=>{setMyVote('timeOk',v);if(!v){setMyVote('lateMin',0);setMyVote('meetOk',null);setOpenSection(p=>({...p,_onTime:undefined}));setShowAvailRange(true);}},t.yesLbl,'No')}
-          {/* Avail range toggle — available even if Yes */}
-          {myVote.timeOk!==null&&<button onClick={()=>setShowAvailRange(p=>!p)} style={{width:'100%',marginTop:'6px',background:'none',border:'none',color:mc,cursor:'pointer',fontFamily:'inherit',fontSize:'11px',padding:'4px 0',textAlign:'left'}}>{showAvailRange?'▾':'▸'} {t.availRangeEvenYes}</button>}
-        </>}
+        {(myVote.dateOk===true)&&ynBtn(myVote.timeOk,v=>{setMyVote('timeOk',v);if(v===false){setMyVote('lateMin',0);setMyVote('meetOk',null);setOpenSection(p=>({...p,_onTime:undefined}));}},t.yesLbl,'No')}
       </div>
     </div>
 
-    {/* Alt dates panel */}
-    {canVote&&showAltDates&&myVote.dateOk!==null&&<div style={{background:myVote.dateOk===false?'#ef444408':c.CARD2,border:`1px solid ${myVote.dateOk===false?'#ef444420':c.BD}`,borderRadius:'14px',padding:'12px',marginBottom:'8px'}}>
-      <div style={{fontSize:'12px',color:myVote.dateOk===false?'#ef4444':c.M,fontWeight:'600',marginBottom:'6px'}}>{t.yourAvailDates} ({myVote.altDates.length}/3)</div>
-      <CalendarPicker selected={myVote.altDates} onChange={d=>setMyVote('altDates',d.filter(x=>x!==planDate).slice(-3))} max={3} c={c} lang={lang}/>
-    </div>}
+    {/* ── ROW 2: ALT DATES + AVAILABILITY ── */}
+    <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
+      {/* ALT DATES */}
+      <div style={{...cardSt,flex:1,marginBottom:0,opacity:allowAlt?1:0.5}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:allowAlt?'8px':0}}>
+          <div style={{fontSize:'11px',color:c.M}}>📅 {t.altDatesLbl||'Fechas alternativas'}</div>
+          {isOrg&&<button onClick={async()=>{const up={...plan,allowAltDates:!allowAlt};await updatePlan(up);setPlan(up);}} style={toggleSt(allowAlt)}><div style={dotSt(allowAlt)}/></button>}
+        </div>
+        {allowAlt&&<>
+          <div style={{fontSize:'10px',color:c.M2,marginBottom:'6px'}}>({myVote.altDates.length}/3)</div>
+          <CalendarPicker selected={myVote.altDates} onChange={d=>setMyVote('altDates',d.filter(x=>x!==planDate).slice(-3))} max={3} c={c} lang={lang}/>
+        </>}
+        {!allowAlt&&<div style={{fontSize:'10px',color:c.M2,fontStyle:'italic'}}>{t.altDatesDisabled||'El organizador no permite fechas alternativas'}</div>}
+      </div>
 
-    {/* Avail range panel */}
-    {canVote&&showAvailRange&&myVote.dateOk===true&&myVote.timeOk!==null&&<div style={{background:myVote.timeOk===false?'#f59e0b08':c.CARD2,border:`1px solid ${myVote.timeOk===false?'#f59e0b20':c.BD}`,borderRadius:'14px',padding:'12px',marginBottom:'8px'}}>
-      <div style={{fontSize:'12px',color:myVote.timeOk===false?'#f59e0b':c.M,fontWeight:'600',marginBottom:'8px'}}>{t.availStartTime}</div>
-      <div style={{fontSize:'11px',color:c.M2,marginBottom:'10px'}}>{t.availStartHint}</div>
-      <TimeRangeBar from={myVote.timeFrom||'08:00'} to={myVote.timeTo||'22:00'} onChange={(f,to)=>{setMyVote('timeFrom',f);setMyVote('timeTo',to);}} c={c}/>
-      {myVote.timeFrom&&myVote.timeTo&&planTime>=myVote.timeFrom&&planTime<=myVote.timeTo&&myVote.timeOk===false&&<div style={{marginTop:'6px',padding:'6px 10px',background:'#ef444410',border:'1px solid #ef444430',borderRadius:'8px',fontSize:'11px',color:'#ef4444',fontWeight:'600'}}>{t.rangeIncludesOriginal}</div>}
-    </div>}
+      {/* AVAILABILITY RANGE */}
+      <div style={{...cardSt,flex:1,marginBottom:0,opacity:allowAvail?1:0.5}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:allowAvail?'8px':0}}>
+          <div style={{fontSize:'11px',color:c.M}}>🕐 {t.availLbl||'Disponibilidad'}</div>
+          {isOrg&&<button onClick={async()=>{const up={...plan,allowAltTimes:!allowAvail};await updatePlan(up);setPlan(up);}} style={toggleSt(allowAvail)}><div style={dotSt(allowAvail)}/></button>}
+        </div>
+        {allowAvail&&<>
+          <div style={{fontSize:'10px',color:c.M2,marginBottom:'6px'}}>{t.availStartHint}</div>
+          <div style={{marginBottom:'6px'}}><div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>{t.fromLbl}{myVote.timeFrom&&` → ${myVote.timeFrom}`}</div><ClockPicker value={myVote.timeFrom||''} onChange={v=>setMyVote('timeFrom',v)} c={c}/></div>
+          <div><div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>{t.toLbl}{myVote.timeTo&&` → ${myVote.timeTo}`}</div><ClockPicker value={myVote.timeTo||''} onChange={v=>setMyVote('timeTo',v)} c={c}/></div>
+        </>}
+        {!allowAvail&&<div style={{fontSize:'10px',color:c.M2,fontStyle:'italic'}}>{t.availDisabled||'El organizador no permite elegir horas alternativas'}</div>}
+      </div>
+    </div>
 
-    {/* ── 3. LATE ARRIVAL CARD ── */}
-    {(isOrg||(canVote&&myVote.dateOk===true&&myVote.timeOk===true))&&(()=>{
+    {/* ── 3. LATE ARRIVAL ── */}
+    {(isOrg||(myVote.dateOk===true&&myVote.timeOk===true))&&(()=>{
       const hasTolerance=sTolerance>0;
       const isLate=myVote.lateMin>0;const isOnTime=openSection._onTime===true||(!isLate&&myVote.lateMin===0);
-
-      // Toggle style
-      const toggleSt=(on)=>({width:'40px',height:'22px',borderRadius:'11px',border:'none',background:on?'#22c55e':c.BD,cursor:'pointer',position:'relative',transition:'background .2s',flexShrink:0});
-      const dotSt=(on)=>({position:'absolute',top:'3px',left:on?'20px':'3px',width:'16px',height:'16px',borderRadius:'50%',background:'#fff',transition:'left .2s',boxShadow:'0 1px 3px rgba(0,0,0,.3)'});
 
       return<div style={cardSt}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'8px'}}>
           <div style={{fontSize:'11px',color:c.M}}>⏰ {t.onTimeQ}</div>
           {isOrg&&<button onClick={async()=>{if(hasTolerance){await updateFirstStop({tolerance:''});}else{await updateFirstStop({tolerance:'15'});}}} style={toggleSt(hasTolerance)}><div style={dotSt(hasTolerance)}/></button>}
         </div>
-
-        {/* Org: set max minutes when enabled */}
         {isOrg&&hasTolerance&&<div style={{marginBottom:'8px',display:'flex',alignItems:'center',gap:'8px'}}>
           <div style={{fontSize:'11px',color:c.M}}>{t.maxLateLbl}:</div>
           <input type="number" min="1" max="120" value={firstStop?.tolerance||''} onChange={e=>{const v=e.target.value;if(v&&parseInt(v)>0)updateFirstStop({tolerance:v});}} style={{...inpSt,width:'60px',padding:'4px 8px',fontSize:'12px',textAlign:'center'}}/>
           <span style={{fontSize:'11px',color:c.M2}}>min = {addMins(planTime,sTolerance)}</span>
         </div>}
-
         {hasTolerance&&<>
           <div style={{display:'flex',gap:'6px'}}>
-            <button onClick={()=>{const v=openSection._onTime===true&&myVote.lateMin===0?undefined:true;setMyVote('lateMin',0);setOpenSection(p=>({...p,_onTime:v===undefined?undefined:true}));}} style={{flex:1,padding:'8px',borderRadius:'8px',border:`1px solid ${isOnTime?'#22c55e50':c.BD}`,background:isOnTime?'#22c55e18':'transparent',color:isOnTime?'#22c55e':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:isOnTime?'700':'500'}}>{isOnTime?'✓ ':''}{t.yesLbl}</button>
+            <button onClick={()=>{setMyVote('lateMin',0);setOpenSection(p=>({...p,_onTime:openSection._onTime===true?undefined:true}));}} style={{flex:1,padding:'8px',borderRadius:'8px',border:`1px solid ${isOnTime?'#22c55e50':c.BD}`,background:isOnTime?'#22c55e18':'transparent',color:isOnTime?'#22c55e':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:isOnTime?'700':'500'}}>{isOnTime?'✓ ':''}{t.yesLbl}</button>
             <button onClick={()=>{setMyVote('lateMin',isLate?0:5);setOpenSection(p=>({...p,_onTime:isLate?undefined:false}));}} style={{flex:1,padding:'8px',borderRadius:'8px',border:`1px solid ${isLate?'#f59e0b50':c.BD}`,background:isLate?'#f59e0b18':'transparent',color:isLate?'#f59e0b':c.T,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:isLate?'700':'500'}}>{isLate?'⏰ ':''}{t.noLbl||'No'}</button>
           </div>
           {isLate&&<div style={{marginTop:'8px'}}>
@@ -267,21 +273,18 @@ export default function PlanTab(){
             </div>
           </div>}
         </>}
-        {!hasTolerance&&<div style={{fontSize:'11px',color:c.M2,fontStyle:'italic'}}>{t.lateDisabled||'El organizador no permite llegar tarde'}</div>}
+        {!hasTolerance&&<div style={{fontSize:'11px',color:c.M2,fontStyle:'italic'}}>{t.lateDisabled}</div>}
       </div>;
     })()}
 
-    {/* ── 4. MEETING POINT CARD ── */}
-    {(isOrg||(canVote&&myVote.dateOk===true&&myVote.timeOk===true&&myVote.lateMin===0))&&(()=>{
+    {/* ── 4. MEETING POINT ── */}
+    {(isOrg||(myVote.dateOk===true&&myVote.timeOk===true&&myVote.lateMin===0))&&(()=>{
       const hasMp=!!firstStop?.meetingPoint;
-
-      const toggleSt=(on)=>({width:'40px',height:'22px',borderRadius:'11px',border:'none',background:on?'#22c55e':c.BD,cursor:'pointer',position:'relative',transition:'background .2s',flexShrink:0});
-      const dotSt=(on)=>({position:'absolute',top:'3px',left:on?'20px':'3px',width:'16px',height:'16px',borderRadius:'50%',background:'#fff',transition:'left .2s',boxShadow:'0 1px 3px rgba(0,0,0,.3)'});
 
       return<div style={cardSt}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'8px'}}>
-          <div style={{fontSize:'11px',color:c.M}}>📍 {t.meetingPointLbl2||'Meeting point'}</div>
-          {isOrg&&<button onClick={async()=>{if(hasMp){await updateFirstStop({meetingPoint:'',meetingPointLat:null,meetingPointLng:null,meetingMinsBefore:''});}else{setEditingMP(true);}}} style={toggleSt(hasMp)}><div style={dotSt(hasMp)}/></button>}
+          <div style={{fontSize:'11px',color:c.M}}>📍 {t.meetingPointLbl2||'Punto de encuentro'}</div>
+          {isOrg&&<button onClick={async()=>{if(hasMp){await updateFirstStop({meetingPoint:'',meetingPointLat:null,meetingPointLng:null,meetingMinsBefore:''});setEditingMP(false);}else{setEditingMP(true);}}} style={toggleSt(hasMp)}><div style={dotSt(hasMp)}/></button>}
         </div>
 
         {/* Org: configure when enabled */}
@@ -293,13 +296,13 @@ export default function PlanTab(){
           </div>
           {mpResults.length>0&&<div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',marginBottom:'6px',maxHeight:'120px',overflowY:'auto'}}>{mpResults.map((r,i)=><div key={i} onClick={()=>pickMP(r)} style={{padding:'8px 12px',cursor:'pointer',borderBottom:i<mpResults.length-1?`1px solid ${c.BD}`:'none',fontSize:'12px'}}><div style={{color:c.T,fontWeight:'500'}}>{r.name}</div><div style={{color:c.M2,fontSize:'11px'}}>{r.address}</div></div>)}</div>}
           <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
-            <div style={{fontSize:'11px',color:c.M}}>{t.minBeforeLbl||'Min before'}:</div>
+            <div style={{fontSize:'11px',color:c.M}}>{t.minBeforeLbl||'Min antes'}:</div>
             <input type="number" min="0" max="120" value={firstStop?.meetingMinsBefore||''} onChange={e=>updateFirstStop({meetingMinsBefore:e.target.value})} placeholder="10" style={{...inpSt,width:'60px',padding:'4px 8px',fontSize:'12px',textAlign:'center'}}/>
             <span style={{fontSize:'11px',color:c.M2}}>min</span>
           </div>
         </div>}
 
-        {/* Org: search when just activated (no mp yet) */}
+        {/* Org: search when just activated */}
         {isOrg&&!hasMp&&editingMP&&<div className="fade-in" style={{marginBottom:'8px',padding:'10px',background:c.CARD2,borderRadius:'8px',border:`1px solid ${c.BD}`}}>
           <div style={{display:'flex',gap:'6px',marginBottom:'6px'}}>
             <input value={mpSearch} onChange={e=>setMpSearch(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();searchMP(mpSearch);}}} placeholder={t.searchPlacePh||'Search...'} style={{...inpSt,flex:1,padding:'6px 8px',fontSize:'12px'}}/>
@@ -322,7 +325,7 @@ export default function PlanTab(){
             </button>
           </div>
         </>}
-        {!hasMp&&!editingMP&&<div style={{fontSize:'11px',color:c.M2,fontStyle:'italic'}}>{t.mpDisabled||'No hay punto de encuentro'}</div>}
+        {!hasMp&&!editingMP&&<div style={{fontSize:'11px',color:c.M2,fontStyle:'italic'}}>{t.mpDisabled}</div>}
       </div>;
     })()}
 
