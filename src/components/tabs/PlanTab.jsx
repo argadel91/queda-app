@@ -193,14 +193,15 @@ export default function PlanTab(){
 
       {/* TIME */}
       <div style={{...cardSt,flex:1,marginBottom:0}}>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'10px'}}>
+        {!editingTime&&<div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'10px'}}>
           <div>
             <div style={{fontSize:'11px',color:c.M,marginBottom:'2px'}}>🕐 {t.datesStep2||'Hora'}</div>
             <div style={{fontSize:'14px',color:c.T,fontWeight:'700'}}>{planTime?fmtTime(planTime):'—'}</div>
           </div>
-          {isOrg&&<button onClick={()=>setEditingTime(p=>!p)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',flexShrink:0}}>✏️</button>}
-        </div>
-        {isOrg&&editingTime&&<div className="fade-in" style={{marginBottom:'8px'}}>
+          {isOrg&&<button onClick={()=>setEditingTime(true)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',flexShrink:0}}>✏️</button>}
+        </div>}
+        {editingTime&&<div className="fade-in" style={{marginBottom:'8px'}}>
+          <div style={{fontSize:'11px',color:c.M,marginBottom:'4px'}}>🕐 {t.datesStep2||'Hora'}</div>
           <ClockPicker value={planTime||''} onChange={async v=>{const up={...plan,startTimes:[v,...(plan.startTimes||[]).slice(1)],time:v};await updatePlan(up);setPlan(up);setEditingTime(false);}} c={c}/>
         </div>}
         {!editingTime&&ynBtn(myVote.timeOk,v=>{setMyVote('timeOk',v);if(v===false){setMyVote('lateMin',0);setMyVote('meetOk',null);setOpenSection(p=>({...p,_onTime:undefined}));}},t.yesLbl,'No')}
@@ -216,10 +217,9 @@ export default function PlanTab(){
           {isOrg&&<button onClick={async()=>{const up={...plan,allowAltDates:!allowAlt};await updatePlan(up);setPlan(up);}} style={toggleSt(allowAlt)}><div style={dotSt(allowAlt)}/></button>}
         </div>
         {allowAlt&&<>
-          <div style={{fontSize:'9px',color:c.M2,marginBottom:'4px'}}>{t.altDatesHint||'Elige hasta 3 fechas alternativas (opcional)'}</div>
-          <div style={{fontSize:'10px',color:c.M2,marginBottom:'4px'}}>({myVote.altDates.length}/3)</div>
-          <div style={{transform:'scale(0.85)',transformOrigin:'top left',marginBottom:'-20px'}}><CalendarPicker selected={myVote.altDates} onChange={d=>{const filtered=d.filter(x=>x!==planDate);if(filtered.length===d.length){setMyVote('altDates',filtered.slice(-3));}else{setOpenSection(p=>({...p,_altDateWarn:true}));}}} max={3} c={c} lang={lang}/></div>
-          {openSection._altDateWarn&&<div style={{marginTop:'24px',padding:'4px 8px',background:'#f59e0b10',border:'1px solid #f59e0b30',borderRadius:'6px',fontSize:'10px',color:'#f59e0b'}}>{t.altDateIsPlan||'Esa fecha ya es la del plan'}</div>}
+          <div style={{fontSize:'9px',color:openSection._altDateWarn?'#f59e0b':c.M2,marginBottom:'4px'}}>{openSection._altDateWarn?(t.altDateIsPlan||'Esa fecha ya es la del plan'):`${t.altDatesHint||'Hasta 3 fechas alternativas (opcional)'} (${myVote.altDates.length}/3)`}</div>
+          {myVote.altDates.length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:'4px',marginBottom:'4px'}}>{myVote.altDates.map(d=><span key={d} style={{fontSize:'10px',padding:'2px 6px',borderRadius:'10px',background:`${mc}15`,color:mc,border:`1px solid ${mc}30`,display:'flex',alignItems:'center',gap:'2px',textTransform:'capitalize'}}>{fmtShort(d,lang)}<button onClick={()=>setMyVote('altDates',myVote.altDates.filter(x=>x!==d))} style={{background:'none',border:'none',color:mc,cursor:'pointer',fontSize:'10px',padding:0}}>×</button></span>)}</div>}
+          <div style={{transform:'scale(0.8)',transformOrigin:'top left',marginBottom:'-40px'}}><CalendarPicker selected={myVote.altDates} onChange={d=>{const filtered=d.filter(x=>x!==planDate);if(filtered.length===d.length){setMyVote('altDates',filtered.slice(-3));setOpenSection(p=>({...p,_altDateWarn:undefined}));}else{setOpenSection(p=>({...p,_altDateWarn:true}));setTimeout(()=>setOpenSection(p=>({...p,_altDateWarn:undefined})),2000);}}} max={3} c={c} lang={lang}/></div>
         </>}
         {!allowAlt&&<div style={{fontSize:'9px',color:c.M2,fontStyle:'italic'}}>{t.altDatesDisabled}</div>}
       </div>
@@ -329,6 +329,7 @@ export default function PlanTab(){
       fromLabel={`📍 ${(firstStop.meetingPoint||'').split(' — ')[0]}`}
       toLabel={`1) ${firstOpt.name||''}`}
       departureTime={mpTime}
+      title={t.tHowToGetMP||'Cómo llegar desde el punto de encuentro'}
       c={c} t={t}/>}
 
     {/* STOP CARDS + transport */}

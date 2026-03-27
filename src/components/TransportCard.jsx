@@ -19,7 +19,7 @@ const MODES = [
   { key: 'BICYCLING', emoji: '🚲' },
 ]
 
-export default function TransportCard({ origin, destination, fromLabel, toLabel, departureTime, c, t }) {
+export default function TransportCard({ origin, destination, fromLabel, toLabel, departureTime, title, c, t }) {
   const [results, setResults] = useState({})
   const [flightInfo, setFlightInfo] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -94,7 +94,7 @@ export default function TransportCard({ origin, destination, fromLabel, toLabel,
       padding: '10px 12px', marginBottom: '10px'
     }}>
       <div style={{ fontSize: '10px', color: c.M, fontWeight: '600', marginBottom: '4px', letterSpacing: '.03em' }}>
-        {t.tHowToGet || 'Cómo llegar'}
+        {title || t.tHowToGet || 'Cómo llegar'}
       </div>
       <div style={{ fontSize: '10px', color: c.M2, marginBottom: '8px' }}>
         {fromLabel} → {toLabel}
