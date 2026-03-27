@@ -3,6 +3,7 @@ import { useResults, addMins, fmtMinsToH } from '../ResultsContext.jsx'
 import { fmtShort, fmtTime, fmtDate, calcEnd } from '../../lib/utils.js'
 import { updatePlan } from '../../lib/supabase.js'
 import CalendarPicker from '../CalendarPicker.jsx'
+import ClockPicker from '../ClockPicker.jsx'
 import Countdown from '../Countdown.jsx'
 import TransportCard from '../TransportCard.jsx'
 import TimeRangeBar from '../TimeRangeBar.jsx'
@@ -27,6 +28,8 @@ export default function PlanTab(){
   const[mpResults,setMpResults]=useState([]);
   const[editingCap,setEditingCap]=useState(null); // stopId or null
   const[editingDur,setEditingDur]=useState(null); // stopId or null
+  const[editingTime,setEditingTime]=useState(false);
+  const[editingDeadline,setEditingDeadline]=useState(false);
 
   // Show alt dates / avail range toggles
   const[showAltDates,setShowAltDates]=useState(false);
@@ -194,10 +197,17 @@ export default function PlanTab(){
 
       {/* ── 2. TIME CARD ── */}
       <div style={{...cardSt,flex:1,marginBottom:0,opacity:myVote.dateOk===true||isOrg?1:0.4}}>
-        <div style={{marginBottom:canVote&&myVote.dateOk===true?'10px':0}}>
-          <div style={{fontSize:'11px',color:c.M,marginBottom:'2px'}}>🕐 {t.timeOkQ||'Time'}</div>
-          <div style={{fontSize:'14px',color:c.T,fontWeight:'700'}}>{planTime?fmtTime(planTime):'—'}</div>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:canVote&&myVote.dateOk===true?'10px':editingTime?'10px':0}}>
+          <div>
+            <div style={{fontSize:'11px',color:c.M,marginBottom:'2px'}}>🕐 {t.timeOkQ||'Time'}</div>
+            <div style={{fontSize:'14px',color:c.T,fontWeight:'700'}}>{planTime?fmtTime(planTime):'—'}</div>
+          </div>
+          {isOrg&&<button onClick={()=>setEditingTime(p=>!p)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'4px 8px',color:c.M2,cursor:'pointer',fontSize:'12px',flexShrink:0}}>✏️</button>}
         </div>
+        {/* Organizer inline time edit */}
+        {isOrg&&editingTime&&<div className="fade-in" style={{marginBottom:'8px'}}>
+          <ClockPicker value={planTime||''} onChange={async v=>{const up={...plan,startTimes:[v,...(plan.startTimes||[]).slice(1)],time:v};await updatePlan(up);setPlan(up);}} c={c}/>
+        </div>}
         {canVote&&myVote.dateOk===true&&<>
           {ynBtn(myVote.timeOk,v=>{setMyVote('timeOk',v);if(!v){setMyVote('lateMin',0);setMyVote('meetOk',null);setOpenSection(p=>({...p,_onTime:undefined}));setShowAvailRange(true);}},t.yesLbl,'No')}
           {/* Avail range toggle — available even if Yes */}
@@ -359,6 +369,20 @@ export default function PlanTab(){
       </div>
       <button onClick={()=>saveMyResp(true)} disabled={myVote.saving} style={{width:'100%',padding:'10px',background:myVote.saved?'#22c55e':mc,border:'none',borderRadius:'10px',color:myVote.saved?'#fff':'#0A0A0A',cursor:'pointer',fontFamily:'inherit',fontWeight:'700',fontSize:'13px',marginTop:'4px'}}>{myVote.saving?'...':(myVote.saved?(t.respSaved):(t.saveAvail))}</button>
       {myVote.saveConfirm&&<div className="fade-in" style={{marginTop:'6px',padding:'8px',background:'#22c55e15',border:'1px solid #22c55e40',borderRadius:'8px',textAlign:'center',fontSize:'12px',color:'#22c55e',fontWeight:'600'}}>✓ {t.savedTitle}</div>}
+      {/* Deadline card — organizer */}
+      <div style={{marginTop:'8px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px'}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:editingDeadline?'8px':0}}>
+          <div>
+            <div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>⏰ {t.deadlineLbl||'Deadline'}</div>
+            <div style={{fontSize:'12px',color:plan.deadline?c.T:c.M2,fontWeight:'600'}}>{plan.deadline?new Date(plan.deadline).toLocaleString():'—'}</div>
+          </div>
+          <button onClick={()=>setEditingDeadline(p=>!p)} style={{background:'none',border:`1px solid ${c.BD}`,borderRadius:'6px',padding:'2px 6px',color:c.M2,cursor:'pointer',fontSize:'11px',flexShrink:0}}>✏️</button>
+        </div>
+        {editingDeadline&&<div className="fade-in">
+          <input type="datetime-local" min={new Date().toISOString().slice(0,16)} value={plan.deadline||''} onChange={async e=>{const up={...plan,deadline:e.target.value||null};await updatePlan(up);setPlan(up);}} style={{...inpSt,padding:'6px 8px',fontSize:'12px'}}/>
+          {plan.deadline&&<button onClick={async()=>{const up={...plan,deadline:null};await updatePlan(up);setPlan(up);}} style={{marginTop:'4px',background:'none',border:'none',color:'#ef4444',cursor:'pointer',fontSize:'11px',fontFamily:'inherit'}}>× {t.removeDeadline||'Remove'}</button>}
+        </div>}
+      </div>
     </div>}
 
     {/* Require login gate */}
@@ -380,7 +404,12 @@ export default function PlanTab(){
         return<button onClick={saveMyResp} disabled={!can} style={{width:'100%',padding:'12px',background:myVote.saved?'#22c55e':can?mc:c.CARD2,border:can||myVote.saved?'none':`1px solid ${c.BD}`,borderRadius:'10px',color:myVote.saved?'#fff':can?'#0A0A0A':c.M,cursor:can?'pointer':'default',fontFamily:'inherit',fontWeight:'700',fontSize:'14px',opacity:can||myVote.saved?1:0.5}}>{myVote.saving?'...':(myVote.saved?t.respSaved:(ok?t.saveAvail:(t.answerAllToSave)))}</button>;
       })()}
       {myVote.saveConfirm&&<div className="fade-in" style={{marginTop:'8px',padding:'10px',background:'#22c55e15',border:'1px solid #22c55e40',borderRadius:'10px',textAlign:'center',fontSize:'13px',color:'#22c55e',fontWeight:'600'}}>✓ {t.savedTitle}</div>}
-      {plan.deadline&&<Countdown deadline={plan.deadline} lang={lang} c={c} t={t} mc={mc} onExpired={()=>setTab('vote')}/>}
+      {/* Deadline card — invitee (visible, read-only) */}
+      {plan.deadline&&<div style={{marginTop:'8px',background:c.CARD2,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px'}}>
+        <div style={{fontSize:'10px',color:c.M,marginBottom:'2px'}}>⏰ {t.deadlineLbl||'Deadline'}</div>
+        <div style={{fontSize:'12px',color:c.T,fontWeight:'600'}}>{new Date(plan.deadline).toLocaleString()}</div>
+        <Countdown deadline={plan.deadline} lang={lang} c={c} t={t} mc={mc} onExpired={()=>setTab('vote')}/>
+      </div>}
     </div>}
 
     {/* Add point */}
