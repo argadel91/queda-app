@@ -168,6 +168,7 @@ function AppInner() {
     <AppProvider value={appCtx}>
     <React.Suspense fallback={<Fallback />}>
       <div style={{ minHeight: '100vh', background: c.BG, color: c.T, fontFamily: "'DM Sans',system-ui,sans-serif" }} onClick={() => { setLangOpen(false) }}>
+        <a href="#main-content" className="skip-link">{T[lang]?.skipToContent || 'Skip to content'}</a>
         {toast && <div role="status" aria-live="polite" style={{ position: 'fixed', bottom: showBottomNav ? '72px' : '24px', left: '50%', transform: 'translateX(-50%)', background: toast.type === 'success' ? '#22c55e' : toast.type === 'info' ? c.A : '#ef4444', color: toast.type === 'info' ? '#0A0A0A' : '#fff', padding: '12px 20px', borderRadius: '30px', fontWeight: '600', fontSize: '14px', zIndex: 300, boxShadow: '0 4px 20px rgba(0,0,0,.4)', whiteSpace: 'nowrap', animation: 'slideDown .3s ease' }}>{toast.type === 'success' ? '✓' : toast.type === 'info' ? 'i' : '!'} {toast.msg}</div>}
 
         {/* Top bar */}
@@ -184,7 +185,7 @@ function AppInner() {
           </div>
         </header>
 
-        <main><Routes>
+        <main id="main-content"><Routes>
           <Route path="/" element={<Feed c={c} lang={lang} onPlanClick={handlePlanClick} onCreateClick={handleCreateClick} userLocation={userLocation} />} />
           <Route path="/map" element={<MapFeed c={c} lang={lang} onPlanClick={handlePlanClick} userLocation={userLocation} />} />
           <Route path="/create" element={<Create onBack={handleGoHome} onCreated={p => navigate('/plan/' + p.id)} c={c} lang={lang} authUser={authUser} profile={profile} />} />

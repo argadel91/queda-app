@@ -16,6 +16,7 @@ export default function MapFeed({ c, lang, onPlanClick, userLocation }) {
   const [filters, setFilters] = useState({ category: '', dateRange: '', radiusKm: '' })
   const [selected, setSelected] = useState(null)
   const [mapReady, setMapReady] = useState(false)
+  const [showHint, setShowHint] = useState(false)
   const mapRef = useRef(null)
   const mapObj = useRef(null)
   const markersRef = useRef([])
@@ -131,6 +132,13 @@ export default function MapFeed({ c, lang, onPlanClick, userLocation }) {
       plans.forEach(p => { if (p.lat && p.lng) bounds.extend({ lat: p.lat, lng: p.lng }) })
       mapObj.current.fitBounds(bounds, 50)
     }
+
+    // Show hint when there are plans with markers
+    if (plans.length > 0 && !selected) {
+      setShowHint(true)
+      const timer = setTimeout(() => setShowHint(false), 3000)
+      return () => clearTimeout(timer)
+    }
   }, [plans, mapReady])
 
   const handleFilterChange = newFilters => {
@@ -144,6 +152,19 @@ export default function MapFeed({ c, lang, onPlanClick, userLocation }) {
         <FilterBar filters={filters} onChange={handleFilterChange} lang={lang} c={c} />
       </div>
       <div ref={mapRef} style={{ flex: 1, minHeight: '300px' }} />
+
+      {/* Map hint */}
+      {showHint && !selected && (
+        <div onClick={() => setShowHint(false)} style={{
+          position: 'absolute', top: '60px', left: '50%', transform: 'translateX(-50%)',
+          background: c.CARD, border: `1px solid ${c.BD}`, borderRadius: '12px',
+          padding: '10px 16px', boxShadow: '0 4px 16px rgba(0,0,0,.2)',
+          fontSize: '14px', color: c.T, fontWeight: '500', zIndex: 5,
+          cursor: 'pointer', whiteSpace: 'nowrap'
+        }}>
+          📍 {t.mapHint || 'Tap a pin to see plan details'}
+        </div>
+      )}
 
       {/* Selected plan card at bottom */}
       {selected && (

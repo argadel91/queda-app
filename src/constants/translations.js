@@ -230,7 +230,7 @@ const T ={
     resetPassTitle:'Restablecer contraseña',resetPassSubtitle:'Elige una nueva contraseña para tu cuenta',resetPassPlaceholder:'Nueva contraseña (mín. 8 caracteres)',resetPassRepeat:'Repite la nueva contraseña',resetPassMin:'La contraseña debe tener al menos 8 caracteres',resetPassNoMatch:'Las contraseñas no coinciden',resetPassError:'Error al actualizar la contraseña',resetPassUpdated:'Contraseña actualizada',resetPassNowSignIn:'Ya puedes iniciar sesión con tu nueva contraseña',resetPassBtn:'Actualizar contraseña',
     emptyFeedTitle:'No hay planes cerca',emptyFeedSub:'¡Crea el primero y queda con gente nueva!',emptyFeedCta:'Crear un plan',
     profileSaved:'Perfil guardado',signOutConfirm:'¿Cerrar sesión?',leaveConfirm:'¿Dejar este plan?',
-    onboardHint:'Rellena nombre, fecha de nacimiento e intereses para continuar',onboardReady:'¡Listo! Pulsa guardar',
+    onboardHint:'Rellena nombre, fecha de nacimiento e intereses para continuar',onboardReady:'¡Listo! Pulsa guardar',linkCopied:'Link copiado',mapHint:'Toca un pin para ver el plan',skipToContent:'Ir al contenido',
   },
   en:{
     sub:'Say goodbye to endless chats.',
@@ -448,7 +448,7 @@ const T ={
     resetPassTitle:'Reset password',resetPassSubtitle:'Choose a new password for your account',resetPassPlaceholder:'New password (min 8 characters)',resetPassRepeat:'Repeat new password',resetPassMin:'Password must be at least 8 characters',resetPassNoMatch:'Passwords do not match',resetPassError:'Error updating password',resetPassUpdated:'Password updated',resetPassNowSignIn:'You can now sign in with your new password',resetPassBtn:'Update password',
     emptyFeedTitle:'No plans nearby',emptyFeedSub:'Create the first one and meet new people!',emptyFeedCta:'Create a plan',
     profileSaved:'Profile saved',signOutConfirm:'Sign out?',leaveConfirm:'Leave this plan?',
-    onboardHint:'Fill in name, birthdate and interests to continue',onboardReady:'Ready! Hit save',
+    onboardHint:'Fill in name, birthdate and interests to continue',onboardReady:'Ready! Hit save',linkCopied:'Link copied',mapHint:'Tap a pin to see plan details',skipToContent:'Skip to content',
   },
   pt:{
 sub:'Diga adeus aos chats intermináveis.',
@@ -505,7 +505,7 @@ noDataYet:'Sem dados ainda',noDataHint:'Quando responderem, verá os dados aqui'
     resetPassTitle:'Redefinir palavra-passe',resetPassSubtitle:'Escolhe uma nova palavra-passe para a tua conta',resetPassPlaceholder:'Nova palavra-passe (mín. 8 caracteres)',resetPassRepeat:'Repete a nova palavra-passe',resetPassMin:'A palavra-passe deve ter pelo menos 8 caracteres',resetPassNoMatch:'As palavras-passe não coincidem',resetPassError:'Erro ao atualizar a palavra-passe',resetPassUpdated:'Palavra-passe atualizada',resetPassNowSignIn:'Já podes iniciar sessão com a tua nova palavra-passe',resetPassBtn:'Atualizar palavra-passe',
     emptyFeedTitle:'Sem planos por perto',emptyFeedSub:'Cria o primeiro e conhece gente nova!',emptyFeedCta:'Criar um plano',
     profileSaved:'Perfil guardado',signOutConfirm:'Encerrar sessão?',leaveConfirm:'Sair deste plano?',
-    onboardHint:'Preenche nome, data de nascimento e interesses para continuar',onboardReady:'Pronto! Clica em guardar',
+    onboardHint:'Preenche nome, data de nascimento e interesses para continuar',onboardReady:'Pronto! Clica em guardar',linkCopied:'Link copiado',mapHint:'Toca num pin para ver o plano',skipToContent:'Ir para o conteúdo',
   },
   fr:{
 sub:'Dites adieu aux discussions sans fin.',
@@ -542,7 +542,7 @@ editNameLbl:'Nom',editDescLbl:'Description',editDatesLbl:'Dates',editTimesLbl:'H
     resetPassTitle:'Réinitialiser le mot de passe',resetPassSubtitle:'Choisis un nouveau mot de passe pour ton compte',resetPassPlaceholder:'Nouveau mot de passe (min 8 caractères)',resetPassRepeat:'Répète le nouveau mot de passe',resetPassMin:'Le mot de passe doit contenir au moins 8 caractères',resetPassNoMatch:'Les mots de passe ne correspondent pas',resetPassError:'Erreur lors de la mise à jour du mot de passe',resetPassUpdated:'Mot de passe mis à jour',resetPassNowSignIn:'Tu peux maintenant te connecter avec ton nouveau mot de passe',resetPassBtn:'Mettre à jour le mot de passe',
     emptyFeedTitle:'Pas de plans à proximité',emptyFeedSub:'Crée le premier et rencontre de nouvelles personnes !',emptyFeedCta:'Créer un plan',
     profileSaved:'Profil enregistré',signOutConfirm:'Se déconnecter ?',leaveConfirm:'Quitter ce plan ?',
-    onboardHint:'Remplis nom, date de naissance et intérêts pour continuer',onboardReady:'Prêt ! Appuie sur enregistrer',
+    onboardHint:'Remplis nom, date de naissance et intérêts pour continuer',onboardReady:'Prêt ! Appuie sur enregistrer',linkCopied:'Lien copié',mapHint:'Touche un pin pour voir le plan',skipToContent:'Aller au contenu',
   },
   de:{
 sub:'Schluss mit endlosen Chats.',
@@ -579,7 +579,7 @@ editNameLbl:'Name',editDescLbl:'Beschreibung',editDatesLbl:'Termine',editTimesLb
     resetPassTitle:'Passwort zurücksetzen',resetPassSubtitle:'Wähle ein neues Passwort für dein Konto',resetPassPlaceholder:'Neues Passwort (mind. 8 Zeichen)',resetPassRepeat:'Neues Passwort wiederholen',resetPassMin:'Das Passwort muss mindestens 8 Zeichen lang sein',resetPassNoMatch:'Die Passwörter stimmen nicht überein',resetPassError:'Fehler beim Aktualisieren des Passworts',resetPassUpdated:'Passwort aktualisiert',resetPassNowSignIn:'Du kannst dich jetzt mit deinem neuen Passwort anmelden',resetPassBtn:'Passwort aktualisieren',
     emptyFeedTitle:'Keine Pläne in der Nähe',emptyFeedSub:'Erstelle den ersten und lerne neue Leute kennen!',emptyFeedCta:'Plan erstellen',
     profileSaved:'Profil gespeichert',signOutConfirm:'Abmelden?',leaveConfirm:'Plan verlassen?',
-    onboardHint:'Fülle Name, Geburtsdatum und Interessen aus',onboardReady:'Fertig! Klicke auf Speichern',
+    onboardHint:'Fülle Name, Geburtsdatum und Interessen aus',onboardReady:'Fertig! Klicke auf Speichern',linkCopied:'Link kopiert',mapHint:'Tippe auf einen Pin für Details',skipToContent:'Zum Inhalt springen',
   },
   it:{
 sub:'Dì addio alle chat infinite.',
@@ -616,7 +616,7 @@ editNameLbl:'Nome',editDescLbl:'Descrizione',editDatesLbl:'Date',editTimesLbl:'O
     resetPassTitle:'Reimposta password',resetPassSubtitle:'Scegli una nuova password per il tuo account',resetPassPlaceholder:'Nuova password (min 8 caratteri)',resetPassRepeat:'Ripeti la nuova password',resetPassMin:'La password deve essere di almeno 8 caratteri',resetPassNoMatch:'Le password non corrispondono',resetPassError:'Errore nell\'aggiornamento della password',resetPassUpdated:'Password aggiornata',resetPassNowSignIn:'Ora puoi accedere con la tua nuova password',resetPassBtn:'Aggiorna password',
     emptyFeedTitle:'Nessun piano nelle vicinanze',emptyFeedSub:'Crea il primo e conosci gente nuova!',emptyFeedCta:'Crea un piano',
     profileSaved:'Profilo salvato',signOutConfirm:'Disconnettersi?',leaveConfirm:'Lasciare questo piano?',
-    onboardHint:'Inserisci nome, data di nascita e interessi per continuare',onboardReady:'Pronto! Premi salva',
+    onboardHint:'Inserisci nome, data di nascita e interessi per continuare',onboardReady:'Pronto! Premi salva',linkCopied:'Link copiato',mapHint:'Tocca un pin per vedere il piano',skipToContent:'Vai al contenuto',
   },
 };
 export default T

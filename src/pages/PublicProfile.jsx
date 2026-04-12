@@ -45,7 +45,7 @@ export default function PublicProfile({ c, lang }) {
           {profile.name}
           {age != null && <span style={{ fontSize: '16px', fontWeight: '400', color: c.M, marginLeft: '8px' }}>{age}</span>}
         </h2>
-        {profile.username && <div style={{ fontSize: '14px', color: c.A, fontWeight: '600', marginBottom: '4px' }}>@{profile.username}</div>}
+        {profile.username && <div style={{ fontSize: '14px', color: c.M, fontWeight: '500', marginBottom: '4px' }}>@{profile.username}</div>}
         {profile.city && <div style={{ fontSize: '13px', color: c.M2 }}>📍 {profile.city}</div>}
       </div>
 

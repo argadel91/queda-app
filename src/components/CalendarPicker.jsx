@@ -22,10 +22,10 @@ export default function CalendarPicker({selected,onChange,c,lang,max:maxDates=3}
       <span style={{fontSize:'14px',fontWeight:'600',color:c.T,textTransform:'capitalize'}}>{fmtMonthYear(vy,vm,lang)}</span>
       <button onClick={next} title={t.nextMonth||'Next month'} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'20px',padding:'8px 12px',minWidth:'44px',minHeight:'44px'}}>›</button>
     </div>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:'3px',marginBottom:'4px'}}>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:'4px',marginBottom:'4px'}}>
       {dl.map((d,i)=><div key={i} style={{textAlign:'center',fontSize:'11px',color:c.M,fontWeight:'600',padding:'4px'}}>{d}</div>)}
     </div>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:'3px'}}>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:'4px'}}>
       {Array.from({length:first}).map((_,i)=><div key={'e'+i}/>)}
       {Array.from({length:days}).map((_,i)=>{const date=new Date(vy,vm,i+1);const iso=toISO(date);const dis=date<now||date>max;const sel=selected.includes(iso);return<div key={i} onClick={()=>!dis&&tog(iso)} style={{textAlign:'center',padding:'7px 2px',borderRadius:'8px',fontSize:'13px',cursor:dis?'default':'pointer',background:sel?c.A:dis?'transparent':c.CARD,color:sel?'#0A0A0A':dis?c.BD:c.T,fontWeight:sel?'700':'400',border:sel?'none':`1px solid ${dis?'transparent':c.BD}`}}>{i+1}</div>;})}
     </div>

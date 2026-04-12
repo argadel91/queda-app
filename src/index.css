@@ -76,3 +76,29 @@ button:active {
 .fade-in {
   animation: fadeIn 0.25s ease-out;
 }
+
+/* Skip link — hidden until focused */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  padding: 12px 24px;
+  background: #0A0A0A;
+  color: #CDFF6C;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  z-index: 999;
+  text-decoration: none;
+  transition: top .2s;
+}
+
+.skip-link:focus {
+  top: 12px;
+}
+
+/* Compact layout for very small screens */
+@media (max-width: 380px) {
+  h1 { font-size: 32px !important; }
+  h2 { font-size: 20px !important; }
+}

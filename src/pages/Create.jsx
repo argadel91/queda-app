@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import T from '../constants/translations.js'
-import { createPlan, joinPlan, showErr } from '../lib/supabase.js'
+import { createPlan, joinPlan, showErr, showToast } from '../lib/supabase.js'
 import { PLAN_STATUS, JOIN_MODE } from '../constants/status.js'
 import { genId, fmtShort } from '../lib/utils.js'
 import { Btn, Back, Lbl, Stepper } from '../components/ui.jsx'
@@ -69,7 +69,7 @@ export default function Create({ onBack, onCreated, c, lang, authUser, profile }
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={() => window.open('https://wa.me/?text=' + encodeURIComponent(shareText), '_blank')} style={{ flex: 1, padding: '12px', background: '#25D366', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>WhatsApp</button>
             <button onClick={() => window.open('https://t.me/share/url?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent(shareText), '_blank')} style={{ flex: 1, padding: '12px', background: '#0088cc', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>Telegram</button>
-            <button onClick={() => { navigator.clipboard?.writeText(shareUrl) }} style={{ flex: 1, padding: '12px', background: c.CARD2, color: c.T, border: `1px solid ${c.BD}`, borderRadius: '12px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}>🔗 {t.copyLink || 'Copy'}</button>
+            <button onClick={() => { navigator.clipboard?.writeText(shareUrl); showToast(t.linkCopied || 'Link copied') }} style={{ flex: 1, padding: '12px', background: c.CARD2, color: c.T, border: `1px solid ${c.BD}`, borderRadius: '12px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}>🔗 {t.copyLink || 'Copy'}</button>
           </div>
           {onCreated && <Btn onClick={() => onCreated(created)} full style={{ padding: '14px' }} c={c}>{t.viewPlan || 'View plan'}</Btn>}
           <button onClick={onBack} style={{ padding: '12px', background: 'none', border: 'none', color: c.M2, cursor: 'pointer', fontFamily: 'inherit', fontSize: '14px' }}>{t.homeBtn || 'Home'}</button>
@@ -171,6 +171,7 @@ export default function Create({ onBack, onCreated, c, lang, authUser, profile }
       <div style={{ marginBottom: '24px' }}>
         <Lbl c={c} htmlFor="plan-desc">{t.descLbl || 'Description (optional)'}</Lbl>
         <textarea id="plan-desc" value={description} onChange={e => setDescription(e.target.value.slice(0, 500))} maxLength={500} rows={3} placeholder={t.descPlaceholder || 'Any extra details...'} style={{ background: c.CARD, border: `1px solid ${c.BD}`, borderRadius: '10px', padding: '12px 14px', color: c.T, fontSize: '14px', fontFamily: 'inherit', outline: 'none', width: '100%', boxSizing: 'border-box', resize: 'vertical', lineHeight: 1.5 }} />
+        <div style={{ fontSize: '12px', color: description.length > 450 ? '#ef4444' : c.M2, textAlign: 'right', marginTop: '4px' }}>{description.length}/500</div>
       </div>
 
       {/* Create button */}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import T from '../constants/translations.js'
 import { JOIN_STATUS, JOIN_MODE } from '../constants/status.js'
-import { fetchPlan, fetchParticipants, joinPlan, requestJoin, leavePlan, updateParticipant, db, showErr } from '../lib/supabase.js'
+import { fetchPlan, fetchParticipants, joinPlan, requestJoin, leavePlan, updateParticipant, db, showErr, showToast } from '../lib/supabase.js'
 import { getCategoryEmoji, getCategoryLabel } from '../constants/categories.js'
 import { fmtDate, fmtTime } from '../lib/utils.js'
 import { Btn, Back } from '../components/ui.jsx'
@@ -199,7 +199,7 @@ export default function PlanDetail({ c, lang, authUser }) {
           }
           <div>
             <div style={{ fontSize: '15px', fontWeight: '600', color: c.T }}>{organizer?.name || '?'}</div>
-            {organizer?.username && <div style={{ fontSize: '12px', color: c.A }}>@{organizer.username}</div>}
+            {organizer?.username && <div style={{ fontSize: '12px', color: c.M }}>@{organizer.username}</div>}
             {organizer?.city && <div style={{ fontSize: '11px', color: c.M2 }}>📍 {organizer.city}</div>}
           </div>
         </div>
@@ -226,7 +226,7 @@ export default function PlanDetail({ c, lang, authUser }) {
                     {p?.name || '?'}
                     {age(p?.birthdate) && <span style={{ color: c.M, fontWeight: '400', marginLeft: '6px' }}>{age(p.birthdate)}</span>}
                   </div>
-                  {pp.user_id === plan.user_id && <span style={{ fontSize: '10px', color: c.A, fontWeight: '700', background: `${c.A}18`, padding: '2px 8px', borderRadius: '10px' }}>ORG</span>}
+                  {pp.user_id === plan.user_id && <span style={{ fontSize: '10px', color: c.M, fontWeight: '700', background: `${c.BD}`, padding: '2px 8px', borderRadius: '10px' }}>ORG</span>}
                 </div>
               )
             })}
@@ -282,7 +282,7 @@ export default function PlanDetail({ c, lang, authUser }) {
       <div style={{ display: 'flex', gap: '8px' }}>
         <button onClick={() => window.open('https://wa.me/?text=' + encodeURIComponent(shareText), '_blank')} style={{ flex: 1, padding: '10px', background: '#25D366', color: '#fff', border: 'none', borderRadius: '10px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>WhatsApp</button>
         <button onClick={() => window.open('https://t.me/share/url?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent(shareText), '_blank')} style={{ flex: 1, padding: '10px', background: '#0088cc', color: '#fff', border: 'none', borderRadius: '10px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>Telegram</button>
-        <button onClick={() => { navigator.clipboard?.writeText(shareUrl) }} style={{ flex: 1, padding: '10px', background: c.CARD2, color: c.T, border: `1px solid ${c.BD}`, borderRadius: '10px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}>🔗 {t.copyLink || 'Copy'}</button>
+        <button onClick={() => { navigator.clipboard?.writeText(shareUrl); showToast(t.linkCopied || 'Link copied') }} style={{ flex: 1, padding: '10px', background: c.CARD2, color: c.T, border: `1px solid ${c.BD}`, borderRadius: '10px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}>🔗 {t.copyLink || 'Copy'}</button>
       </div>
       </>}
     </div>

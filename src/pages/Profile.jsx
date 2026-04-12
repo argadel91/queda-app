@@ -102,7 +102,7 @@ export default function Profile({ onBack, c, lang, authUser, profile, onUpdatePr
                 {profile?.name || '—'}
                 {age != null && <span style={{ fontSize: '14px', fontWeight: '400', color: c.M, marginLeft: '8px' }}>{age}</span>}
               </div>
-              {profile?.username && <div style={{ fontSize: '13px', color: c.A, fontWeight: '600' }}>@{profile.username}</div>}
+              {profile?.username && <div style={{ fontSize: '14px', color: c.M, fontWeight: '500' }}>@{profile.username}</div>}
               {profile?.city && <div style={{ fontSize: '12px', color: c.M2 }}>📍 {profile.city}</div>}
             </div>
           </div>
