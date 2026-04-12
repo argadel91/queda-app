@@ -150,10 +150,9 @@ test.describe('Auth flows', () => {
     const loggedIn = await loginViaSDK(page)
     if (!loggedIn) { test.skip(); return }
 
-    // Should see authenticated content: feed heading or bottom nav
-    const feedOrNav = page.locator('text=/discover|descubrir|descobrir/i').first()
-      .or(page.locator('text=🔍').first())
-    await expect(feedOrNav).toBeVisible({ timeout: 10000 })
+    // Should see authenticated content: feed heading
+    const feedHeading = page.locator('h2').filter({ hasText: /discover|descubrir|descobrir/i }).first()
+    await expect(feedHeading).toBeVisible({ timeout: 10000 })
   })
 
   test('login with invalid credentials shows error', async ({ page }) => {
