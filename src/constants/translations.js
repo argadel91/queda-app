@@ -229,6 +229,7 @@ const T ={
     spotsLeft:'plazas libres',spotLeft:'plaza libre',planFullLabel:'Completo',chatToday:'Hoy',chatYesterday:'Ayer',chatNoMessages:'Aún no hay mensajes. ¡Sé el primero!',chatPlaceholder:'Escribe un mensaje...',chatReconnecting:'Reconectando...',
     resetPassTitle:'Restablecer contraseña',resetPassSubtitle:'Elige una nueva contraseña para tu cuenta',resetPassPlaceholder:'Nueva contraseña (mín. 8 caracteres)',resetPassRepeat:'Repite la nueva contraseña',resetPassMin:'La contraseña debe tener al menos 8 caracteres',resetPassNoMatch:'Las contraseñas no coinciden',resetPassError:'Error al actualizar la contraseña',resetPassUpdated:'Contraseña actualizada',resetPassNowSignIn:'Ya puedes iniciar sesión con tu nueva contraseña',resetPassBtn:'Actualizar contraseña',
     emptyFeedTitle:'No hay planes cerca',emptyFeedSub:'¡Crea el primero y queda con gente nueva!',emptyFeedCta:'Crear un plan',
+    profileSaved:'Perfil guardado',signOutConfirm:'¿Cerrar sesión?',leaveConfirm:'¿Dejar este plan?',
   },
   en:{
     sub:'Say goodbye to endless chats.',
@@ -445,6 +446,7 @@ const T ={
     spotsLeft:'spots left',spotLeft:'spot left',planFullLabel:'Full',chatToday:'Today',chatYesterday:'Yesterday',chatNoMessages:'No messages yet. Be the first!',chatPlaceholder:'Type a message...',chatReconnecting:'Reconnecting...',
     resetPassTitle:'Reset password',resetPassSubtitle:'Choose a new password for your account',resetPassPlaceholder:'New password (min 8 characters)',resetPassRepeat:'Repeat new password',resetPassMin:'Password must be at least 8 characters',resetPassNoMatch:'Passwords do not match',resetPassError:'Error updating password',resetPassUpdated:'Password updated',resetPassNowSignIn:'You can now sign in with your new password',resetPassBtn:'Update password',
     emptyFeedTitle:'No plans nearby',emptyFeedSub:'Create the first one and meet new people!',emptyFeedCta:'Create a plan',
+    profileSaved:'Profile saved',signOutConfirm:'Sign out?',leaveConfirm:'Leave this plan?',
   },
   pt:{
 sub:'Diga adeus aos chats intermináveis.',
@@ -500,6 +502,7 @@ noDataYet:'Sem dados ainda',noDataHint:'Quando responderem, verá os dados aqui'
     spotsLeft:'vagas',spotLeft:'vaga',planFullLabel:'Lotado',chatToday:'Hoje',chatYesterday:'Ontem',chatNoMessages:'Ainda sem mensagens. Sê o primeiro!',chatPlaceholder:'Escreve uma mensagem...',chatReconnecting:'A reconectar...',
     resetPassTitle:'Redefinir palavra-passe',resetPassSubtitle:'Escolhe uma nova palavra-passe para a tua conta',resetPassPlaceholder:'Nova palavra-passe (mín. 8 caracteres)',resetPassRepeat:'Repete a nova palavra-passe',resetPassMin:'A palavra-passe deve ter pelo menos 8 caracteres',resetPassNoMatch:'As palavras-passe não coincidem',resetPassError:'Erro ao atualizar a palavra-passe',resetPassUpdated:'Palavra-passe atualizada',resetPassNowSignIn:'Já podes iniciar sessão com a tua nova palavra-passe',resetPassBtn:'Atualizar palavra-passe',
     emptyFeedTitle:'Sem planos por perto',emptyFeedSub:'Cria o primeiro e conhece gente nova!',emptyFeedCta:'Criar um plano',
+    profileSaved:'Perfil guardado',signOutConfirm:'Encerrar sessão?',leaveConfirm:'Sair deste plano?',
   },
   fr:{
 sub:'Dites adieu aux discussions sans fin.',
@@ -535,6 +538,7 @@ editNameLbl:'Nom',editDescLbl:'Description',editDatesLbl:'Dates',editTimesLbl:'H
     spotsLeft:'places restantes',spotLeft:'place restante',planFullLabel:'Complet',chatToday:"Aujourd'hui",chatYesterday:'Hier',chatNoMessages:'Pas encore de messages. Sois le premier !',chatPlaceholder:'Écris un message...',chatReconnecting:'Reconnexion...',
     resetPassTitle:'Réinitialiser le mot de passe',resetPassSubtitle:'Choisis un nouveau mot de passe pour ton compte',resetPassPlaceholder:'Nouveau mot de passe (min 8 caractères)',resetPassRepeat:'Répète le nouveau mot de passe',resetPassMin:'Le mot de passe doit contenir au moins 8 caractères',resetPassNoMatch:'Les mots de passe ne correspondent pas',resetPassError:'Erreur lors de la mise à jour du mot de passe',resetPassUpdated:'Mot de passe mis à jour',resetPassNowSignIn:'Tu peux maintenant te connecter avec ton nouveau mot de passe',resetPassBtn:'Mettre à jour le mot de passe',
     emptyFeedTitle:'Pas de plans à proximité',emptyFeedSub:'Crée le premier et rencontre de nouvelles personnes !',emptyFeedCta:'Créer un plan',
+    profileSaved:'Profil enregistré',signOutConfirm:'Se déconnecter ?',leaveConfirm:'Quitter ce plan ?',
   },
   de:{
 sub:'Schluss mit endlosen Chats.',
@@ -570,6 +574,7 @@ editNameLbl:'Name',editDescLbl:'Beschreibung',editDatesLbl:'Termine',editTimesLb
     spotsLeft:'Plätze frei',spotLeft:'Platz frei',planFullLabel:'Voll',chatToday:'Heute',chatYesterday:'Gestern',chatNoMessages:'Noch keine Nachrichten. Sei der Erste!',chatPlaceholder:'Nachricht schreiben...',chatReconnecting:'Verbindung wird hergestellt...',
     resetPassTitle:'Passwort zurücksetzen',resetPassSubtitle:'Wähle ein neues Passwort für dein Konto',resetPassPlaceholder:'Neues Passwort (mind. 8 Zeichen)',resetPassRepeat:'Neues Passwort wiederholen',resetPassMin:'Das Passwort muss mindestens 8 Zeichen lang sein',resetPassNoMatch:'Die Passwörter stimmen nicht überein',resetPassError:'Fehler beim Aktualisieren des Passworts',resetPassUpdated:'Passwort aktualisiert',resetPassNowSignIn:'Du kannst dich jetzt mit deinem neuen Passwort anmelden',resetPassBtn:'Passwort aktualisieren',
     emptyFeedTitle:'Keine Pläne in der Nähe',emptyFeedSub:'Erstelle den ersten und lerne neue Leute kennen!',emptyFeedCta:'Plan erstellen',
+    profileSaved:'Profil gespeichert',signOutConfirm:'Abmelden?',leaveConfirm:'Plan verlassen?',
   },
   it:{
 sub:'Dì addio alle chat infinite.',
@@ -605,6 +610,7 @@ editNameLbl:'Nome',editDescLbl:'Descrizione',editDatesLbl:'Date',editTimesLbl:'O
     spotsLeft:'posti liberi',spotLeft:'posto libero',planFullLabel:'Pieno',chatToday:'Oggi',chatYesterday:'Ieri',chatNoMessages:'Nessun messaggio. Sii il primo!',chatPlaceholder:'Scrivi un messaggio...',chatReconnecting:'Riconnessione...',
     resetPassTitle:'Reimposta password',resetPassSubtitle:'Scegli una nuova password per il tuo account',resetPassPlaceholder:'Nuova password (min 8 caratteri)',resetPassRepeat:'Ripeti la nuova password',resetPassMin:'La password deve essere di almeno 8 caratteri',resetPassNoMatch:'Le password non corrispondono',resetPassError:'Errore nell\'aggiornamento della password',resetPassUpdated:'Password aggiornata',resetPassNowSignIn:'Ora puoi accedere con la tua nuova password',resetPassBtn:'Aggiorna password',
     emptyFeedTitle:'Nessun piano nelle vicinanze',emptyFeedSub:'Crea il primo e conosci gente nuova!',emptyFeedCta:'Crea un piano',
+    profileSaved:'Profilo salvato',signOutConfirm:'Disconnettersi?',leaveConfirm:'Lasciare questo piano?',
   },
 };
 export default T

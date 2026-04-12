@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react'
 import T from '../constants/translations.js'
 import CATEGORIES from '../constants/categories.js'
-import { db, uploadAvatar } from '../lib/supabase.js'
+import { db, uploadAvatar, showToast } from '../lib/supabase.js'
 import { Btn, Back, Lbl } from '../components/ui.jsx'
 import CityInput from '../components/CityInput.jsx'
 
@@ -64,6 +64,7 @@ export default function Profile({ onBack, c, lang, authUser, profile, onUpdatePr
       photo_url: photoUrl || null,
     })
     setSaving(false); setEditing(false)
+    showToast(t.profileSaved || 'Profile saved')
   }
 
   const age = birthdate ? Math.floor((Date.now() - new Date(birthdate).getTime()) / 31557600000) : null
@@ -110,7 +111,7 @@ export default function Profile({ onBack, c, lang, authUser, profile, onUpdatePr
 
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={() => { setEditing(true); setNewName(profile?.name || ''); setNewUsername(profile?.username || ''); setBio(profile?.bio || ''); setBirthdate(profile?.birthdate || ''); setGender(profile?.gender || ''); setInterests(profile?.interests || []); setCityLabel(profile?.city || ''); setPhotoUrl(profile?.photo_url || '') }} style={{ flex: 1, padding: '10px', background: c.CARD2, border: `1px solid ${c.BD}`, borderRadius: '10px', color: c.T, cursor: 'pointer', fontFamily: 'inherit', fontSize: '14px', fontWeight: '600' }}>{t.editBtn || 'Edit'}</button>
-            <button onClick={onSignOut} style={{ flex: 1, padding: '10px', background: 'transparent', border: '1px solid #ef444440', borderRadius: '10px', color: '#ef4444', cursor: 'pointer', fontFamily: 'inherit', fontSize: '14px', fontWeight: '500' }}>{t.signOut}</button>
+            <button onClick={() => { if (window.confirm(t.signOutConfirm || 'Sign out?')) onSignOut() }} style={{ flex: 1, padding: '10px', background: 'transparent', border: '1px solid #ef444440', borderRadius: '10px', color: '#ef4444', cursor: 'pointer', fontFamily: 'inherit', fontSize: '14px', fontWeight: '500' }}>{t.signOut}</button>
           </div>
         </> : <>
           {/* Edit mode */}

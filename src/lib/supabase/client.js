@@ -11,3 +11,4 @@ if (typeof window !== 'undefined') window.__supabaseClient = db
 let _toastFn = null
 export const setToastFn = fn => { _toastFn = fn }
 export const showErr = msg => { if (_toastFn) _toastFn(msg) }
+export const showToast = (msg, type = 'success') => { if (_toastFn) _toastFn(msg, type) }

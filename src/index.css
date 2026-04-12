@@ -37,6 +37,16 @@ input, textarea, select, button {
   font-family: inherit;
 }
 
+/* Focus ring — visible only on keyboard navigation */
+*:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
 input[type=number]::-webkit-inner-spin-button {
   -webkit-appearance: none;
 }

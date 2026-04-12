@@ -171,7 +171,7 @@ function AppInner() {
         {toast && <div style={{ position: 'fixed', bottom: showBottomNav ? '72px' : '24px', left: '50%', transform: 'translateX(-50%)', background: toast.type === 'success' ? '#22c55e' : toast.type === 'info' ? c.A : '#ef4444', color: toast.type === 'info' ? '#0A0A0A' : '#fff', padding: '12px 20px', borderRadius: '30px', fontWeight: '600', fontSize: '13px', zIndex: 300, boxShadow: '0 4px 20px rgba(0,0,0,.4)', whiteSpace: 'nowrap', animation: 'slideDown .3s ease' }}>{toast.type === 'success' ? '✓' : toast.type === 'info' ? 'i' : '!'} {toast.msg}</div>}
 
         {/* Top bar */}
-        <div style={{ borderBottom: `1px solid ${c.BD}`, padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, background: c.BG + 'F0', backdropFilter: 'blur(10px)', zIndex: 10 }}>
+        <header style={{ borderBottom: `1px solid ${c.BD}`, padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, background: c.BG + 'F0', backdropFilter: 'blur(10px)', zIndex: 10 }}>
           <div onClick={() => navigate('/')} style={{ fontFamily: "'Syne',serif", fontWeight: '800', fontSize: '22px', cursor: 'pointer', color: c.T, letterSpacing: '-.02em' }}>queda<span style={{ color: c.A }}>.</span></div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
@@ -182,9 +182,9 @@ function AppInner() {
             </div>
             <button title={T[lang]?.tipTheme} aria-label="Toggle theme" onClick={tgTheme} style={{ background: c.CARD, border: `1px solid ${c.BD}`, borderRadius: '8px', padding: '5px 8px', cursor: 'pointer', fontSize: '14px', color: c.T, fontFamily: 'inherit' }}>{theme === 'dark' ? '☀️' : '🌙'}</button>
           </div>
-        </div>
+        </header>
 
-        <Routes>
+        <main><Routes>
           <Route path="/" element={<Feed c={c} lang={lang} onPlanClick={handlePlanClick} onCreateClick={handleCreateClick} userLocation={userLocation} />} />
           <Route path="/map" element={<MapFeed c={c} lang={lang} onPlanClick={handlePlanClick} userLocation={userLocation} />} />
           <Route path="/create" element={<Create onBack={handleGoHome} onCreated={p => navigate('/plan/' + p.id)} c={c} lang={lang} authUser={authUser} profile={profile} />} />
@@ -192,7 +192,7 @@ function AppInner() {
           <Route path="/profile/:id" element={<PublicProfile c={c} lang={lang} />} />
           <Route path="/profile" element={<Profile onBack={() => navigate('/')} c={c} lang={lang} authUser={authUser} profile={profile} onUpdateProfile={updateProfile} onSignOut={handleSignOut} onLangChange={l => { setLang(l); ls.set('q_lang', l); if (authUser) saveProfile(authUser.id, { ...profile, lang: l }).catch(() => {}) }} onThemeToggle={tgTheme} theme={theme} />} />
           <Route path="*" element={<div style={{ padding: '40px', textAlign: 'center', color: c.M }}>404</div>} />
-        </Routes>
+        </Routes></main>
 
         {showBottomNav && <BottomNav current={location.pathname} onNavigate={p => navigate(p)} c={c} lang={lang} />}
       </div>

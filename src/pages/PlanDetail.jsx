@@ -88,6 +88,7 @@ export default function PlanDetail({ c, lang, authUser }) {
 
   const handleLeave = async () => {
     if (!authUser) return
+    if (!window.confirm(t.leaveConfirm || 'Leave this plan?')) return
     setJoining(true)
     try {
       await leavePlan(id, authUser.id)
@@ -163,8 +164,8 @@ export default function PlanDetail({ c, lang, authUser }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{ fontSize: '18px' }}>📍</span>
             <div>
-              <div style={{ fontSize: '15px', color: c.T, fontWeight: '500' }}>{plan.place_name}</div>
-              {plan.place_address && <div style={{ fontSize: '12px', color: c.M2 }}>{plan.place_address}</div>}
+              <div style={{ fontSize: '15px', color: c.T, fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{plan.place_name}</div>
+              {plan.place_address && <div style={{ fontSize: '12px', color: c.M2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{plan.place_address}</div>}
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

@@ -16,7 +16,7 @@ const LABELS = {
 
 export default function BottomNav({ current, onNavigate, c, lang }) {
   return (
-    <div style={{
+    <nav aria-label="Main navigation" style={{
       position: 'fixed', bottom: 0, left: 0, right: 0,
       background: c.BG + 'F0', backdropFilter: 'blur(10px)',
       borderTop: `1px solid ${c.BD}`,
@@ -27,7 +27,7 @@ export default function BottomNav({ current, onNavigate, c, lang }) {
       {TABS.map(tab => {
         const active = current === tab.path || (tab.path === '/' && current === '/')
         return (
-          <button key={tab.path} onClick={() => onNavigate(tab.path)} style={{
+          <button key={tab.path} onClick={() => onNavigate(tab.path)} aria-label={LABELS[tab.labelKey]?.[lang] || LABELS[tab.labelKey]?.en} style={{
             background: 'none', border: 'none', cursor: 'pointer',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
             padding: '6px 12px', minHeight: '44px', minWidth: '44px', fontFamily: 'inherit',
@@ -41,6 +41,6 @@ export default function BottomNav({ current, onNavigate, c, lang }) {
           </button>
         )
       })}
-    </div>
+    </nav>
   )
 }

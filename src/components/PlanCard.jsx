@@ -25,10 +25,10 @@ export default function PlanCard({ plan, lang, c, distance, onClick }) {
       </div>
 
       {/* Info row */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 16px', fontSize: '13px', color: c.M, marginBottom: '12px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 16px', fontSize: '13px', color: c.M, marginBottom: '12px', overflow: 'hidden' }}>
         <span>📅 {fmtShort(plan.date, lang)}</span>
         <span>🕐 {plan.time?.slice(0, 5)}</span>
-        <span>📍 {plan.place_name}</span>
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '180px' }}>📍 {plan.place_name}</span>
         {distance != null && <span>📏 {distance < 1 ? '<1' : Math.round(distance)} km</span>}
       </div>
 
