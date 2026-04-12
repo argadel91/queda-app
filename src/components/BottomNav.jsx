@@ -21,7 +21,7 @@ export default function BottomNav({ current, onNavigate, c, lang }) {
       background: c.BG + 'F0', backdropFilter: 'blur(10px)',
       borderTop: `1px solid ${c.BD}`,
       display: 'flex', justifyContent: 'space-around',
-      padding: '6px 0 env(safe-area-inset-bottom, 8px)',
+      padding: '6px env(safe-area-inset-right, 0px) calc(6px + env(safe-area-inset-bottom, 8px)) env(safe-area-inset-left, 0px)',
       zIndex: 20
     }}>
       {TABS.map(tab => {
@@ -30,7 +30,7 @@ export default function BottomNav({ current, onNavigate, c, lang }) {
           <button key={tab.path} onClick={() => onNavigate(tab.path)} style={{
             background: 'none', border: 'none', cursor: 'pointer',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
-            padding: '6px 12px', fontFamily: 'inherit',
+            padding: '6px 12px', minHeight: '44px', minWidth: '44px', fontFamily: 'inherit',
             color: active ? c.A : c.M,
             transition: 'color .15s'
           }}>

@@ -115,7 +115,7 @@ export default function PlanDetail({ c, lang, authUser }) {
   }
 
   return (
-    <div style={{ padding: '24px', maxWidth: '500px', margin: '0 auto', paddingBottom: '100px' }}>
+    <div style={{ padding: '24px', maxWidth: '500px', margin: '0 auto', paddingBottom: 'calc(100px + env(safe-area-inset-bottom, 0px))' }}>
       <Back onClick={() => navigate('/')} label={t.back || 'Back'} c={c} />
 
       {/* Header */}

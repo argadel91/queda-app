@@ -122,6 +122,7 @@ function AppInner() {
   const updateProfile = useCallback(async (updates) => { if (!authUser) return; const updated = { ...profile, ...updates }; setProfile(updated); await saveProfile(authUser.id, updated); if (updates.lang) setLang(updates.lang) }, [authUser, profile])
   const handlePlanClick = useCallback(id => navigate('/plan/' + id), [navigate])
   const handleGoHome = useCallback(() => navigate('/'), [navigate])
+  const handleCreateClick = useCallback(() => navigate('/create'), [navigate])
 
   const Fallback = () => <div style={{ minHeight: '100vh', background: c.BG, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div style={{ fontFamily: "'Syne',serif", fontWeight: '800', fontSize: '22px', color: c.T }}>queda<span style={{ color: c.A }}>.</span></div></div>
 
@@ -184,7 +185,7 @@ function AppInner() {
         </div>
 
         <Routes>
-          <Route path="/" element={<Feed c={c} lang={lang} onPlanClick={handlePlanClick} userLocation={userLocation} />} />
+          <Route path="/" element={<Feed c={c} lang={lang} onPlanClick={handlePlanClick} onCreateClick={handleCreateClick} userLocation={userLocation} />} />
           <Route path="/map" element={<MapFeed c={c} lang={lang} onPlanClick={handlePlanClick} userLocation={userLocation} />} />
           <Route path="/create" element={<Create onBack={handleGoHome} onCreated={p => navigate('/plan/' + p.id)} c={c} lang={lang} authUser={authUser} profile={profile} />} />
           <Route path="/plan/:id" element={<PlanDetail c={c} lang={lang} authUser={authUser} />} />

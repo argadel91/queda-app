@@ -5,7 +5,7 @@ import PlanCard from '../components/PlanCard.jsx'
 import FilterBar from '../components/FilterBar.jsx'
 import useGeolocation, { haversine } from '../hooks/useGeolocation.js'
 
-export default function Feed({ c, lang, onPlanClick, userLocation }) {
+export default function Feed({ c, lang, onPlanClick, onCreateClick, userLocation }) {
   const t = T[lang]
   const [plans, setPlans] = useState([])
   const [total, setTotal] = useState(0)
@@ -55,7 +55,7 @@ export default function Feed({ c, lang, onPlanClick, userLocation }) {
   }
 
   return (
-    <div style={{ padding: '16px', maxWidth: '500px', margin: '0 auto', paddingBottom: '80px' }}>
+    <div style={{ padding: '16px', maxWidth: '500px', margin: '0 auto', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
       <h2 style={{ fontFamily: "'Syne',serif", fontSize: '24px', fontWeight: '800', color: c.T, marginBottom: '16px' }}>
         {t.discoverPlans || 'Discover plans'}
       </h2>
@@ -79,9 +79,11 @@ export default function Feed({ c, lang, onPlanClick, userLocation }) {
           {t.loading || 'Loading...'}
         </div>
       ) : plans.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px 0' }}>
-          <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔭</div>
-          <p style={{ color: c.M, fontSize: '14px' }}>{t.noPlansFound || 'No plans found. Be the first to create one!'}</p>
+        <div style={{ textAlign: 'center', padding: '48px 16px' }}>
+          <div style={{ fontSize: '56px', marginBottom: '16px' }}>📌</div>
+          <h3 style={{ fontFamily: "'Syne',serif", fontSize: '20px', fontWeight: '800', color: c.T, marginBottom: '8px' }}>{t.emptyFeedTitle || 'No plans nearby'}</h3>
+          <p style={{ color: c.M, fontSize: '14px', lineHeight: 1.5, marginBottom: '24px' }}>{t.emptyFeedSub || 'Create the first one and meet new people!'}</p>
+          {onCreateClick && <button onClick={onCreateClick} style={{ padding: '14px 32px', background: c.A, color: '#0A0A0A', border: 'none', borderRadius: '12px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>{t.emptyFeedCta || 'Create a plan'}</button>}
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

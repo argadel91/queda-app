@@ -132,31 +132,31 @@ export default function Profile({ onBack, c, lang, authUser, profile, onUpdatePr
 
             {/* Name */}
             <div>
-              <Lbl c={c}>{t.nameLbl || 'Name'}</Lbl>
-              <input value={newName} onChange={e => setNewName(e.target.value.slice(0, 50))} maxLength={50} placeholder={t.yourNamePh2 || 'Your name'} style={inputStyle} />
+              <Lbl c={c} htmlFor="profile-name">{t.nameLbl || 'Name'}</Lbl>
+              <input id="profile-name" value={newName} onChange={e => setNewName(e.target.value.slice(0, 50))} maxLength={50} placeholder={t.yourNamePh2 || 'Your name'} style={inputStyle} />
             </div>
 
             {/* Username */}
             <div>
-              <Lbl c={c}>{t.usernameLbl || 'Username'}</Lbl>
+              <Lbl c={c} htmlFor="profile-username">{t.usernameLbl || 'Username'}</Lbl>
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <span style={{ color: c.M, fontSize: '15px', fontWeight: '600' }}>@</span>
-                <input value={newUsername} onChange={e => setNewUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g, '').slice(0, 20))} placeholder="username" style={{ ...inputStyle, flex: 1, width: 'auto' }} />
+                <input id="profile-username" value={newUsername} onChange={e => setNewUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g, '').slice(0, 20))} placeholder="username" style={{ ...inputStyle, flex: 1, width: 'auto' }} />
               </div>
               {usernameErr && <div style={{ fontSize: '11px', color: '#ef4444', marginTop: '4px' }}>{usernameErr}</div>}
             </div>
 
             {/* Bio */}
             <div>
-              <Lbl c={c}>{t.bioLbl || 'Bio'}</Lbl>
-              <textarea value={bio} onChange={e => setBio(e.target.value.slice(0, 300))} maxLength={300} rows={3} placeholder={t.bioPlaceholder || 'Tell something about yourself...'} style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.5 }} />
+              <Lbl c={c} htmlFor="profile-bio">{t.bioLbl || 'Bio'}</Lbl>
+              <textarea id="profile-bio" value={bio} onChange={e => setBio(e.target.value.slice(0, 300))} maxLength={300} rows={3} placeholder={t.bioPlaceholder || 'Tell something about yourself...'} style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.5 }} />
               <div style={{ fontSize: '11px', color: c.M2, textAlign: 'right' }}>{bio.length}/300</div>
             </div>
 
             {/* Birthdate */}
             <div>
-              <Lbl c={c}>{t.birthdateLbl || 'Date of birth'}</Lbl>
-              <input type="date" value={birthdate} onChange={e => setBirthdate(e.target.value)} max={new Date().toISOString().slice(0, 10)} style={inputStyle} />
+              <Lbl c={c} htmlFor="profile-birthdate">{t.birthdateLbl || 'Date of birth'}</Lbl>
+              <input id="profile-birthdate" type="date" value={birthdate} onChange={e => setBirthdate(e.target.value)} max={new Date().toISOString().slice(0, 10)} style={inputStyle} />
             </div>
 
             {/* Gender */}
@@ -197,7 +197,7 @@ export default function Profile({ onBack, c, lang, authUser, profile, onUpdatePr
               <Lbl c={c}>{t.langLbl || 'Language'}</Lbl>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                 {LANGS.map(l => (
-                  <button key={l} onClick={() => onLangChange(l)} style={{ padding: '6px 12px', borderRadius: '20px', border: `1px solid ${lang === l ? c.A : c.BD}`, background: lang === l ? `${c.A}18` : 'transparent', color: lang === l ? c.A : c.T, cursor: 'pointer', fontFamily: 'inherit', fontSize: '13px' }}>
+                  <button key={l} onClick={() => onLangChange(l)} style={{ padding: '10px 14px', minHeight: '44px', borderRadius: '20px', border: `1px solid ${lang === l ? c.A : c.BD}`, background: lang === l ? `${c.A}18` : 'transparent', color: lang === l ? c.A : c.T, cursor: 'pointer', fontFamily: 'inherit', fontSize: '13px' }}>
                     {FLAGS[l]} {LANG_NAMES[l]}
                   </button>
                 ))}

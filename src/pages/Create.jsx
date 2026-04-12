@@ -85,8 +85,8 @@ export default function Create({ onBack, onCreated, c, lang, authUser, profile }
 
       {/* Title */}
       <div style={{ marginBottom: '18px' }}>
-        <Lbl c={c}>{t.titleLbl || 'What are we doing?'}</Lbl>
-        <input value={title} onChange={e => setTitle(e.target.value.slice(0, 100))} maxLength={100} placeholder={t.titlePlaceholder || 'Football, coffee, hiking...'} style={{ background: c.CARD, border: `1px solid ${c.BD}`, borderRadius: '10px', padding: '12px 14px', color: c.T, fontSize: '14px', fontFamily: 'inherit', outline: 'none', width: '100%', boxSizing: 'border-box' }} />
+        <Lbl c={c} htmlFor="plan-title">{t.titleLbl || 'What are we doing?'}</Lbl>
+        <input id="plan-title" value={title} onChange={e => setTitle(e.target.value.slice(0, 100))} maxLength={100} placeholder={t.titlePlaceholder || 'Football, coffee, hiking...'} style={{ background: c.CARD, border: `1px solid ${c.BD}`, borderRadius: '10px', padding: '12px 14px', color: c.T, fontSize: '14px', fontFamily: 'inherit', outline: 'none', width: '100%', boxSizing: 'border-box' }} />
       </div>
 
       {/* Category */}
@@ -156,8 +156,8 @@ export default function Create({ onBack, onCreated, c, lang, authUser, profile }
 
       {/* Description */}
       <div style={{ marginBottom: '24px' }}>
-        <Lbl c={c}>{t.descLbl || 'Description (optional)'}</Lbl>
-        <textarea value={description} onChange={e => setDescription(e.target.value.slice(0, 500))} maxLength={500} rows={3} placeholder={t.descPlaceholder || 'Any extra details...'} style={{ background: c.CARD, border: `1px solid ${c.BD}`, borderRadius: '10px', padding: '12px 14px', color: c.T, fontSize: '14px', fontFamily: 'inherit', outline: 'none', width: '100%', boxSizing: 'border-box', resize: 'vertical', lineHeight: 1.5 }} />
+        <Lbl c={c} htmlFor="plan-desc">{t.descLbl || 'Description (optional)'}</Lbl>
+        <textarea id="plan-desc" value={description} onChange={e => setDescription(e.target.value.slice(0, 500))} maxLength={500} rows={3} placeholder={t.descPlaceholder || 'Any extra details...'} style={{ background: c.CARD, border: `1px solid ${c.BD}`, borderRadius: '10px', padding: '12px 14px', color: c.T, fontSize: '14px', fontFamily: 'inherit', outline: 'none', width: '100%', boxSizing: 'border-box', resize: 'vertical', lineHeight: 1.5 }} />
       </div>
 
       {/* Create button */}

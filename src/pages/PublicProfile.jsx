@@ -33,7 +33,7 @@ export default function PublicProfile({ c, lang }) {
   const memberSince = profile.created_at ? new Date(profile.created_at).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-GB', { month: 'long', year: 'numeric' }) : null
 
   return (
-    <div style={{ padding: '24px', maxWidth: '420px', margin: '0 auto', paddingBottom: '100px' }}>
+    <div style={{ padding: '24px', maxWidth: '420px', margin: '0 auto', paddingBottom: 'calc(100px + env(safe-area-inset-bottom, 0px))' }}>
       <Back onClick={() => navigate(-1)} label={t.back || 'Back'} c={c} />
 
       <div style={{ textAlign: 'center', marginBottom: '24px' }}>

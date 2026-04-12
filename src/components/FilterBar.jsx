@@ -31,7 +31,7 @@ export default function FilterBar({ filters, onChange, lang, c }) {
 
   const selectStyle = {
     background: c.CARD, border: `1px solid ${c.BD}`, borderRadius: '8px',
-    padding: '6px 10px', color: c.T, fontSize: '12px', fontFamily: 'inherit',
+    padding: '10px 10px', minHeight: '44px', color: c.T, fontSize: '13px', fontFamily: 'inherit',
     outline: 'none', cursor: 'pointer', appearance: 'none',
     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23888'/%3E%3C/svg%3E")`,
     backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center',
