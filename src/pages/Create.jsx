@@ -3,7 +3,7 @@ import T from '../constants/translations.js'
 import { createPlan, joinPlan, showErr } from '../lib/supabase.js'
 import { PLAN_STATUS, JOIN_MODE } from '../constants/status.js'
 import { genId, fmtShort } from '../lib/utils.js'
-import { Btn, Back, Lbl } from '../components/ui.jsx'
+import { Btn, Back, Lbl, Stepper } from '../components/ui.jsx'
 import CalendarPicker from '../components/CalendarPicker.jsx'
 import ClockPicker from '../components/ClockPicker.jsx'
 import CategoryPicker from '../components/CategoryPicker.jsx'
@@ -78,37 +78,50 @@ export default function Create({ onBack, onCreated, c, lang, authUser, profile }
     )
   }
 
+  // Stepper: compute current step based on filled fields
+  const stepperCur = !title.trim() ? 0 : !category ? 1 : date.length === 0 ? 2 : !time ? 3 : !place?.lat ? 4 : 5
+  const stepperLabels = [
+    t.titleLbl || 'Title',
+    t.categoryLbl || 'Category',
+    t.dateLbl || 'Date',
+    t.timeLbl || 'Time',
+    t.placeLbl || 'Place',
+    t.capacityLbl || 'Details'
+  ]
+
   return (
     <div style={{ padding: '24px', maxWidth: '420px', margin: '0 auto' }}>
       <Back onClick={onBack} label={t.back} c={c} />
-      <h2 style={{ fontFamily: "'Syne',serif", fontSize: '26px', fontWeight: '800', color: c.T, marginBottom: '20px' }}>{t.createPlan || 'Create a plan'}</h2>
+      <h2 style={{ fontFamily: "'Syne',serif", fontSize: '24px', fontWeight: '800', color: c.T, marginBottom: '16px' }}>{t.createPlan || 'Create a plan'}</h2>
+
+      <Stepper cur={stepperCur} labels={stepperLabels} c={c} />
 
       {/* Title */}
-      <div style={{ marginBottom: '18px' }}>
+      <div style={{ marginBottom: '16px' }}>
         <Lbl c={c} htmlFor="plan-title">{t.titleLbl || 'What are we doing?'}</Lbl>
         <input id="plan-title" value={title} onChange={e => setTitle(e.target.value.slice(0, 100))} maxLength={100} placeholder={t.titlePlaceholder || 'Football, coffee, hiking...'} style={{ background: c.CARD, border: `1px solid ${c.BD}`, borderRadius: '10px', padding: '12px 14px', color: c.T, fontSize: '14px', fontFamily: 'inherit', outline: 'none', width: '100%', boxSizing: 'border-box' }} />
       </div>
 
       {/* Category */}
-      <div style={{ marginBottom: '18px' }}>
+      <div style={{ marginBottom: '16px' }}>
         <Lbl c={c}>{t.categoryLbl || 'Category'}</Lbl>
         <CategoryPicker value={category} onChange={setCategory} lang={lang} c={c} />
       </div>
 
       {/* Date */}
-      <div style={{ marginBottom: '18px' }}>
+      <div style={{ marginBottom: '16px' }}>
         <Lbl c={c}>{t.dateLbl || 'When?'}</Lbl>
         <CalendarPicker selected={date} onChange={d => setDate(d.slice(-1))} c={c} lang={lang} max={1} />
       </div>
 
       {/* Time */}
-      <div style={{ marginBottom: '18px' }}>
+      <div style={{ marginBottom: '16px' }}>
         <Lbl c={c}>{t.timeLbl || 'What time?'}</Lbl>
         <ClockPicker value={time} onChange={setTime} c={c} />
       </div>
 
       {/* Place */}
-      <div style={{ marginBottom: '18px' }}>
+      <div style={{ marginBottom: '16px' }}>
         <Lbl c={c}>{t.placeLbl || 'Where?'}</Lbl>
         {place ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', background: c.CARD, border: `1px solid ${c.A}30`, borderRadius: '12px' }}>
@@ -125,7 +138,7 @@ export default function Create({ onBack, onCreated, c, lang, authUser, profile }
       </div>
 
       {/* Capacity */}
-      <div style={{ marginBottom: '18px' }}>
+      <div style={{ marginBottom: '16px' }}>
         <Lbl c={c}>{t.capacityLbl || 'Max people'}</Lbl>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button onClick={() => setCapacity(c => Math.max(2, c - 1))} style={{ width: '40px', height: '40px', borderRadius: '50%', background: c.CARD, border: `1px solid ${c.BD}`, color: c.T, fontSize: '18px', cursor: 'pointer', fontFamily: 'inherit' }}>−</button>
@@ -136,7 +149,7 @@ export default function Create({ onBack, onCreated, c, lang, authUser, profile }
       </div>
 
       {/* Join mode */}
-      <div style={{ marginBottom: '18px' }}>
+      <div style={{ marginBottom: '16px' }}>
         <Lbl c={c}>{t.joinModeLbl || 'Who can join?'}</Lbl>
         <div style={{ display: 'flex', gap: '8px' }}>
           {[JOIN_MODE.OPEN, JOIN_MODE.CLOSED].map(mode => (

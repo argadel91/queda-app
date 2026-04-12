@@ -71,10 +71,23 @@ export default function Profile({ onBack, c, lang, authUser, profile, onUpdatePr
 
   const inputStyle = { background: c.CARD2, border: `1px solid ${c.BD}`, borderRadius: '8px', padding: '10px 12px', color: c.T, fontSize: '14px', fontFamily: 'inherit', outline: 'none', width: '100%', boxSizing: 'border-box' }
 
+  const onboardProgress = onboard ? [newName.trim(), birthdate, interests.length > 0].filter(Boolean).length : 0
+
   return (
     <div style={{ padding: '24px', maxWidth: '420px', margin: '0 auto' }}>
       {onBack && <Back onClick={onBack} label={t.back} c={c} />}
-      <h2 style={{ fontFamily: "'Syne',serif", fontSize: '26px', fontWeight: '800', color: c.T, marginBottom: '20px' }}>{t.myProfile || 'My profile'}</h2>
+      <h2 style={{ fontFamily: "'Syne',serif", fontSize: '24px', fontWeight: '800', color: c.T, marginBottom: '16px' }}>{t.myProfile || 'My profile'}</h2>
+
+      {onboard && (
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+            {[0, 1, 2].map(i => (
+              <div key={i} style={{ flex: 1, height: '4px', borderRadius: '2px', background: i < onboardProgress ? c.A : c.BD, transition: 'background .2s' }} />
+            ))}
+          </div>
+          <p style={{ fontSize: '14px', color: c.M, textAlign: 'center' }}>{t.onboardProgress || `${onboardProgress}/3 — ${onboardProgress < 3 ? (t.onboardHint || 'Fill in name, birthdate and interests to continue') : (t.onboardReady || 'Ready! Hit save')}`}</p>
+        </div>
+      )}
 
       <div style={{ background: c.CARD, border: `1px solid ${c.BD}`, borderRadius: '16px', padding: '20px' }}>
         {!editing ? <>
