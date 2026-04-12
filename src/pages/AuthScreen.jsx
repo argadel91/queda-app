@@ -60,7 +60,6 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
         const prof={name:email.trim().toLowerCase().split('@')[0],email:email.trim().toLowerCase(),lang,contacts:[]};
         await saveProfile(data.user.id,prof);
         onAuth(data.user,prof);
-        setTimeout(()=>window.location.reload(),100);
       }else{
         setMode('confirmEmail');
       }

@@ -1,7 +1,4 @@
 // Vercel Edge Middleware — dynamic OG meta tags for /plan/:id
-// Always serves HTML with meta tags first. Browsers redirect to SPA via JS + cookie.
-// Crawlers (no JS) read the meta tags and stop.
-
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.VITE_SUPABASE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -10,43 +7,31 @@ export const config = {
 };
 
 export default async function middleware(request) {
-  // If cookie _q=1 exists, user already saw meta tags — let SPA handle
   const cookies = request.headers.get('cookie') || '';
-  if (cookies.includes('_q=1')) {
-    return; // Pass through to SPA
-  }
+  if (cookies.includes('_q=1')) return;
 
-  // Extract plan code
   const url = new URL(request.url);
   const code = url.pathname.split('/plan/')[1]?.split('/')[0]?.split('?')[0];
-  if (!code) return;
+  if (!code || !/^[A-Za-z0-9]{6,12}$/.test(code)) return;
 
-  // Fetch plan from Supabase
   let plan = null;
   if (SUPABASE_URL && SUPABASE_KEY) {
     try {
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/plans?id=eq.${code}&select=data`,
-        {
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-          },
-        }
+        `${SUPABASE_URL}/rest/v1/plans?id=eq.${code}&select=title,category,place_name,date,time`,
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
       );
       const rows = await res.json();
-      if (rows?.[0]?.data) plan = rows[0].data;
+      if (rows?.[0]) plan = rows[0];
     } catch {}
   }
 
-  // Build meta content
-  const place = plan?.place?.name || plan?.stops?.[0]?.options?.[0]?.name || '';
   const title = plan
-    ? `${plan.name || 'Plan'} — queda. More plans, less chaos`
-    : 'queda. — More plans, less chaos';
+    ? `${plan.title} — queda.`
+    : 'queda. — Meet new people. Hang out with anyone.';
   const desc = plan
-    ? `${plan.organizer || 'Someone'} invites you${plan.name ? ' to ' + plan.name : ''}. ${plan.date ? '📅 ' + plan.date : ''} ${plan.time ? '🕐 ' + plan.time : ''} ${place ? '📍 ' + place : ''}. Vote now on queda!`.trim()
-    : 'One date, one time, one place — everyone votes. Organize group plans without the chaos. Free.';
+    ? `${plan.title}. ${plan.date ? '📅 ' + plan.date : ''} ${plan.time ? '🕐 ' + plan.time.slice(0,5) : ''} ${plan.place_name ? '📍 ' + plan.place_name : ''}. Join on queda!`.trim()
+    : 'Create spontaneous plans, discover hangouts near you, and meet people who share your interests.';
   const planUrl = `https://www.queda.xyz/plan/${code}`;
   const image = 'https://www.queda.xyz/og.png';
 

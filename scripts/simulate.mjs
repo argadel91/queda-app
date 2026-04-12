@@ -1,15 +1,19 @@
+import 'dotenv/config'
 import { createClient } from '@supabase/supabase-js'
 
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_KEY
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('Missing env vars: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY')
+  process.exit(1)
+}
+
 // Anon client for auth operations
-const db = createClient(
-  'https://gxkdibhfzjkjxuuhuwfv.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4a2RpYmhmempranh1dWh1d2Z2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MzI2MzksImV4cCI6MjA4OTUwODYzOX0.mjxrUTzVjCverPfyKORYuArcq-j07B_kfm6j3MLWev4'
-)
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 // Service role client to bypass RLS for user_plans
-const admin = createClient(
-  'https://gxkdibhfzjkjxuuhuwfv.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4a2RpYmhmempranh1dWh1d2Z2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzkzMjYzOSwiZXhwIjoyMDg5NTA4NjM5fQ.jpRlr_cRNJfq104dZrFxgZktp2PQGSInIbrHoQ6tuwY'
-)
+const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 const NAMES = ['Ana', 'Carlos', 'Lucía', 'Pedro', 'María', 'Javi', 'Elena', 'Diego']
 const rand = arr => arr[Math.floor(Math.random() * arr.length)]

@@ -8,7 +8,6 @@ export default defineConfig({
       output: {
         manualChunks: {
           translations: ['./src/constants/translations.js'],
-          weather: ['./src/constants/weather.js'],
         }
       }
     }

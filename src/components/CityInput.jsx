@@ -1,19 +1,5 @@
 import React, { useState, useRef } from 'react'
-import { getCityTz } from '../constants/weather.js'
-
-const getPlacesLib = async () => {
-  if (window.__loadGoogleMaps) window.__loadGoogleMaps()
-  if (!window.google?.maps) {
-    await new Promise(resolve => {
-      const check = setInterval(() => {
-        if (window.google?.maps) { clearInterval(check); resolve() }
-      }, 100)
-      setTimeout(() => clearInterval(check), 10000)
-    })
-  }
-  if(google.maps.importLibrary)return google.maps.importLibrary('places')
-  return Promise.resolve()
-}
+import { loadPlacesLib } from '../lib/googleMaps.js'
 
 export default function CityInput({value,onChange,onSelect,placeholder,c}){
   const[results,setResults]=useState([]);
@@ -25,12 +11,12 @@ export default function CityInput({value,onChange,onSelect,placeholder,c}){
     if(!q||q.length<2){setResults([]);setOpen(false);return;}
     debRef.current=setTimeout(async()=>{
       try{
-        const{Place}=await getPlacesLib();
+        await loadPlacesLib();const{Place}=google.maps.places;
         const{places}=await Place.searchByText({textQuery:q,fields:['displayName','formattedAddress','location','addressComponents'],includedType:'locality',maxResultCount:5});
         if(places?.length){
           const cities=places.map(p=>({
             name:p.displayName||'',
-            country:p.addressComponents?.find(c=>c.types?.includes('country'))?.longText||'',
+            country:p.addressComponents?.find(comp=>comp.types?.includes('country'))?.longText||'',
             lat:p.location?.lat(),
             lng:p.location?.lng()
           }));
@@ -59,9 +45,8 @@ export default function CityInput({value,onChange,onSelect,placeholder,c}){
 
   const pick=(r)=>{
     const label=`${r.name}${r.country?', '+r.country:''}`.trim();
-    const tz=getCityTz(r.name);
     onChange(label);
-    onSelect({label,city:r.name,country:r.country,lat:r.lat,lon:r.lng,tz});
+    onSelect({label,city:r.name,country:r.country,lat:r.lat,lng:r.lng});
     setOpen(false);setResults([]);
   };
 

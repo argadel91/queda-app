@@ -26,7 +26,7 @@ export const authSignInWithProvider = async (provider) => {
 
 export const authResetPassword = async email => {
   const { error } = await db.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + '/auth/callback'
+    redirectTo: window.location.origin + '/reset-password'
   })
   return { error }
 }

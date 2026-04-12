@@ -1,381 +1,169 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import React, { useState } from 'react'
 import T from '../constants/translations.js'
-import { savePlan, savePlanWithUser, showErr } from '../lib/supabase.js'
-import { ls, addMyPlan } from '../lib/storage.js'
+import { createPlan, joinPlan, showErr } from '../lib/supabase.js'
+import { PLAN_STATUS, JOIN_MODE } from '../constants/status.js'
 import { genId, fmtShort } from '../lib/utils.js'
-import { Btn, Back, Stepper } from '../components/ui.jsx'
+import { Btn, Back, Lbl } from '../components/ui.jsx'
 import CalendarPicker from '../components/CalendarPicker.jsx'
-import MapModal from '../components/MapModal.jsx'
-import { getCityTz } from '../constants/weather.js'
 import ClockPicker from '../components/ClockPicker.jsx'
+import CategoryPicker from '../components/CategoryPicker.jsx'
+import PlaceSearch from '../components/PlaceSearch.jsx'
+import { getCategoryEmoji, getCategoryLabel } from '../constants/categories.js'
 
+export default function Create({ onBack, onCreated, c, lang, authUser, profile }) {
+  const t = T[lang]
+  const [title, setTitle] = useState('')
+  const [category, setCategory] = useState('')
+  const [description, setDescription] = useState('')
+  const [date, setDate] = useState([])
+  const [time, setTime] = useState('')
+  const [place, setPlace] = useState(null)
+  const [capacity, setCapacity] = useState(4)
+  const [joinMode, setJoinMode] = useState(JOIN_MODE.OPEN)
+  const [saving, setSaving] = useState(false)
+  const [created, setCreated] = useState(null)
 
-const calcEndTime = (start, duration) => {
-  if (!start || !duration) return '';
-  const [h, m] = start.split(':').map(Number);
-  const mins = duration === '30min' ? 30 : duration === '1h' ? 60 : duration === '1h30' ? 90 : duration === '2h' ? 120 : duration === '3h' ? 180 : duration === '4h+' ? 240 : 0;
-  const end = new Date(2000, 0, 1, h, m + mins);
-  return `${String(end.getHours()).padStart(2,'0')}:${String(end.getMinutes()).padStart(2,'0')}`;
-};
+  const canCreate = title.trim() && category && date.length === 1 && time && place?.lat
 
-
-const emptyOption = () => ({
-  id: Date.now(), name: '', address: '', lat: null, lng: null, rating: null, ratingCount: null,
-  priceLevel: null, photo: null, website: null, phone: null, hours: null, isOpen: null,
-  summary: null, googleMapsURI: null, types: [], servesBeer: null, servesWine: null,
-  outdoorSeating: null, wheelchair: null, goodForChildren: null, dineIn: null, takeout: null,
-  delivery: null, reservable: null
-});
-
-const emptyStop = (id, suggestedStart) => ({
-  id, options: [emptyOption()], startTime: suggestedStart || '', duration: '', tolerance: '', notes: '',
-  maxCapacity: '', orgAttends: true, meetingPoint: '', meetingMinsBefore: '', minAttendees: '',
-});
-
-const STEPS=['date','time','place','confirm'];
-export default function Create({onBack,onCreated,c,lang,authUser,profile}){
-  const t=T[lang];const mc=c.A;
-  const nav2=useNavigate();
-  const{step:stepParam}=useParams();
-  const step=Math.max(0,STEPS.indexOf(stepParam||'date'));
-  const setStep=(s)=>nav2('/create/'+STEPS[s],{replace:false});
-  const[org,setOrg]=useState(profile?.name||ls.get('q_myname',''));
-  const[selDates,setSelDates]=useState([]);
-  const[startTimes,setStartTimes]=useState(['']);
-  const[inlineResults,setInlineResults]=useState([]);
-  const inlineSearchRef=useRef(null);
-  const inlineMapRef=useRef(null);
-  const inlineMapObj=useRef(null);
-  const inlineMarkers=useRef([]);
-  const[stops,setStops]=useState([emptyStop(1,'')]);
-  const[mapTarget,setMapTarget]=useState(null);
-  const[saving,setSaving]=useState(false);
-  const[requireLogin,setRequireLogin]=useState(false);
-  const[draftRestored,setDraftRestored]=useState(false);
-  const draftKey='q_draft';
-
-  // Auto-deduce city from first stop with coordinates
-  const autoCity = useMemo(() => {
-    const addr = stops.flatMap(s=>s.options||[]).find(o=>o?.address)?.address || '';
-    const parts = addr.split(',').map(p=>p.trim()).filter(Boolean);
-    // Remove country (last), get city (second to last or third to last, skip postal codes)
-    const relevant = parts.slice(-3,-1).map(p=>p.replace(/^\d{4,6}\s*/,'').trim()).filter(Boolean);
-    return relevant.join(', ');
-  }, [stops]);
-  const autoCityShort = autoCity.split(',')[0]?.trim() || '';
-  const firstCoords = useMemo(() => {
-    const o = stops.flatMap(s=>s.options||[]).find(o=>o?.lat && o?.lng);
-    return o ? {lat:o.lat, lng:o.lng} : null;
-  }, [stops]);
-  const planTz = getCityTz(autoCity);
-
-  useEffect(()=>{if(org.trim())ls.set('q_myname',org.trim());},[org]);
-
-  // Restore draft on mount
-  useEffect(()=>{
-    const d=ls.get(draftKey,null);if(!d)return;
-    if(d.org)setOrg(d.org);
-    if(d.selDates)setSelDates(d.selDates);
-    if(d.startTimes)setStartTimes(d.startTimes);
-    if(d.stops)setStops(d.stops);if(d.requireLogin)setRequireLogin(d.requireLogin);if(d.step!=null&&STEPS[d.step])nav2('/create/'+STEPS[d.step],{replace:true});
-    setDraftRestored(true);
-  },[]);// eslint-disable-line react-hooks/exhaustive-deps
-
-  // Save draft helper
-  const saveDraft=(s)=>ls.set(draftKey,{org,selDates,startTimes,stops,requireLogin,step:s!==undefined?s:step});
-  // Auto-save every 30s
-  useEffect(()=>{const id=setInterval(()=>saveDraft(),30000);return()=>clearInterval(id);});
-  const clearDraft=()=>{try{localStorage.removeItem(draftKey)}catch{}};
-  const discardDraft=()=>{clearDraft();setDraftRestored(false);window.location.reload();};
-  // Save on step change
-  const changeStep=(s)=>{saveDraft(s);if(s!==2){inlineMapObj.current=null;}nav2('/create/'+STEPS[s],{replace:false});};
-
-  // Stop helpers
-  const addStop=()=>{
-    const last=stops[stops.length-1];
-    let suggested='';
-    if(last?.startTime && last?.duration){
-      const end=calcEndTime(last.startTime,last.duration);
-      if(end){
-        const [h,m]=end.split(':').map(Number);
-        const d=new Date(2000,0,1,h,m+30);
-        suggested=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  const handleCreate = async () => {
+    if (!canCreate || !authUser) return
+    setSaving(true)
+    try {
+      const plan = {
+        id: genId(),
+        user_id: authUser.id,
+        title: title.trim(),
+        description: description.trim() || null,
+        category,
+        place_name: place.name,
+        place_address: place.address || null,
+        lat: place.lat,
+        lng: place.lng,
+        date: date[0],
+        time: time + ':00',
+        capacity,
+        join_mode: joinMode,
+        status: PLAN_STATUS.ACTIVE,
       }
-    }
-    setStops(p=>[...p,emptyStop(Date.now(),suggested)]);
-  };
-  const remStop=id=>{
-    // Clear all markers and re-add remaining
-    inlineMarkers.current.forEach(m=>m.setMap(null));
-    inlineMarkers.current=[];
-    setStops(p=>{
-      const remaining=p.filter(s=>s.id!==id);
-      // Re-add markers for remaining stops
-      setTimeout(()=>{
-        let idx=0;
-        remaining.forEach(s=>{
-          const o=(s.options||[])[0];
-          if(o?.lat&&o?.lng&&inlineMapObj.current){
-            idx++;
-            // Meeting point marker (orange)
-            if(s.meetingPointLat&&s.meetingPointLng){
-              const mpM=new google.maps.Marker({position:{lat:s.meetingPointLat,lng:s.meetingPointLng},map:inlineMapObj.current,label:{text:'📍',fontSize:'14px'},icon:{path:google.maps.SymbolPath.CIRCLE,scale:12,fillColor:'#f59e0b',fillOpacity:1,strokeColor:'#d97706',strokeWeight:2},title:'Meeting: '+(s.meetingPoint||'')});
-              inlineMarkers.current.push(mpM);
-            }
-            // Venue marker (green)
-            const marker=new google.maps.Marker({position:{lat:o.lat,lng:o.lng},map:inlineMapObj.current,label:{text:String(idx),color:'#0A0A0A',fontWeight:'800'},icon:{path:google.maps.SymbolPath.CIRCLE,scale:14,fillColor:'#CDFF6C',fillOpacity:1,strokeColor:'#CDFF6C',strokeWeight:2}});
-            inlineMarkers.current.push(marker);
-          }
-        });
-      },50);
-      return remaining;
-    });
-  };
-  const updOption=(stopId,optionId,key,value)=>setStops(p=>p.map(s=>s.id===stopId?{...s,options:s.options.map(o=>o.id===optionId?{...o,[key]:value}:o)}:s));
-
-  const stepLabels=['📅','🕐','📍','✓'];
-  const[created,setCreated]=useState(null);
-
-  const create=async()=>{
-    setSaving(true);
-    try{
-      const cleanStops=stops.filter(s=>(s.options||[]).some(o=>o.name));
-      const theDate=selDates[0]||null;const theTime=startTimes[0]||null;const thePlace=cleanStops[0]?.options?.[0]||null;
-      const dateTimes=theDate&&theTime?{[theDate]:[theTime]}:{};
-      const plan={id:genId(),name:null,desc:null,organizer:profile?.name||org.trim()||'',organizerUsername:profile?.username||null,date:theDate,time:theTime,place:thePlace,dates:theDate?[theDate]:[],startTimes:theTime?[theTime]:[],dateTimes,stops:cleanStops,timezone:planTz,city:autoCityShort,cityFull:autoCity,cityLat:firstCoords?.lat||null,cityLon:firstCoords?.lng||null,confirmedDate:null,alternatives:[],isPublic:false,requireLogin,lang,createdAt:new Date().toISOString()};
-      if(authUser)await savePlanWithUser(plan,authUser.id);else await savePlan(plan);
-      addMyPlan(plan.id,plan.name,'organizer');
-      clearDraft();setCreated(plan);
-    }catch(e){showErr(t.createError);}
-    setSaving(false);
-  };
-
-  // Inline map for step 2 (place)
-  useEffect(()=>{
-    if(step!==2||!inlineMapRef.current||inlineMapObj.current)return;
-    // Wait a tick for DOM to be ready
-    const timer=setTimeout(()=>{
-    if(!inlineMapRef.current)return;
-    const loadGM=()=>{if(window.__loadGoogleMaps)window.__loadGoogleMaps();return new Promise(r=>{if(window.google?.maps)return r();const ch=setInterval(()=>{if(window.google?.maps){clearInterval(ch);r();}},100);setTimeout(()=>clearInterval(ch),10000);});};
-    const mapDiv=document.createElement('div');
-    mapDiv.style.cssText='width:100%;height:100%;min-height:250px;';
-    while(inlineMapRef.current.firstChild)inlineMapRef.current.removeChild(inlineMapRef.current.firstChild);
-    inlineMapRef.current.appendChild(mapDiv);
-    loadGM().catch(()=>{}).then(()=>{
-      if(!window.google?.maps){if(inlineMapRef.current)inlineMapRef.current.textContent=t.mapFailed||'Could not load map';return;}
-      if(google.maps.importLibrary)google.maps.importLibrary('maps');}).then(()=>{
-      if(!window.google?.maps)return;
-      const map=new google.maps.Map(mapDiv,{center:{lat:40.4168,lng:-3.7038},zoom:6,disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy',backgroundColor:'#1A1A1A'});
-      inlineMapObj.current=map;
-      // Click to select
-      map.addListener('click',e=>{
-        const lat=e.latLng.lat(),lng=e.latLng.lng();
-        const geocoder=new google.maps.Geocoder();
-        geocoder.geocode({location:{lat,lng}},(res,status)=>{
-          if(status==='OK'&&res[0]){
-            const r=res[0];
-            pickInlineResult({name:r.address_components?.[0]?.long_name||'',address:r.formatted_address||'',lat,lng,placeId:r.place_id});
-          }
-        });
-      });
-    });
-    },100);
-    return()=>{clearTimeout(timer);};
-  },[step]);
-
-  const inlineSearch=async(q)=>{
-    if(!q?.trim()||!window.google?.maps)return;
-    try{
-      if(google.maps.importLibrary)await google.maps.importLibrary('places');const{Place}=google.maps.places;
-      const{places}=await Place.searchByText({textQuery:q,fields:['displayName','formattedAddress','location','rating','userRatingCount','priceLevel','photos','placeId'],maxResultCount:5});
-      if(places?.length){setInlineResults(places.map(p=>({name:p.displayName||'',address:p.formattedAddress||'',lat:p.location?.lat(),lng:p.location?.lng(),rating:p.rating||null,ratingCount:p.userRatingCount||null,priceLevel:p.priceLevel??null,photo:p.photos?.[0]?.getURI?.({maxWidth:400})||null,placeId:p.id||null})));}
-      else{setInlineResults([]);}
-    }catch{
-      try{
-        const service=new google.maps.places.PlacesService(inlineMapObj.current||document.createElement('div'));
-        service.textSearch({query:q},(res,status)=>{
-          if(status==='OK'&&res)setInlineResults(res.slice(0,5).map(r=>({name:r.name||'',address:r.formatted_address||'',lat:r.geometry.location.lat(),lng:r.geometry.location.lng(),rating:r.rating||null,ratingCount:r.user_ratings_total||null,priceLevel:r.price_level??null,photo:r.photos?.[0]?.getUrl?.({maxWidth:400})||null,placeId:r.place_id||null})));
-          else setInlineResults([]);
-        });
-      }catch{setInlineResults([]);}
-    }
-  };
-
-  const pickingRef=useRef(false);
-  const pickInlineResult=async(r)=>{
-    if(pickingRef.current)return;pickingRef.current=true;setTimeout(()=>{pickingRef.current=false;},500);
-    setInlineResults([]);
-    if(inlineSearchRef.current)inlineSearchRef.current.value=r.name;
-    // Enrich with details
-    if(r.placeId){
-      try{
-        if(google.maps.importLibrary)await google.maps.importLibrary('places');const{Place}=google.maps.places;
-        const place=new Place({id:r.placeId});
-        await place.fetchFields({fields:['websiteURI','nationalPhoneNumber','regularOpeningHours','editorialSummary','googleMapsURI','types','dineIn','takeout','delivery','reservable','servesBeer','servesWine','outdoorSeating','goodForChildren','accessibilityOptions']});
-        r.website=place.websiteURI||null;r.phone=place.nationalPhoneNumber||null;
-        r.hours=place.regularOpeningHours?.weekdayDescriptions||null;
-        r.summary=place.editorialSummary||null;r.googleMapsURI=place.googleMapsURI||null;
-        r.types=place.types||[];r.dineIn=place.dineIn??null;r.takeout=place.takeout??null;
-        r.servesBeer=place.servesBeer??null;r.servesWine=place.servesWine??null;
-        r.outdoorSeating=place.outdoorSeating??null;r.wheelchair=place.accessibilityOptions?.wheelchairAccessibleEntrance??null;
-      }catch{}
-    }
-    // Add to stops
-    let targetStop=stops.find(s=>!(s.options||[]).some(o=>o.name));
-    if(!targetStop){targetStop=emptyStop(Date.now());setStops(p=>[...p,targetStop]);}
-    const optId=targetStop.options[0].id;
-    const fields=['name','address','lat','lng','placeId','rating','ratingCount','priceLevel','website','phone','hours','photo','summary','googleMapsURI','types','dineIn','takeout','delivery','reservable','servesBeer','servesWine','outdoorSeating','goodForChildren','wheelchair'];
-    setTimeout(()=>{fields.forEach(k=>{if(r[k]!==undefined&&r[k]!==null)updOption(targetStop.id,optId,k,r[k]);});},10);
-    // Zoom map and add marker
-    if(inlineMapObj.current&&r.lat&&r.lng){
-      inlineMapObj.current.setCenter({lat:r.lat,lng:r.lng});
-      inlineMapObj.current.setZoom(15);
-      const marker=new google.maps.Marker({position:{lat:r.lat,lng:r.lng},map:inlineMapObj.current,label:{text:String(stops.filter(s=>(s.options||[]).some(o=>o.name)).length+1),color:'#0A0A0A',fontWeight:'800'},icon:{path:google.maps.SymbolPath.CIRCLE,scale:14,fillColor:'#CDFF6C',fillOpacity:1,strokeColor:'#CDFF6C',strokeWeight:2}});
-      inlineMarkers.current.push(marker);
-    }
-    if(inlineSearchRef.current)inlineSearchRef.current.value='';
-  };
-
-  // Map modal init string
-  const mapInit = useMemo(() => {
-    if(!mapTarget) return '';
-    const st = stops.find(s=>s.id===mapTarget.stopId);
-    const opt = st?.options.find(o=>o.id===mapTarget.optionId);
-    return opt?.name || autoCity || '';
-  }, [mapTarget, stops, autoCity]);
-
-  // Apply map selection to the targeted option
-  const handleMapSelect = (sel) => {
-    if(!mapTarget) return;
-    const {stopId, optionId} = mapTarget;
-    const fields = ['name','address','lat','lng','placeId','rating','ratingCount','priceLevel','website','phone','hours','isOpen','googleMapsURI','photo','summary','types','dineIn','takeout','delivery','reservable','servesBeer','servesWine','outdoorSeating','goodForChildren','wheelchair'];
-    fields.forEach(k => { if(sel[k] !== undefined && sel[k] !== null) updOption(stopId, optionId, k, sel[k]); });
-    setMapTarget(null);
-  };
-
-  // Done screen
-  const[shareOpen,setShareOpen]=useState(false);
-  if(created){
-    const shareUrl=location.href.split('?')[0]+'?code='+created.id;
-    const shareText=`${t.shareJoinText} ${shareUrl}`;
-    return<div style={{padding:'48px 24px',maxWidth:'420px',margin:'0 auto',textAlign:'center'}}>
-      <div style={{fontSize:'64px',marginBottom:'16px'}}>🎉</div>
-      <h2 style={{fontFamily:"'Syne',serif",fontSize:'28px',fontWeight:'800',color:mc,marginBottom:'8px'}}>{t.planCreatedTitle}</h2>
-      <div style={{fontFamily:'monospace',fontSize:'40px',fontWeight:'900',color:mc,letterSpacing:'.15em',margin:'16px 0'}}>{created.id}</div>
-      <p style={{color:c.M2,fontSize:'14px',marginBottom:'24px'}}>{t.shareCodeMsg2||'Ya puedes compartir tu código con quien quieras. Revisa tu plan para editar o añadir lo que necesites.'}</p>
-      <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
-        <div style={{position:'relative'}}>
-          <Btn onClick={()=>setShareOpen(o=>!o)} full style={{padding:'14px'}} c={c} accent={mc}>{t.sharePlanBtn||'Comparte tu plan'} {shareOpen?'▾':'▸'}</Btn>
-          {shareOpen&&<div className="fade-in" style={{display:'flex',gap:'8px',marginTop:'8px'}}>
-            <button onClick={()=>window.open('https://wa.me/?text='+encodeURIComponent(shareText),'_blank')} style={{flex:1,padding:'12px',background:'#25D366',color:'#fff',border:'none',borderRadius:'12px',fontSize:'13px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>WhatsApp</button>
-            <button onClick={()=>window.open('https://t.me/share/url?url='+encodeURIComponent(shareUrl)+'&text='+encodeURIComponent(shareText),'_blank')} style={{flex:1,padding:'12px',background:'#0088cc',color:'#fff',border:'none',borderRadius:'12px',fontSize:'13px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>Telegram</button>
-            <button onClick={()=>{navigator.clipboard?.writeText(shareUrl);}} style={{flex:1,padding:'12px',background:c.CARD2,color:c.T,border:`1px solid ${c.BD}`,borderRadius:'12px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>🔗</button>
-          </div>}
-        </div>
-        <Btn onClick={()=>onCreated(created)} v="secondary" full style={{padding:'14px',color:c.T}} c={c}>{t.reviewPlan||'Review plan →'}</Btn>
-        <Btn onClick={()=>{setCreated(null);setShareOpen(false);nav2('/create/date');setSelDates([]);setStartTimes(['']);setStops([emptyStop(1,'')]);}} v="secondary" full style={{padding:'14px',color:c.T}} c={c}>{t.createAnother||'Crear otro plan'}</Btn>
-        <button onClick={onBack} style={{padding:'12px',background:'none',border:'none',color:c.M2,cursor:'pointer',fontFamily:'inherit',fontSize:'14px'}}>🏠 {t.homeBtn||'Home'}</button>
-      </div>
-    </div>;
+      await createPlan(plan)
+      // Organizer auto-joins
+      await joinPlan(plan.id, authUser.id)
+      setCreated(plan)
+    } catch (e) { showErr(t.createError || 'Error creating plan') }
+    setSaving(false)
   }
 
-  return(<>
-    <MapModal visible={mapTarget!==null} onSelect={handleMapSelect} onClose={()=>setMapTarget(null)} c={c} lang={lang} init={mapInit}/>
-    <div style={{padding:'24px',maxWidth:'420px',margin:'0 auto'}}>
-      {draftRestored&&<div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:'8px',padding:'10px 14px',marginBottom:'12px',background:mc+'18',border:`1px solid ${mc}40`,borderRadius:'10px',fontSize:'13px'}}>
-        <span style={{color:mc,fontWeight:'600'}}>{t.draftRestored||'Draft restored'}</span>
-        <div style={{display:'flex',gap:'6px'}}>
-          <button onClick={discardDraft} style={{background:'none',border:`1px solid ${mc}40`,borderRadius:'6px',padding:'4px 10px',color:mc,cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:'600'}}>{t.draftDiscard||'Discard'}</button>
-          <button onClick={()=>setDraftRestored(false)} style={{background:'none',border:'none',color:c.M2,cursor:'pointer',fontSize:'16px',lineHeight:1}}>x</button>
-        </div>
-      </div>}
-      <Back onClick={step===0?onBack:()=>nav2(-1)} label={t.back} c={c}/>
-      <Stepper cur={step} labels={stepLabels} c={c} accent={mc}/>
-
-      {/* ── STEP 0: DATE ── */}
-      {step===0&&<div className="fade-in">
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>📅 {t.pickOneDate}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{t.dontWorryDates}</p>
-        <CalendarPicker selected={selDates} onChange={d=>setSelDates(d.slice(-1))} c={c} lang={lang} max={1}/>
-        <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(1)} disabled={selDates.length<1} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.nextBtn}</Btn></div>
-      </div>}
-
-      {/* ── STEP 1: TIME ── */}
-      {step===1&&<div className="fade-in">
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>🕐 {t.pickOneTime}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{t.dontWorryTimes}</p>
-        <ClockPicker value={startTimes[0]||''} onChange={v=>setStartTimes([v])} c={c}/>
-        <div style={{marginTop:'20px'}}><Btn onClick={()=>changeStep(2)} disabled={!startTimes[0]} full style={{padding:'15px',background:startTimes[0]?mc:c.CARD2,color:startTimes[0]?'#0A0A0A':c.M}} c={c}>{t.nextBtn}</Btn></div>
-      </div>}
-
-      {/* ── STEP 2: PLACE ── */}
-      {step===2&&<div className="fade-in">
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'6px'}}>📍 {t.pickOnePlace}</h2>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'10px'}}>{t.dontWorryPoints}</p>
-
-        {/* Online / Physical toggle */}
-        {!stops.some(s=>(s.options||[]).some(o=>o.name))&&<div style={{display:'flex',gap:'8px',marginBottom:'12px'}}>
-          <button onClick={()=>{const ns=emptyStop(Date.now());ns.options[0].name='Online';ns.options[0].address='💻';setStops(p=>[...p,ns]);}} style={{flex:1,padding:'14px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',cursor:'pointer',fontFamily:'inherit',fontSize:'14px',color:c.T,fontWeight:'500',textAlign:'center'}}>💻 Online</button>
-          <div style={{flex:1,padding:'14px',background:`${mc}10`,border:`1px solid ${mc}30`,borderRadius:'12px',fontSize:'14px',color:mc,fontWeight:'600',textAlign:'center'}}>📍 {t.physicalPlace}</div>
-        </div>}
-
-        {/* Selected place */}
-        {stops.filter(s=>(s.options||[]).some(o=>o.name)).map((s)=>{
-          const opt=(s.options||[])[0]||{};
-          return<div key={s.id} style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px',background:c.CARD,border:`1px solid ${mc}30`,borderRadius:'12px',marginBottom:'8px'}}>
-            {opt.photo&&<img src={opt.photo} alt={opt.name||'Venue photo'} style={{width:'44px',height:'44px',borderRadius:'10px',objectFit:'cover',flexShrink:0}}/>}
-            <div style={{flex:1,minWidth:0}}>
-              <div style={{fontSize:'15px',color:c.T,fontWeight:'600',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{opt.name}</div>
-              {opt.address&&<div style={{fontSize:'12px',color:c.M2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>📍 {opt.address}</div>}
-              {opt.rating&&<div style={{fontSize:'11px',color:c.M2}}>⭐{opt.rating}{opt.priceLevel?' · '+'€'.repeat(opt.priceLevel):''}</div>}
-            </div>
-            <button onClick={()=>remStop(s.id)} style={{background:'none',border:'none',color:c.M,cursor:'pointer',fontSize:'18px',flexShrink:0,padding:'4px'}}>×</button>
-          </div>;
-        })}
-
-        {/* Map search — only if no place yet */}
-        {!stops.some(s=>(s.options||[]).some(o=>o.name))&&<div style={{marginBottom:'12px'}}>
-          <div style={{display:'flex',gap:'6px',marginBottom:'8px'}}>
-            <input ref={inlineSearchRef} defaultValue='' onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();inlineSearch(inlineSearchRef.current?.value);}}} placeholder={t.searchPlacePh||'Search a place... (Enter)'} style={{flex:1,background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',padding:'10px 14px',color:c.T,fontSize:'14px',fontFamily:'inherit',outline:'none'}}/>
-            <button onClick={()=>inlineSearch(inlineSearchRef.current?.value)} style={{background:mc,border:'none',borderRadius:'10px',padding:'10px 14px',color:'#0A0A0A',cursor:'pointer',fontWeight:'700',fontSize:'14px'}}>🔍</button>
+  // Done screen
+  if (created) {
+    const shareUrl = `https://www.queda.xyz/plan/${created.id}`
+    const shareText = `${getCategoryEmoji(created.category)} ${created.title} — ${shareUrl}`
+    return (
+      <div style={{ padding: '48px 24px', maxWidth: '420px', margin: '0 auto', textAlign: 'center' }}>
+        <div style={{ fontSize: '64px', marginBottom: '16px' }}>{getCategoryEmoji(created.category)}</div>
+        <h2 style={{ fontFamily: "'Syne',serif", fontSize: '28px', fontWeight: '800', color: c.A, marginBottom: '8px' }}>{t.planCreatedTitle || 'Plan created!'}</h2>
+        <p style={{ color: c.T, fontSize: '16px', fontWeight: '600', marginBottom: '4px' }}>{created.title}</p>
+        <p style={{ color: c.M2, fontSize: '14px', marginBottom: '24px' }}>
+          {fmtShort(created.date, lang)} · {time} · {created.place_name}
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={() => window.open('https://wa.me/?text=' + encodeURIComponent(shareText), '_blank')} style={{ flex: 1, padding: '12px', background: '#25D366', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>WhatsApp</button>
+            <button onClick={() => window.open('https://t.me/share/url?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent(shareText), '_blank')} style={{ flex: 1, padding: '12px', background: '#0088cc', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>Telegram</button>
+            <button onClick={() => { navigator.clipboard?.writeText(shareUrl) }} style={{ flex: 1, padding: '12px', background: c.CARD2, color: c.T, border: `1px solid ${c.BD}`, borderRadius: '12px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}>🔗 {t.copyLink || 'Copy'}</button>
           </div>
-          {inlineResults.length>0&&<div style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'10px',marginBottom:'8px',maxHeight:'200px',overflowY:'auto'}}>
-            {inlineResults.map((r,i)=><div key={i} onClick={()=>pickInlineResult(r)} style={{padding:'10px 14px',cursor:'pointer',borderBottom:i<inlineResults.length-1?`1px solid ${c.BD}`:'none'}} onMouseEnter={e=>e.currentTarget.style.background=c.CARD2} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
-              <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
-                <div style={{fontSize:'14px',color:c.T,fontWeight:'500'}}>{r.name}</div>
-                {r.rating&&<span style={{fontSize:'11px',color:mc}}>⭐{r.rating}</span>}
-                {r.priceLevel&&<span style={{fontSize:'11px',color:c.M2}}>{'€'.repeat(r.priceLevel)}</span>}
-              </div>
-              <div style={{fontSize:'12px',color:c.M2}}>{r.address}</div>
-            </div>)}
-          </div>}
-          <div ref={inlineMapRef} style={{width:'100%',height:'250px',borderRadius:'12px',overflow:'hidden',border:`1px solid ${c.BD}`,background:c.CARD2,display:'flex',alignItems:'center',justifyContent:'center',color:c.M2,fontSize:'13px'}}>{!inlineMapObj.current&&(t.loadingMap||'Loading map...')}</div>
-        </div>}
-
-        {/* Place selected — go to confirm */}
-        {stops.some(s=>(s.options||[]).some(o=>o.name))&&<Btn onClick={()=>changeStep(3)} full style={{padding:'15px',background:mc,color:'#0A0A0A'}} c={c}>{t.nextBtn}</Btn>}
-      </div>}
-
-      {/* ── STEP 3: CONFIRM ── */}
-      {step===3&&<div className="fade-in" style={{textAlign:'center'}}>
-        <h2 style={{fontFamily:"'Syne',serif",fontSize:'26px',fontWeight:'800',color:c.T,marginBottom:'12px'}}>{t.readyQ}</h2>
-        <div style={{background:`linear-gradient(135deg,${mc}12,${mc}04)`,border:`2px solid ${mc}30`,borderRadius:'20px',padding:'20px 16px',marginBottom:'16px'}}>
-          <div style={{fontSize:'14px',color:mc,fontWeight:'600',textTransform:'capitalize',marginBottom:'4px'}}>{fmtShort(selDates[0],lang)}{startTimes[0]?' · '+startTimes[0]:''}</div>
-          {(()=>{const opt=stops.find(s=>(s.options||[]).some(o=>o.name))?.options?.[0];return opt?<div style={{fontSize:'16px',color:c.T,fontWeight:'700'}}>{opt.name}</div>:null;})()}
-          <div style={{fontSize:'12px',color:c.M2,marginTop:'4px'}}>@ {profile?.name||org}</div>
+          {onCreated && <Btn onClick={() => onCreated(created)} full style={{ padding: '14px' }} c={c}>{t.viewPlan || 'View plan'}</Btn>}
+          <button onClick={onBack} style={{ padding: '12px', background: 'none', border: 'none', color: c.M2, cursor: 'pointer', fontFamily: 'inherit', fontSize: '14px' }}>{t.homeBtn || 'Home'}</button>
         </div>
-        <p style={{color:c.M2,fontSize:'13px',marginBottom:'16px'}}>{t.aboutToCreate}</p>
-        <label style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px 14px',background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'12px',marginBottom:'16px',cursor:'pointer'}}>
-          <input type="checkbox" checked={requireLogin} onChange={e=>setRequireLogin(e.target.checked)} style={{width:'18px',height:'18px',accentColor:mc,cursor:'pointer'}}/>
-          <div><div style={{fontSize:'13px',color:c.T,fontWeight:'600'}}>{t.requireLoginLbl||'Require login to respond'}</div><div style={{fontSize:'11px',color:c.M2}}>{t.requireLoginHint||'Invitees must sign in before voting'}</div></div>
-        </label>
-        <Btn onClick={create} disabled={saving} full style={{padding:'16px',fontSize:'16px',background:mc,color:'#0A0A0A'}} c={c}>{saving?(t.creatingPlan):(t.createPlanBtn)}</Btn>
-      </div>}
+      </div>
+    )
+  }
 
+  return (
+    <div style={{ padding: '24px', maxWidth: '420px', margin: '0 auto' }}>
+      <Back onClick={onBack} label={t.back} c={c} />
+      <h2 style={{ fontFamily: "'Syne',serif", fontSize: '26px', fontWeight: '800', color: c.T, marginBottom: '20px' }}>{t.createPlan || 'Create a plan'}</h2>
+
+      {/* Title */}
+      <div style={{ marginBottom: '18px' }}>
+        <Lbl c={c}>{t.titleLbl || 'What are we doing?'}</Lbl>
+        <input value={title} onChange={e => setTitle(e.target.value.slice(0, 100))} maxLength={100} placeholder={t.titlePlaceholder || 'Football, coffee, hiking...'} style={{ background: c.CARD, border: `1px solid ${c.BD}`, borderRadius: '10px', padding: '12px 14px', color: c.T, fontSize: '14px', fontFamily: 'inherit', outline: 'none', width: '100%', boxSizing: 'border-box' }} />
+      </div>
+
+      {/* Category */}
+      <div style={{ marginBottom: '18px' }}>
+        <Lbl c={c}>{t.categoryLbl || 'Category'}</Lbl>
+        <CategoryPicker value={category} onChange={setCategory} lang={lang} c={c} />
+      </div>
+
+      {/* Date */}
+      <div style={{ marginBottom: '18px' }}>
+        <Lbl c={c}>{t.dateLbl || 'When?'}</Lbl>
+        <CalendarPicker selected={date} onChange={d => setDate(d.slice(-1))} c={c} lang={lang} max={1} />
+      </div>
+
+      {/* Time */}
+      <div style={{ marginBottom: '18px' }}>
+        <Lbl c={c}>{t.timeLbl || 'What time?'}</Lbl>
+        <ClockPicker value={time} onChange={setTime} c={c} />
+      </div>
+
+      {/* Place */}
+      <div style={{ marginBottom: '18px' }}>
+        <Lbl c={c}>{t.placeLbl || 'Where?'}</Lbl>
+        {place ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', background: c.CARD, border: `1px solid ${c.A}30`, borderRadius: '12px' }}>
+            {place.photo && <img src={place.photo} alt="" style={{ width: '44px', height: '44px', borderRadius: '10px', objectFit: 'cover', flexShrink: 0 }} />}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '15px', color: c.T, fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{place.name}</div>
+              {place.address && <div style={{ fontSize: '12px', color: c.M2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{place.address}</div>}
+            </div>
+            <button onClick={() => setPlace(null)} style={{ background: 'none', border: 'none', color: c.M, cursor: 'pointer', fontSize: '18px', flexShrink: 0, padding: '4px' }}>×</button>
+          </div>
+        ) : (
+          <PlaceSearch value={place} onSelect={setPlace} placeholder={t.searchPlacePh || 'Search a place...'} c={c} lang={lang} />
+        )}
+      </div>
+
+      {/* Capacity */}
+      <div style={{ marginBottom: '18px' }}>
+        <Lbl c={c}>{t.capacityLbl || 'Max people'}</Lbl>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button onClick={() => setCapacity(c => Math.max(2, c - 1))} style={{ width: '40px', height: '40px', borderRadius: '50%', background: c.CARD, border: `1px solid ${c.BD}`, color: c.T, fontSize: '18px', cursor: 'pointer', fontFamily: 'inherit' }}>−</button>
+          <span style={{ fontSize: '22px', fontWeight: '800', color: c.T, minWidth: '32px', textAlign: 'center' }}>{capacity}</span>
+          <button onClick={() => setCapacity(c => Math.min(20, c + 1))} style={{ width: '40px', height: '40px', borderRadius: '50%', background: c.CARD, border: `1px solid ${c.BD}`, color: c.T, fontSize: '18px', cursor: 'pointer', fontFamily: 'inherit' }}>+</button>
+          <span style={{ fontSize: '12px', color: c.M2 }}>{t.peopleIncluding || 'people (including you)'}</span>
+        </div>
+      </div>
+
+      {/* Join mode */}
+      <div style={{ marginBottom: '18px' }}>
+        <Lbl c={c}>{t.joinModeLbl || 'Who can join?'}</Lbl>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {[JOIN_MODE.OPEN, JOIN_MODE.CLOSED].map(mode => (
+            <button key={mode} onClick={() => setJoinMode(mode)} style={{
+              flex: 1, padding: '12px', borderRadius: '12px',
+              border: `1px solid ${joinMode === mode ? c.A : c.BD}`,
+              background: joinMode === mode ? `${c.A}18` : 'transparent',
+              color: joinMode === mode ? c.A : c.T,
+              cursor: 'pointer', fontFamily: 'inherit', fontSize: '13px', fontWeight: '600',
+              textAlign: 'center'
+            }}>
+              {mode === JOIN_MODE.OPEN ? (t.joinOpen || 'Anyone can join') : (t.joinClosed || 'Approval needed')}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Description */}
+      <div style={{ marginBottom: '24px' }}>
+        <Lbl c={c}>{t.descLbl || 'Description (optional)'}</Lbl>
+        <textarea value={description} onChange={e => setDescription(e.target.value.slice(0, 500))} maxLength={500} rows={3} placeholder={t.descPlaceholder || 'Any extra details...'} style={{ background: c.CARD, border: `1px solid ${c.BD}`, borderRadius: '10px', padding: '12px 14px', color: c.T, fontSize: '14px', fontFamily: 'inherit', outline: 'none', width: '100%', boxSizing: 'border-box', resize: 'vertical', lineHeight: 1.5 }} />
+      </div>
+
+      {/* Create button */}
+      <Btn onClick={handleCreate} disabled={!canCreate || saving} full style={{ padding: '16px', fontSize: '16px' }} c={c}>
+        {saving ? '...' : (t.createPlanBtn || 'Create plan')}
+      </Btn>
     </div>
-  </>);
+  )
 }
-
-
-// ─── SHARE ────────────────────────────────────────────

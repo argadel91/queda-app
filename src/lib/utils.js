@@ -1,5 +1,6 @@
 const BAD_WORDS = ['FUCK','SHIT','CUNT','COCK','DICK','PUTA','MIER','CONO','JODE','CULO','PENE','POLLA','NAZI','KKKK']
-export const genId = () => { let id; do { id = (Math.random().toString(36).substring(2,6)+Math.random().toString(36).substring(2,6)).substring(0,8).toUpperCase() } while (BAD_WORDS.some(w => id.includes(w))); return id }
+const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+export const genId = () => { const bytes = crypto.getRandomValues(new Uint8Array(10)); let id; do { id = Array.from(bytes, b => CHARS[b % CHARS.length]).join('') } while (BAD_WORDS.some(w => id.includes(w))); return id }
 export const toISO = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
 export const dayStart = () => { const d = new Date(); d.setHours(0,0,0,0); return d }
 export const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r }
