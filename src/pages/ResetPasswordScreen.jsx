@@ -4,7 +4,6 @@ import T from '../constants/translations.js'
 
 export default function ResetPasswordScreen({ onDone, c, lang }) {
   const t = T[lang] || T.en
-  React.useEffect(() => { console.log('[RESET SCREEN] mounted, hash:', window.location.hash?.substring(0, 50)) }, [])
   const [password, setPassword] = useState('')
   const [password2, setPassword2] = useState('')
   const [loading, setLoading] = useState(false)

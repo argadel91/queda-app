@@ -38,8 +38,6 @@ function AppInner() {
   const [authUser, setAuthUser] = useState(null)
   const [profile, setProfile] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
-  const [resetMode, setResetMode] = useState(false)
-  const resetModeRef = React.useRef(false)
   const c = useMemo(() => C(theme), [theme])
 
   useEffect(() => { applyTheme(theme) }, [theme])
@@ -69,9 +67,9 @@ function AppInner() {
         return
       }
 
-      // Handle password reset redirect — Supabase puts tokens in the hash
-      if (window.location.pathname === '/reset-password' && window.location.hash) {
-        // Let onAuthStateChange detect PASSWORD_RECOVERY from the hash
+      // Handle password reset — user arrives at /reset-password with token in hash
+      // Supabase will auto-sign-in with the recovery token, we just need to wait
+      if (window.location.pathname === '/reset-password') {
         setAuthLoading(false)
         return
       }
@@ -96,23 +94,14 @@ function AppInner() {
     initAuth()
 
     const { data: { subscription } } = db.auth.onAuthStateChange((event, session) => {
-      console.log('[AUTH EVENT]', event, session?.user?.email)
-      // PASSWORD_RECOVERY fires first, then SIGNED_IN fires immediately after.
-      // We use a ref to persist the flag across both events.
-      if (event === 'PASSWORD_RECOVERY') {
-        console.log('[RESET] PASSWORD_RECOVERY detected, navigating to /reset-password')
-        resetModeRef.current = true
-        setResetMode(true)
-        setAuthLoading(false)
-        navigate('/reset-password', { replace: true })
+      // If user is on /reset-password, don't run normal login flow
+      if (window.location.pathname === '/reset-password') {
+        if (session?.user) { setAuthUser(session.user); setAuthLoading(false) }
         return
       }
 
-      // If we're in recovery mode, ignore the SIGNED_IN that follows
-      if (resetModeRef.current) return
-
       // Clean up hash tokens from URL
-      if (window.location.hash && (window.location.hash.includes('access_token') || window.location.hash.includes('type=recovery'))) {
+      if (window.location.hash && window.location.hash.includes('access_token')) {
         navigate('/', { replace: true })
       }
 
@@ -123,7 +112,7 @@ function AppInner() {
           const savedLang = ls.get('q_lang', null); if (savedLang) setLang(savedLang); else if (prof?.lang) setLang(prof.lang)
           setAuthLoading(false)
         }).catch(e => { console.error('loadProfile change:', e); setAuthUser(session.user); setProfile({ name: session.user.email?.split('@')[0] || 'User', email: session.user.email || '' }); setAuthLoading(false) })
-      } else { setAuthUser(null); setProfile(null); setResetMode(false); resetModeRef.current = false }
+      } else { setAuthUser(null); setProfile(null) }
     })
     return () => { cancelled = true; subscription.unsubscribe() }
   }, [])
@@ -143,7 +132,10 @@ function AppInner() {
     </div>
   )
 
-  if (resetMode) return <React.Suspense fallback={<Fallback />}><ResetPasswordScreen onDone={async () => { resetModeRef.current = false; setResetMode(false); try { await authSignOut() } catch (e) { console.error('signOut after reset:', e) }; setAuthUser(null); setProfile(null); navigate('/', { replace: true }) }} c={c} lang={lang} /></React.Suspense>
+  // Password reset: if on /reset-password and user is authenticated (recovery token), show reset screen
+  if (location.pathname === '/reset-password' && authUser) {
+    return <React.Suspense fallback={<Fallback />}><ResetPasswordScreen onDone={async () => { try { await authSignOut() } catch (e) { console.error('signOut after reset:', e) }; setAuthUser(null); setProfile(null); navigate('/', { replace: true }) }} c={c} lang={lang} /></React.Suspense>
+  }
 
   if (!authUser) {
     if (showAuth) return <React.Suspense fallback={<Fallback />}><AuthScreen onAuth={handleAuth} c={c} lang={lang} onLangChange={l => { setLang(l); ls.set('q_lang', l) }} /></React.Suspense>
