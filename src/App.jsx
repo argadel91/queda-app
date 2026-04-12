@@ -131,20 +131,22 @@ function AppInner() {
   const appCtx = useMemo(() => ({ c, lang, authUser, profile }), [c, lang, authUser, profile])
 
   if (authLoading) return (
+    <AppProvider value={appCtx}>
     <div role="status" aria-live="assertive" aria-label="Loading" style={{ minHeight: '100vh', background: c.BG, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
       <div style={{ fontFamily: "'Syne',serif", fontWeight: '800', fontSize: '32px', color: c.T }}>queda<span style={{ color: c.A }}>.</span></div>
       <div style={{ width: '24px', height: '24px', border: `3px solid ${c.BD}`, borderTop: `3px solid ${c.A}`, borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
     </div>
+    </AppProvider>
   )
 
   // Password reset: if on /reset-password and user is authenticated (recovery token), show reset screen
   if (location.pathname === '/reset-password' && authUser) {
-    return <React.Suspense fallback={<Fallback />}><ResetPasswordScreen onDone={async () => { try { await authSignOut() } catch (e) { console.error('signOut after reset:', e) }; setAuthUser(null); setProfile(null); navigate('/', { replace: true }) }} c={c} lang={lang} /></React.Suspense>
+    return <AppProvider value={appCtx}><React.Suspense fallback={<Fallback />}><ResetPasswordScreen onDone={async () => { try { await authSignOut() } catch (e) { console.error('signOut after reset:', e) }; setAuthUser(null); setProfile(null); navigate('/', { replace: true }) }} c={c} lang={lang} /></React.Suspense></AppProvider>
   }
 
   if (!authUser) {
-    if (showAuth) return <React.Suspense fallback={<Fallback />}><AuthScreen onAuth={handleAuth} c={c} lang={lang} onLangChange={l => { setLang(l); ls.set('q_lang', l) }} /></React.Suspense>
-    return <Landing onGetStarted={() => setShowAuth(true)} c={c} lang={lang} onLangChange={l => { setLang(l); ls.set('q_lang', l) }} />
+    if (showAuth) return <AppProvider value={appCtx}><React.Suspense fallback={<Fallback />}><AuthScreen onAuth={handleAuth} c={c} lang={lang} onLangChange={l => { setLang(l); ls.set('q_lang', l) }} /></React.Suspense></AppProvider>
+    return <AppProvider value={appCtx}><Landing onGetStarted={() => setShowAuth(true)} c={c} lang={lang} onLangChange={l => { setLang(l); ls.set('q_lang', l) }} /></AppProvider>
   }
 
   // Check if profile is incomplete (onboarding)
