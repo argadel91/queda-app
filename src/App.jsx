@@ -125,6 +125,10 @@ function AppInner() {
 
   const Fallback = () => <div style={{ minHeight: '100vh', background: c.BG, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div style={{ fontFamily: "'Syne',serif", fontWeight: '800', fontSize: '22px', color: c.T }}>queda<span style={{ color: c.A }}>.</span></div></div>
 
+  const userLocation = profile?.lat && profile?.lng ? { lat: profile.lat, lng: profile.lng } : null
+  const showBottomNav = !location.pathname.startsWith('/create')
+  const appCtx = useMemo(() => ({ c, lang, authUser, profile }), [c, lang, authUser, profile])
+
   if (authLoading) return (
     <div style={{ minHeight: '100vh', background: c.BG, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
       <div style={{ fontFamily: "'Syne',serif", fontWeight: '800', fontSize: '28px', color: c.T }}>queda<span style={{ color: c.A }}>.</span></div>
@@ -158,13 +162,6 @@ function AppInner() {
       </React.Suspense>
     )
   }
-
-  // Hide bottom nav on create page
-  const showBottomNav = !location.pathname.startsWith('/create')
-
-  const userLocation = profile?.lat && profile?.lng ? { lat: profile.lat, lng: profile.lng } : null
-
-  const appCtx = useMemo(() => ({ c, lang, authUser, profile }), [c, lang, authUser, profile])
 
   return (
     <AppProvider value={appCtx}>
