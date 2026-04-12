@@ -1,4 +1,9 @@
 import { test, expect } from '@playwright/test'
+import { createClient } from '@supabase/supabase-js'
+
+const SB_URL = process.env.VITE_SUPABASE_URL
+const SB_KEY = process.env.VITE_SUPABASE_KEY
+const TEST_PLAN_ID = 'E2ETEST01'
 
 // ═══════════════════════════════════════════════════════
 // Helper: login via Supabase SDK (fast, no UI interaction)
@@ -301,9 +306,54 @@ test.describe('Feed and navigation', () => {
 })
 
 // ═══════════════════════════════════════════════════════
-// 5. PLAN DETAIL & JOIN (requires auth)
+// 5. PLAN DETAIL & JOIN (requires auth + test plan)
 // ═══════════════════════════════════════════════════════
 test.describe('Plan detail', () => {
+  let testUserId = null
+
+  test.beforeAll(async () => {
+    if (!SB_URL || !SB_KEY || !process.env.TEST_EMAIL || !process.env.TEST_PASSWORD) return
+    const db = createClient(SB_URL, SB_KEY)
+    const { data } = await db.auth.signInWithPassword({ email: process.env.TEST_EMAIL, password: process.env.TEST_PASSWORD })
+    if (!data?.user) return
+    testUserId = data.user.id
+
+    // Create a test plan (tomorrow, open, capacity 5)
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    const dateStr = tomorrow.toISOString().slice(0, 10)
+
+    await db.from('plans').upsert({
+      id: TEST_PLAN_ID,
+      user_id: testUserId,
+      title: 'E2E Test Plan',
+      category: 'cafe',
+      place_name: 'Test Cafe',
+      place_address: 'Test Street 1',
+      lat: 40.4168, lng: -3.7038,
+      date: dateStr,
+      time: '18:00:00',
+      capacity: 5,
+      join_mode: 'open',
+      status: 'active'
+    })
+
+    // Organizer auto-joins
+    await db.from('plan_participants').upsert({
+      plan_id: TEST_PLAN_ID,
+      user_id: testUserId,
+      status: 'joined'
+    })
+  })
+
+  test.afterAll(async () => {
+    if (!SB_URL || !SB_KEY) return
+    const db = createClient(SB_URL, SB_KEY)
+    await db.auth.signInWithPassword({ email: process.env.TEST_EMAIL, password: process.env.TEST_PASSWORD })
+    await db.from('plan_participants').delete().eq('plan_id', TEST_PLAN_ID)
+    await db.from('plans').delete().eq('id', TEST_PLAN_ID)
+  })
+
   test.beforeEach(async ({ page }) => {
     const loggedIn = await loginViaSDK(page)
     if (!loggedIn) test.skip()
@@ -313,7 +363,6 @@ test.describe('Plan detail', () => {
     await waitForAppReady(page)
     await page.waitForTimeout(2000)
 
-    // Find any plan card (div with 📅 inside)
     const cards = page.locator('div[style*="cursor: pointer"]').filter({ hasText: '📅' })
     const count = await cards.count()
     if (count === 0) { test.skip(); return }
@@ -321,60 +370,34 @@ test.describe('Plan detail', () => {
     await cards.first().click()
     await page.waitForTimeout(2000)
 
-    // Should be on plan detail page
     expect(page.url()).toContain('/plan/')
-    // Should see plan info (date, time, place icons)
     await expect(page.locator('text=📅').first()).toBeVisible({ timeout: 5000 })
   })
 
   test('plan detail shows organizer and participants section', async ({ page }) => {
-    await waitForAppReady(page)
-    await page.waitForTimeout(2000)
+    await page.goto('/plan/' + TEST_PLAN_ID)
+    await page.waitForTimeout(3000)
 
-    const cards = page.locator('div[style*="cursor: pointer"]').filter({ hasText: '📅' })
-    if (await cards.count() === 0) { test.skip(); return }
-
-    await cards.first().click()
-    await page.waitForTimeout(2000)
-
-    // Should see organizer section
     const organizer = page.locator('text=/organizer|organizador/i').first()
     await expect(organizer).toBeVisible({ timeout: 5000 })
 
-    // Should see participants section
     const participants = page.locator('text=/participants|participantes/i').first()
     await expect(participants).toBeVisible({ timeout: 5000 })
   })
 
-  test('plan detail shows join or leave button', async ({ page }) => {
-    await waitForAppReady(page)
-    await page.waitForTimeout(2000)
+  test('plan detail shows chat tab for joined user', async ({ page }) => {
+    await page.goto('/plan/' + TEST_PLAN_ID)
+    await page.waitForTimeout(3000)
 
-    const cards = page.locator('div[style*="cursor: pointer"]').filter({ hasText: '📅' })
-    if (await cards.count() === 0) { test.skip(); return }
-
-    await cards.first().click()
-    await page.waitForTimeout(2000)
-
-    // Should show one of: Join, Leave, Waiting, Full, or Chat tab (if already joined)
-    const joinBtn = page.locator('button').filter({ hasText: /join|unirse|request|solicitar/i }).first()
-    const leaveBtn = page.locator('button').filter({ hasText: /leave|dejar|salir/i }).first()
-    const pendingMsg = page.locator('text=/waiting|esperando/i').first()
+    // Test user is the organizer and joined — should see Chat tab
     const chatTab = page.locator('button').filter({ hasText: /chat/i }).first()
-
-    const anyAction =
-      await joinBtn.isVisible({ timeout: 3000 }).catch(() => false) ||
-      await leaveBtn.isVisible({ timeout: 1000 }).catch(() => false) ||
-      await pendingMsg.isVisible({ timeout: 1000 }).catch(() => false) ||
-      await chatTab.isVisible({ timeout: 1000 }).catch(() => false)
-    expect(anyAction).toBe(true)
+    await expect(chatTab).toBeVisible({ timeout: 5000 })
   })
 
   test('invalid plan URL shows not found', async ({ page }) => {
     await page.goto('/plan/ZZZZZZZZZZ')
     await page.waitForTimeout(5000)
 
-    // Should show queda logo (not blank) and possibly "not found" message
     await expect(page.locator('text=queda.').first()).toBeVisible({ timeout: 5000 })
   })
 })
