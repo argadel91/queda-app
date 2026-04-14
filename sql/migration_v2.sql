@@ -5,12 +5,14 @@
 -- After running, enable Realtime on: messages, plan_participants
 
 -- ============================================================
--- 1. Rename old tables (preserve data, don't delete)
+-- 1. Drop old v1 tables (no longer needed)
 -- ============================================================
 
-ALTER TABLE IF EXISTS plans RENAME TO plans_v1;
-ALTER TABLE IF EXISTS responses RENAME TO responses_v1;
-ALTER TABLE IF EXISTS user_plans RENAME TO user_plans_v1;
+DROP TABLE IF EXISTS responses_v1 CASCADE;
+DROP TABLE IF EXISTS user_plans_v1 CASCADE;
+DROP TABLE IF EXISTS plans_v1 CASCADE;
+DROP TABLE IF EXISTS responses CASCADE;
+DROP TABLE IF EXISTS user_plans CASCADE;
 
 -- ============================================================
 -- 2. Expand profiles table
