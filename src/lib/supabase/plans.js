@@ -23,7 +23,7 @@ export const fetchPlans = async ({ category, dateFrom, dateTo, lat, lng, radiusK
       .select('*, profiles:user_id(id,name,username,photo_url,birthdate,city), plan_participants(count)', { count: 'exact' })
       .in('status', [PLAN_STATUS.ACTIVE, PLAN_STATUS.FULL])
       .gte('date', new Date().toISOString().slice(0, 10))
-      .eq('plan_participants.status', 'joined')
+
       .order('date', { ascending: true })
       .order('time', { ascending: true })
       .range(offset, offset + limit - 1)
@@ -68,7 +68,7 @@ export const fetchMyPlans = async (userId) => {
     const { data } = await db.from('plans')
       .select('*, profiles:user_id(id,name,username,photo_url,birthdate,city), plan_participants(count)')
       .eq('user_id', userId)
-      .eq('plan_participants.status', 'joined')
+
       .order('date', { ascending: false })
     if (!data?.length) return []
     return data.map(p => ({ ...p, participant_count: p.plan_participants?.[0]?.count || 0, profiles: p.profiles || null, plan_participants: undefined }))
@@ -85,7 +85,7 @@ export const fetchJoinedPlans = async (userId) => {
       .select('*, profiles:user_id(id,name,username,photo_url,birthdate,city), plan_participants(count)')
       .in('id', planIds)
       .neq('user_id', userId)
-      .eq('plan_participants.status', 'joined')
+
       .order('date', { ascending: false })
     if (!data?.length) return []
     return data.map(p => ({ ...p, participant_count: p.plan_participants?.[0]?.count || 0, profiles: p.profiles || null, plan_participants: undefined }))
