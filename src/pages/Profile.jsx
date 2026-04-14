@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import T from '../constants/translations.js'
 import CATEGORIES from '../constants/categories.js'
-import { db, uploadAvatar, showToast } from '../lib/supabase.js'
+import { db, uploadAvatar, showToast, fetchMyPlans, fetchJoinedPlans } from '../lib/supabase.js'
 import { Btn, Back, Lbl } from '../components/ui.jsx'
+import PlanCard from '../components/PlanCard.jsx'
 import CityInput from '../components/CityInput.jsx'
 
 const FLAGS = { es: '🇪🇸', en: '🇬🇧', pt: '🇵🇹', fr: '🇫🇷', de: '🇩🇪', it: '🇮🇹' }
@@ -11,9 +12,13 @@ const LANGS = ['es', 'en', 'pt', 'fr', 'de', 'it']
 const GENDERS = ['male', 'female', 'non-binary', 'other', 'prefer_not_to_say']
 const GENDER_KEY = { male: 'genderMale', female: 'genderFemale', 'non-binary': 'genderNonBinary', other: 'genderOther', prefer_not_to_say: 'genderPreferNot' }
 
-export default function Profile({ onBack, c, lang, authUser, profile, onUpdateProfile, onSignOut, onLangChange, onThemeToggle, theme, onboard }) {
+export default function Profile({ onBack, c, lang, authUser, profile, onUpdateProfile, onSignOut, onLangChange, onThemeToggle, theme, onboard, onPlanClick }) {
   const t = T[lang]
   const [editing, setEditing] = useState(!!onboard)
+  const [plansTab, setPlansTab] = useState('mine')
+  const [myPlans, setMyPlans] = useState([])
+  const [joinedPlans, setJoinedPlans] = useState([])
+  const [plansLoading, setPlansLoading] = useState(true)
   const [newName, setNewName] = useState(profile?.name || '')
   const [newUsername, setNewUsername] = useState(profile?.username || '')
   const [bio, setBio] = useState(profile?.bio || '')
@@ -27,6 +32,15 @@ export default function Profile({ onBack, c, lang, authUser, profile, onUpdatePr
   const [usernameErr, setUsernameErr] = useState('')
   const [saving, setSaving] = useState(false)
   const fileRef = useRef()
+
+  useEffect(() => {
+    if (!authUser?.id || onboard) return
+    setPlansLoading(true)
+    Promise.all([fetchMyPlans(authUser.id), fetchJoinedPlans(authUser.id)])
+      .then(([mine, joined]) => { setMyPlans(mine); setJoinedPlans(joined) })
+      .catch(e => console.error('loadPlans:', e))
+      .finally(() => setPlansLoading(false))
+  }, [authUser?.id, onboard])
 
   const toggleInterest = slug => {
     setInterests(prev => prev.includes(slug) ? prev.filter(s => s !== slug) : [...prev, slug])
@@ -226,6 +240,59 @@ export default function Profile({ onBack, c, lang, authUser, profile, onUpdatePr
           </div>
         </>}
       </div>
+
+      {/* My Plans section — only in view mode, not onboarding */}
+      {!editing && !onboard && (
+        <div style={{ marginTop: '24px' }}>
+          {/* Tabs */}
+          <div style={{ display: 'flex', gap: '4px', background: c.CARD, borderRadius: '12px', padding: '4px', border: `1px solid ${c.BD}`, marginBottom: '16px' }}>
+            {[['mine', t.myPlansTab || 'My plans'], ['joined', t.joinedPlansTab || 'Joined']].map(([key, label]) => (
+              <button key={key} onClick={() => setPlansTab(key)} style={{
+                flex: 1, padding: '10px', borderRadius: '10px', border: 'none',
+                background: plansTab === key ? c.A : 'transparent',
+                color: plansTab === key ? '#0A0A0A' : c.M,
+                fontWeight: '700', fontSize: '14px', cursor: 'pointer', fontFamily: 'inherit',
+                transition: 'all .15s'
+              }}>{label}</button>
+            ))}
+          </div>
+
+          {/* Content */}
+          {plansLoading ? (
+            <div style={{ textAlign: 'center', padding: '32px 0', color: c.M }}>
+              <div style={{ width: '24px', height: '24px', border: `3px solid ${c.BD}`, borderTop: `3px solid ${c.A}`, borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 12px' }} />
+            </div>
+          ) : (
+            <>
+              {plansTab === 'mine' && (
+                myPlans.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '32px 16px' }}>
+                    <div style={{ fontSize: '40px', marginBottom: '12px' }}>📋</div>
+                    <p style={{ color: c.M, fontSize: '14px', marginBottom: '16px' }}>{t.noMyPlans || "You haven't created any plans yet"}</p>
+                    {onPlanClick && <Btn onClick={() => onPlanClick('create')} c={c} sm>{t.createFirstPlan || 'Create your first plan'}</Btn>}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {myPlans.map(plan => <PlanCard key={plan.id} plan={plan} lang={lang} c={c} onClick={() => onPlanClick?.(plan.id)} />)}
+                  </div>
+                )
+              )}
+              {plansTab === 'joined' && (
+                joinedPlans.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '32px 16px' }}>
+                    <div style={{ fontSize: '40px', marginBottom: '12px' }}>🔍</div>
+                    <p style={{ color: c.M, fontSize: '14px' }}>{t.noJoinedPlans || "You haven't joined any plans yet"}</p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {joinedPlans.map(plan => <PlanCard key={plan.id} plan={plan} lang={lang} c={c} onClick={() => onPlanClick?.(plan.id)} />)}
+                  </div>
+                )
+              )}
+            </>
+          )}
+        </div>
+      )}
     </div>
   )
 }

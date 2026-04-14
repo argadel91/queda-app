@@ -62,3 +62,32 @@ export const deletePlan = async (planId) => {
   const { error } = await db.rpc('delete_plan', { p_plan_id: planId })
   if (error) throw error
 }
+
+export const fetchMyPlans = async (userId) => {
+  try {
+    const { data } = await db.from('plans')
+      .select('*, profiles:user_id(id,name,username,photo_url,birthdate,city), plan_participants(count)')
+      .eq('user_id', userId)
+      .eq('plan_participants.status', 'joined')
+      .order('date', { ascending: false })
+    if (!data?.length) return []
+    return data.map(p => ({ ...p, participant_count: p.plan_participants?.[0]?.count || 0, profiles: p.profiles || null, plan_participants: undefined }))
+  } catch (e) { console.error('fetchMyPlans:', e); return [] }
+}
+
+export const fetchJoinedPlans = async (userId) => {
+  try {
+    // Get plan IDs where user is a joined participant (but not organizer)
+    const { data: pp } = await db.from('plan_participants').select('plan_id').eq('user_id', userId).eq('status', 'joined')
+    if (!pp?.length) return []
+    const planIds = pp.map(p => p.plan_id)
+    const { data } = await db.from('plans')
+      .select('*, profiles:user_id(id,name,username,photo_url,birthdate,city), plan_participants(count)')
+      .in('id', planIds)
+      .neq('user_id', userId)
+      .eq('plan_participants.status', 'joined')
+      .order('date', { ascending: false })
+    if (!data?.length) return []
+    return data.map(p => ({ ...p, participant_count: p.plan_participants?.[0]?.count || 0, profiles: p.profiles || null, plan_participants: undefined }))
+  } catch (e) { console.error('fetchJoinedPlans:', e); return [] }
+}

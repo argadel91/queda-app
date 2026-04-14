@@ -193,7 +193,7 @@ function AppInner() {
           <Route path="/create" element={<Create onBack={handleGoHome} onCreated={p => navigate('/plan/' + p.id)} c={c} lang={lang} authUser={authUser} profile={profile} />} />
           <Route path="/plan/:id" element={<PlanDetail c={c} lang={lang} authUser={authUser} />} />
           <Route path="/profile/:id" element={<PublicProfile c={c} lang={lang} />} />
-          <Route path="/profile" element={<Profile onBack={() => navigate('/')} c={c} lang={lang} authUser={authUser} profile={profile} onUpdateProfile={updateProfile} onSignOut={handleSignOut} onLangChange={l => { setLang(l); ls.set('q_lang', l); if (authUser) saveProfile(authUser.id, { ...profile, lang: l }).catch(() => {}) }} onThemeToggle={tgTheme} theme={theme} />} />
+          <Route path="/profile" element={<Profile onBack={() => navigate('/')} c={c} lang={lang} authUser={authUser} profile={profile} onUpdateProfile={updateProfile} onSignOut={handleSignOut} onLangChange={l => { setLang(l); ls.set('q_lang', l); if (authUser) saveProfile(authUser.id, { ...profile, lang: l }).catch(() => {}) }} onThemeToggle={tgTheme} theme={theme} onPlanClick={id => id === 'create' ? navigate('/create') : navigate('/plan/' + id)} />} />
           <Route path="*" element={<div style={{ padding: '40px', textAlign: 'center', color: c.M }}>404</div>} />
         </Routes></main>
 

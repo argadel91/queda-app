@@ -82,6 +82,9 @@ const T = {
 
     // Map & Misc
     mapHint: 'Toca un pin para ver el plan', skipToContent: 'Ir al contenido',
+    myPlansTab: 'Mis planes', joinedPlansTab: 'Unido',
+    noMyPlans: 'Aún no has creado ningún plan', noJoinedPlans: 'Aún no te has unido a ningún plan',
+    createFirstPlan: 'Crea tu primer plan',
   },
 
   en: {
@@ -157,6 +160,9 @@ const T = {
     resetPassNowSignIn: 'You can now sign in with your new password', resetPassBtn: 'Update password',
 
     mapHint: 'Tap a pin to see plan details', skipToContent: 'Skip to content',
+    myPlansTab: 'My plans', joinedPlansTab: 'Joined',
+    noMyPlans: "You haven't created any plans yet", noJoinedPlans: "You haven't joined any plans yet",
+    createFirstPlan: 'Create your first plan',
   },
 
   pt: {
@@ -222,6 +228,9 @@ const T = {
     resetPassNowSignIn: 'Já podes entrar com a tua nova palavra-passe', resetPassBtn: 'Atualizar',
 
     mapHint: 'Toca num pin para ver o plano', skipToContent: 'Ir para o conteúdo',
+    myPlansTab: 'Meus planos', joinedPlansTab: 'Participando',
+    noMyPlans: 'Ainda não criaste nenhum plano', noJoinedPlans: 'Ainda não te juntaste a nenhum plano',
+    createFirstPlan: 'Cria o teu primeiro plano',
   },
 
   fr: {
@@ -285,6 +294,9 @@ const T = {
     resetPassNowSignIn: 'Tu peux te connecter', resetPassBtn: 'Mettre à jour',
 
     mapHint: 'Touche un pin pour voir le plan', skipToContent: 'Aller au contenu',
+    myPlansTab: 'Mes plans', joinedPlansTab: 'Rejoint',
+    noMyPlans: "Tu n'as pas encore créé de plan", noJoinedPlans: "Tu n'as rejoint aucun plan",
+    createFirstPlan: 'Crée ton premier plan',
   },
 
   de: {
@@ -348,6 +360,9 @@ const T = {
     resetPassNowSignIn: 'Du kannst dich jetzt anmelden', resetPassBtn: 'Aktualisieren',
 
     mapHint: 'Tippe auf einen Pin', skipToContent: 'Zum Inhalt springen',
+    myPlansTab: 'Meine Pläne', joinedPlansTab: 'Beigetreten',
+    noMyPlans: 'Du hast noch keinen Plan erstellt', noJoinedPlans: 'Du bist noch keinem Plan beigetreten',
+    createFirstPlan: 'Erstelle deinen ersten Plan',
   },
 
   it: {
@@ -411,6 +426,9 @@ const T = {
     resetPassNowSignIn: 'Ora puoi accedere', resetPassBtn: 'Aggiorna',
 
     mapHint: 'Tocca un pin per vedere il piano', skipToContent: 'Vai al contenuto',
+    myPlansTab: 'I miei piani', joinedPlansTab: 'Partecipo',
+    noMyPlans: 'Non hai ancora creato nessun piano', noJoinedPlans: 'Non ti sei ancora unito a nessun piano',
+    createFirstPlan: 'Crea il tuo primo piano',
   },
 }
 export default T
