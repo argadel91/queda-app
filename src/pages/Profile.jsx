@@ -88,7 +88,7 @@ export default function Profile({ onBack, c, lang, authUser, profile, onUpdatePr
   const onboardProgress = onboard ? [newName.trim(), birthdate, interests.length > 0].filter(Boolean).length : 0
 
   return (
-    <div style={{ padding: '24px', maxWidth: '420px', margin: '0 auto' }}>
+    <div style={{ padding: '24px', maxWidth: '420px', margin: '0 auto', paddingBottom: 'calc(100px + env(safe-area-inset-bottom, 0px))' }}>
       {onBack && <Back onClick={onBack} label={t.back} c={c} />}
       <h2 style={{ fontFamily: "'Syne',serif", fontSize: '24px', fontWeight: '800', color: c.T, marginBottom: '16px' }}>{t.myProfile || 'My profile'}</h2>
 
