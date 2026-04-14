@@ -10,6 +10,26 @@ async function getParticipantCounts(planIds) {
   return counts
 }
 
+// Helper: fetch organizer profiles for a list of plans
+async function getOrganizerProfiles(plans) {
+  if (!plans.length) return {}
+  const userIds = [...new Set(plans.map(p => p.user_id))]
+  const { data } = await db.from('profiles').select('id,name,username,photo_url,birthdate,city').in('id', userIds)
+  const map = {}
+  ;(data || []).forEach(p => { map[p.id] = p })
+  return map
+}
+
+// Helper: enrich plans with profiles and participant counts
+async function enrichPlans(plans) {
+  if (!plans.length) return []
+  const [counts, profMap] = await Promise.all([
+    getParticipantCounts(plans.map(p => p.id)),
+    getOrganizerProfiles(plans)
+  ])
+  return plans.map(p => ({ ...p, participant_count: counts[p.id] || 0, profiles: profMap[p.user_id] || null }))
+}
+
 export const createPlan = async (plan) => {
   try {
     const { error } = await db.from('plans').insert(plan)
@@ -29,7 +49,7 @@ export const fetchPlan = async id => {
 export const fetchPlans = async ({ category, dateFrom, dateTo, lat, lng, radiusKm, limit = 20, offset = 0 } = {}) => {
   try {
     let q = db.from('plans')
-      .select('*, profiles:user_id(id,name,username,photo_url,birthdate,city)', { count: 'exact' })
+      .select('*', { count: 'exact' })
       .in('status', [PLAN_STATUS.ACTIVE, PLAN_STATUS.FULL])
       .gte('date', new Date().toISOString().slice(0, 10))
       .order('date', { ascending: true })
@@ -48,9 +68,7 @@ export const fetchPlans = async ({ category, dateFrom, dateTo, lat, lng, radiusK
     const { data, count } = await q
     if (!data?.length) return { plans: [], total: 0 }
 
-    const counts = await getParticipantCounts(data.map(p => p.id))
-    const plans = data.map(p => ({ ...p, participant_count: counts[p.id] || 0 }))
-
+    const plans = await enrichPlans(data)
     return { plans, total: count || 0 }
   } catch (e) { console.error('fetchPlans:', e); return { plans: [], total: 0 } }
 }
@@ -69,13 +87,9 @@ export const deletePlan = async (planId) => {
 
 export const fetchMyPlans = async (userId) => {
   try {
-    const { data } = await db.from('plans')
-      .select('*, profiles:user_id(id,name,username,photo_url,birthdate,city)')
-      .eq('user_id', userId)
-      .order('date', { ascending: false })
+    const { data } = await db.from('plans').select('*').eq('user_id', userId).order('date', { ascending: false })
     if (!data?.length) return []
-    const counts = await getParticipantCounts(data.map(p => p.id))
-    return data.map(p => ({ ...p, participant_count: counts[p.id] || 0 }))
+    return enrichPlans(data)
   } catch (e) { console.error('fetchMyPlans:', e); return [] }
 }
 
@@ -84,13 +98,8 @@ export const fetchJoinedPlans = async (userId) => {
     const { data: pp } = await db.from('plan_participants').select('plan_id').eq('user_id', userId).eq('status', 'joined')
     if (!pp?.length) return []
     const planIds = pp.map(p => p.plan_id)
-    const { data } = await db.from('plans')
-      .select('*, profiles:user_id(id,name,username,photo_url,birthdate,city)')
-      .in('id', planIds)
-      .neq('user_id', userId)
-      .order('date', { ascending: false })
+    const { data } = await db.from('plans').select('*').in('id', planIds).neq('user_id', userId).order('date', { ascending: false })
     if (!data?.length) return []
-    const counts = await getParticipantCounts(data.map(p => p.id))
-    return data.map(p => ({ ...p, participant_count: counts[p.id] || 0 }))
+    return enrichPlans(data)
   } catch (e) { console.error('fetchJoinedPlans:', e); return [] }
 }
