@@ -8,7 +8,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://maps.googleapis.com https://maps.gstatic.com https://lh3.googleusercontent.com https://places.googleapis.com https://gxkdibhfzjkjxuuhuwfv.supabase.co; connect-src 'self' https://gxkdibhfzjkjxuuhuwfv.supabase.co wss://gxkdibhfzjkjxuuhuwfv.supabase.co https://maps.googleapis.com https://places.googleapis.com https://routes.googleapis.com https://*.ingest.de.sentry.io; frame-src 'none'; object-src 'none'; base-uri 'self'"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://maps.googleapis.com https://maps.gstatic.com https://lh3.googleusercontent.com https://places.googleapis.com https://gxkdibhfzjkjxuuhuwfv.supabase.co; connect-src 'self' https://gxkdibhfzjkjxuuhuwfv.supabase.co wss://gxkdibhfzjkjxuuhuwfv.supabase.co https://maps.googleapis.com https://places.googleapis.com https://routes.googleapis.com https://*.ingest.de.sentry.io https://fonts.googleapis.com https://fonts.gstatic.com; frame-src 'none'; object-src 'none'; base-uri 'self'"
         },
         {
           "key": "X-Frame-Options",
