@@ -1,4 +1,4 @@
-const CACHE_NAME = 'queda-v3'
+const CACHE_NAME = 'queda-v4'
 const STATIC_ASSETS = [
   '/manifest.json',
   '/icon-192.svg',
@@ -25,14 +25,15 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return
   const url = new URL(e.request.url)
-  // Never cache HTML, JS bundles, or API calls — always fetch fresh
+  // Never intercept: HTML, JS bundles, API calls, fonts, external services
   if (
     url.pathname === '/' ||
     url.pathname.endsWith('.html') ||
     url.pathname.startsWith('/assets/') ||
     url.hostname.includes('supabase') ||
     url.hostname.includes('sentry') ||
-    url.hostname.includes('googleapis')
+    url.hostname.includes('googleapis') ||
+    url.hostname.includes('gstatic')
   ) return
   // Only cache static assets (icons, manifest, images)
   e.respondWith(
