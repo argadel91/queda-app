@@ -48,6 +48,7 @@ const T = {
     pendingApproval: 'Esperando aprobación...', pendingRequests: 'Solicitudes pendientes',
     planNotFound: 'Plan no encontrado', planFull: 'Plan completo', joinError: 'Error al unirse',
     leaveConfirm: '¿Dejar este plan?',
+    deletePlan: 'Eliminar plan', deletePlanConfirm: '¿Eliminar este plan? No se puede deshacer.', deletePlanSuccess: 'Plan eliminado', deletePlanError: 'Error al eliminar el plan',
 
     // Chat
     chatToday: 'Hoy', chatYesterday: 'Ayer',
@@ -132,6 +133,7 @@ const T = {
     pendingApproval: 'Waiting for approval...', pendingRequests: 'Pending requests',
     planNotFound: 'Plan not found', planFull: 'Plan is full', joinError: 'Error joining plan',
     leaveConfirm: 'Leave this plan?',
+    deletePlan: 'Delete plan', deletePlanConfirm: 'Delete this plan? This cannot be undone.', deletePlanSuccess: 'Plan deleted', deletePlanError: 'Error deleting plan',
 
     chatToday: 'Today', chatYesterday: 'Yesterday',
     chatNoMessages: 'No messages yet. Be the first!',
@@ -207,6 +209,7 @@ const T = {
     pendingApproval: 'À espera de aprovação...', pendingRequests: 'Pedidos pendentes',
     planNotFound: 'Plano não encontrado', planFull: 'Plano lotado', joinError: 'Erro ao participar',
     leaveConfirm: 'Sair deste plano?',
+    deletePlan: 'Eliminar plano', deletePlanConfirm: 'Eliminar este plano? Não pode ser desfeito.', deletePlanSuccess: 'Plano eliminado', deletePlanError: 'Erro ao eliminar',
 
     chatToday: 'Hoje', chatYesterday: 'Ontem', chatNoMessages: 'Ainda sem mensagens. Sê o primeiro!',
     chatPlaceholder: 'Escreve uma mensagem...', chatReconnecting: 'A reconectar...',
@@ -274,6 +277,7 @@ const T = {
     pendingApproval: 'En attente...', pendingRequests: 'Demandes en attente',
     planNotFound: 'Plan introuvable', planFull: 'Plan complet', joinError: 'Erreur',
     leaveConfirm: 'Quitter ce plan ?',
+    deletePlan: 'Supprimer le plan', deletePlanConfirm: 'Supprimer ce plan ? Irréversible.', deletePlanSuccess: 'Plan supprimé', deletePlanError: 'Erreur',
 
     chatToday: "Aujourd'hui", chatYesterday: 'Hier', chatNoMessages: 'Pas encore de messages.',
     chatPlaceholder: 'Écris un message...', chatReconnecting: 'Reconnexion...',
@@ -341,6 +345,7 @@ const T = {
     pendingApproval: 'Warte auf Genehmigung...', pendingRequests: 'Offene Anfragen',
     planNotFound: 'Plan nicht gefunden', planFull: 'Plan voll', joinError: 'Fehler',
     leaveConfirm: 'Plan verlassen?',
+    deletePlan: 'Plan löschen', deletePlanConfirm: 'Plan löschen? Kann nicht rückgängig gemacht werden.', deletePlanSuccess: 'Plan gelöscht', deletePlanError: 'Fehler beim Löschen',
 
     chatToday: 'Heute', chatYesterday: 'Gestern', chatNoMessages: 'Noch keine Nachrichten.',
     chatPlaceholder: 'Nachricht schreiben...', chatReconnecting: 'Verbinde...',
@@ -408,6 +413,7 @@ const T = {
     pendingApproval: 'In attesa...', pendingRequests: 'Richieste in attesa',
     planNotFound: 'Piano non trovato', planFull: 'Piano pieno', joinError: 'Errore',
     leaveConfirm: 'Lasciare questo piano?',
+    deletePlan: 'Elimina piano', deletePlanConfirm: 'Eliminare questo piano? Non si può annullare.', deletePlanSuccess: 'Piano eliminato', deletePlanError: 'Errore',
 
     chatToday: 'Oggi', chatYesterday: 'Ieri', chatNoMessages: 'Nessun messaggio. Sii il primo!',
     chatPlaceholder: 'Scrivi un messaggio...', chatReconnecting: 'Riconnessione...',

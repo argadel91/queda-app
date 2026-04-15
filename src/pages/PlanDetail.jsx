@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import T from '../constants/translations.js'
 import { JOIN_STATUS, JOIN_MODE } from '../constants/status.js'
-import { fetchPlan, fetchParticipants, joinPlan, requestJoin, leavePlan, updateParticipant, db, showErr, showToast } from '../lib/supabase.js'
+import { fetchPlan, fetchParticipants, joinPlan, requestJoin, leavePlan, updateParticipant, deletePlan, db, showErr, showToast } from '../lib/supabase.js'
 import { getCategoryEmoji, getCategoryLabel } from '../constants/categories.js'
 import { fmtDate, fmtTime } from '../lib/utils.js'
 import { Btn, Back } from '../components/ui.jsx'
@@ -284,6 +284,14 @@ export default function PlanDetail({ c, lang, authUser }) {
         <button onClick={() => window.open('https://t.me/share/url?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent(shareText), '_blank')} style={{ flex: 1, padding: '10px', background: '#0088cc', color: '#fff', border: 'none', borderRadius: '10px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>Telegram</button>
         <button onClick={() => { navigator.clipboard?.writeText(shareUrl); showToast(t.linkCopied || 'Link copied') }} style={{ flex: 1, padding: '10px', background: c.CARD2, color: c.T, border: `1px solid ${c.BD}`, borderRadius: '10px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}>🔗 {t.copyLink || 'Copy'}</button>
       </div>
+      {/* Delete (organizer only) */}
+      {isOrganizer && (
+        <Btn v="danger" full style={{ marginTop: '16px' }} c={c} onClick={async () => {
+          if (!window.confirm(t.deletePlanConfirm || 'Delete this plan? This cannot be undone.')) return
+          try { await deletePlan(plan.id); showToast(t.deletePlanSuccess || 'Plan deleted'); navigate('/', { replace: true }) }
+          catch (e) { console.error('deletePlan:', e); showErr(t.deletePlanError || 'Error deleting plan') }
+        }}>{t.deletePlan || 'Delete plan'}</Btn>
+      )}
       </>}
     </div>
   )
