@@ -24,7 +24,7 @@ const T = {
     tipLang: 'Cambiar idioma', tipTheme: 'Cambiar tema',
 
     // Feed
-    discoverPlans: 'Descubrir planes', enableLocation: 'Activa ubicación para ver planes cerca',
+    discoverPlans: 'Descubrir planes', feedSubtitle: 'Planes donde encajas', enableLocation: 'Activa ubicación para ver planes cerca',
     emptyFeedTitle: 'No hay planes cerca', emptyFeedSub: '¡Crea el primero y queda con gente nueva!', emptyFeedCta: 'Crear un plan',
 
     // Create
@@ -111,7 +111,7 @@ const T = {
     loading: 'Loading...', offlineMsg: 'No internet connection', onlineMsg: 'Back online',
     tipLang: 'Change language', tipTheme: 'Change theme',
 
-    discoverPlans: 'Discover plans', enableLocation: 'Enable location to see nearby plans',
+    discoverPlans: 'Discover plans', feedSubtitle: 'Plans you fit into', enableLocation: 'Enable location to see nearby plans',
     emptyFeedTitle: 'No plans nearby', emptyFeedSub: 'Create the first one and meet new people!', emptyFeedCta: 'Create a plan',
 
     titleLbl: 'What are we doing?', titlePlaceholder: 'Football, coffee, hiking...',
@@ -189,7 +189,7 @@ const T = {
     loading: 'A carregar...', offlineMsg: 'Sem ligação à internet', onlineMsg: 'Ligação restaurada',
     tipLang: 'Mudar idioma', tipTheme: 'Mudar tema',
 
-    discoverPlans: 'Descobrir planos', enableLocation: 'Ativa a localização para ver planos perto',
+    discoverPlans: 'Descobrir planos', feedSubtitle: 'Planos que encaixam contigo', enableLocation: 'Ativa a localização para ver planos perto',
     emptyFeedTitle: 'Sem planos por perto', emptyFeedSub: 'Cria o primeiro e conhece gente nova!', emptyFeedCta: 'Criar um plano',
 
     titleLbl: 'O que vamos fazer?', titlePlaceholder: 'Futebol, café, caminhada...',
@@ -257,7 +257,7 @@ const T = {
     loading: 'Chargement...', offlineMsg: 'Pas de connexion', onlineMsg: 'Connexion rétablie',
     tipLang: 'Changer la langue', tipTheme: 'Changer le thème',
 
-    discoverPlans: 'Découvrir des plans', enableLocation: 'Active la localisation',
+    discoverPlans: 'Découvrir des plans', feedSubtitle: 'Les plans qui te correspondent', enableLocation: 'Active la localisation',
     emptyFeedTitle: 'Pas de plans à proximité', emptyFeedSub: 'Crée le premier !', emptyFeedCta: 'Créer un plan',
 
     titleLbl: 'On fait quoi ?', titlePlaceholder: 'Foot, café, rando...',
@@ -325,7 +325,7 @@ const T = {
     loading: 'Laden...', offlineMsg: 'Keine Verbindung', onlineMsg: 'Wieder online',
     tipLang: 'Sprache ändern', tipTheme: 'Thema wechseln',
 
-    discoverPlans: 'Pläne entdecken', enableLocation: 'Standort aktivieren',
+    discoverPlans: 'Pläne entdecken', feedSubtitle: 'Pläne, die zu dir passen', enableLocation: 'Standort aktivieren',
     emptyFeedTitle: 'Keine Pläne in der Nähe', emptyFeedSub: 'Erstelle den ersten!', emptyFeedCta: 'Plan erstellen',
 
     titleLbl: 'Was machen wir?', titlePlaceholder: 'Fußball, Kaffee, Wandern...',
@@ -393,7 +393,7 @@ const T = {
     loading: 'Caricamento...', offlineMsg: 'Nessuna connessione', onlineMsg: 'Connessione ripristinata',
     tipLang: 'Cambia lingua', tipTheme: 'Cambia tema',
 
-    discoverPlans: 'Scopri piani', enableLocation: 'Attiva la posizione',
+    discoverPlans: 'Scopri piani', feedSubtitle: 'Piani che fanno per te', enableLocation: 'Attiva la posizione',
     emptyFeedTitle: 'Nessun piano nelle vicinanze', emptyFeedSub: 'Crea il primo!', emptyFeedCta: 'Crea un piano',
 
     titleLbl: 'Cosa facciamo?', titlePlaceholder: 'Calcio, caffè, trekking...',

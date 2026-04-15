@@ -121,9 +121,9 @@ export default function PlanDetail({ c, lang, authUser }) {
 
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-        <div style={{ fontSize: '48px', marginBottom: '8px' }}>{getCategoryEmoji(plan.category)}</div>
-        <h1 style={{ fontFamily: "'Syne',serif", fontSize: '26px', fontWeight: '800', color: c.T, marginBottom: '4px' }}>{plan.title}</h1>
-        <div style={{ fontSize: '13px', color: c.A, fontWeight: '600' }}>{getCategoryLabel(plan.category, lang)}</div>
+        <div style={{ width: '72px', height: '72px', borderRadius: '24px', background: `${c.A}15`, border: `1px solid ${c.A}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '36px', margin: '0 auto 12px' }}>{getCategoryEmoji(plan.category)}</div>
+        <h1 style={{ fontFamily: "'Syne',serif", fontSize: '28px', fontWeight: '800', color: c.T, marginBottom: '4px', letterSpacing: '-0.5px' }}>{plan.title}</h1>
+        <div style={{ fontSize: '13px', color: c.M, fontWeight: '600' }}>{getCategoryLabel(plan.category, lang)}</div>
       </div>
 
       {/* Tabs — only show Chat if user is joined or organizer */}
@@ -151,31 +151,31 @@ export default function PlanDetail({ c, lang, authUser }) {
       ) : <>
 
       {/* Info card */}
-      <div style={{ background: c.CARD, border: `1px solid ${c.BD}`, borderRadius: '16px', padding: '18px', marginBottom: '16px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div style={{ background: c.CARD, border: `1px solid ${c.BD}`, borderRadius: '20px', padding: '0', marginBottom: '16px', overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,.15)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 18px', borderBottom: `1px solid ${c.BD}` }}>
             <span style={{ fontSize: '18px' }}>📅</span>
             <span style={{ fontSize: '15px', color: c.T, fontWeight: '500' }}>{fmtDate(plan.date, lang)}</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 18px', borderBottom: `1px solid ${c.BD}` }}>
             <span style={{ fontSize: '18px' }}>🕐</span>
             <span style={{ fontSize: '15px', color: c.T, fontWeight: '500' }}>{plan.time?.slice(0, 5)}</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 18px', borderBottom: `1px solid ${c.BD}` }}>
             <span style={{ fontSize: '18px' }}>📍</span>
-            <div>
+            <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '15px', color: c.T, fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{plan.place_name}</div>
               {plan.place_address && <div style={{ fontSize: '12px', color: c.M2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{plan.place_address}</div>}
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 18px', borderBottom: `1px solid ${c.BD}` }}>
             <span style={{ fontSize: '18px' }}>👥</span>
             <span style={{ fontSize: '15px', color: c.T, fontWeight: '500' }}>{joinedParticipants.length}/{plan.capacity} {t.people || 'people'}</span>
-            <span style={{ fontSize: '12px', color: spotsLeft > 0 ? c.A : '#ef4444', fontWeight: '600' }}>
-              {spotsLeft > 0 ? `(${spotsLeft} ${t.spotsLeft || 'spots left'})` : `(${t.full || 'Full'})`}
+            <span style={{ fontSize: '11px', fontWeight: '700', padding: '3px 10px', borderRadius: '20px', background: spotsLeft > 0 ? `${c.A}18` : '#ef444418', color: spotsLeft > 0 ? c.A : '#ef4444' }}>
+              {spotsLeft > 0 ? `${spotsLeft} ${t.spotsLeft || 'left'}` : (t.full || 'Full')}
             </span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 18px' }}>
             <span style={{ fontSize: '18px' }}>{plan.join_mode === JOIN_MODE.OPEN ? '🔓' : '🔒'}</span>
             <span style={{ fontSize: '13px', color: c.M }}>{plan.join_mode === JOIN_MODE.OPEN ? (t.joinOpen || 'Anyone can join') : (t.joinClosed || 'Approval needed')}</span>
           </div>
@@ -271,7 +271,7 @@ export default function PlanDetail({ c, lang, authUser }) {
               <span style={{ color: '#f59e0b', fontWeight: '600', fontSize: '14px' }}>{t.pendingApproval || 'Waiting for approval...'}</span>
             </div>
           ) : (
-            <Btn onClick={handleJoin} disabled={joining || isFull} full style={{ padding: '16px', fontSize: '16px' }} c={c}>
+            <Btn onClick={handleJoin} disabled={joining || isFull} full style={{ padding: '18px', fontSize: '17px', borderRadius: '16px', boxShadow: `0 0 24px ${c.A}25` }} c={c}>
               {joining ? '...' : isFull ? (t.planFull || 'Plan is full') : plan.join_mode === JOIN_MODE.OPEN ? (t.joinPlan || 'Join plan') : (t.requestJoin || 'Request to join')}
             </Btn>
           )}

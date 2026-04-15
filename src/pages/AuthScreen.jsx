@@ -85,7 +85,7 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
     <div style={{width:'100%',maxWidth:'400px'}}>
       {/* Header */}
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'40px'}}>
-        <div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'32px',color:c.T,letterSpacing:'-.02em'}}>queda<span style={{color:c.A}}>.</span></div>
+        <div style={{fontFamily:"'Syne',serif",fontWeight:'800',fontSize:'40px',color:c.T,letterSpacing:'-.03em'}}>queda<span style={{color:c.A}}>.</span></div>
         <div style={{position:'relative'}} onClick={e=>e.stopPropagation()}>
           <button onClick={()=>setLangMenuOpen(o=>!o)} style={{background:c.CARD,border:`1px solid ${c.BD}`,borderRadius:'8px',padding:'6px 10px',cursor:'pointer',fontSize:'14px',display:'flex',alignItems:'center',gap:'4px',color:c.T,fontFamily:'inherit'}}>
             {FLAGS[lang]} <span style={{fontSize:'11px'}}>{lang.toUpperCase()}</span> <span style={{fontSize:'10px',color:c.M}}>▾</span>
@@ -115,9 +115,9 @@ export default function AuthScreen({onAuth,c,lang,onLangChange}){
       {/* Normal auth forms */}
       {mode!=='confirmEmail'&&<>
       {/* Mode tabs */}
-      <div style={{display:'flex',gap:'4px',background:c.CARD2,borderRadius:'10px',padding:'4px',marginBottom:'28px'}}>
+      <div style={{display:'flex',gap:'4px',background:c.CARD2,borderRadius:'14px',padding:'4px',marginBottom:'28px'}}>
         {[['login',t.authSignInTab],['register',t.authRegisterTab]].map(([m,lbl])=>(
-          <button key={m} onClick={()=>{setMode(m);setErr('');setMsg('');}} style={{flex:1,padding:'9px',borderRadius:'7px',border:'none',background:mode===m?c.CARD:'transparent',color:mode===m?c.T:c.M2,fontWeight:mode===m?'700':'400',cursor:'pointer',fontFamily:'inherit',fontSize:'14px',transition:'all .15s'}}>
+          <button key={m} onClick={()=>{setMode(m);setErr('');setMsg('');}} style={{flex:1,padding:'11px',borderRadius:'10px',border:'none',background:mode===m?c.A:'transparent',color:mode===m?'#0A0A0A':c.M2,fontWeight:mode===m?'800':'400',fontFamily:mode===m?"'Syne',serif":'inherit',cursor:'pointer',fontSize:'14px',transition:'all .15s'}}>
             {lbl}
           </button>
         ))}

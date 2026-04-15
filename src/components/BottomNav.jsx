@@ -18,10 +18,10 @@ export default function BottomNav({ current, onNavigate, c, lang }) {
   return (
     <nav aria-label="Main navigation" style={{
       position: 'fixed', bottom: 0, left: 0, right: 0,
-      background: c.BG + 'F0', backdropFilter: 'blur(10px)',
+      background: c.BG + 'CC', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
       borderTop: `1px solid ${c.BD}`,
       display: 'flex', justifyContent: 'space-around',
-      padding: '6px env(safe-area-inset-right, 0px) calc(6px + env(safe-area-inset-bottom, 8px)) env(safe-area-inset-left, 0px)',
+      padding: '8px env(safe-area-inset-right, 0px) calc(8px + env(safe-area-inset-bottom, 8px)) env(safe-area-inset-left, 0px)',
       zIndex: 20
     }}>
       {TABS.map(tab => {
@@ -38,6 +38,7 @@ export default function BottomNav({ current, onNavigate, c, lang }) {
             <span style={{ fontSize: '10px', fontWeight: active ? '700' : '400' }}>
               {LABELS[tab.labelKey]?.[lang] || LABELS[tab.labelKey]?.en}
             </span>
+            {active && <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: c.A, marginTop: '1px' }} />}
           </button>
         )
       })}

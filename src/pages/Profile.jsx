@@ -108,8 +108,8 @@ export default function Profile({ onBack, c, lang, authUser, profile, onUpdatePr
           {/* View mode */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
             {photoUrl
-              ? <img src={photoUrl} alt="" style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-              : <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: c.A, color: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: '800', flexShrink: 0 }}>{(profile?.name || '?')[0].toUpperCase()}</div>
+              ? <img src={photoUrl} alt="" style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: `2px solid ${c.A}40` }} />
+              : <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: c.A, color: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: '800', flexShrink: 0, border: `2px solid ${c.A}40` }}>{(profile?.name || '?')[0].toUpperCase()}</div>
             }
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: '18px', fontWeight: '700', color: c.T }}>

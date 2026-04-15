@@ -29,23 +29,22 @@ export default function FilterBar({ filters, onChange, lang, c }) {
     { value: '50', label: { es: '< 50 km', en: '< 50 km', pt: '< 50 km', fr: '< 50 km', de: '< 50 km', it: '< 50 km' } },
   ]
 
-  const selectStyle = {
-    background: c.CARD, border: `1px solid ${c.BD}`, borderRadius: '8px',
-    padding: '10px 10px', minHeight: '44px', color: c.T, fontSize: '13px', fontFamily: 'inherit',
+  const selectStyle = (active) => ({
+    background: active ? c.A : 'transparent', border: `1px solid ${active ? c.A : c.BD}`, borderRadius: '12px',
+    padding: '10px 12px', minHeight: '44px', color: active ? '#0A0A0A' : c.T, fontSize: '13px', fontFamily: 'inherit',
+    fontWeight: active ? '700' : '400',
     outline: 'none', cursor: 'pointer', appearance: 'none',
-    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23888'/%3E%3C/svg%3E")`,
-    backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center',
-    paddingRight: '24px'
-  }
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='${active?'%23000':'%23888'}'/%3E%3C/svg%3E")`,
+    backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center',
+    paddingRight: '26px', transition: 'all .15s'
+  })
 
   return (
     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
       {/* Category chips */}
       <div style={{ position: 'relative' }}>
         <button onClick={() => setCatOpen(o => !o)} aria-expanded={catOpen} aria-haspopup="listbox" aria-label={lang === 'es' ? 'Categoría' : 'Category'} style={{
-          ...selectStyle, cursor: 'pointer',
-          border: `1px solid ${filters.category ? c.A : c.BD}`,
-          color: filters.category ? c.A : c.T
+          ...selectStyle(!!filters.category), cursor: 'pointer'
         }}>
           {filters.category
             ? `${CATEGORIES.find(cat => cat.slug === filters.category)?.emoji || ''} ${CATEGORIES.find(cat => cat.slug === filters.category)?.labels[lang] || filters.category}`
@@ -68,12 +67,12 @@ export default function FilterBar({ filters, onChange, lang, c }) {
       </div>
 
       {/* Date filter */}
-      <select value={filters.dateRange || ''} onChange={e => setFilter('dateRange', e.target.value)} style={selectStyle}>
+      <select value={filters.dateRange || ''} onChange={e => setFilter('dateRange', e.target.value)} style={selectStyle(!!filters.dateRange)}>
         {DATE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label[lang] || o.label.en}</option>)}
       </select>
 
       {/* Distance filter */}
-      <select value={filters.radiusKm || ''} onChange={e => setFilter('radiusKm', e.target.value)} style={selectStyle}>
+      <select value={filters.radiusKm || ''} onChange={e => setFilter('radiusKm', e.target.value)} style={selectStyle(!!filters.radiusKm)}>
         {DISTANCE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label[lang] || o.label.en}</option>)}
       </select>
     </div>

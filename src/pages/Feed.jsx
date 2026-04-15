@@ -56,9 +56,10 @@ export default function Feed({ c, lang, onPlanClick, onCreateClick, userLocation
 
   return (
     <div style={{ padding: '16px', maxWidth: '500px', margin: '0 auto', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
-      <h2 style={{ fontFamily: "'Syne',serif", fontSize: '24px', fontWeight: '800', color: c.T, marginBottom: '16px' }}>
+      <h2 style={{ fontFamily: "'Syne',serif", fontSize: '28px', fontWeight: '800', color: c.T, letterSpacing: '-1px', marginBottom: '4px' }}>
         {t.discoverPlans || 'Discover plans'}
       </h2>
+      <p style={{ fontSize: '13px', color: c.M, marginBottom: '16px' }}>{t.feedSubtitle || 'Plans you fit into'}</p>
 
       <FilterBar filters={filters} onChange={handleFilterChange} lang={lang} c={c} />
 
