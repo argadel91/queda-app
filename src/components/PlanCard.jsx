@@ -3,7 +3,7 @@ import T from '../constants/translations.js'
 import { getCategoryEmoji, getCategoryLabel } from '../constants/categories.js'
 import { fmtShort, fmtTime } from '../lib/utils.js'
 
-export default function PlanCard({ plan, lang, c, distance, onClick }) {
+export default function PlanCard({ plan, lang, c, distance, onClick, badge }) {
   const t = T[lang] || T.en
   const organizer = plan.profiles
   const spotsLeft = plan.capacity - (plan.participant_count || 0)
@@ -15,11 +15,14 @@ export default function PlanCard({ plan, lang, c, distance, onClick }) {
     }} onMouseEnter={e => e.currentTarget.style.borderColor = c.A + '60'}
        onMouseLeave={e => e.currentTarget.style.borderColor = c.BD}>
 
-      {/* Header: category + title */}
+      {/* Header: category + title + badge */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '12px' }}>
         <div style={{ fontSize: '28px', lineHeight: 1, flexShrink: 0 }}>{getCategoryEmoji(plan.category)}</div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: '16px', fontWeight: '700', color: c.T, marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{plan.title}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+            <span style={{ fontSize: '16px', fontWeight: '700', color: c.T, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{plan.title}</span>
+            {badge && <span style={{ fontSize: '10px', fontWeight: '700', padding: '2px 8px', borderRadius: '10px', whiteSpace: 'nowrap', flexShrink: 0, ...badge.style }}>{badge.label}</span>}
+          </div>
           <div style={{ fontSize: '12px', color: c.A, fontWeight: '600' }}>{getCategoryLabel(plan.category, lang)}</div>
         </div>
       </div>

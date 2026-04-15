@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import T from '../constants/translations.js'
 import CATEGORIES from '../constants/categories.js'
-import { db, uploadAvatar, showToast, fetchMyPlans, fetchJoinedPlans } from '../lib/supabase.js'
+import { db, uploadAvatar, showToast, fetchUpcomingPlans, fetchRequestPlans } from '../lib/supabase.js'
 import { Btn, Back, Lbl } from '../components/ui.jsx'
 import PlanCard from '../components/PlanCard.jsx'
 import CityInput from '../components/CityInput.jsx'
@@ -15,9 +15,9 @@ const GENDER_KEY = { male: 'genderMale', female: 'genderFemale', 'non-binary': '
 export default function Profile({ onBack, c, lang, authUser, profile, onUpdateProfile, onSignOut, onLangChange, onThemeToggle, theme, onboard, onPlanClick }) {
   const t = T[lang]
   const [editing, setEditing] = useState(!!onboard)
-  const [plansTab, setPlansTab] = useState('mine')
-  const [myPlans, setMyPlans] = useState([])
-  const [joinedPlans, setJoinedPlans] = useState([])
+  const [plansTab, setPlansTab] = useState('upcoming')
+  const [upcomingPlans, setUpcomingPlans] = useState([])
+  const [requestPlans, setRequestPlans] = useState([])
   const [plansLoading, setPlansLoading] = useState(true)
   const [newName, setNewName] = useState(profile?.name || '')
   const [newUsername, setNewUsername] = useState(profile?.username || '')
@@ -36,8 +36,8 @@ export default function Profile({ onBack, c, lang, authUser, profile, onUpdatePr
   useEffect(() => {
     if (!authUser?.id || onboard) return
     setPlansLoading(true)
-    Promise.all([fetchMyPlans(authUser.id), fetchJoinedPlans(authUser.id)])
-      .then(([mine, joined]) => { setMyPlans(mine); setJoinedPlans(joined) })
+    Promise.all([fetchUpcomingPlans(authUser.id), fetchRequestPlans(authUser.id)])
+      .then(([upcoming, requests]) => { setUpcomingPlans(upcoming); setRequestPlans(requests) })
       .catch(e => console.error('loadPlans:', e))
       .finally(() => setPlansLoading(false))
   }, [authUser?.id, onboard])
@@ -241,19 +241,24 @@ export default function Profile({ onBack, c, lang, authUser, profile, onUpdatePr
         </>}
       </div>
 
-      {/* My Plans section — only in view mode, not onboarding */}
+      {/* Plans section — only in view mode, not onboarding */}
       {!editing && !onboard && (
         <div style={{ marginTop: '24px' }}>
           {/* Tabs */}
           <div style={{ display: 'flex', gap: '4px', background: c.CARD, borderRadius: '12px', padding: '4px', border: `1px solid ${c.BD}`, marginBottom: '16px' }}>
-            {[['mine', t.myPlansTab || 'My plans'], ['joined', t.joinedPlansTab || 'Joined']].map(([key, label]) => (
+            {[['upcoming', t.upcomingTab || 'Upcoming'], ['requests', t.requestsTab || 'Requests']].map(([key, label]) => (
               <button key={key} onClick={() => setPlansTab(key)} style={{
                 flex: 1, padding: '10px', borderRadius: '10px', border: 'none',
                 background: plansTab === key ? c.A : 'transparent',
                 color: plansTab === key ? '#0A0A0A' : c.M,
                 fontWeight: '700', fontSize: '14px', cursor: 'pointer', fontFamily: 'inherit',
                 transition: 'all .15s'
-              }}>{label}</button>
+              }}>
+                {label}
+                {key === 'requests' && requestPlans.length > 0 && (
+                  <span style={{ marginLeft: '6px', fontSize: '11px', fontWeight: '800', background: plansTab === key ? '#0A0A0A20' : '#F5A623', color: plansTab === key ? '#0A0A0A' : '#fff', padding: '1px 6px', borderRadius: '8px' }}>{requestPlans.length}</span>
+                )}
+              </button>
             ))}
           </div>
 
@@ -264,28 +269,42 @@ export default function Profile({ onBack, c, lang, authUser, profile, onUpdatePr
             </div>
           ) : (
             <>
-              {plansTab === 'mine' && (
-                myPlans.length === 0 ? (
+              {plansTab === 'upcoming' && (
+                upcomingPlans.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '32px 16px' }}>
                     <div style={{ fontSize: '40px', marginBottom: '12px' }}>📋</div>
-                    <p style={{ color: c.M, fontSize: '14px', marginBottom: '16px' }}>{t.noMyPlans || "You haven't created any plans yet"}</p>
+                    <p style={{ color: c.M, fontSize: '14px', marginBottom: '16px' }}>{t.noUpcoming || 'No upcoming plans'}</p>
                     {onPlanClick && <Btn onClick={() => onPlanClick('create')} c={c} sm>{t.createFirstPlan || 'Create your first plan'}</Btn>}
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {myPlans.map(plan => <PlanCard key={plan.id} plan={plan} lang={lang} c={c} onClick={() => onPlanClick?.(plan.id)} />)}
+                    {upcomingPlans.map(plan => (
+                      <PlanCard key={plan.id} plan={plan} lang={lang} c={c} onClick={() => onPlanClick?.(plan.id)}
+                        badge={plan._role === 'organizer'
+                          ? { label: t.badgeOrganizer || 'Organizer', style: { background: `${c.A}20`, color: c.A } }
+                          : { label: t.badgeJoined || 'Joined', style: { background: c.BD, color: c.M } }
+                        }
+                      />
+                    ))}
                   </div>
                 )
               )}
-              {plansTab === 'joined' && (
-                joinedPlans.length === 0 ? (
+              {plansTab === 'requests' && (
+                requestPlans.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '32px 16px' }}>
-                    <div style={{ fontSize: '40px', marginBottom: '12px' }}>🔍</div>
-                    <p style={{ color: c.M, fontSize: '14px' }}>{t.noJoinedPlans || "You haven't joined any plans yet"}</p>
+                    <div style={{ fontSize: '40px', marginBottom: '12px' }}>📭</div>
+                    <p style={{ color: c.M, fontSize: '14px' }}>{t.noRequests || 'No pending requests'}</p>
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {joinedPlans.map(plan => <PlanCard key={plan.id} plan={plan} lang={lang} c={c} onClick={() => onPlanClick?.(plan.id)} />)}
+                    {requestPlans.map(plan => (
+                      <PlanCard key={plan.id} plan={plan} lang={lang} c={c} onClick={() => onPlanClick?.(plan.id)}
+                        badge={plan._requestStatus === 'pending'
+                          ? { label: t.badgePending || 'Pending', style: { background: '#F5A62320', color: '#F5A623' } }
+                          : { label: t.badgeRejected || 'Denied', style: { background: '#E53E3E20', color: '#E53E3E' } }
+                        }
+                      />
+                    ))}
                   </div>
                 )
               )}

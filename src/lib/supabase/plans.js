@@ -85,21 +85,39 @@ export const deletePlan = async (planId) => {
   if (error) throw error
 }
 
-export const fetchMyPlans = async (userId) => {
+export const fetchUpcomingPlans = async (userId) => {
   try {
-    const { data } = await db.from('plans').select('*').eq('user_id', userId).order('date', { ascending: false })
-    if (!data?.length) return []
-    return enrichPlans(data)
-  } catch (e) { console.error('fetchMyPlans:', e); return [] }
+    // 1. Plans I organized
+    const { data: myData } = await db.from('plans').select('*').eq('user_id', userId).order('date', { ascending: true })
+    const myPlans = (myData || []).map(p => ({ ...p, _role: 'organizer' }))
+
+    // 2. Plans I joined (not organizer)
+    const { data: pp } = await db.from('plan_participants').select('plan_id').eq('user_id', userId).eq('status', 'joined')
+    let joinedPlans = []
+    if (pp?.length) {
+      const joinedIds = pp.map(p => p.plan_id).filter(id => !myPlans.some(m => m.id === id))
+      if (joinedIds.length) {
+        const { data: jData } = await db.from('plans').select('*').in('id', joinedIds).order('date', { ascending: true })
+        joinedPlans = (jData || []).map(p => ({ ...p, _role: 'joined' }))
+      }
+    }
+
+    // Combine, sort by date asc
+    const all = [...myPlans, ...joinedPlans].sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0)
+    return enrichPlans(all)
+  } catch (e) { console.error('fetchUpcomingPlans:', e); return [] }
 }
 
-export const fetchJoinedPlans = async (userId) => {
+export const fetchRequestPlans = async (userId) => {
   try {
-    const { data: pp } = await db.from('plan_participants').select('plan_id').eq('user_id', userId).eq('status', 'joined')
+    const { data: pp } = await db.from('plan_participants').select('plan_id, status').eq('user_id', userId).in('status', ['pending', 'rejected'])
     if (!pp?.length) return []
+    const statusMap = {}
+    pp.forEach(p => { statusMap[p.plan_id] = p.status })
     const planIds = pp.map(p => p.plan_id)
-    const { data } = await db.from('plans').select('*').in('id', planIds).neq('user_id', userId).order('date', { ascending: false })
+    const { data } = await db.from('plans').select('*').in('id', planIds).order('date', { ascending: false })
     if (!data?.length) return []
-    return enrichPlans(data)
-  } catch (e) { console.error('fetchJoinedPlans:', e); return [] }
+    const enriched = await enrichPlans(data)
+    return enriched.map(p => ({ ...p, _requestStatus: statusMap[p.id] || 'pending' }))
+  } catch (e) { console.error('fetchRequestPlans:', e); return [] }
 }
