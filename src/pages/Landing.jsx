@@ -20,32 +20,47 @@ const PLANS=[
 
 const LT={
   es:{title:'queda.',sub:'Planes para la gente correcta.',go:'Empezar',orb:'Un plan para cada',orbGr:'momento',s1:'Crea.',s2:'Descubre.',s3:'Queda.',
-    st1:'📝 Crea tu plan',st1d:'Elige quién puede verlo',st2:'🔍 Descubre planes',st2d:'Solo los que encajan contigo',st3:'🤝 Queda en persona',st3d:'Con gente real, sin filtros raros',
-    f1:'Mapa',f2:'Chat',f3:'Dark mode',f4:'6 idiomas',f5:'Privado',f6:'PWA',f7:'Para ti',ct1:'Planes creados',ct2:'Personas quedando',ct3:'Categorías',ctaWords:['Para','de','scrollear.'],c3:'Gratis. Sin anuncios. Solo quedadas reales.',c4:'Crear un plan',cta:'Abrir app'},
-  en:{title:'meet.',sub:'Plans for the right people.',go:'Get started',orb:'A plan for every',orbGr:'moment',s1:'Create.',s2:'Discover.',s3:'Meet.',
-    st1:'📝 Create your plan',st1d:'Choose who can see it',st2:'🔍 Discover plans',st2d:'Only the ones that fit you',st3:'🤝 Meet in person',st3d:'With real people, no weird filters',
-    f1:'Map',f2:'Chat',f3:'Dark mode',f4:'6 languages',f5:'Private',f6:'PWA',f7:'For you',ct1:'Plans created',ct2:'People meeting',ct3:'Categories',ctaWords:['Stop','scrolling.'],c3:'Free. No ads. Just real plans.',c4:'Create a plan',cta:'Open app'},
-  pt:{title:'combina.',sub:'Planos para as pessoas certas.',go:'Começar',orb:'Um plano para cada',orbGr:'momento',s1:'Cria.',s2:'Descobre.',s3:'Combina.',
-    st1:'📝 Cria o teu plano',st1d:'Escolhe quem pode ver',st2:'🔍 Descobre planos',st2d:'Só os que encaixam contigo',st3:'🤝 Encontra pessoalmente',st3d:'Com gente real, sem filtros estranhos',
-    f1:'Mapa',f2:'Chat',f3:'Dark mode',f4:'6 idiomas',f5:'Privado',f6:'PWA',f7:'Para ti',ct1:'Planos criados',ct2:'Pessoas combinando',ct3:'Categorias',ctaWords:['Para','de','scrollar.'],c3:'Grátis. Sem anúncios. Só encontros reais.',c4:'Criar um plano',cta:'Abrir app'},
-  fr:{title:'sortez.',sub:'Des plans pour les bonnes personnes.',go:'Commencer',orb:'Un plan pour chaque',orbGr:'moment',s1:'Créez.',s2:'Découvrez.',s3:'Sortez.',
-    st1:'📝 Crée ton plan',st1d:'Choisis qui peut le voir',st2:'🔍 Découvre des plans',st2d:'Seulement ceux qui te correspondent',st3:'🤝 Retrouve-toi en vrai',st3d:'Avec des vrais gens, sans filtres bizarres',
-    f1:'Carte',f2:'Chat',f3:'Dark mode',f4:'6 langues',f5:'Privé',f6:'PWA',f7:'Pour toi',ct1:'Plans créés',ct2:'Personnes qui sortent',ct3:'Catégories',ctaWords:['Arrêtez','de','scroller.'],c3:'Gratuit. Sans pub. Que des vrais plans.',c4:'Créer un plan',cta:'Ouvrir'},
-  de:{title:'triff.',sub:'Pläne für die richtigen Leute.',go:'Loslegen',orb:'Ein Plan für jeden',orbGr:'Moment',s1:'Erstelle.',s2:'Entdecke.',s3:'Triff dich.',
-    st1:'📝 Erstelle deinen Plan',st1d:'Bestimme, wer ihn sehen kann',st2:'🔍 Entdecke Pläne',st2d:'Nur die, die zu dir passen',st3:'🤝 Triff dich persönlich',st3d:'Mit echten Leuten, ohne komische Filter',
-    f1:'Karte',f2:'Chat',f3:'Dark mode',f4:'6 Sprachen',f5:'Privat',f6:'PWA',f7:'Für dich',ct1:'Pläne erstellt',ct2:'Leute treffen sich',ct3:'Kategorien',ctaWords:['Hör','auf','zu','scrollen.'],c3:'Kostenlos. Keine Werbung. Nur echte Treffen.',c4:'Plan erstellen',cta:'Öffnen'},
-  it:{title:'esci.',sub:'Piani per le persone giuste.',go:'Inizia',orb:'Un piano per ogni',orbGr:'momento',s1:'Crea.',s2:'Scopri.',s3:'Esci.',
-    st1:'📝 Crea il tuo piano',st1d:'Scegli chi può vederlo',st2:'🔍 Scopri piani',st2d:'Solo quelli che fanno per te',st3:'🤝 Incontra di persona',st3d:'Con gente vera, senza filtri strani',
-    f1:'Mappa',f2:'Chat',f3:'Dark mode',f4:'6 lingue',f5:'Privato',f6:'PWA',f7:'Per te',ct1:'Piani creati',ct2:'Persone che escono',ct3:'Categorie',ctaWords:['Smetti','di','scrollare.'],c3:'Gratis. Senza pubblicità. Solo incontri veri.',c4:'Creare un piano',cta:'Apri'},
+    s4:'Crea un plan, elige quién puede verlo. Descubre planes donde encajas. Sin algoritmos raros. Solo gente con tus mismos planes.',
+    s_create:'Crea tu plan',s_create_sub:'Elige actividad, lugar y quién quieres que venga',
+    s_discover:'Descubre planes',s_discover_sub:'Solo ves los planes donde tu perfil encaja',
+    s_meet:'Queda en persona',s_meet_sub:'Chatea con el grupo y queda',
+    ctaWords:['Deja','de','aburrirte.'],c4:'Crear un plan',cta:'Abrir app'},
+  en:{title:'queda.',sub:'Plans for the right people.',go:'Get started',orb:'A plan for every',orbGr:'moment',s1:'Create.',s2:'Discover.',s3:'Meet.',
+    s4:'Create a plan, choose who sees it. Discover plans where you fit. No weird algorithms. Just people with the same plans as you.',
+    s_create:'Create your plan',s_create_sub:'Pick activity, place and who you want there',
+    s_discover:'Discover plans',s_discover_sub:'Only see plans where your profile fits',
+    s_meet:'Meet in person',s_meet_sub:'Chat with the group and show up',
+    ctaWords:['Stop','being','bored.'],c4:'Create a plan',cta:'Open app'},
+  pt:{title:'queda.',sub:'Planos para as pessoas certas.',go:'Começar',orb:'Um plano para cada',orbGr:'momento',s1:'Cria.',s2:'Descobre.',s3:'Combina.',
+    s4:'Cria um plano, escolhe quem pode ver. Descobre planos onde encaixas. Sem algoritmos estranhos. Só gente com os mesmos planos.',
+    s_create:'Cria o teu plano',s_create_sub:'Escolhe atividade, lugar e quem queres',
+    s_discover:'Descobre planos',s_discover_sub:'Só vês planos onde o teu perfil encaixa',
+    s_meet:'Encontra-te pessoalmente',s_meet_sub:'Fala com o grupo e aparece',
+    ctaWords:['Para','de','te','aborrecer.'],c4:'Criar um plano',cta:'Abrir app'},
+  fr:{title:'queda.',sub:'Des plans pour les bonnes personnes.',go:'Commencer',orb:'Un plan pour chaque',orbGr:'moment',s1:'Créez.',s2:'Découvrez.',s3:'Sortez.',
+    s4:'Crée un plan, choisis qui peut le voir. Découvre des plans qui te correspondent. Pas d\'algorithmes bizarres. Juste des gens avec les mêmes plans.',
+    s_create:'Crée ton plan',s_create_sub:'Choisis activité, lieu et qui tu veux',
+    s_discover:'Découvre des plans',s_discover_sub:'Vois seulement les plans qui te correspondent',
+    s_meet:'Rencontre en personne',s_meet_sub:'Discute avec le groupe et retrouve-vous',
+    ctaWords:['Arrête','de','t\'ennuyer.'],c4:'Créer un plan',cta:'Ouvrir'},
+  de:{title:'queda.',sub:'Pläne für die richtigen Leute.',go:'Loslegen',orb:'Ein Plan für jeden',orbGr:'Moment',s1:'Erstelle.',s2:'Entdecke.',s3:'Triff dich.',
+    s4:'Erstelle einen Plan, bestimme wer ihn sieht. Entdecke Pläne, die zu dir passen. Keine komischen Algorithmen. Nur Leute mit denselben Plänen.',
+    s_create:'Erstelle deinen Plan',s_create_sub:'Wähle Aktivität, Ort und wen du willst',
+    s_discover:'Entdecke Pläne',s_discover_sub:'Sieh nur Pläne, die zu dir passen',
+    s_meet:'Triff dich persönlich',s_meet_sub:'Chatte mit der Gruppe und triff dich',
+    ctaWords:['Hör','auf','dich','zu','langweilen.'],c4:'Plan erstellen',cta:'Öffnen'},
+  it:{title:'queda.',sub:'Piani per le persone giuste.',go:'Inizia',orb:'Un piano per ogni',orbGr:'momento',s1:'Crea.',s2:'Scopri.',s3:'Esci.',
+    s4:'Crea un piano, scegli chi può vederlo. Scopri piani dove il tuo profilo si adatta. Niente algoritmi strani. Solo gente con i tuoi stessi piani.',
+    s_create:'Crea il tuo piano',s_create_sub:'Scegli attività, luogo e chi vuoi',
+    s_discover:'Scopri piani',s_discover_sub:'Vedi solo i piani dove il tuo profilo si adatta',
+    s_meet:'Incontra di persona',s_meet_sub:'Chatta con il gruppo e incontrali',
+    ctaWords:['Smetti','di','annoiarti.'],c4:'Creare un piano',cta:'Apri'},
 }
 
 function hexToRgb(hex){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return`${r},${g},${b}`}
 
-const FEATS=[
-  {icon:'🗺️',key:'f1',color:'#6BFFD4'},{icon:'💬',key:'f2',color:'#6BC5FF'},
-  {icon:'🌙',key:'f3',color:'#B48CFF'},{icon:'🌍',key:'f4',color:'#FFB86C'},
-  {icon:'🔒',key:'f5',color:'#FF8ED4'},{icon:'📱',key:'f6',color:'#CDFF6C'},
-  {icon:'🎯',key:'f7',color:'#CDFF6C'},
+const STEPS=[
+  {icon:'📝',key:'s_create'},{icon:'🔍',key:'s_discover'},{icon:'🤝',key:'s_meet'},
 ]
 
 const PER_RING=[5,7,8]
@@ -183,19 +198,6 @@ export default function Landing({ onGetStarted, onLangChange }) {
       })
     }, { threshold: 0.2 })
 
-    const counterObs = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          const val = e.target.querySelector('.lp-val')
-          if (val && !val.dataset.done) {
-            val.dataset.done = '1'
-            animateCounter(val, parseInt(val.dataset.target))
-          }
-          counterObs.unobserve(e.target)
-        }
-      })
-    }, { threshold: 0.5 })
-
     const ctaObs = new IntersectionObserver(entries => {
       entries.forEach(e => {
         if (e.isIntersecting) {
@@ -208,25 +210,11 @@ export default function Landing({ onGetStarted, onLangChange }) {
       })
     }, { threshold: 0.3 })
 
-    document.querySelectorAll('.lp-phone,.lp-side,.lp-feat,.lp-counter').forEach(el => obs.observe(el))
-    document.querySelectorAll('.lp-counter').forEach(el => counterObs.observe(el))
+    document.querySelectorAll('.lp-phone,.lp-side,.lp-step').forEach(el => obs.observe(el))
     document.querySelectorAll('.lp-cta').forEach(el => ctaObs.observe(el))
 
-    return () => { obs.disconnect(); counterObs.disconnect(); ctaObs.disconnect() }
+    return () => { obs.disconnect(); ctaObs.disconnect() }
   }, [])
-
-  function animateCounter(el, target, duration=1500) {
-    const start = performance.now()
-    const fmt = target >= 1000
-    function tick(now) {
-      const t = Math.min((now - start) / duration, 1)
-      const ease = 1 - Math.pow(1 - t, 3)
-      const val = Math.floor(ease * target)
-      el.textContent = fmt ? val.toLocaleString() : val
-      if (t < 1) requestAnimationFrame(tick)
-    }
-    requestAnimationFrame(tick)
-  }
 
   // ═══ CAROUSEL ═══
   const currentCardRef = useRef(0)
@@ -273,14 +261,14 @@ export default function Landing({ onGetStarted, onLangChange }) {
     })
   })
 
-  // Hero chars
-  const titleChars = [...(t.title || 'queda.')].map((ch, i) => (
+  // Hero chars — always "queda."
+  const titleChars = [...'queda.'].map((ch, i) => (
     <span key={i} className={'lp-char' + (ch === '.' ? ' lp-dot' : '')} style={{ animationDelay: (.15 + i * .08) + 's' }}>{ch}</span>
   ))
 
   // CTA words
-  const ctaWords = (t.ctaWords || ['Stop','scrolling.']).map((w, i) => (
-    <span key={i} className="lp-cta-word">{w}</span>
+  const ctaWords = (t.ctaWords || ['Stop','being','bored.']).map((w, i) => (
+    <React.Fragment key={i}><span className="lp-cta-word">{w}</span>{' '}</React.Fragment>
   ))
 
   const handleCTA = useCallback(() => { if (onGetStarted) onGetStarted() }, [onGetStarted])
@@ -351,22 +339,14 @@ export default function Landing({ onGetStarted, onLangChange }) {
 .lp-side.visible{transform:translateY(0);opacity:1}
 .lp-side h2{font-family:'Syne',serif;font-weight:800;font-size:clamp(28px,4vw,44px);line-height:1;letter-spacing:-1.5px;margin-bottom:14px}
 .lp-w1{color:#CDFF6C}.lp-w2{color:#6BC5FF}.lp-w3{color:#FF8ED4}
-.lp-side p{color:#555;font-size:13px;line-height:1.6}
-.lp-steps{display:flex;flex-direction:column;gap:16px}
-.lp-step{padding:0}
-.lp-step-title{font-family:'Syne',serif;font-weight:700;font-size:16px;color:#F0EBE1;margin-bottom:2px}
-.lp-step-desc{font-size:13px;color:#555;line-height:1.4}
-.lp-counters{padding:80px 24px 40px;display:flex;justify-content:center;gap:56px;flex-wrap:wrap;max-width:800px;margin:0 auto}
-.lp-counter{text-align:center;opacity:0;transform:translateY(24px);transition:all .7s cubic-bezier(.16,1,.3,1)}
-.lp-counter.visible{opacity:1;transform:translateY(0)}
-.lp-counter-num{font-family:'Syne',serif;font-weight:800;font-size:clamp(32px,5vw,52px);letter-spacing:-2px;margin-bottom:4px}
-.lp-counter-label{font-size:11px;color:#555;font-family:'Syne',serif;font-weight:700;text-transform:uppercase;letter-spacing:2px}
-.lp-feats{padding:40px 24px 60px;max-width:800px;margin:0 auto;display:flex;justify-content:center;gap:36px;flex-wrap:wrap}
-.lp-feat{text-align:center;opacity:0;transform:translateY(30px);transition:all .6s cubic-bezier(.16,1,.3,1)}
-.lp-feat.visible{opacity:1;transform:translateY(0)}
-.lp-feat-icon{font-size:32px;margin-bottom:8px;display:block;transition:transform .3s}
-.lp-feat:hover .lp-feat-icon{transform:scale(1.3) rotate(-10deg)}
-.lp-feat-label{font-family:'Syne',serif;font-weight:700;font-size:12px}
+.lp-side-p{color:#555;font-size:13px;line-height:1.6}
+.lp-how{padding:40px 24px 60px;max-width:800px;margin:0 auto;display:flex;justify-content:center;gap:24px;flex-wrap:wrap}
+.lp-step{text-align:center;opacity:0;transform:translateY(30px);transition:all .6s cubic-bezier(.16,1,.3,1);max-width:200px;flex:1;min-width:150px}
+.lp-step.visible{opacity:1;transform:translateY(0)}
+.lp-step-icon{font-size:36px;margin-bottom:8px;display:block}
+.lp-step-num{font-family:'Syne',serif;font-weight:800;font-size:11px;color:#CDFF6C;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px}
+.lp-step-title{font-family:'Syne',serif;font-weight:800;font-size:16px;color:#F0EBE1;margin-bottom:4px}
+.lp-step-sub{font-size:12px;color:#555;line-height:1.5}
 .lp-cta{text-align:center;padding:120px 24px 80px;position:relative;overflow:hidden}
 .lp-cta::before{content:'';position:absolute;bottom:-100px;left:50%;transform:translateX(-50%);width:1200px;height:700px;background:radial-gradient(ellipse,rgba(205,255,108,0.07),rgba(107,197,255,0.04) 35%,rgba(180,140,255,0.025) 55%,transparent 75%);pointer-events:none;opacity:0;transition:opacity 2s ease}
 .lp-cta.visible::before{opacity:1}
@@ -438,44 +418,23 @@ export default function Landing({ onGetStarted, onLangChange }) {
             </div>
             <div className="lp-side">
               <h2><span className="lp-w1">{t.s1}</span> <span className="lp-w2">{t.s2}</span><br /><span className="lp-w3">{t.s3}</span></h2>
-              <div className="lp-steps">
-                {[['st1','st1d'],['st2','st2d'],['st3','st3d']].map(([k,kd]) => (
-                  <div key={k} className="lp-step">
-                    <div className="lp-step-title">{t[k]}</div>
-                    <div className="lp-step-desc">{t[kd]}</div>
-                  </div>
-                ))}
-              </div>
+              <p className="lp-side-p">{t.s4}</p>
             </div>
           </section>
 
-          <div className="lp-counters">
-            <div className="lp-counter" data-d="0">
-              <div className="lp-counter-num" style={{ color: '#CDFF6C' }}><span className="lp-val" data-target="312">0</span></div>
-              <div className="lp-counter-label">{t.ct1}</div>
-            </div>
-            <div className="lp-counter" data-d="100">
-              <div className="lp-counter-num" style={{ color: '#6BC5FF' }}><span className="lp-val" data-target="89">0</span></div>
-              <div className="lp-counter-label">{t.ct2}</div>
-            </div>
-            <div className="lp-counter" data-d="200">
-              <div className="lp-counter-num" style={{ color: '#FF8ED4' }}><span className="lp-val" data-target="16">0</span></div>
-              <div className="lp-counter-label">{t.ct3}</div>
-            </div>
-          </div>
-
-          <div className="lp-feats">
-            {FEATS.map((f, i) => (
-              <div key={i} className="lp-feat" data-d={i * 60}>
-                <span className="lp-feat-icon">{f.icon}</span>
-                <span className="lp-feat-label" style={{ color: f.color }}>{t[f.key]}</span>
+          <div className="lp-how">
+            {STEPS.map((s, i) => (
+              <div key={i} className="lp-step" data-d={i * 120}>
+                <div className="lp-step-icon">{s.icon}</div>
+                <div className="lp-step-num">0{i + 1}</div>
+                <div className="lp-step-title">{t[s.key]}</div>
+                <div className="lp-step-sub">{t[s.key + '_sub']}</div>
               </div>
             ))}
           </div>
 
           <section className="lp-cta">
-            <h2>{ctaWords} <span className="lp-cta-word lp-gr">{t.title}</span></h2>
-            <p className="lp-sub">{t.c3}</p>
+            <h2>{ctaWords}<span className="lp-cta-word lp-gr">queda.</span></h2>
             <div className="lp-btn-wrap"><button className="lp-btn" onClick={handleCTA}>{t.c4}</button></div>
           </section>
         </div>
