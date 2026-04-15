@@ -19,12 +19,24 @@ const PLANS=[
 ]
 
 const LT={
-  es:{title:'queda.',sub:'Planes reales. Gente real.',go:'Empezar',orb:'Un plan para cada',orbGr:'momento',s1:'Crea.',s2:'Descubre.',s3:'Queda.',s4:'Sin swipes. Sin match. Solo planes reales con gente que quiere lo mismo.',f1:'Mapa',f2:'Chat',f3:'Dark mode',f4:'6 idiomas',f5:'Privado',f6:'PWA',ct1:'Planes creados',ct2:'Personas quedando',ct3:'Categorías',ctaWords:['Deja','de','scrollear.'],c3:'Gratis. Sin anuncios. Sin swipes.',c4:'Crear un plan',cta:'Abrir app'},
-  en:{title:'meet.',sub:'Real plans. Real people.',go:'Get started',orb:'A plan for every',orbGr:'moment',s1:'Create.',s2:'Discover.',s3:'Meet.',s4:'No swipes. No matching. Just real plans with people who want the same.',f1:'Map',f2:'Chat',f3:'Dark mode',f4:'6 languages',f5:'Private',f6:'PWA',ct1:'Plans created',ct2:'People meeting',ct3:'Categories',ctaWords:['Stop','scrolling.'],c3:'Free. No ads. No swipes.',c4:'Create a plan',cta:'Open app'},
-  pt:{title:'combina.',sub:'Planos reais. Pessoas reais.',go:'Começar',orb:'Um plano para cada',orbGr:'momento',s1:'Cria.',s2:'Descobre.',s3:'Combina.',s4:'Sem swipes. Sem match. Só planos reais com quem quer o mesmo.',f1:'Mapa',f2:'Chat',f3:'Dark mode',f4:'6 idiomas',f5:'Privado',f6:'PWA',ct1:'Planos criados',ct2:'Pessoas combinando',ct3:'Categorias',ctaWords:['Para','de','scrollar.'],c3:'Grátis. Sem anúncios.',c4:'Criar um plano',cta:'Abrir app'},
-  fr:{title:'sortez.',sub:'Vrais plans. Vraies personnes.',go:'Commencer',orb:'Un plan pour chaque',orbGr:'moment',s1:'Créez.',s2:'Découvrez.',s3:'Sortez.',s4:'Zéro swipe. Zéro match. Juste des plans avec des gens comme vous.',f1:'Carte',f2:'Chat',f3:'Dark mode',f4:'6 langues',f5:'Privé',f6:'PWA',ct1:'Plans créés',ct2:'Personnes qui sortent',ct3:'Catégories',ctaWords:['Arrêtez','de','scroller.'],c3:'Gratuit. Sans pub.',c4:'Créer un plan',cta:'Ouvrir'},
-  de:{title:'triff.',sub:'Echte Pläne. Echte Leute.',go:'Loslegen',orb:'Ein Plan für jeden',orbGr:'Moment',s1:'Erstelle.',s2:'Entdecke.',s3:'Triff dich.',s4:'Kein Swipen. Kein Matching. Nur echte Pläne mit echten Leuten.',f1:'Karte',f2:'Chat',f3:'Dark mode',f4:'6 Sprachen',f5:'Privat',f6:'PWA',ct1:'Pläne erstellt',ct2:'Leute treffen sich',ct3:'Kategorien',ctaWords:['Hör','auf','zu','scrollen.'],c3:'Kostenlos. Keine Werbung.',c4:'Plan erstellen',cta:'Öffnen'},
-  it:{title:'esci.',sub:'Piani veri. Persone vere.',go:'Inizia',orb:'Un piano per ogni',orbGr:'momento',s1:'Crea.',s2:'Scopri.',s3:'Esci.',s4:'Zero swipe. Zero match. Solo piani veri con persone vere.',f1:'Mappa',f2:'Chat',f3:'Dark mode',f4:'6 lingue',f5:'Privato',f6:'PWA',ct1:'Piani creati',ct2:'Persone che escono',ct3:'Categorie',ctaWords:['Smetti','di','scrollare.'],c3:'Gratis. Senza pubblicità.',c4:'Creare un piano',cta:'Apri'},
+  es:{title:'queda.',sub:'Planes para la gente correcta.',go:'Empezar',orb:'Un plan para cada',orbGr:'momento',s1:'Crea.',s2:'Descubre.',s3:'Queda.',
+    st1:'📝 Crea tu plan',st1d:'Elige quién puede verlo',st2:'🔍 Descubre planes',st2d:'Solo los que encajan contigo',st3:'🤝 Queda en persona',st3d:'Con gente real, sin filtros raros',
+    f1:'Mapa',f2:'Chat',f3:'Dark mode',f4:'6 idiomas',f5:'Privado',f6:'PWA',f7:'Para ti',ct1:'Planes creados',ct2:'Personas quedando',ct3:'Categorías',ctaWords:['Para','de','scrollear.'],c3:'Gratis. Sin anuncios. Solo quedadas reales.',c4:'Crear un plan',cta:'Abrir app'},
+  en:{title:'meet.',sub:'Plans for the right people.',go:'Get started',orb:'A plan for every',orbGr:'moment',s1:'Create.',s2:'Discover.',s3:'Meet.',
+    st1:'📝 Create your plan',st1d:'Choose who can see it',st2:'🔍 Discover plans',st2d:'Only the ones that fit you',st3:'🤝 Meet in person',st3d:'With real people, no weird filters',
+    f1:'Map',f2:'Chat',f3:'Dark mode',f4:'6 languages',f5:'Private',f6:'PWA',f7:'For you',ct1:'Plans created',ct2:'People meeting',ct3:'Categories',ctaWords:['Stop','scrolling.'],c3:'Free. No ads. Just real plans.',c4:'Create a plan',cta:'Open app'},
+  pt:{title:'combina.',sub:'Planos para as pessoas certas.',go:'Começar',orb:'Um plano para cada',orbGr:'momento',s1:'Cria.',s2:'Descobre.',s3:'Combina.',
+    st1:'📝 Cria o teu plano',st1d:'Escolhe quem pode ver',st2:'🔍 Descobre planos',st2d:'Só os que encaixam contigo',st3:'🤝 Encontra pessoalmente',st3d:'Com gente real, sem filtros estranhos',
+    f1:'Mapa',f2:'Chat',f3:'Dark mode',f4:'6 idiomas',f5:'Privado',f6:'PWA',f7:'Para ti',ct1:'Planos criados',ct2:'Pessoas combinando',ct3:'Categorias',ctaWords:['Para','de','scrollar.'],c3:'Grátis. Sem anúncios. Só encontros reais.',c4:'Criar um plano',cta:'Abrir app'},
+  fr:{title:'sortez.',sub:'Des plans pour les bonnes personnes.',go:'Commencer',orb:'Un plan pour chaque',orbGr:'moment',s1:'Créez.',s2:'Découvrez.',s3:'Sortez.',
+    st1:'📝 Crée ton plan',st1d:'Choisis qui peut le voir',st2:'🔍 Découvre des plans',st2d:'Seulement ceux qui te correspondent',st3:'🤝 Retrouve-toi en vrai',st3d:'Avec des vrais gens, sans filtres bizarres',
+    f1:'Carte',f2:'Chat',f3:'Dark mode',f4:'6 langues',f5:'Privé',f6:'PWA',f7:'Pour toi',ct1:'Plans créés',ct2:'Personnes qui sortent',ct3:'Catégories',ctaWords:['Arrêtez','de','scroller.'],c3:'Gratuit. Sans pub. Que des vrais plans.',c4:'Créer un plan',cta:'Ouvrir'},
+  de:{title:'triff.',sub:'Pläne für die richtigen Leute.',go:'Loslegen',orb:'Ein Plan für jeden',orbGr:'Moment',s1:'Erstelle.',s2:'Entdecke.',s3:'Triff dich.',
+    st1:'📝 Erstelle deinen Plan',st1d:'Bestimme, wer ihn sehen kann',st2:'🔍 Entdecke Pläne',st2d:'Nur die, die zu dir passen',st3:'🤝 Triff dich persönlich',st3d:'Mit echten Leuten, ohne komische Filter',
+    f1:'Karte',f2:'Chat',f3:'Dark mode',f4:'6 Sprachen',f5:'Privat',f6:'PWA',f7:'Für dich',ct1:'Pläne erstellt',ct2:'Leute treffen sich',ct3:'Kategorien',ctaWords:['Hör','auf','zu','scrollen.'],c3:'Kostenlos. Keine Werbung. Nur echte Treffen.',c4:'Plan erstellen',cta:'Öffnen'},
+  it:{title:'esci.',sub:'Piani per le persone giuste.',go:'Inizia',orb:'Un piano per ogni',orbGr:'momento',s1:'Crea.',s2:'Scopri.',s3:'Esci.',
+    st1:'📝 Crea il tuo piano',st1d:'Scegli chi può vederlo',st2:'🔍 Scopri piani',st2d:'Solo quelli che fanno per te',st3:'🤝 Incontra di persona',st3d:'Con gente vera, senza filtri strani',
+    f1:'Mappa',f2:'Chat',f3:'Dark mode',f4:'6 lingue',f5:'Privato',f6:'PWA',f7:'Per te',ct1:'Piani creati',ct2:'Persone che escono',ct3:'Categorie',ctaWords:['Smetti','di','scrollare.'],c3:'Gratis. Senza pubblicità. Solo incontri veri.',c4:'Creare un piano',cta:'Apri'},
 }
 
 function hexToRgb(hex){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return`${r},${g},${b}`}
@@ -33,6 +45,7 @@ const FEATS=[
   {icon:'🗺️',key:'f1',color:'#6BFFD4'},{icon:'💬',key:'f2',color:'#6BC5FF'},
   {icon:'🌙',key:'f3',color:'#B48CFF'},{icon:'🌍',key:'f4',color:'#FFB86C'},
   {icon:'🔒',key:'f5',color:'#FF8ED4'},{icon:'📱',key:'f6',color:'#CDFF6C'},
+  {icon:'🎯',key:'f7',color:'#CDFF6C'},
 ]
 
 const PER_RING=[5,7,8]
@@ -339,6 +352,10 @@ export default function Landing({ onGetStarted, onLangChange }) {
 .lp-side h2{font-family:'Syne',serif;font-weight:800;font-size:clamp(28px,4vw,44px);line-height:1;letter-spacing:-1.5px;margin-bottom:14px}
 .lp-w1{color:#CDFF6C}.lp-w2{color:#6BC5FF}.lp-w3{color:#FF8ED4}
 .lp-side p{color:#555;font-size:13px;line-height:1.6}
+.lp-steps{display:flex;flex-direction:column;gap:16px}
+.lp-step{padding:0}
+.lp-step-title{font-family:'Syne',serif;font-weight:700;font-size:16px;color:#F0EBE1;margin-bottom:2px}
+.lp-step-desc{font-size:13px;color:#555;line-height:1.4}
 .lp-counters{padding:80px 24px 40px;display:flex;justify-content:center;gap:56px;flex-wrap:wrap;max-width:800px;margin:0 auto}
 .lp-counter{text-align:center;opacity:0;transform:translateY(24px);transition:all .7s cubic-bezier(.16,1,.3,1)}
 .lp-counter.visible{opacity:1;transform:translateY(0)}
@@ -421,17 +438,24 @@ export default function Landing({ onGetStarted, onLangChange }) {
             </div>
             <div className="lp-side">
               <h2><span className="lp-w1">{t.s1}</span> <span className="lp-w2">{t.s2}</span><br /><span className="lp-w3">{t.s3}</span></h2>
-              <p>{t.s4}</p>
+              <div className="lp-steps">
+                {[['st1','st1d'],['st2','st2d'],['st3','st3d']].map(([k,kd]) => (
+                  <div key={k} className="lp-step">
+                    <div className="lp-step-title">{t[k]}</div>
+                    <div className="lp-step-desc">{t[kd]}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
 
           <div className="lp-counters">
             <div className="lp-counter" data-d="0">
-              <div className="lp-counter-num" style={{ color: '#CDFF6C' }}><span className="lp-val" data-target="2847">0</span></div>
+              <div className="lp-counter-num" style={{ color: '#CDFF6C' }}><span className="lp-val" data-target="312">0</span></div>
               <div className="lp-counter-label">{t.ct1}</div>
             </div>
             <div className="lp-counter" data-d="100">
-              <div className="lp-counter-num" style={{ color: '#6BC5FF' }}><span className="lp-val" data-target="1203">0</span></div>
+              <div className="lp-counter-num" style={{ color: '#6BC5FF' }}><span className="lp-val" data-target="89">0</span></div>
               <div className="lp-counter-label">{t.ct2}</div>
             </div>
             <div className="lp-counter" data-d="200">
