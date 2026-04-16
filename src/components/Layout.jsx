@@ -1,12 +1,14 @@
 import React from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
+import { useTokens } from '../hooks/useTokens.js'
 import { theme } from '../theme.js'
 
 export default function Layout({ children }) {
-  const { profile } = useAuth()
+  const { user } = useAuth()
+  const { balance } = useTokens()
   const navigate = useNavigate()
-  const tokens = profile?.token_balance ?? '—'
+  const tokens = user ? (balance ?? '—') : '—'
 
   return (
     <div style={{ minHeight: '100vh', background: theme.bg, color: theme.text, fontFamily: theme.font, display: 'flex', flexDirection: 'column' }}>
@@ -20,13 +22,14 @@ export default function Layout({ children }) {
         }}>
           queda
         </button>
-        <div style={{
+        <button onClick={() => navigate('/wallet')} style={{
           display: 'flex', alignItems: 'center', gap: 6,
           background: theme.bgElev, border: `1px solid ${theme.border}`, borderRadius: 999,
-          padding: '6px 12px', fontSize: 13, color: theme.accent, fontWeight: 600
+          padding: '6px 12px', fontSize: 13, color: theme.accent, fontWeight: 600,
+          cursor: 'pointer', fontFamily: theme.font
         }}>
           {tokens} <span style={{ color: theme.textDim, fontWeight: 400 }}>tokens</span>
-        </div>
+        </button>
       </header>
 
       <main style={{ flex: 1, padding: '16px', paddingBottom: 'calc(80px + env(safe-area-inset-bottom,0px))', maxWidth: 640, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
