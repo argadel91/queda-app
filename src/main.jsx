@@ -2,7 +2,6 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import * as Sentry from '@sentry/react'
 import App from './App.jsx'
-import './index.css'
 
 // Sentry — error tracking (production only)
 if (import.meta.env.PROD && import.meta.env.VITE_SENTRY_DSN) {
