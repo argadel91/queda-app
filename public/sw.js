@@ -1,4 +1,4 @@
-const CACHE_NAME = 'queda-v4'
+const CACHE_NAME = 'queda-v5'
 const STATIC_ASSETS = [
   '/manifest.json',
   '/icon-192.svg',
