@@ -1,32 +1,18 @@
 import React from 'react'
 import { theme } from '../theme.js'
 
-// Human-readable labels for ledger.reason values written by the SQL functions.
-// Keep in sync with sql/migration_v3_tokens.sql.
+// Keep in sync with sql/migration_v4_simplify.sql.
 const LABELS = {
-  signup: 'Signed up',
-  weekly_regen: 'Weekly regen',
-  invite_friend_completed: 'Friend joined',
-  create_plan_deposit: 'Plan deposit',
-  organizer_refund_executed: 'Plan executed',
-  organizer_pending_reward: 'Plan reward',
-  organizer_refund_no_attendees: 'No one joined',
-  organizer_no_show_refund: 'Organizer no-show refund',
-  organizer_no_show_penalty: 'You didn’t show up (organizer)',
-  thumbs_bonus_tier_1: 'Thumbs-up bonus',
-  thumbs_bonus_tier_2: 'Thumbs-up bonus (half)',
-  thumbs_bonus_tier_3: 'Thumbs-up bonus (everyone)',
-  join_plan_deposit: 'Joined a plan',
-  attended_refund: 'Attended a plan',
-  attended_thumbs_up_bonus: 'Thumbs-up from organizer',
-  attended_no_thumbs: 'Attended (no thumbs-up)',
-  no_show_penalty: 'You didn’t show up',
-  cancel_refund_attendee: 'Plan cancelled (refund)',
-  cancel_refund_organizer_ontime: 'You cancelled in time',
-  cancel_penalty_organizer_late: 'You cancelled late',
-  leave_refund_ontime: 'Left in time',
-  leave_penalty_late: 'Left late',
-  passport_redeem: 'Passport unlocked',
+  signup: ‘Signed up’,
+  join_plan_deposit: ‘Joined a plan’,
+  attended_refund: ‘Attended’,
+  no_show_penalty: ‘Didn’t show up’,
+  create_plan_free: ‘Created a plan’,
+  organizer_plan_executed: ‘Plan executed’,
+  organizer_no_show_refund: ‘Organiser no-show refund’,
+  cancel_refund: ‘Plan cancelled (refund)’,
+  leave_refund: ‘Left in time’,
+  leave_late_penalty: ‘Left late’,
 }
 
 const label = reason => LABELS[reason] || reason.replace(/_/g, ' ')
