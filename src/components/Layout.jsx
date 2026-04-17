@@ -1,5 +1,6 @@
 import React from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
+import ErrorBoundary from './ErrorBoundary.jsx'
 import { useAuth } from '../hooks/useAuth.js'
 import { useTokens } from '../hooks/useTokens.js'
 import { useNotifications } from '../hooks/useNotifications.js'
@@ -50,7 +51,7 @@ export default function Layout({ children }) {
       </header>
 
       <main style={{ flex: 1, padding: '16px', paddingBottom: 'calc(80px + env(safe-area-inset-bottom,0px))', maxWidth: 640, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-        {children}
+        <ErrorBoundary>{children}</ErrorBoundary>
       </main>
 
       <nav style={{

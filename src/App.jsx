@@ -13,6 +13,7 @@ import PlanDetail from './pages/PlanDetail.jsx'
 import MyPlans from './pages/MyPlans.jsx'
 import Wallet from './pages/Wallet.jsx'
 import Notifications from './pages/Notifications.jsx'
+import Welcome from './pages/Welcome.jsx'
 
 // Layout-free routes (no bottom nav / header): auth flow + onboarding.
 // Everything else is wrapped in <Layout> and gated by <ProtectedRoute>.
@@ -25,6 +26,9 @@ export default function App() {
         <Route path="/verify" element={<Verify />} />
         <Route path="/onboarding" element={
           <ProtectedRoute requireProfile={false}><Onboarding /></ProtectedRoute>
+        } />
+        <Route path="/welcome" element={
+          <ProtectedRoute><Welcome /></ProtectedRoute>
         } />
 
         <Route path="/" element={<Layout><Feed /></Layout>} />

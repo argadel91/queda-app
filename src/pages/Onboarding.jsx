@@ -42,7 +42,7 @@ export default function Onboarding() {
     setLoading(false)
     if (error) { setErr(error.message); return }
     await refreshProfile()
-    navigate('/', { replace: true })
+    navigate('/welcome', { replace: true })
   }
 
   return (
