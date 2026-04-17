@@ -65,8 +65,8 @@ export default function Onboarding() {
           {loading ? '…' : 'Finish'}
         </button>
       </form>
-      <p style={{ marginTop: 16, fontSize: 12, color: theme.textDim, textAlign: ‘center’, lineHeight: 1.5 }}>
-        You’ll start with 6 tokens. Joining a plan costs 1 — you get it back if you show up.
+      <p style={{ marginTop: 16, fontSize: 12, color: theme.textDim, textAlign: 'center', lineHeight: 1.5 }}>
+        {"You'll start with 6 tokens. Joining a plan costs 1 — you get it back if you show up."}
       </p>
     </AuthShell>
   )

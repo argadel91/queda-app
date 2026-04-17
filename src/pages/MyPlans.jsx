@@ -63,7 +63,7 @@ export default function MyPlans() {
       {!loading && list.length === 0 && (
         <div style={{ textAlign: 'center', padding: '40px 0' }}>
           <p style={{ color: theme.textDim, fontSize: 14, marginBottom: 16 }}>
-            {tab === 'created' ? 'You haven't created any plans yet.' : 'You haven't joined any plans yet.'}
+            {tab === 'created' ? "You haven't created any plans yet." : "You haven't joined any plans yet."}
           </p>
           <Link to={tab === 'created' ? '/create-plan' : '/'} style={{ color: theme.accent, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>
             {tab === 'created' ? 'Create one →' : 'Browse the feed →'}

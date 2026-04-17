@@ -47,7 +47,7 @@ export default function Wallet() {
       </div>
       <div style={S.row}>
         <div style={S.icon}>❌</div>
-        <span style={S.text}>You don't show up</span>
+        <span style={S.text}>{"You don't show up"}</span>
         <span style={S.badge(red)}>lost</span>
       </div>
 

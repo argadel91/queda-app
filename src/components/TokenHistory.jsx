@@ -3,17 +3,17 @@ import { theme } from '../theme.js'
 
 // Keep in sync with sql/migration_v4_simplify.sql.
 const LABELS = {
-  signup: ‘Signed up’,
-  join_plan_deposit: ‘Joined a plan’,
-  attended_refund: ‘Attended’,
-  no_show_penalty: ‘Didn’t show up’,
-  create_plan_free: ‘Created a plan’,
-  organizer_plan_executed: ‘Plan executed’,
-  organizer_no_show_refund: ‘Organiser no-show refund’,
-  cancel_refund: ‘Plan cancelled (refund)’,
-  leave_refund: ‘Left in time’,
-  leave_late_penalty: ‘Left late’,
-  reject_refund: ‘Request rejected (refund)’,
+  signup: 'Signed up',
+  join_plan_deposit: 'Joined a plan',
+  attended_refund: 'Attended',
+  no_show_penalty: "Didn't show up",
+  create_plan_free: 'Created a plan',
+  organizer_plan_executed: 'Plan executed',
+  organizer_no_show_refund: 'Organiser no-show refund',
+  cancel_refund: 'Plan cancelled (refund)',
+  leave_refund: 'Left in time',
+  leave_late_penalty: 'Left late',
+  reject_refund: 'Request rejected (refund)',
 }
 
 const label = reason => LABELS[reason] || reason.replace(/_/g, ' ')

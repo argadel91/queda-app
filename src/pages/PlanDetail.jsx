@@ -117,7 +117,7 @@ export default function PlanDetail() {
           )}
           {myStatus === 'joined' && (
             <>
-              <p style={{ fontSize: 14, color: theme.accent, fontWeight: 600, marginBottom: 8 }}>✓ You're in</p>
+              <p style={{ fontSize: 14, color: theme.accent, fontWeight: 600, marginBottom: 8 }}>{"✓ You're in"}</p>
               <button disabled={busy} onClick={leave} style={dangerBtn}>
                 {busy ? '…' : 'Leave plan'}
               </button>
