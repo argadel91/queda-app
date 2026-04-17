@@ -1,6 +1,6 @@
 import React, { useRef, useCallback, useState } from 'react'
 import { loadPlacesLib } from '../lib/googleMaps.js'
-import { theme } from '../theme.js'
+import { theme as t } from '../theme.js'
 
 // Minimal Google Places autocomplete input.
 // Returns { name, address, lat, lng } via onSelect.
@@ -40,13 +40,13 @@ export default function PlaceInput({ value, onSelect, style }) {
       {value ? (
         <div style={{
           display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px',
-          background: theme.bgElev, border: `1px solid ${theme.border}`, borderRadius: 10,
+          background: t.bgElev, border: `1px solid ${t.border}`, borderRadius: 10,
         }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 14, color: theme.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value.name}</div>
-            {value.address && <div style={{ fontSize: 11, color: theme.textDim, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value.address}</div>}
+            <div style={{ fontSize: 14, color: t.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value.name}</div>
+            {value.address && <div style={{ fontSize: 11, color: t.textDim, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value.address}</div>}
           </div>
-          <button onClick={() => onSelect(null)} type="button" style={{ background: 'none', border: 'none', color: theme.textDim, cursor: 'pointer', fontSize: 16 }}>×</button>
+          <button onClick={() => onSelect(null)} type="button" style={{ background: 'none', border: 'none', color: t.textDim, cursor: 'pointer', fontSize: 16 }}>×</button>
         </div>
       ) : (
         <>
@@ -56,23 +56,23 @@ export default function PlaceInput({ value, onSelect, style }) {
             onInput={onInput}
             style={{
               width: '100%', boxSizing: 'border-box',
-              background: theme.bgElev, border: `1px solid ${theme.border}`, borderRadius: 10,
-              padding: '12px 14px', color: theme.text, fontSize: 14, fontFamily: theme.font, outline: 'none',
+              background: t.bgElev, border: `1px solid ${t.border}`, borderRadius: 10,
+              padding: '12px 14px', color: t.text, fontSize: 14, fontFamily: t.font, outline: 'none',
             }}
           />
           {results.length > 0 && (
             <div style={{
               position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 20, marginTop: 4,
-              background: theme.bgElev, border: `1px solid ${theme.border}`, borderRadius: 10,
+              background: t.bgElev, border: `1px solid ${t.border}`, borderRadius: 10,
               maxHeight: 220, overflowY: 'auto',
             }}>
               {results.map((r, i) => (
                 <div key={i} onClick={() => pick(r)} style={{
                   padding: '10px 14px', cursor: 'pointer',
-                  borderBottom: i < results.length - 1 ? `1px solid ${theme.border}` : 'none',
+                  borderBottom: i < results.length - 1 ? `1px solid ${t.border}` : 'none',
                 }}>
-                  <div style={{ fontSize: 14, color: theme.text }}>{r.name}</div>
-                  <div style={{ fontSize: 11, color: theme.textDim }}>{r.address}</div>
+                  <div style={{ fontSize: 14, color: t.text }}>{r.name}</div>
+                  <div style={{ fontSize: 11, color: t.textDim }}>{r.address}</div>
                 </div>
               ))}
             </div>

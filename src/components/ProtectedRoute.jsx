@@ -1,7 +1,7 @@
 import React from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
-import { theme } from '../theme.js'
+import { theme as t } from '../theme.js'
 
 export default function ProtectedRoute({ children, requireProfile = true }) {
   const { user, profile, loading, needsOnboarding } = useAuth()
@@ -9,7 +9,7 @@ export default function ProtectedRoute({ children, requireProfile = true }) {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: theme.bg, color: theme.textDim }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: t.bg, color: t.textDim }}>
         …
       </div>
     )

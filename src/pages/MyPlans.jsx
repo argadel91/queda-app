@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { db } from '../lib/supabase.js'
 import { useAuth } from '../hooks/useAuth.js'
 import PlanCard from '../components/PlanCard.jsx'
-import { theme } from '../theme.js'
+import { theme as t } from '../theme.js'
 
 export default function MyPlans() {
   const { user } = useAuth()
@@ -25,7 +25,6 @@ export default function MyPlans() {
       setCreated(c || [])
       const jPlans = (j || []).map(r => r.plans).filter(Boolean)
       setJoined(jPlans)
-      // Batch counts
       const allIds = [...(c || []).map(p => p.id), ...jPlans.map(p => p.id)]
       if (allIds.length) {
         const { data: parts } = await db.from('plan_participants').select('plan_id').in('plan_id', allIds).eq('status', 'joined')
@@ -45,27 +44,33 @@ export default function MyPlans() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 700, margin: '8px 0 16px' }}>My plans</h1>
+      <h1 style={{ fontFamily: t.fontHead, fontSize: 26, fontWeight: 800, letterSpacing: -0.5, margin: '0 0 16px' }}>My plans</h1>
 
-      <div style={{ display: 'flex', gap: 0, marginBottom: 16, borderRadius: 10, overflow: 'hidden', border: `1px solid ${theme.border}` }}>
-        {['created', 'joined'].map(t => (
-          <button key={t} onClick={() => setTab(t)} style={{
-            flex: 1, padding: '10px 0', border: 'none', cursor: 'pointer', fontFamily: theme.font,
+      <div style={{ display: 'flex', gap: 0, marginBottom: 16, borderRadius: t.radiusSm, overflow: 'hidden', border: `1px solid ${t.border}` }}>
+        {['created', 'joined'].map(v => (
+          <button key={v} onClick={() => setTab(v)} style={{
+            flex: 1, padding: '11px 0', border: 'none', cursor: 'pointer', fontFamily: t.font,
             fontSize: 13, fontWeight: 600, letterSpacing: 0.5,
-            background: tab === t ? theme.accent : theme.bgElev,
-            color: tab === t ? theme.accentInk : theme.textDim,
-          }}>{t === 'created' ? 'Created' : 'Joined'}</button>
+            background: tab === v ? t.accent : t.bgCard,
+            color: tab === v ? t.accentInk : t.textDim,
+            transition: 'all 150ms ease',
+          }}>{v === 'created' ? 'Created' : 'Joined'}</button>
         ))}
       </div>
 
-      {loading && <p style={{ color: theme.textDim, fontSize: 13 }}>Loading…</p>}
+      {loading && <p style={{ color: t.textDim, fontSize: 13, padding: '20px 0' }}>Loading…</p>}
 
       {!loading && list.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '40px 0' }}>
-          <p style={{ color: theme.textDim, fontSize: 14, marginBottom: 16 }}>
+        <div style={{ textAlign: 'center', padding: '48px 0' }}>
+          <div style={{ fontSize: 36, marginBottom: 10 }}>{tab === 'created' ? '📣' : '🔍'}</div>
+          <p style={{ color: t.textDim, fontSize: 14, marginBottom: 16 }}>
             {tab === 'created' ? "You haven't created any plans yet." : "You haven't joined any plans yet."}
           </p>
-          <Link to={tab === 'created' ? '/create-plan' : '/'} style={{ color: theme.accent, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>
+          <Link to={tab === 'created' ? '/create-plan' : '/'} style={{
+            display: 'inline-block', background: t.gradient, color: t.accentInk,
+            padding: '10px 20px', borderRadius: t.radiusSm, fontWeight: 700, fontSize: 13,
+            textDecoration: 'none',
+          }}>
             {tab === 'created' ? 'Create one →' : 'Browse the feed →'}
           </Link>
         </div>

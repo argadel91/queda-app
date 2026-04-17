@@ -4,7 +4,7 @@ import { db } from '../lib/supabase.js'
 import { useAuth } from '../hooks/useAuth.js'
 import { useTokens } from '../hooks/useTokens.js'
 import { categoryIcon, categoryLabel } from '../constants/categories.js'
-import { theme } from '../theme.js'
+import { theme as t } from '../theme.js'
 
 export default function PlanDetail() {
   const { id } = useParams()
@@ -19,7 +19,7 @@ export default function PlanDetail() {
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
-  const [attendance, setAttendance] = useState({}) // uid → boolean (checkout mode)
+  const [attendance, setAttendance] = useState({})
 
   const load = useCallback(async () => {
     const { data: p } = await db.from('plans').select('*').eq('id', id).maybeSingle()
@@ -66,19 +66,16 @@ export default function PlanDetail() {
     if (error) throw new Error(error.message)
   })
   const reject = uid => act(() => rpc('reject_join_request', { p_organizer_id: user.id, p_plan_id: id, p_user_id: uid }))
-
   const finalise = () => act(async () => {
-    // 1. Write each participant's attended flag
     for (const [uid, attended] of Object.entries(attendance)) {
       await db.from('plan_participants').update({ attended }).eq('plan_id', id).eq('user_id', uid)
     }
-    // 2. Call checkout RPC (handles all token movements atomically)
     const { error } = await db.rpc('process_plan_checkout', { p_plan_id: id, p_organizer_id: user.id, p_auto: false })
     if (error) throw error
   })
 
-  if (loading) return <p style={{ color: theme.textDim, padding: 24 }}>Loading…</p>
-  if (!plan) return <p style={{ color: theme.textDim, padding: 24 }}>Plan not found.</p>
+  if (loading) return <p style={{ color: t.textDim, padding: 24 }}>Loading…</p>
+  if (!plan) return <p style={{ color: t.textDim, padding: 24 }}>Plan not found.</p>
 
   const d = new Date(plan.date + 'T' + plan.time)
   const dateStr = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
@@ -91,70 +88,35 @@ export default function PlanDetail() {
 
   return (
     <div>
-      <div style={{ fontSize: 11, color: theme.textDim, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6 }}>
+      <div style={{ fontSize: 11, color: t.textDim, letterSpacing: 1.5, textTransform: 'uppercase', fontWeight: 600, marginBottom: 8 }}>
         {categoryIcon(plan.category)} {categoryLabel(plan.category)}
-        {plan.status === 'cancelled' && <span style={{ color: theme.danger, marginLeft: 8 }}>CANCELLED</span>}
+        {plan.status === 'cancelled' && <span style={{ color: t.danger, marginLeft: 8 }}>CANCELLED</span>}
       </div>
-      <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 4px', lineHeight: 1.2 }}>{plan.title}</h1>
-      {organizer && <div style={{ fontSize: 13, color: theme.textDim, marginBottom: 20 }}>by {organizer.username || 'Anonymous'}</div>}
+      <h1 style={{ fontFamily: t.fontHead, fontSize: 26, fontWeight: 800, margin: '0 0 4px', lineHeight: 1.2, letterSpacing: -0.5 }}>{plan.title}</h1>
+      {organizer && <div style={{ fontSize: 13, color: t.textDim, marginBottom: 20 }}>by {organizer.username || 'Anonymous'}</div>}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-        <Row label="When" value={`${dateStr} · ${timeStr}`} />
-        <Row label="Where" value={plan.place_name} sub={plan.place_address} />
-        <Row label="Spots" value={`${joined.length} / ${plan.capacity}${isFull ? ' · full' : ''}`} />
-        <Row label="Join" value={plan.join_mode === 'approval' ? 'Needs approval' : plan.join_mode === 'private' ? 'Private' : 'Open'} />
-        <Row label="Gender" value={plan.gender_filter === 'mixed' ? 'Mixed' : plan.gender_filter === 'male' ? 'Men only' : 'Women only'} />
-        {plan.description && <Row label="Details" value={plan.description} />}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24, padding: '16px 18px', background: t.bgCard, borderRadius: t.radius, border: `1px solid ${t.border}` }}>
+        <Row icon="📅" value={`${dateStr} · ${timeStr}`} />
+        <Row icon="📍" value={plan.place_name} sub={plan.place_address} />
+        <Row icon="👥" value={`${joined.length} / ${plan.capacity}${isFull ? ' · full' : ''}`} />
+        <Row icon="🔓" value={plan.join_mode === 'approval' ? 'Needs approval' : plan.join_mode === 'private' ? 'Private' : 'Open'} />
+        <Row icon="⚥" value={plan.gender_filter === 'mixed' ? 'Mixed' : plan.gender_filter === 'male' ? 'Men only' : 'Women only'} />
+        {plan.description && <Row icon="📝" value={plan.description} />}
       </div>
 
-      {err && <p style={{ color: theme.danger, fontSize: 13, marginBottom: 12 }}>{err}</p>}
+      {err && <p style={{ color: t.danger, fontSize: 13, marginBottom: 12 }}>{err}</p>}
 
-      {/* --- Attendee actions --- */}
-      {!isOrg && user && !isPast && (
-        <>
-          {!myStatus && !isFull && (
-            <button disabled={busy || (balance !== null && balance < 1)} onClick={join} style={accentBtn}>
-              {busy ? '…' : plan.join_mode === 'approval' ? 'Request to join · 1 token' : 'Join · 1 token'}
-            </button>
-          )}
-          {!myStatus && isFull && (
-            <p style={{ fontSize: 14, color: theme.textDim }}>Plan is full.</p>
-          )}
-          {myStatus === 'joined' && (
-            <>
-              <p style={{ fontSize: 14, color: theme.accent, fontWeight: 600, marginBottom: 8 }}>{"✓ You're in"}</p>
-              <button disabled={busy} onClick={leave} style={dangerBtn}>
-                {busy ? '…' : 'Leave plan'}
-              </button>
-            </>
-          )}
-          {myStatus === 'pending' && (
-            <>
-              <p style={{ fontSize: 14, color: theme.textDim, fontWeight: 600, marginBottom: 8 }}>⏳ Pending approval</p>
-              <button disabled={busy} onClick={leave} style={dangerBtn}>
-                {busy ? '…' : 'Withdraw request'}
-              </button>
-            </>
-          )}
-        </>
-      )}
-
-      {/* --- Checkout mode (organizer, plan time past, not yet checked out) --- */}
+      {/* Checkout */}
       {needsCheckout && joined.length > 0 && (
-        <section style={{ marginBottom: 24, padding: '16px', background: theme.bgElev, border: `1px solid ${theme.border}`, borderRadius: 14 }}>
-          <h3 style={{ ...sectionTitle, marginBottom: 12 }}>Check out — who showed up?</h3>
+        <section style={{ marginBottom: 24, padding: '18px', background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: t.radius }}>
+          <h3 style={secTitle}>Check out — who showed up?</h3>
           {joined.map(p => (
-            <label key={p.user_id} style={{
-              ...participantRow, cursor: 'pointer', gap: 10,
-            }}>
-              <input
-                type="checkbox"
-                checked={attendance[p.user_id] ?? true}
+            <label key={p.user_id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: `1px solid ${t.border}`, cursor: 'pointer' }}>
+              <input type="checkbox" checked={attendance[p.user_id] ?? true}
                 onChange={e => setAttendance(prev => ({ ...prev, [p.user_id]: e.target.checked }))}
-                style={{ width: 18, height: 18, accentColor: theme.accent, flexShrink: 0 }}
-              />
-              <span style={{ flex: 1, fontSize: 14, color: theme.text }}>{p.profiles?.username || 'User'}</span>
-              <span style={{ fontSize: 12, color: (attendance[p.user_id] ?? true) ? theme.accent : theme.danger, fontWeight: 600 }}>
+                style={{ width: 18, height: 18, accentColor: t.accent, flexShrink: 0 }} />
+              <span style={{ flex: 1, fontSize: 14 }}>{p.profiles?.username || 'User'}</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: (attendance[p.user_id] ?? true) ? t.accent : t.danger }}>
                 {(attendance[p.user_id] ?? true) ? '✓ attended' : '✗ no-show'}
               </span>
             </label>
@@ -166,35 +128,55 @@ export default function PlanDetail() {
       )}
       {needsCheckout && joined.length === 0 && (
         <section style={{ marginBottom: 24 }}>
-          <p style={{ color: theme.textDim, fontSize: 14, marginBottom: 12 }}>No one joined. You can finalise to close the plan.</p>
-          <button disabled={busy} onClick={finalise} style={accentBtn}>
-            {busy ? '…' : 'Finalise (no attendees)'}
-          </button>
+          <p style={{ color: t.textDim, fontSize: 14, marginBottom: 12 }}>No one joined.</p>
+          <button disabled={busy} onClick={finalise} style={accentBtn}>{busy ? '…' : 'Finalise (no attendees)'}</button>
         </section>
       )}
 
-      {/* --- Organizer actions (before plan time) --- */}
-      {isOrg && !isPast && !needsCheckout && (
-        <div style={{ marginBottom: 24 }}>
-          <button disabled={busy} onClick={cancel} style={dangerBtn}>
-            {busy ? '…' : 'Cancel plan'}
-          </button>
+      {/* Attendee actions */}
+      {!isOrg && user && !isPast && !needsCheckout && (
+        <div style={{ marginBottom: 20 }}>
+          {!myStatus && !isFull && (
+            <button disabled={busy || (balance !== null && balance < 1)} onClick={join} style={accentBtn}>
+              {busy ? '…' : plan.join_mode === 'approval' ? 'Request to join · 1 token' : 'Join · 1 token'}
+            </button>
+          )}
+          {!myStatus && isFull && <p style={{ fontSize: 14, color: t.textDim }}>Plan is full.</p>}
+          {myStatus === 'joined' && (
+            <>
+              <p style={{ fontSize: 14, color: t.accent, fontWeight: 600, marginBottom: 8 }}>{"✓ You're in"}</p>
+              <button disabled={busy} onClick={leave} style={dangerBtn}>{busy ? '…' : 'Leave plan'}</button>
+            </>
+          )}
+          {myStatus === 'pending' && (
+            <>
+              <p style={{ fontSize: 14, color: t.textDim, fontWeight: 600, marginBottom: 8 }}>⏳ Pending approval</p>
+              <button disabled={busy} onClick={leave} style={dangerBtn}>{busy ? '…' : 'Withdraw request'}</button>
+            </>
+          )}
         </div>
       )}
 
-      {/* --- Checked-out banner --- */}
+      {/* Organizer cancel (before plan time) */}
+      {isOrg && !isPast && !needsCheckout && (
+        <div style={{ marginBottom: 24 }}>
+          <button disabled={busy} onClick={cancel} style={dangerBtn}>{busy ? '…' : 'Cancel plan'}</button>
+        </div>
+      )}
+
+      {/* Checked-out banner */}
       {plan.checked_out_at && (
-        <div style={{ padding: '12px 16px', borderRadius: 10, background: theme.bgElev, border: `1px solid ${theme.border}`, marginBottom: 20, fontSize: 13, color: theme.textDim }}>
+        <div style={{ padding: '12px 16px', borderRadius: t.radiusSm, background: t.accentSoft, marginBottom: 20, fontSize: 13, color: t.accent, fontWeight: 600 }}>
           ✓ Checked out {plan.auto_checked_out ? '(auto — 48h)' : ''} · {new Date(plan.checked_out_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
         </div>
       )}
 
-      {/* --- Pending requests (organizer only) --- */}
+      {/* Pending requests */}
       {isOrg && pending.length > 0 && !needsCheckout && (
         <section style={{ marginBottom: 24 }}>
-          <h3 style={sectionTitle}>Pending requests</h3>
+          <h3 style={secTitle}>Pending requests</h3>
           {pending.map(p => (
-            <div key={p.user_id} style={participantRow}>
+            <div key={p.user_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: `1px solid ${t.border}` }}>
               <span style={{ fontSize: 14 }}>{p.profiles?.username || 'User'}</span>
               <div style={{ display: 'flex', gap: 6 }}>
                 <button disabled={busy} onClick={() => approve(p.user_id)} style={smallGreen}>Accept</button>
@@ -205,56 +187,52 @@ export default function PlanDetail() {
         </section>
       )}
 
-      {/* --- Confirmed attendees --- */}
+      {/* Attendees list */}
       {joined.length > 0 && !needsCheckout && (
         <section style={{ marginBottom: 24 }}>
-          <h3 style={sectionTitle}>Going ({joined.length})</h3>
+          <h3 style={secTitle}>Going ({joined.length})</h3>
           {joined.map(p => (
-            <div key={p.user_id} style={participantRow}>
+            <div key={p.user_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: `1px solid ${t.border}` }}>
               <span style={{ fontSize: 14 }}>{p.profiles?.username || 'User'}</span>
-              {p.user_id === plan.user_id && <span style={{ fontSize: 11, color: theme.accent }}>organiser</span>}
+              {p.user_id === plan.user_id && <span style={{ fontSize: 11, color: t.accent, fontWeight: 600 }}>organiser</span>}
             </div>
           ))}
         </section>
       )}
 
-      <Link to="/" style={{ display: 'block', marginTop: 16, color: theme.textDim, fontSize: 13, textDecoration: 'none' }}>← Feed</Link>
+      <Link to="/" style={{ display: 'block', marginTop: 16, color: t.textDim, fontSize: 13, textDecoration: 'none' }}>← Feed</Link>
     </div>
   )
 }
 
-function Row({ label, value, sub }) {
+function Row({ icon, value, sub }) {
   return (
-    <div style={{ display: 'flex', gap: 12, fontSize: 14 }}>
-      <span style={{ width: 70, flexShrink: 0, color: theme.textDim, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, paddingTop: 2 }}>{label}</span>
-      <div style={{ color: theme.text }}>
+    <div style={{ display: 'flex', gap: 10, fontSize: 14 }}>
+      <span style={{ fontSize: 16, width: 20, textAlign: 'center', flexShrink: 0 }}>{icon}</span>
+      <div>
         <div>{value}</div>
-        {sub && <div style={{ fontSize: 12, color: theme.textDim, marginTop: 2 }}>{sub}</div>}
+        {sub && <div style={{ fontSize: 12, color: t.textDim, marginTop: 2 }}>{sub}</div>}
       </div>
     </div>
   )
 }
 
 const accentBtn = {
-  width: '100%', padding: '14px', borderRadius: 10, fontWeight: 700, fontSize: 14,
-  fontFamily: theme.font, letterSpacing: 0.5, cursor: 'pointer',
-  background: theme.accent, color: theme.accentInk, border: 'none',
+  width: '100%', padding: '14px', borderRadius: t.radiusSm, fontWeight: 700, fontSize: 15,
+  fontFamily: t.font, letterSpacing: 0.3, cursor: 'pointer',
+  background: t.gradient, color: t.accentInk, border: 'none',
 }
 const dangerBtn = {
-  width: '100%', padding: '12px', borderRadius: 10, fontWeight: 600, fontSize: 13,
-  fontFamily: theme.font, cursor: 'pointer',
-  background: 'transparent', color: theme.danger, border: `1px solid ${theme.border}`,
+  width: '100%', padding: '12px', borderRadius: t.radiusSm, fontWeight: 600, fontSize: 13,
+  fontFamily: t.font, cursor: 'pointer',
+  background: t.dangerSoft, color: t.danger, border: 'none',
 }
-const sectionTitle = { fontSize: 11, color: theme.textDim, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 600, margin: '0 0 8px' }
-const participantRow = {
-  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-  padding: '10px 0', borderBottom: `1px solid ${theme.border}`, color: theme.text,
-}
+const secTitle = { fontSize: 11, color: t.textDim, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 600, margin: '0 0 8px' }
 const smallGreen = {
-  padding: '6px 12px', borderRadius: 8, background: theme.accent, color: theme.accentInk,
-  border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: theme.font,
+  padding: '6px 14px', borderRadius: 8, background: t.gradient, color: t.accentInk,
+  border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: t.font,
 }
 const smallRed = {
-  padding: '6px 12px', borderRadius: 8, background: 'transparent', color: theme.danger,
-  border: `1px solid ${theme.border}`, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font,
+  padding: '6px 14px', borderRadius: 8, background: t.dangerSoft, color: t.danger,
+  border: 'none', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: t.font,
 }

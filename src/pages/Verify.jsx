@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { theme } from '../theme.js'
+import { theme as t } from '../theme.js'
 import { AuthShell } from './Signup.jsx'
 
 // Placeholder page. With email+password this is where Supabase email confirmation
@@ -9,11 +9,11 @@ import { AuthShell } from './Signup.jsx'
 export default function Verify() {
   return (
     <AuthShell title="Verify your account">
-      <p style={{ color: theme.textDim, fontSize: 14, lineHeight: 1.5 }}>
+      <p style={{ color: t.textDim, fontSize: 14, lineHeight: 1.5 }}>
         Open the confirmation link we sent to your email, then log in.
       </p>
       <p style={{ marginTop: 24, textAlign: 'center' }}>
-        <Link to="/login" style={{ color: theme.accent, fontSize: 14 }}>Back to login</Link>
+        <Link to="/login" style={{ color: t.accent, fontSize: 14 }}>Back to login</Link>
       </p>
     </AuthShell>
   )

@@ -1,10 +1,9 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { db } from '../lib/supabase.js'
-import { theme } from '../theme.js'
-import { AuthShell, Field, inputStyle, primaryBtn, errText } from './Signup.jsx'
+import { theme as t } from '../theme.js'
+import { AuthShell, Field, inp, primaryBtn } from './Signup.jsx'
 
-// TODO(auth): swap for phone OTP once provider is configured.
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -22,21 +21,25 @@ export default function Login() {
   }
 
   return (
-    <AuthShell title="Welcome back">
-      <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <AuthShell>
+      <h1 style={{ fontFamily: t.fontHead, fontSize: 32, fontWeight: 800, letterSpacing: -1, marginBottom: 4 }}>
+        queda<span style={{ color: t.accent }}>.</span>
+      </h1>
+      <p style={{ color: t.textDim, fontSize: 14, marginBottom: 28 }}>Welcome back</p>
+      <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <Field label="Email">
-          <input type="email" required value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" style={inputStyle} />
+          <input type="email" required value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" style={inp} />
         </Field>
         <Field label="Password">
-          <input type="password" required value={password} onChange={e => setPassword(e.target.value)} autoComplete="current-password" style={inputStyle} />
+          <input type="password" required value={password} onChange={e => setPassword(e.target.value)} autoComplete="current-password" style={inp} />
         </Field>
-        {err && <p style={errText}>{err}</p>}
+        {err && <p style={{ color: t.danger, fontSize: 13, margin: 0 }}>{err}</p>}
         <button type="submit" disabled={loading} style={primaryBtn}>
           {loading ? '…' : 'Log in'}
         </button>
       </form>
-      <p style={{ marginTop: 16, fontSize: 13, color: theme.textDim, textAlign: 'center' }}>
-        No account yet? <Link to="/signup" style={{ color: theme.accent }}>Sign up</Link>
+      <p style={{ marginTop: 20, fontSize: 13, color: t.textDim, textAlign: 'center' }}>
+        No account yet? <Link to="/signup" style={{ color: t.accent, textDecoration: 'none', fontWeight: 600 }}>Sign up</Link>
       </p>
     </AuthShell>
   )

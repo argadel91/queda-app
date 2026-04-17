@@ -2,14 +2,12 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { db } from '../lib/supabase.js'
 import { useAuth } from '../hooks/useAuth.js'
-import { theme } from '../theme.js'
-import { AuthShell, Field, inputStyle, primaryBtn, errText } from './Signup.jsx'
+import { theme as t } from '../theme.js'
+import { AuthShell, Field, inp, primaryBtn } from './Signup.jsx'
 
 const GENDERS = [
-  { v: 'male', label: 'Male' },
-  { v: 'female', label: 'Female' },
-  { v: 'non-binary', label: 'Non-binary' },
-  { v: 'other', label: 'Other' },
+  { v: 'male', label: 'Male' }, { v: 'female', label: 'Female' },
+  { v: 'non-binary', label: 'Non-binary' }, { v: 'other', label: 'Other' },
   { v: 'prefer_not_to_say', label: 'Prefer not to say' },
 ]
 
@@ -29,15 +27,10 @@ export default function Onboarding() {
     const ageNum = parseInt(age, 10)
     if (!Number.isFinite(ageNum) || ageNum < 18 || ageNum > 99) { setErr('Age must be 18-99'); return }
     setLoading(true)
-    // Birthdate is stored (not age) to avoid drift; approximate from age.
     const birthYear = new Date().getFullYear() - ageNum
-    const birthdate = `${birthYear}-01-01`
-    // token_balance defaults to 6 in the schema; trigger log_signup_balance records the signup ledger row.
     const { error } = await db.from('profiles').insert({
-      id: user.id,
-      username: username.trim() || null,
-      gender,
-      birthdate,
+      id: user.id, username: username.trim() || null,
+      gender, birthdate: `${birthYear}-01-01`,
     })
     setLoading(false)
     if (error) { setErr(error.message); return }
@@ -46,26 +39,28 @@ export default function Onboarding() {
   }
 
   return (
-    <AuthShell title="Tell us about you">
-      <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <AuthShell>
+      <h1 style={{ fontFamily: t.fontHead, fontSize: 24, fontWeight: 800, letterSpacing: -0.5, marginBottom: 4 }}>About you</h1>
+      <p style={{ color: t.textDim, fontSize: 14, marginBottom: 24 }}>Just the basics. Takes 10 seconds.</p>
+      <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <Field label="Display name">
-          <input required maxLength={40} value={username} onChange={e => setUsername(e.target.value)} style={inputStyle} />
+          <input required maxLength={40} value={username} onChange={e => setUsername(e.target.value)} style={inp} />
         </Field>
         <Field label="Age">
-          <input type="number" min={18} max={99} required value={age} onChange={e => setAge(e.target.value)} style={inputStyle} />
+          <input type="number" min={18} max={99} required value={age} onChange={e => setAge(e.target.value)} style={inp} />
         </Field>
         <Field label="Gender">
-          <select required value={gender} onChange={e => setGender(e.target.value)} style={{ ...inputStyle, appearance: 'none' }}>
+          <select required value={gender} onChange={e => setGender(e.target.value)} style={{ ...inp, appearance: 'none' }}>
             <option value="" disabled>Select…</option>
             {GENDERS.map(g => <option key={g.v} value={g.v}>{g.label}</option>)}
           </select>
         </Field>
-        {err && <p style={errText}>{err}</p>}
+        {err && <p style={{ color: t.danger, fontSize: 13, margin: 0 }}>{err}</p>}
         <button type="submit" disabled={loading} style={primaryBtn}>
-          {loading ? '…' : 'Finish'}
+          {loading ? '…' : 'Continue'}
         </button>
       </form>
-      <p style={{ marginTop: 16, fontSize: 12, color: theme.textDim, textAlign: 'center', lineHeight: 1.5 }}>
+      <p style={{ marginTop: 20, fontSize: 12, color: t.textDim, textAlign: 'center', lineHeight: 1.5 }}>
         {"You'll start with 6 tokens. Joining a plan costs 1 — you get it back if you show up."}
       </p>
     </AuthShell>

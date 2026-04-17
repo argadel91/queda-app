@@ -1,7 +1,6 @@
 import React from 'react'
-import { theme } from '../theme.js'
+import { theme as t } from '../theme.js'
 
-// Keep in sync with sql/migration_v4_simplify.sql.
 const LABELS = {
   signup: 'Signed up',
   join_plan_deposit: 'Joined a plan',
@@ -25,26 +24,28 @@ const fmtDateTime = ts => {
 
 export default function TokenHistory({ entries }) {
   if (!entries?.length) {
-    return <p style={{ color: theme.textDim, fontSize: 13 }}>No movements yet.</p>
+    return <p style={{ color: t.textDim, fontSize: 13, padding: '12px 0' }}>No movements yet.</p>
   }
   return (
     <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
       {entries.map(e => {
         const positive = e.amount > 0
         const neutral = e.amount === 0
-        const color = neutral ? theme.textDim : positive ? theme.accent : theme.danger
+        const color = neutral ? t.textDim : positive ? t.accent : t.danger
         return (
           <li key={e.id} style={{
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            padding: '12px 0', borderBottom: `1px solid ${theme.border}`, gap: 12,
+            padding: '12px 0', borderBottom: `1px solid ${t.border}`, gap: 12,
           }}>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 14, color: theme.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {label(e.reason)}
-              </div>
-              <div style={{ fontSize: 11, color: theme.textDim, marginTop: 2 }}>{fmtDateTime(e.created_at)}</div>
+              <div style={{ fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label(e.reason)}</div>
+              <div style={{ fontSize: 11, color: t.textDim, marginTop: 2 }}>{fmtDateTime(e.created_at)}</div>
             </div>
-            <div style={{ fontSize: 15, fontWeight: 700, color, letterSpacing: 0.5, flexShrink: 0 }}>
+            <div style={{
+              fontSize: 13, fontWeight: 700, color,
+              background: positive ? t.accentSoft : neutral ? t.bgCard : t.dangerSoft,
+              padding: '3px 10px', borderRadius: 999, flexShrink: 0,
+            }}>
               {neutral ? '—' : `${positive ? '+' : ''}${e.amount}`}
             </div>
           </li>
