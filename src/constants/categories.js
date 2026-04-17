@@ -1,5 +1,5 @@
 export const CATEGORIES = [
-  { value: 'active',     label: 'Active',     icon: '🏃' },
+  { value: 'active',     label: 'Active',     icon: '💪' },
   { value: 'social',     label: 'Social',     icon: '🫂' },
   { value: 'experience', label: 'Experience', icon: '✨' },
   { value: 'other',      label: 'Other',      icon: '➕' },
