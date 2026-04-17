@@ -19,6 +19,7 @@ export default function PlanDetail() {
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
+  const [attendance, setAttendance] = useState({}) // uid → boolean (checkout mode)
 
   const load = useCallback(async () => {
     const { data: p } = await db.from('plans').select('*').eq('id', id).maybeSingle()
@@ -29,9 +30,15 @@ export default function PlanDetail() {
       db.from('plan_participants').select('user_id, status, profiles(username, gender)').eq('plan_id', id).in('status', ['joined', 'pending']),
     ])
     setOrganizer(org)
-    setJoined((parts || []).filter(x => x.status === 'joined'))
+    const j = (parts || []).filter(x => x.status === 'joined')
+    setJoined(j)
     setPending((parts || []).filter(x => x.status === 'pending'))
     setMyStatus((parts || []).find(x => x.user_id === user?.id)?.status || null)
+    setAttendance(prev => {
+      const next = {}
+      j.forEach(x => { next[x.user_id] = prev[x.user_id] ?? true })
+      return next
+    })
     setLoading(false)
   }, [id, user?.id])
 
@@ -55,6 +62,16 @@ export default function PlanDetail() {
   })
   const reject = uid => act(() => db.rpc('reject_join_request', { p_organizer_id: user.id, p_plan_id: id, p_user_id: uid }))
 
+  const finalise = () => act(async () => {
+    // 1. Write each participant's attended flag
+    for (const [uid, attended] of Object.entries(attendance)) {
+      await db.from('plan_participants').update({ attended }).eq('plan_id', id).eq('user_id', uid)
+    }
+    // 2. Call checkout RPC (handles all token movements atomically)
+    const { error } = await db.rpc('process_plan_checkout', { p_plan_id: id, p_organizer_id: user.id, p_auto: false })
+    if (error) throw error
+  })
+
   if (loading) return <p style={{ color: theme.textDim, padding: 24 }}>Loading…</p>
   if (!plan) return <p style={{ color: theme.textDim, padding: 24 }}>Plan not found.</p>
 
@@ -64,6 +81,8 @@ export default function PlanDetail() {
   const isOrg = user?.id === plan.user_id
   const isFull = joined.length >= plan.capacity
   const isPast = plan.status === 'past' || plan.status === 'cancelled'
+  const planTs = new Date(plan.date + 'T' + plan.time)
+  const needsCheckout = isOrg && planTs < new Date() && !plan.checked_out_at && plan.status !== 'cancelled'
 
   return (
     <div>
@@ -115,8 +134,42 @@ export default function PlanDetail() {
         </>
       )}
 
-      {/* --- Organizer actions --- */}
-      {isOrg && !isPast && (
+      {/* --- Checkout mode (organizer, plan time past, not yet checked out) --- */}
+      {needsCheckout && joined.length > 0 && (
+        <section style={{ marginBottom: 24, padding: '16px', background: theme.bgElev, border: `1px solid ${theme.border}`, borderRadius: 14 }}>
+          <h3 style={{ ...sectionTitle, marginBottom: 12 }}>Check out — who showed up?</h3>
+          {joined.map(p => (
+            <label key={p.user_id} style={{
+              ...participantRow, cursor: 'pointer', gap: 10,
+            }}>
+              <input
+                type="checkbox"
+                checked={attendance[p.user_id] ?? true}
+                onChange={e => setAttendance(prev => ({ ...prev, [p.user_id]: e.target.checked }))}
+                style={{ width: 18, height: 18, accentColor: theme.accent, flexShrink: 0 }}
+              />
+              <span style={{ flex: 1, fontSize: 14, color: theme.text }}>{p.profiles?.username || 'User'}</span>
+              <span style={{ fontSize: 12, color: (attendance[p.user_id] ?? true) ? theme.accent : theme.danger, fontWeight: 600 }}>
+                {(attendance[p.user_id] ?? true) ? '✓ attended' : '✗ no-show'}
+              </span>
+            </label>
+          ))}
+          <button disabled={busy} onClick={finalise} style={{ ...accentBtn, marginTop: 16 }}>
+            {busy ? 'Processing…' : 'Finalise plan'}
+          </button>
+        </section>
+      )}
+      {needsCheckout && joined.length === 0 && (
+        <section style={{ marginBottom: 24 }}>
+          <p style={{ color: theme.textDim, fontSize: 14, marginBottom: 12 }}>No one joined. You can finalise to close the plan.</p>
+          <button disabled={busy} onClick={finalise} style={accentBtn}>
+            {busy ? '…' : 'Finalise (no attendees)'}
+          </button>
+        </section>
+      )}
+
+      {/* --- Organizer actions (before plan time) --- */}
+      {isOrg && !isPast && !needsCheckout && (
         <div style={{ marginBottom: 24 }}>
           <button disabled={busy} onClick={cancel} style={dangerBtn}>
             {busy ? '…' : 'Cancel plan'}
@@ -124,8 +177,15 @@ export default function PlanDetail() {
         </div>
       )}
 
+      {/* --- Checked-out banner --- */}
+      {plan.checked_out_at && (
+        <div style={{ padding: '12px 16px', borderRadius: 10, background: theme.bgElev, border: `1px solid ${theme.border}`, marginBottom: 20, fontSize: 13, color: theme.textDim }}>
+          ✓ Checked out {plan.auto_checked_out ? '(auto — 48h)' : ''} · {new Date(plan.checked_out_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+        </div>
+      )}
+
       {/* --- Pending requests (organizer only) --- */}
-      {isOrg && pending.length > 0 && (
+      {isOrg && pending.length > 0 && !needsCheckout && (
         <section style={{ marginBottom: 24 }}>
           <h3 style={sectionTitle}>Pending requests</h3>
           {pending.map(p => (
@@ -141,7 +201,7 @@ export default function PlanDetail() {
       )}
 
       {/* --- Confirmed attendees --- */}
-      {joined.length > 0 && (
+      {joined.length > 0 && !needsCheckout && (
         <section style={{ marginBottom: 24 }}>
           <h3 style={sectionTitle}>Going ({joined.length})</h3>
           {joined.map(p => (
