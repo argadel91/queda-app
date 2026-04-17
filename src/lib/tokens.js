@@ -26,14 +26,14 @@ export async function getTokenHistory(userId, limit = 50) {
 }
 
 export function subscribeToBalance(userId, onLedgerInsert) {
-  const channel = db
-    .channel(`tokens:${userId}`)
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'tokens_ledger',
-      filter: `user_id=eq.${userId}`,
-    }, payload => onLedgerInsert(payload.new))
-    .subscribe()
+  const channelName = `tokens:${userId}:${Date.now()}`
+  const channel = db.channel(channelName)
+  channel.on('postgres_changes', {
+    event: 'INSERT',
+    schema: 'public',
+    table: 'tokens_ledger',
+    filter: `user_id=eq.${userId}`,
+  }, payload => onLedgerInsert(payload.new))
+  channel.subscribe()
   return () => { db.removeChannel(channel) }
 }
