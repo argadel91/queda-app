@@ -2,11 +2,13 @@ import React from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
 import { useTokens } from '../hooks/useTokens.js'
+import { useNotifications } from '../hooks/useNotifications.js'
 import { theme } from '../theme.js'
 
 export default function Layout({ children }) {
   const { user } = useAuth()
   const { balance } = useTokens()
+  const { unread } = useNotifications()
   const navigate = useNavigate()
   const tokens = user ? (balance ?? '—') : '—'
 
@@ -22,6 +24,20 @@ export default function Layout({ children }) {
         }}>
           queda
         </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <button onClick={() => navigate('/notifications')} style={{
+          position: 'relative', background: 'none', border: 'none', color: theme.text,
+          fontSize: 18, cursor: 'pointer', padding: 4,
+        }}>
+          🔔
+          {unread > 0 && (
+            <span style={{
+              position: 'absolute', top: -2, right: -4, minWidth: 16, height: 16, borderRadius: 999,
+              background: theme.danger, color: '#fff', fontSize: 10, fontWeight: 700,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px',
+            }}>{unread > 9 ? '9+' : unread}</span>
+          )}
+        </button>
         <button onClick={() => navigate('/wallet')} style={{
           display: 'flex', alignItems: 'center', gap: 6,
           background: theme.bgElev, border: `1px solid ${theme.border}`, borderRadius: 999,
@@ -30,6 +46,7 @@ export default function Layout({ children }) {
         }}>
           {tokens} <span style={{ color: theme.textDim, fontWeight: 400 }}>tokens</span>
         </button>
+        </div>
       </header>
 
       <main style={{ flex: 1, padding: '16px', paddingBottom: 'calc(80px + env(safe-area-inset-bottom,0px))', maxWidth: 640, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>

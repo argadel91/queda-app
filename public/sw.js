@@ -40,3 +40,27 @@ self.addEventListener('fetch', e => {
     caches.match(e.request).then(cached => cached || fetch(e.request))
   )
 })
+
+// Push notification handler — ready for when server-side push is wired.
+// TODO(push): set up VAPID keys + Vercel Function to send web-push.
+self.addEventListener('push', e => {
+  const data = e.data?.json?.() || {}
+  const title = data.title || 'queda'
+  const options = {
+    body: data.body || '',
+    icon: '/icon-192.svg',
+    badge: '/icon-192.svg',
+    data: { url: data.url || '/' },
+  }
+  e.waitUntil(self.registration.showNotification(title, options))
+})
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close()
+  const url = e.notification.data?.url || '/'
+  e.waitUntil(clients.matchAll({ type: 'window' }).then(cls => {
+    const match = cls.find(c => c.url.includes(url) && 'focus' in c)
+    if (match) return match.focus()
+    return clients.openWindow(url)
+  }))
+})
