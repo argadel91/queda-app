@@ -92,7 +92,7 @@ export default function PlanDetail() {
         {categoryIcon(plan.category)} {categoryLabel(plan.category)}
         {plan.status === 'cancelled' && <span style={{ color: t.danger, marginLeft: 8 }}>CANCELLED</span>}
       </div>
-      <h1 style={{ fontFamily: t.fontHead, fontSize: 26, fontWeight: 800, margin: '0 0 4px', lineHeight: 1.2, letterSpacing: -0.5 }}>{plan.title}</h1>
+      <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 4px', lineHeight: 1.3 }}>{plan.title}</h1>
       {organizer && <div style={{ fontSize: 13, color: t.textDim, marginBottom: 20 }}>by {organizer.username || 'Anonymous'}</div>}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24, padding: '16px 18px', background: t.bgCard, borderRadius: t.radius, border: `1px solid ${t.border}` }}>

@@ -54,7 +54,7 @@ export default function Profile() {
       {!editing ? (
         <>
           <div style={{ padding: '20px', background: t.bgCard, borderRadius: t.radius, border: `1px solid ${t.border}`, marginBottom: 16 }}>
-            <div style={{ fontSize: 18, fontWeight: 700, fontFamily: t.fontHead, marginBottom: 4 }}>{profile?.username || '—'}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, lineHeight: 1.3 }}>{profile?.username || '—'}</div>
             <div style={{ fontSize: 13, color: t.textDim, lineHeight: 1.6 }}>
               {user?.email}<br />
               Gender: {profile?.gender || '—'} · Age: {profile?.birthdate ? new Date().getFullYear() - new Date(profile.birthdate).getFullYear() : '—'}
