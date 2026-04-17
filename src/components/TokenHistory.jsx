@@ -13,6 +13,7 @@ const LABELS = {
   cancel_refund: ‘Plan cancelled (refund)’,
   leave_refund: ‘Left in time’,
   leave_late_penalty: ‘Left late’,
+  reject_refund: ‘Request rejected (refund)’,
 }
 
 const label = reason => LABELS[reason] || reason.replace(/_/g, ' ')

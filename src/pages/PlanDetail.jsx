@@ -1,36 +1,59 @@
-import React, { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import React, { useEffect, useState, useCallback } from 'react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { db } from '../lib/supabase.js'
 import { useAuth } from '../hooks/useAuth.js'
+import { useTokens } from '../hooks/useTokens.js'
 import { categoryIcon, categoryLabel } from '../constants/categories.js'
 import { theme } from '../theme.js'
 
 export default function PlanDetail() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const { user } = useAuth()
+  const { balance } = useTokens()
   const [plan, setPlan] = useState(null)
   const [organizer, setOrganizer] = useState(null)
-  const [participants, setParticipants] = useState([])
+  const [joined, setJoined] = useState([])
+  const [pending, setPending] = useState([])
+  const [myStatus, setMyStatus] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
 
-  useEffect(() => {
-    let cancelled = false
-    const load = async () => {
-      const { data: p } = await db.from('plans').select('*').eq('id', id).maybeSingle()
-      if (cancelled || !p) { setLoading(false); return }
-      setPlan(p)
-      const [{ data: org }, { data: parts }] = await Promise.all([
-        db.from('profiles').select('id, username, gender').eq('id', p.user_id).maybeSingle(),
-        db.from('plan_participants').select('user_id, status').eq('plan_id', id).eq('status', 'joined'),
-      ])
-      if (cancelled) return
-      setOrganizer(org)
-      setParticipants(parts || [])
-      setLoading(false)
-    }
-    load()
-    return () => { cancelled = true }
-  }, [id])
+  const load = useCallback(async () => {
+    const { data: p } = await db.from('plans').select('*').eq('id', id).maybeSingle()
+    if (!p) { setLoading(false); return }
+    setPlan(p)
+    const [{ data: org }, { data: parts }] = await Promise.all([
+      db.from('profiles').select('id, username, gender, birthdate').eq('id', p.user_id).maybeSingle(),
+      db.from('plan_participants').select('user_id, status, profiles(username, gender)').eq('plan_id', id).in('status', ['joined', 'pending']),
+    ])
+    setOrganizer(org)
+    setJoined((parts || []).filter(x => x.status === 'joined'))
+    setPending((parts || []).filter(x => x.status === 'pending'))
+    setMyStatus((parts || []).find(x => x.user_id === user?.id)?.status || null)
+    setLoading(false)
+  }, [id, user?.id])
+
+  useEffect(() => { load() }, [load])
+
+  const act = async (fn) => {
+    setBusy(true); setErr('')
+    try { await fn(); await load() }
+    catch (e) { setErr(e.message || String(e)) }
+    setBusy(false)
+  }
+
+  const join = () => act(() => db.rpc('join_plan_with_deposit', { p_plan_id: id, p_user_id: user.id }))
+  const leave = () => act(() => db.rpc('leave_plan', { p_plan_id: id, p_user_id: user.id }))
+  const cancel = () => act(async () => {
+    await db.rpc('cancel_plan', { p_plan_id: id, p_user_id: user.id })
+    navigate('/', { replace: true })
+  })
+  const approve = uid => act(async () => {
+    await db.from('plan_participants').update({ status: 'joined' }).eq('plan_id', id).eq('user_id', uid)
+  })
+  const reject = uid => act(() => db.rpc('reject_join_request', { p_organizer_id: user.id, p_plan_id: id, p_user_id: uid }))
 
   if (loading) return <p style={{ color: theme.textDim, padding: 24 }}>Loading…</p>
   if (!plan) return <p style={{ color: theme.textDim, padding: 24 }}>Plan not found.</p>
@@ -38,50 +61,99 @@ export default function PlanDetail() {
   const d = new Date(plan.date + 'T' + plan.time)
   const dateStr = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
   const timeStr = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-  const isOrganizer = user?.id === plan.user_id
-  const isJoined = participants.some(p => p.user_id === user?.id)
-  const isFull = participants.length >= plan.capacity
+  const isOrg = user?.id === plan.user_id
+  const isFull = joined.length >= plan.capacity
+  const isPast = plan.status === 'past' || plan.status === 'cancelled'
 
   return (
     <div>
-      {/* Header */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 11, color: theme.textDim, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6 }}>
-          {categoryIcon(plan.category)} {categoryLabel(plan.category)}
-        </div>
-        <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 4px', lineHeight: 1.2 }}>{plan.title}</h1>
-        {organizer && (
-          <div style={{ fontSize: 13, color: theme.textDim }}>by {organizer.username || 'Anonymous'}</div>
-        )}
+      <div style={{ fontSize: 11, color: theme.textDim, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6 }}>
+        {categoryIcon(plan.category)} {categoryLabel(plan.category)}
+        {plan.status === 'cancelled' && <span style={{ color: theme.danger, marginLeft: 8 }}>CANCELLED</span>}
       </div>
+      <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 4px', lineHeight: 1.2 }}>{plan.title}</h1>
+      {organizer && <div style={{ fontSize: 13, color: theme.textDim, marginBottom: 20 }}>by {organizer.username || 'Anonymous'}</div>}
 
-      {/* Details rows */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
         <Row label="When" value={`${dateStr} · ${timeStr}`} />
         <Row label="Where" value={plan.place_name} sub={plan.place_address} />
-        <Row label="Spots" value={`${participants.length} / ${plan.capacity}${isFull ? ' (full)' : ''}`} />
-        <Row label="Join mode" value={plan.join_mode === 'approval' ? 'Needs approval' : plan.join_mode === 'private' ? 'Private (link only)' : 'Open'} />
+        <Row label="Spots" value={`${joined.length} / ${plan.capacity}${isFull ? ' · full' : ''}`} />
+        <Row label="Join" value={plan.join_mode === 'approval' ? 'Needs approval' : plan.join_mode === 'private' ? 'Private' : 'Open'} />
         <Row label="Gender" value={plan.gender_filter === 'mixed' ? 'Mixed' : plan.gender_filter === 'male' ? 'Men only' : 'Women only'} />
         {plan.description && <Row label="Details" value={plan.description} />}
       </div>
 
-      {/* Action button — joining logic comes in Prompt 6 */}
-      {!isOrganizer && user && !isJoined && !isFull && plan.status === 'active' && (
-        <button disabled style={{
-          width: '100%', padding: '14px', borderRadius: 10, fontWeight: 700, fontSize: 14,
-          fontFamily: theme.font, letterSpacing: 0.5, cursor: 'default',
-          background: theme.accent, color: theme.accentInk, border: 'none', opacity: 0.5,
-        }}>Join — 1 token (coming soon)</button>
+      {err && <p style={{ color: theme.danger, fontSize: 13, marginBottom: 12 }}>{err}</p>}
+
+      {/* --- Attendee actions --- */}
+      {!isOrg && user && !isPast && (
+        <>
+          {!myStatus && !isFull && (
+            <button disabled={busy || (balance !== null && balance < 1)} onClick={join} style={accentBtn}>
+              {busy ? '…' : plan.join_mode === 'approval' ? 'Request to join · 1 token' : 'Join · 1 token'}
+            </button>
+          )}
+          {!myStatus && isFull && (
+            <p style={{ fontSize: 14, color: theme.textDim }}>Plan is full.</p>
+          )}
+          {myStatus === 'joined' && (
+            <>
+              <p style={{ fontSize: 14, color: theme.accent, fontWeight: 600, marginBottom: 8 }}>✓ You're in</p>
+              <button disabled={busy} onClick={leave} style={dangerBtn}>
+                {busy ? '…' : 'Leave plan'}
+              </button>
+            </>
+          )}
+          {myStatus === 'pending' && (
+            <>
+              <p style={{ fontSize: 14, color: theme.textDim, fontWeight: 600, marginBottom: 8 }}>⏳ Pending approval</p>
+              <button disabled={busy} onClick={leave} style={dangerBtn}>
+                {busy ? '…' : 'Withdraw request'}
+              </button>
+            </>
+          )}
+        </>
       )}
-      {isJoined && <p style={{ fontSize: 14, color: theme.accent, fontWeight: 600 }}>✓ You're in</p>}
-      {isOrganizer && (
-        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-          <button disabled style={{ flex: 1, padding: '12px', borderRadius: 10, background: theme.bgElev, border: `1px solid ${theme.border}`, color: theme.textDim, fontSize: 13, fontWeight: 600, fontFamily: theme.font }}>Cancel plan</button>
-          <button disabled style={{ flex: 1, padding: '12px', borderRadius: 10, background: theme.bgElev, border: `1px solid ${theme.border}`, color: theme.textDim, fontSize: 13, fontWeight: 600, fontFamily: theme.font }}>Check out</button>
+
+      {/* --- Organizer actions --- */}
+      {isOrg && !isPast && (
+        <div style={{ marginBottom: 24 }}>
+          <button disabled={busy} onClick={cancel} style={dangerBtn}>
+            {busy ? '…' : 'Cancel plan'}
+          </button>
         </div>
       )}
 
-      <Link to="/" style={{ display: 'block', marginTop: 24, color: theme.textDim, fontSize: 13, textDecoration: 'none' }}>← Back to feed</Link>
+      {/* --- Pending requests (organizer only) --- */}
+      {isOrg && pending.length > 0 && (
+        <section style={{ marginBottom: 24 }}>
+          <h3 style={sectionTitle}>Pending requests</h3>
+          {pending.map(p => (
+            <div key={p.user_id} style={participantRow}>
+              <span style={{ fontSize: 14 }}>{p.profiles?.username || 'User'}</span>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button disabled={busy} onClick={() => approve(p.user_id)} style={smallGreen}>Accept</button>
+                <button disabled={busy} onClick={() => reject(p.user_id)} style={smallRed}>Reject</button>
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {/* --- Confirmed attendees --- */}
+      {joined.length > 0 && (
+        <section style={{ marginBottom: 24 }}>
+          <h3 style={sectionTitle}>Going ({joined.length})</h3>
+          {joined.map(p => (
+            <div key={p.user_id} style={participantRow}>
+              <span style={{ fontSize: 14 }}>{p.profiles?.username || 'User'}</span>
+              {p.user_id === plan.user_id && <span style={{ fontSize: 11, color: theme.accent }}>organiser</span>}
+            </div>
+          ))}
+        </section>
+      )}
+
+      <Link to="/" style={{ display: 'block', marginTop: 16, color: theme.textDim, fontSize: 13, textDecoration: 'none' }}>← Feed</Link>
     </div>
   )
 }
@@ -89,11 +161,35 @@ export default function PlanDetail() {
 function Row({ label, value, sub }) {
   return (
     <div style={{ display: 'flex', gap: 12, fontSize: 14 }}>
-      <span style={{ width: 80, flexShrink: 0, color: theme.textDim, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, paddingTop: 2 }}>{label}</span>
+      <span style={{ width: 70, flexShrink: 0, color: theme.textDim, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, paddingTop: 2 }}>{label}</span>
       <div style={{ color: theme.text }}>
         <div>{value}</div>
         {sub && <div style={{ fontSize: 12, color: theme.textDim, marginTop: 2 }}>{sub}</div>}
       </div>
     </div>
   )
+}
+
+const accentBtn = {
+  width: '100%', padding: '14px', borderRadius: 10, fontWeight: 700, fontSize: 14,
+  fontFamily: theme.font, letterSpacing: 0.5, cursor: 'pointer',
+  background: theme.accent, color: theme.accentInk, border: 'none',
+}
+const dangerBtn = {
+  width: '100%', padding: '12px', borderRadius: 10, fontWeight: 600, fontSize: 13,
+  fontFamily: theme.font, cursor: 'pointer',
+  background: 'transparent', color: theme.danger, border: `1px solid ${theme.border}`,
+}
+const sectionTitle = { fontSize: 11, color: theme.textDim, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 600, margin: '0 0 8px' }
+const participantRow = {
+  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+  padding: '10px 0', borderBottom: `1px solid ${theme.border}`, color: theme.text,
+}
+const smallGreen = {
+  padding: '6px 12px', borderRadius: 8, background: theme.accent, color: theme.accentInk,
+  border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: theme.font,
+}
+const smallRed = {
+  padding: '6px 12px', borderRadius: 8, background: 'transparent', color: theme.danger,
+  border: `1px solid ${theme.border}`, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font,
 }
