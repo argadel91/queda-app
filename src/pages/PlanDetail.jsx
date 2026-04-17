@@ -81,10 +81,14 @@ export default function PlanDetail() {
   const dateStr = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
   const timeStr = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
   const isOrg = user?.id === plan.user_id
+  const isParticipant = myStatus === 'joined' || myStatus === 'pending' || isOrg
+  const priv = plan.join_mode === 'private'
+  const infoHidden = priv && !isParticipant
   const isFull = joined.length >= plan.capacity
   const isPast = plan.status === 'past' || plan.status === 'cancelled'
   const planTs = new Date(plan.date + 'T' + plan.time)
   const needsCheckout = isOrg && planTs < new Date() && !plan.checked_out_at && plan.status !== 'cancelled'
+  const planUrl = `${window.location.origin}/plan/${plan.id}`
 
   return (
     <div>
@@ -93,16 +97,28 @@ export default function PlanDetail() {
         {plan.status === 'cancelled' && <span style={{ color: t.danger, marginLeft: 8 }}>CANCELLED</span>}
       </div>
       <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 4px', lineHeight: 1.3 }}>{plan.title}</h1>
-      {organizer && <div style={{ fontSize: 13, color: t.textDim, marginBottom: 20 }}>by {organizer.username || 'Anonymous'}</div>}
+      {!infoHidden && organizer && <div style={{ fontSize: 13, color: t.textDim, marginBottom: 20 }}>by {organizer.username || 'Anonymous'}</div>}
+      {infoHidden && <div style={{ fontSize: 13, color: t.textDim, marginBottom: 20 }}>🔒 Private plan — request to join to see details</div>}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24, padding: '16px 18px', background: t.bgCard, borderRadius: t.radius, border: `1px solid ${t.border}` }}>
         <Row icon="📅" value={`${dateStr} · ${timeStr}`} />
-        <Row icon="📍" value={plan.place_name} sub={plan.place_address} />
-        <Row icon="👥" value={`${joined.length} / ${plan.capacity}${isFull ? ' · full' : ''}`} />
-        <Row icon="🔓" value={plan.join_mode === 'approval' ? 'Needs approval' : plan.join_mode === 'private' ? 'Private' : 'Open'} />
+        <Row icon="📍" value={infoHidden ? 'Location revealed after joining' : plan.place_name} sub={infoHidden ? null : plan.place_address} />
+        {!infoHidden && <Row icon="👥" value={`${joined.length} / ${plan.capacity}${isFull ? ' · full' : ''}`} />}
+        <Row icon={priv ? '🔒' : '🔓'} value={plan.join_mode === 'approval' ? 'Needs approval' : plan.join_mode === 'private' ? 'Private' : 'Open'} />
         <Row icon="⚥" value={plan.gender_filter === 'mixed' ? 'Mixed' : plan.gender_filter === 'male' ? 'Men only' : 'Women only'} />
-        {plan.description && <Row icon="📝" value={plan.description} />}
+        {!infoHidden && plan.description && <Row icon="📝" value={plan.description} />}
       </div>
+
+      {/* Copy link (organizer) */}
+      {isOrg && (
+        <button onClick={() => { navigator.clipboard?.writeText(planUrl); setErr('Link copied!'); setTimeout(() => setErr(''), 2000) }} style={{
+          width: '100%', padding: '11px', borderRadius: t.radiusSm, marginBottom: 16,
+          background: t.bgCard, border: `1px solid ${t.border}`,
+          color: t.text, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: t.font,
+        }}>
+          📋 Copy plan link
+        </button>
+      )}
 
       {err && <p style={{ color: t.danger, fontSize: 13, marginBottom: 12 }}>{err}</p>}
 
@@ -138,7 +154,7 @@ export default function PlanDetail() {
         <div style={{ marginBottom: 20 }}>
           {!myStatus && !isFull && (
             <button disabled={busy || (balance !== null && balance < 1)} onClick={join} style={accentBtn}>
-              {busy ? '…' : plan.join_mode === 'approval' ? 'Request to join · 1 token' : 'Join · 1 token'}
+              {busy ? '…' : (priv || plan.join_mode === 'approval') ? 'Request to join · 1 token' : 'Join · 1 token'}
             </button>
           )}
           {!myStatus && isFull && <p style={{ fontSize: 14, color: t.textDim }}>Plan is full.</p>}
@@ -172,7 +188,7 @@ export default function PlanDetail() {
       )}
 
       {/* Pending requests */}
-      {isOrg && pending.length > 0 && !needsCheckout && (
+      {isOrg && pending.length > 0 && !needsCheckout && !infoHidden && (
         <section style={{ marginBottom: 24 }}>
           <h3 style={secTitle}>Pending requests</h3>
           {pending.map(p => (
@@ -188,7 +204,7 @@ export default function PlanDetail() {
       )}
 
       {/* Attendees list */}
-      {joined.length > 0 && !needsCheckout && (
+      {joined.length > 0 && !needsCheckout && !infoHidden && (
         <section style={{ marginBottom: 24 }}>
           <h3 style={secTitle}>Going ({joined.length})</h3>
           {joined.map(p => (

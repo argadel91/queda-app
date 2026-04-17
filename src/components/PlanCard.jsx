@@ -9,6 +9,7 @@ export default function PlanCard({ plan, count }) {
   const timeStr = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
   const spotsLeft = plan.capacity - (count || 0)
   const almostFull = spotsLeft <= 2 && spotsLeft > 0
+  const priv = plan.join_mode === 'private'
 
   return (
     <Link to={`/plan/${plan.id}`} style={{
@@ -41,7 +42,7 @@ export default function PlanCard({ plan, count }) {
 
       {/* Place */}
       <div style={{ fontSize: 13, color: t.textDim, marginBottom: 12 }}>
-        📍 {plan.place_name}
+        {priv ? '🔒 Location hidden' : `📍 ${plan.place_name}`}
       </div>
 
       {/* Footer: spots + gender */}
@@ -63,11 +64,13 @@ export default function PlanCard({ plan, count }) {
           </span>
         )}
         {plan.join_mode === 'approval' && (
-          <span style={{
-            fontSize: 11, color: t.textDim,
-            background: t.bgElev, padding: '3px 8px', borderRadius: 999,
-          }}>
+          <span style={{ fontSize: 11, color: t.textDim, background: t.bgElev, padding: '3px 8px', borderRadius: 999 }}>
             approval
+          </span>
+        )}
+        {priv && (
+          <span style={{ fontSize: 11, color: t.textDim, background: t.bgElev, padding: '3px 8px', borderRadius: 999 }}>
+            🔒 private
           </span>
         )}
       </div>
