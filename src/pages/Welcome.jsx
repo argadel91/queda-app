@@ -43,7 +43,7 @@ export default function Welcome() {
           background: theme.accent, color: theme.accentInk,
           fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: theme.font, letterSpacing: 0.5,
         }}>
-          {last ? 'Let's go' : 'Next'}
+          {last ? "Let's go" : 'Next'}
         </button>
 
         {!last && (
