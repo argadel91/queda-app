@@ -51,16 +51,21 @@ export default function PlanDetail() {
     setBusy(false)
   }
 
-  const join = () => act(() => db.rpc('join_plan_with_deposit', { p_plan_id: id, p_user_id: user.id }))
-  const leave = () => act(() => db.rpc('leave_plan', { p_plan_id: id, p_user_id: user.id }))
+  const rpc = async (fn, params) => {
+    const { error } = await db.rpc(fn, params)
+    if (error) throw new Error(error.message)
+  }
+  const join = () => act(() => rpc('join_plan_with_deposit', { p_plan_id: id, p_user_id: user.id }))
+  const leave = () => act(() => rpc('leave_plan', { p_plan_id: id, p_user_id: user.id }))
   const cancel = () => act(async () => {
-    await db.rpc('cancel_plan', { p_plan_id: id, p_user_id: user.id })
+    await rpc('cancel_plan', { p_plan_id: id, p_user_id: user.id })
     navigate('/', { replace: true })
   })
   const approve = uid => act(async () => {
-    await db.from('plan_participants').update({ status: 'joined' }).eq('plan_id', id).eq('user_id', uid)
+    const { error } = await db.from('plan_participants').update({ status: 'joined' }).eq('plan_id', id).eq('user_id', uid)
+    if (error) throw new Error(error.message)
   })
-  const reject = uid => act(() => db.rpc('reject_join_request', { p_organizer_id: user.id, p_plan_id: id, p_user_id: uid }))
+  const reject = uid => act(() => rpc('reject_join_request', { p_organizer_id: user.id, p_plan_id: id, p_user_id: uid }))
 
   const finalise = () => act(async () => {
     // 1. Write each participant's attended flag
