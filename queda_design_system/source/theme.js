@@ -1,0 +1,18 @@
+export const theme = {
+  bg: '#060608',
+  bgElev: '#111116',
+  bgCard: '#16161C',
+  border: '#222230',
+  text: '#F0EBE1',
+  textDim: '#7A7A8A',
+  accent: '#CDFF6C',
+  accentInk: '#060608',
+  accentSoft: 'rgba(205,255,108,0.12)',
+  danger: '#FF6068',
+  dangerSoft: 'rgba(255,96,104,0.12)',
+  gradient: 'linear-gradient(135deg, #CDFF6C 0%, #7BF5A5 100%)',
+  font: "'DM Sans', system-ui, sans-serif",
+  fontHead: "'Syne', 'DM Sans', system-ui, sans-serif",
+  radius: 14,
+  radiusSm: 10,
+}

@@ -1,0 +1,25 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;padding:0;background:#060608;color:#F0EBE1;font-family:'DM Sans',system-ui,sans-serif;height:100%}
+  .stage{min-height:100%;padding:48px 56px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:40px}
+  .row{display:flex;gap:32px;align-items:flex-end}
+  .item{display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+  .shape{background:#F0EBE1}
+  .s1{width:140px;height:140px;border-radius:10px}
+  .s2{width:140px;height:140px;border-radius:14px}
+  .s3{width:140px;height:140px;border-radius:999px}
+  .num{font-family:'Syne',sans-serif;font-weight:800;font-size:28px;letter-spacing:-0.8px;color:#F0EBE1}
+  .num b{color:#CDFF6C}
+  .lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7A7A8A;font-weight:700}
+  .tick{display:flex;justify-content:space-between;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#7A7A8A;padding-top:20px;border-top:1px solid #222230}
+</style></head><body>
+<div class="stage">
+  <div class="row">
+    <div class="item"><div class="shape s1"></div><div class="num">10<b>·</b></div><div class="lbl">Button</div></div>
+    <div class="item"><div class="shape s2"></div><div class="num">14<b>·</b></div><div class="lbl">Card</div></div>
+    <div class="item"><div class="shape s3"></div><div class="num">999<b>·</b></div><div class="lbl">Pill</div></div>
+  </div>
+  <div class="tick"><span>Radii</span><span>Three values · that's it</span></div>
+</div>
+</body></html>

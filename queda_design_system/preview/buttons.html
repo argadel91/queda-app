@@ -1,0 +1,32 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;padding:0;background:#060608;color:#F0EBE1;font-family:'DM Sans',system-ui,sans-serif;height:100%}
+  .stage{min-height:100%;padding:56px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:28px}
+  .eyebrow{font-size:10px;letter-spacing:2.4px;text-transform:uppercase;color:#7A7A8A;font-weight:700}
+  .btn-primary{
+    align-self:flex-start;
+    background:#CDFF6C;color:#060608;border:none;
+    font-family:'Syne',sans-serif;font-weight:800;letter-spacing:-0.4px;
+    font-size:22px;padding:22px 40px;border-radius:999px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:14px;
+  }
+  .btn-ghost{
+    align-self:flex-start;background:transparent;color:#F0EBE1;
+    border:none;padding:0;cursor:pointer;
+    font-family:'Syne',sans-serif;font-weight:800;letter-spacing:-0.4px;
+    font-size:22px;display:inline-flex;align-items:center;gap:12px;
+  }
+  .btn-ghost .arrow{color:#CDFF6C}
+  .tick{display:flex;justify-content:space-between;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#7A7A8A;padding-top:20px;border-top:1px solid #222230;margin-top:auto}
+</style></head><body>
+<div class="stage">
+  <div class="eyebrow">Primary</div>
+  <button class="btn-primary">Join tonight →</button>
+
+  <div class="eyebrow" style="margin-top:16px">Ghost</div>
+  <button class="btn-ghost">Create a plan <span class="arrow">→</span></button>
+
+  <div class="tick"><span>Buttons</span><span>Pill · 999 radius</span></div>
+</div>
+</body></html>

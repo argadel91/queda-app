@@ -1,0 +1,6 @@
+/* queda fonts — loaded from Google Fonts CDN.
+   No local .ttf files ship in this project. If you need offline use,
+   download Syne (800) and DM Sans (400/500/600/700) from fonts.google.com
+   and replace this import with @font-face rules pointing at local files. */
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&family=DM+Sans:wght@400;500;600;700&display=swap');

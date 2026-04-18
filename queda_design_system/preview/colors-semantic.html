@@ -1,0 +1,25 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{margin:0;padding:22px;background:var(--bg);color:var(--text);font-family:var(--font-body)}
+  .row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .card{border-radius:12px;padding:16px;border:1px solid var(--border);display:flex;flex-direction:column;gap:6px;min-height:90px;justify-content:space-between}
+  .title{font-size:12px;font-weight:700;letter-spacing:0.5px}
+  .sub{font-size:10px;color:var(--text-dim);font-family:ui-monospace,monospace}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;width:max-content}
+</style></head><body>
+<div class="row">
+  <div class="card" style="background:linear-gradient(135deg,#CDFF6C 0%,#7BF5A5 100%)">
+    <span class="title" style="color:#060608">accent-grad</span>
+    <span class="sub" style="color:#060608">CTAs only · 135°</span>
+  </div>
+  <div class="card" style="background:var(--bg-card)">
+    <span class="chip" style="background:var(--accent-soft);color:var(--accent)">+2 tokens</span>
+    <span class="sub">accent-soft · chips</span>
+  </div>
+  <div class="card" style="background:var(--bg-card)">
+    <span class="chip" style="background:var(--danger-soft);color:var(--danger)">✗ no-show</span>
+    <span class="sub">danger-soft · warnings</span>
+  </div>
+</div>
+</body></html>

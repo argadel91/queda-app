@@ -1,0 +1,22 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{margin:0;padding:22px;background:var(--bg);color:var(--text);font-family:var(--font-body)}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .sw{border-radius:10px;border:1px solid var(--border);padding:12px;height:78px;display:flex;flex-direction:column;justify-content:space-between}
+  .sw .n{font-size:11px;font-weight:700;letter-spacing:0.5px}
+  .sw .h{font-size:10px;color:var(--text-dim);font-family:ui-monospace,monospace}
+  .on-dark{color:var(--text)}
+  .on-light{color:#060608}
+</style></head><body>
+<div class="grid">
+  <div class="sw on-dark" style="background:#060608"><span class="n">bg</span><span class="h">#060608</span></div>
+  <div class="sw on-dark" style="background:#111116"><span class="n">bg-elev</span><span class="h">#111116</span></div>
+  <div class="sw on-dark" style="background:#16161C"><span class="n">bg-card</span><span class="h">#16161C</span></div>
+  <div class="sw on-dark" style="background:#222230"><span class="n">border</span><span class="h">#222230</span></div>
+  <div class="sw on-light" style="background:#F0EBE1"><span class="n">text</span><span class="h">#F0EBE1</span></div>
+  <div class="sw on-dark" style="background:#7A7A8A"><span class="n">text-dim</span><span class="h">#7A7A8A</span></div>
+  <div class="sw on-light" style="background:#CDFF6C"><span class="n">accent</span><span class="h">#CDFF6C</span></div>
+  <div class="sw on-light" style="background:#FF6068"><span class="n">danger</span><span class="h">#FF6068</span></div>
+</div>
+</body></html>
