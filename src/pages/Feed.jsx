@@ -249,9 +249,9 @@ function PlanRow({ plan, count, first }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
           fontFamily: t.fontHead, fontSize: 20, fontWeight: 800,
-          letterSpacing: -0.8, color: t.text, lineHeight: 1.3,
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          paddingBottom: 3, marginBottom: 2,
+          letterSpacing: -0.8, color: t.text, lineHeight: 1.35,
+          display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',
+          overflow: 'hidden', marginBottom: 4,
         }}>{plan.title}</div>
         <div style={{ fontSize: 12, color: t.textDim, fontWeight: 600, letterSpacing: 0.3 }}>
           {priv ? 'Private' : plan.place_name} · {count}/{plan.capacity}
