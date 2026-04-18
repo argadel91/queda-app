@@ -182,7 +182,7 @@ function HeroCard({ plan, count, names }) {
       {/* Title */}
       <div style={{
         fontFamily: t.fontHead, fontSize: 32, fontWeight: 800,
-        letterSpacing: -1.2, lineHeight: 1, color: t.text, marginBottom: 16,
+        letterSpacing: -1.2, lineHeight: 1.15, color: t.text, marginBottom: 16,
       }}>{plan.title}</div>
 
       {/* Time + place */}
@@ -249,7 +249,7 @@ function PlanRow({ plan, count, first }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
           fontFamily: t.fontHead, fontSize: 20, fontWeight: 800,
-          letterSpacing: -0.6, color: t.text, lineHeight: 1.1,
+          letterSpacing: -0.6, color: t.text, lineHeight: 1.15,
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           marginBottom: 4,
         }}>{plan.title}</div>
