@@ -124,7 +124,7 @@ BEGIN
   IF v_plan.min_trust > 0 THEN
     v_trust := trust_score(p_user_id);
     IF v_trust >= 0 AND v_trust < v_plan.min_trust THEN
-      RAISE EXCEPTION 'Trust too low (need %%, have %%)', v_plan.min_trust, v_trust;
+      RAISE EXCEPTION 'Trust too low (need %, have %)', v_plan.min_trust, v_trust;
     END IF;
   END IF;
 
