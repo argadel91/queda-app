@@ -34,9 +34,8 @@ export default function PlanCard({ plan, count }) {
       {/* Title */}
       <div style={{
         fontFamily: t.fontHead, fontSize: 17, fontWeight: 800,
-        letterSpacing: -0.8, lineHeight: 1.35,
-        display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',
-        overflow: 'hidden', marginBottom: 4,
+        letterSpacing: -0.8, lineHeight: 1.4,
+        overflow: 'visible', marginBottom: 6,
       }}>
         {plan.title}
       </div>

@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { db } from '../lib/supabase.js'
 import { useAuth } from '../hooks/useAuth.js'
 import { genId } from '../lib/ids.js'
-import { toISO } from '../lib/dates.js'
 import { CATEGORIES } from '../constants/categories.js'
 import PlaceInput from '../components/PlaceInput.jsx'
+import DatePicker from '../components/DatePicker.jsx'
+import TimePicker from '../components/TimePicker.jsx'
 import { theme as t } from '../theme.js'
 
 const GENDERS = [
@@ -43,7 +44,6 @@ export default function CreatePlan() {
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState('')
 
-  const today = toISO(new Date())
   const valid = title.trim().length >= 3 && category && place?.lat && date && time
 
   const onSubmit = async e => {
@@ -107,16 +107,16 @@ export default function CreatePlan() {
           <PlaceInput value={place} onSelect={setPlace} />
         </div>
 
-        {/* Date + Time */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <div>
-            <label style={lbl}>Date</label>
-            <input type="date" required min={today} value={date} onChange={e => setDate(e.target.value)} style={inp} />
-          </div>
-          <div>
-            <label style={lbl}>Time</label>
-            <input type="time" required value={time} onChange={e => setTime(e.target.value)} style={inp} />
-          </div>
+        {/* Date */}
+        <div>
+          <label style={lbl}>When</label>
+          <DatePicker value={date} onChange={setDate} />
+        </div>
+
+        {/* Time */}
+        <div>
+          <label style={lbl}>Time</label>
+          <TimePicker value={time} onChange={setTime} />
         </div>
 
         {/* More options toggle */}
