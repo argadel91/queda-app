@@ -2,15 +2,14 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { db } from '../lib/supabase.js'
 import { useAuth } from '../hooks/useAuth.js'
-import { useTokens } from '../hooks/useTokens.js'
 import { categoryIcon, categoryLabel } from '../constants/categories.js'
+import { formatTrust } from '../lib/trust.js'
 import { theme as t } from '../theme.js'
 
 export default function PlanDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { balance } = useTokens()
   const [plan, setPlan] = useState(null)
   const [organizer, setOrganizer] = useState(null)
   const [joined, setJoined] = useState([])
@@ -25,11 +24,12 @@ export default function PlanDetail() {
     const { data: p } = await db.from('plans').select('*').eq('id', id).maybeSingle()
     if (!p) { setLoading(false); return }
     setPlan(p)
-    const [{ data: org }, { data: parts }] = await Promise.all([
+    const [{ data: org }, { data: parts }, { data: orgTrust }] = await Promise.all([
       db.from('profiles').select('id, username, gender, birthdate').eq('id', p.user_id).maybeSingle(),
       db.from('plan_participants').select('user_id, status, profiles(username, gender)').eq('plan_id', id).in('status', ['joined', 'pending']),
+      db.rpc('trust_score', { p_user_id: p.user_id }),
     ])
-    setOrganizer(org)
+    setOrganizer(org ? { ...org, trust: orgTrust ?? -1 } : null)
     const j = (parts || []).filter(x => x.status === 'joined')
     setJoined(j)
     setPending((parts || []).filter(x => x.status === 'pending'))
@@ -55,7 +55,7 @@ export default function PlanDetail() {
     const { error } = await db.rpc(fn, params)
     if (error) throw new Error(error.message)
   }
-  const join = () => act(() => rpc('join_plan_with_deposit', { p_plan_id: id, p_user_id: user.id }))
+  const join = () => act(() => rpc('join_plan_free', { p_plan_id: id, p_user_id: user.id }))
   const leave = () => act(() => rpc('leave_plan', { p_plan_id: id, p_user_id: user.id }))
   const cancel = () => act(async () => {
     await rpc('cancel_plan', { p_plan_id: id, p_user_id: user.id })
@@ -97,7 +97,14 @@ export default function PlanDetail() {
         {plan.status === 'cancelled' && <span style={{ color: t.danger, marginLeft: 8 }}>CANCELLED</span>}
       </div>
       <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 4px', lineHeight: 1.3 }}>{plan.title}</h1>
-      {!infoHidden && organizer && <div style={{ fontSize: 13, color: t.textDim, marginBottom: 20 }}>by {organizer.username || 'Anonymous'}</div>}
+      {!infoHidden && organizer && (
+        <div style={{ fontSize: 13, color: t.textDim, marginBottom: 20 }}>
+          by {organizer.username || 'Anonymous'}
+          <span style={{ marginLeft: 8, color: organizer.trust < 0 ? t.textDim : t.accent, fontWeight: 600 }}>
+            {formatTrust(organizer.trust)}
+          </span>
+        </div>
+      )}
       {infoHidden && <div style={{ fontSize: 13, color: t.textDim, marginBottom: 20 }}>🔒 Private plan — request to join to see details</div>}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24, padding: '16px 18px', background: t.bgCard, borderRadius: t.radius, border: `1px solid ${t.border}` }}>
@@ -106,6 +113,8 @@ export default function PlanDetail() {
         {!infoHidden && <Row icon="👥" value={`${joined.length} / ${plan.capacity}${isFull ? ' · full' : ''}`} />}
         <Row icon={priv ? '🔒' : '🔓'} value={plan.join_mode === 'approval' ? 'Needs approval' : plan.join_mode === 'private' ? 'Private' : 'Open'} />
         <Row icon="⚥" value={plan.gender_filter === 'mixed' ? 'Mixed' : plan.gender_filter === 'male' ? 'Men only' : 'Women only'} />
+        {plan.min_attendees > 2 && <Row icon="👥" value={`Minimum ${plan.min_attendees} people to go ahead`} />}
+        {plan.min_trust > 0 && <Row icon="🛡️" value={`Requires ${plan.min_trust}% trust`} />}
         {!infoHidden && plan.description && <Row icon="📝" value={plan.description} />}
       </div>
 
@@ -153,8 +162,8 @@ export default function PlanDetail() {
       {!isOrg && user && !isPast && !needsCheckout && (
         <div style={{ marginBottom: 20 }}>
           {!myStatus && !isFull && (
-            <button disabled={busy || (balance !== null && balance < 1)} onClick={join} style={accentBtn}>
-              {busy ? '…' : (priv || plan.join_mode === 'approval') ? 'Request to join · 1 token' : 'Join · 1 token'}
+            <button disabled={busy} onClick={join} style={accentBtn}>
+              {busy ? '…' : (priv || plan.join_mode === 'approval') ? 'Request to join' : 'Join'}
             </button>
           )}
           {!myStatus && isFull && <p style={{ fontSize: 14, color: t.textDim }}>Plan is full.</p>}

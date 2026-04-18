@@ -61,7 +61,7 @@ export default function Onboarding() {
         </button>
       </form>
       <p style={{ marginTop: 20, fontSize: 12, color: t.textDim, textAlign: 'center', lineHeight: 1.5 }}>
-        {"You'll start with 6 tokens. Joining a plan costs 1 — you get it back if you show up."}
+        {"Show up to plans and build your trust score. Others can see how reliable you are."}
       </p>
     </AuthShell>
   )

@@ -38,6 +38,8 @@ export default function CreatePlan() {
   const [capacity, setCapacity] = useState(6)
   const [joinMode, setJoinMode] = useState('open')
   const [gender, setGender] = useState('mixed')
+  const [minAttendees, setMinAttendees] = useState(2)
+  const [minTrust, setMinTrust] = useState(0)
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState('')
 
@@ -57,9 +59,9 @@ export default function CreatePlan() {
         lat: place.lat, lng: place.lng, date, time: time + ':00',
         capacity, join_mode: joinMode, gender_filter: gender,
         cancellation_deadline_hours: 24, status: 'active',
+        min_attendees: minAttendees, min_trust: minTrust,
       })
       if (error) throw error
-      await db.rpc('organizer_create_deposit', { p_user_id: user.id, p_plan_id: planId })
       navigate(`/plan/${planId}`, { replace: true })
     } catch (e) { setErr(e.message || String(e)) }
     setSaving(false)
@@ -164,6 +166,24 @@ export default function CreatePlan() {
                 ))}
               </div>
             </div>
+            <div>
+              <label style={lbl}>Min. attendees to go ahead</label>
+              <input type="number" min={2} max={capacity} value={minAttendees} onChange={e => setMinAttendees(Math.max(2, Math.min(capacity, +e.target.value)))} style={inp} />
+            </div>
+            <div>
+              <label style={lbl}>Minimum trust</label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {[{ v: 0, l: 'Anyone' }, { v: 70, l: '70%' }, { v: 80, l: '80%' }, { v: 90, l: '90%' }].map(o => (
+                  <button key={o.v} type="button" onClick={() => setMinTrust(o.v)} style={{
+                    flex: 1, padding: '10px 0', borderRadius: t.radiusSm, cursor: 'pointer',
+                    border: minTrust === o.v ? 'none' : `1px solid ${t.border}`,
+                    background: minTrust === o.v ? t.gradient : 'transparent',
+                    color: minTrust === o.v ? t.accentInk : t.textDim,
+                    fontSize: 12, fontWeight: 600, fontFamily: t.font,
+                  }}>{o.l}</button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
@@ -179,7 +199,7 @@ export default function CreatePlan() {
           {saving ? 'Creating…' : 'Create plan'}
         </button>
         <p style={{ fontSize: 12, color: t.textDim, textAlign: 'center', margin: 0 }}>
-          Free to create. You earn +1 token when it happens.
+          Free to create. Show up and build your trust score.
         </p>
       </form>
     </div>

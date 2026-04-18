@@ -7,8 +7,8 @@ const SLIDES = [
     body: "queda helps you meet people through spontaneous activities — sports, food, culture, anything. No swiping, no small talk. Just show up." },
   { icon: '📍', title: 'Find plans near you',
     body: "Browse a feed of plans happening in the next hours or days. Filter by category, distance, or gender. Join with one tap." },
-  { icon: '🎟️', title: 'Tokens keep it fair',
-    body: "You start with 6 tokens. Joining costs 1 — you get it back if you show up. Create plans for free and earn +1 when they happen." },
+  { icon: '🛡️', title: 'Trust keeps it real',
+    body: "Your trust score shows others they can count on you. Show up to plans and it stays high. Simple." },
 ]
 
 export default function Welcome() {

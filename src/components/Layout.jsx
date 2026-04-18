@@ -2,17 +2,17 @@ import React from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import ErrorBoundary from './ErrorBoundary.jsx'
 import { useAuth } from '../hooks/useAuth.js'
-import { useTokens } from '../hooks/useTokens.js'
+import { useTrust } from '../hooks/useTrust.js'
 import { useNotifications } from '../hooks/useNotifications.js'
-import { IconCompass, IconPlus, IconCalendar, IconBell, TokenDot } from './Icons.jsx'
+import { formatTrust } from '../lib/trust.js'
+import { IconCompass, IconPlus, IconCalendar, IconBell } from './Icons.jsx'
 import { theme as t } from '../theme.js'
 
 export default function Layout({ children }) {
   const { user, profile } = useAuth()
-  const { balance } = useTokens()
+  const { trust } = useTrust()
   const { unread } = useNotifications()
   const navigate = useNavigate()
-  const tokens = user ? (balance ?? '—') : '—'
   const initial = (profile?.username || user?.email || '?')[0].toUpperCase()
 
   return (
@@ -62,15 +62,15 @@ export default function Layout({ children }) {
               }}>{unread > 9 ? '9+' : unread}</span>
             )}
           </button>
-          <button onClick={() => navigate('/wallet')} style={{
-            display: 'flex', alignItems: 'center', gap: 6,
+          <button onClick={() => navigate('/profile')} style={{
+            display: 'flex', alignItems: 'center', gap: 4,
             background: t.accentSoft, border: 'none', borderRadius: 999,
-            padding: '7px 12px 7px 10px', cursor: 'pointer', fontFamily: t.font,
+            padding: '7px 14px', cursor: 'pointer', fontFamily: t.font,
             height: 36,
           }}>
-            <TokenDot />
-            <span style={{ fontSize: 14, fontWeight: 700, color: t.accent, lineHeight: 1 }}>{tokens}</span>
-            <span style={{ fontSize: 11, color: t.textDim, lineHeight: 1, fontWeight: 600 }}>tkn</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: trust < 0 ? t.textDim : t.accent, lineHeight: 1 }}>
+              {formatTrust(trust)}
+            </span>
           </button>
         </div>
       </header>

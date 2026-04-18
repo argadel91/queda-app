@@ -11,7 +11,6 @@ import Profile from './pages/Profile.jsx'
 import CreatePlan from './pages/CreatePlan.jsx'
 import PlanDetail from './pages/PlanDetail.jsx'
 import MyPlans from './pages/MyPlans.jsx'
-import Wallet from './pages/Wallet.jsx'
 import Notifications from './pages/Notifications.jsx'
 import Welcome from './pages/Welcome.jsx'
 
@@ -40,9 +39,6 @@ export default function App() {
         } />
         <Route path="/profile" element={
           <ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>
-        } />
-        <Route path="/wallet" element={
-          <ProtectedRoute><Layout><Wallet /></Layout></ProtectedRoute>
         } />
         <Route path="/notifications" element={
           <ProtectedRoute><Layout><Notifications /></Layout></ProtectedRoute>
