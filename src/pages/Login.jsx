@@ -32,13 +32,13 @@ export default function Login() {
       </h1>
       <p style={{ color: t.textDim, fontSize: 14, marginBottom: 28 }}>Welcome back</p>
       <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <Field label="Email">
-          <input type="email" required value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" style={inp} />
+        <Field label="Email" htmlFor="login-email">
+          <input id="login-email" type="email" required value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" aria-invalid={!!err} style={inp} />
         </Field>
-        <Field label="Password">
-          <input type="password" required value={password} onChange={e => setPassword(e.target.value)} autoComplete="current-password" style={inp} />
+        <Field label="Password" htmlFor="login-password">
+          <input id="login-password" type="password" required value={password} onChange={e => setPassword(e.target.value)} autoComplete="current-password" aria-invalid={!!err} style={inp} />
         </Field>
-        {err && <p style={{ color: t.danger, fontSize: 13, margin: 0 }}>{err}</p>}
+        {err && <p role="alert" style={{ color: t.danger, fontSize: 13, margin: 0 }}>{err}</p>}
         <button type="submit" disabled={loading} style={primaryBtn}>
           {loading ? '…' : 'Log in'}
         </button>

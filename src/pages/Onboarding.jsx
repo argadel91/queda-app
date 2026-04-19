@@ -48,19 +48,19 @@ export default function Onboarding() {
       <h1 style={{ fontFamily: t.fontHead, fontSize: 24, fontWeight: 800, letterSpacing: -0.5, marginBottom: 4 }}>About you</h1>
       <p style={{ color: t.textDim, fontSize: 14, marginBottom: 24 }}>Just the basics. Takes 10 seconds.</p>
       <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <Field label="Display name">
-          <input required maxLength={40} value={username} onChange={e => setUsername(e.target.value)} style={inp} />
+        <Field label="Display name" htmlFor="ob-username">
+          <input id="ob-username" required maxLength={40} value={username} onChange={e => setUsername(e.target.value)} aria-invalid={!!err} style={inp} />
         </Field>
-        <Field label="Age">
-          <input type="number" min={18} max={99} required value={age} onChange={e => setAge(e.target.value)} style={inp} />
+        <Field label="Age" htmlFor="ob-age">
+          <input id="ob-age" type="number" min={18} max={99} required value={age} onChange={e => setAge(e.target.value)} aria-invalid={!!err} style={inp} />
         </Field>
-        <Field label="Gender">
-          <select required value={gender} onChange={e => setGender(e.target.value)} style={{ ...inp, appearance: 'none' }}>
+        <Field label="Gender" htmlFor="ob-gender">
+          <select id="ob-gender" required value={gender} onChange={e => setGender(e.target.value)} aria-invalid={!!err} style={{ ...inp, appearance: 'none' }}>
             <option value="" disabled>Select…</option>
             {GENDERS.map(g => <option key={g.v} value={g.v}>{g.label}</option>)}
           </select>
         </Field>
-        {err && <p style={{ color: t.danger, fontSize: 13, margin: 0 }}>{err}</p>}
+        {err && <p role="alert" style={{ color: t.danger, fontSize: 13, margin: 0 }}>{err}</p>}
         <button type="submit" disabled={loading} style={primaryBtn}>
           {loading ? '…' : 'Continue'}
         </button>

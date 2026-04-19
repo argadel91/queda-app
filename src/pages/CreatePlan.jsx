@@ -76,16 +76,16 @@ export default function CreatePlan() {
 
         {/* Title */}
         <div>
-          <label style={lbl}>What are we doing?</label>
-          <input required maxLength={100} value={title} onChange={e => setTitle(e.target.value)} placeholder="Football, coffee, hike…" style={inp} />
+          <label htmlFor="cp-title" style={lbl}>What are we doing?</label>
+          <input id="cp-title" required maxLength={100} value={title} onChange={e => setTitle(e.target.value)} placeholder="Football, coffee, hike…" aria-invalid={!!err} style={inp} />
         </div>
 
         {/* Category — 4 tap buttons */}
         <div>
-          <label style={lbl}>Category</label>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+          <label id="cp-category-label" style={lbl}>Category</label>
+          <div role="group" aria-labelledby="cp-category-label" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
             {CATEGORIES.map(c => (
-              <button key={c.value} type="button" onClick={() => setCategory(c.value)} style={{
+              <button key={c.value} type="button" onClick={() => setCategory(c.value)} aria-pressed={category === c.value} style={{
                 padding: '12px 0', borderRadius: t.radiusSm, cursor: 'pointer',
                 border: category === c.value ? 'none' : `1px solid ${t.border}`,
                 background: category === c.value ? t.gradient : t.bgCard,
@@ -103,7 +103,7 @@ export default function CreatePlan() {
 
         {/* Place */}
         <div>
-          <label style={lbl}>Where?</label>
+          <label htmlFor="cp-place" style={lbl}>Where?</label>
           <PlaceInput value={place} onSelect={setPlace} />
         </div>
 
@@ -131,12 +131,12 @@ export default function CreatePlan() {
         {showMore && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '16px', background: t.bgCard, borderRadius: t.radius, border: `1px solid ${t.border}` }}>
             <div>
-              <label style={lbl}>Description</label>
-              <textarea maxLength={500} value={desc} onChange={e => setDesc(e.target.value)} rows={3} placeholder="Any details people should know" style={{ ...inp, resize: 'vertical' }} />
+              <label htmlFor="cp-desc" style={lbl}>Description</label>
+              <textarea id="cp-desc" maxLength={500} value={desc} onChange={e => setDesc(e.target.value)} rows={3} placeholder="Any details people should know" style={{ ...inp, resize: 'vertical' }} />
             </div>
             <div>
-              <label style={lbl}>Capacity</label>
-              <input type="number" min={2} max={20} value={capacity} onChange={e => setCapacity(+e.target.value)} style={inp} />
+              <label htmlFor="cp-capacity" style={lbl}>Capacity</label>
+              <input id="cp-capacity" type="number" min={2} max={20} value={capacity} onChange={e => setCapacity(+e.target.value)} style={inp} />
             </div>
             <div>
               <label style={lbl}>Who can join?</label>
@@ -167,8 +167,8 @@ export default function CreatePlan() {
               </div>
             </div>
             <div>
-              <label style={lbl}>Min. attendees to go ahead</label>
-              <input type="number" min={2} max={capacity} value={minAttendees} onChange={e => setMinAttendees(Math.max(2, Math.min(capacity, +e.target.value)))} style={inp} />
+              <label htmlFor="cp-min-attendees" style={lbl}>Min. attendees to go ahead</label>
+              <input id="cp-min-attendees" type="number" min={2} max={capacity} value={minAttendees} onChange={e => setMinAttendees(Math.max(2, Math.min(capacity, +e.target.value)))} style={inp} />
             </div>
             <div>
               <label style={lbl}>Minimum trust</label>
@@ -187,7 +187,7 @@ export default function CreatePlan() {
           </div>
         )}
 
-        {err && <p style={{ color: t.danger, fontSize: 13, margin: 0 }}>{err}</p>}
+        {err && <p role="alert" style={{ color: t.danger, fontSize: 13, margin: 0 }}>{err}</p>}
 
         <button type="submit" disabled={!valid || saving} style={{
           background: valid ? t.gradient : t.bgCard,

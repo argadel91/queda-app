@@ -36,14 +36,14 @@ export default function Signup() {
       </h1>
       <p style={{ color: t.textDim, fontSize: 14, marginBottom: 28 }}>Create your account</p>
       <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <Field label="Email">
-          <input type="email" required value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" style={inp} />
+        <Field label="Email" htmlFor="signup-email">
+          <input id="signup-email" type="email" required value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" aria-invalid={!!err} style={inp} />
         </Field>
-        <Field label="Password">
-          <input type="password" required minLength={8} value={password} onChange={e => setPassword(e.target.value)} autoComplete="new-password" style={inp} />
+        <Field label="Password" htmlFor="signup-password" hint="At least 8 characters">
+          <input id="signup-password" type="password" required minLength={8} value={password} onChange={e => setPassword(e.target.value)} autoComplete="new-password" aria-invalid={!!err} aria-describedby="signup-password-hint" style={inp} />
         </Field>
-        {err && <p style={{ color: t.danger, fontSize: 13, margin: 0 }}>{err}</p>}
-        {notice && <p style={{ color: t.accent, fontSize: 13 }}>{notice}</p>}
+        {err && <p role="alert" style={{ color: t.danger, fontSize: 13, margin: 0 }}>{err}</p>}
+        {notice && <p role="status" style={{ color: t.accent, fontSize: 13 }}>{notice}</p>}
         <button type="submit" disabled={loading} style={primaryBtn}>
           {loading ? '…' : 'Sign up'}
         </button>
@@ -63,11 +63,13 @@ export function AuthShell({ children }) {
     </div>
   )
 }
-export function Field({ label, children }) {
+export function Field({ label, htmlFor, children, hint, error }) {
   return (
-    <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+    <label htmlFor={htmlFor} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       <span style={{ fontSize: 11, color: t.textDim, letterSpacing: 1.5, textTransform: 'uppercase', fontWeight: 600 }}>{label}</span>
       {children}
+      {hint && <span id={`${htmlFor}-hint`} style={{ fontSize: 11, color: t.textDim }}>{hint}</span>}
+      {error && <span role="alert" style={{ fontSize: 12, color: t.danger }}>{error}</span>}
     </label>
   )
 }
