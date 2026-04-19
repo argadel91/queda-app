@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { db } from '../lib/supabase.js'
 import { useAuth } from '../hooks/useAuth.js'
-import { CATEGORIES, categoryIcon, categoryLabel } from '../constants/categories.js'
+import { CATEGORIES } from '../constants/categories.js'
 import { AVATAR_COLORS } from '../components/Icons.jsx'
 import { theme as t } from '../theme.js'
 
