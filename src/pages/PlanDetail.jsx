@@ -60,7 +60,7 @@ export default function PlanDetail() {
         actions={actions}
       />
 
-      <PlanComments />
+      <PlanComments planId={id} user={user} isParticipant={isParticipant} />
 
       <Link to="/" style={{ display: 'block', marginTop: 16, color: t.textDim, fontSize: 13, textDecoration: 'none' }}>← Feed</Link>
     </div>
