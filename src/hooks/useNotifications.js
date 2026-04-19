@@ -6,17 +6,23 @@ export function useNotifications() {
   const { user } = useAuth()
   const [items, setItems] = useState([])
   const [unread, setUnread] = useState(0)
+  const [error, setError] = useState(null)
 
   const load = useCallback(async () => {
     if (!user) { setItems([]); setUnread(0); return }
-    const { data } = await db
-      .from('notifications')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(30)
-    setItems(data || [])
-    setUnread((data || []).filter(n => !n.read).length)
+    try {
+      const { data, error: fetchErr } = await db
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(30)
+      if (fetchErr) throw fetchErr
+      setItems(data || [])
+      setUnread((data || []).filter(n => !n.read).length)
+    } catch (e) {
+      setError(e.message || String(e))
+    }
   }, [user?.id])
 
   useEffect(() => {
@@ -50,5 +56,5 @@ export function useNotifications() {
     setUnread(0)
   }, [user?.id])
 
-  return { items, unread, markRead, markAllRead, refresh: load }
+  return { items, unread, error, markRead, markAllRead, refresh: load }
 }

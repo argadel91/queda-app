@@ -27,15 +27,20 @@ export default function Onboarding() {
     const ageNum = parseInt(age, 10)
     if (!Number.isFinite(ageNum) || ageNum < 18 || ageNum > 99) { setErr('Age must be 18-99'); return }
     setLoading(true)
-    const birthYear = new Date().getFullYear() - ageNum
-    const { error } = await db.from('profiles').insert({
-      id: user.id, username: username.trim() || null,
-      gender, birthdate: `${birthYear}-01-01`,
-    })
-    setLoading(false)
-    if (error) { setErr(error.message); return }
-    await refreshProfile()
-    navigate('/welcome', { replace: true })
+    try {
+      const birthYear = new Date().getFullYear() - ageNum
+      const { error } = await db.from('profiles').insert({
+        id: user.id, username: username.trim() || null,
+        gender, birthdate: `${birthYear}-01-01`,
+      })
+      if (error) { setErr(error.message); return }
+      await refreshProfile()
+      navigate('/welcome', { replace: true })
+    } catch (e) {
+      setErr(e.message || String(e))
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

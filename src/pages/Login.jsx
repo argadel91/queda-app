@@ -14,10 +14,15 @@ export default function Login() {
   const onSubmit = async e => {
     e.preventDefault()
     setErr(''); setLoading(true)
-    const { error } = await db.auth.signInWithPassword({ email: email.trim(), password })
-    setLoading(false)
-    if (error) { setErr(error.message); return }
-    navigate('/', { replace: true })
+    try {
+      const { error } = await db.auth.signInWithPassword({ email: email.trim(), password })
+      if (error) { setErr(error.message); return }
+      navigate('/', { replace: true })
+    } catch (e) {
+      setErr(e.message || String(e))
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

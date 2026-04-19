@@ -14,13 +14,18 @@ export default function Signup() {
   const onSubmit = async e => {
     e.preventDefault()
     setErr(''); setNotice(''); setLoading(true)
-    const { data, error } = await db.auth.signUp({ email: email.trim(), password })
-    setLoading(false)
-    if (error) { setErr(error.message); return }
-    if (data.session) {
-      navigate('/onboarding', { replace: true })
-    } else {
-      setNotice('Check your inbox to confirm your email, then log in.')
+    try {
+      const { data, error } = await db.auth.signUp({ email: email.trim(), password })
+      if (error) { setErr(error.message); return }
+      if (data.session) {
+        navigate('/onboarding', { replace: true })
+      } else {
+        setNotice('Check your inbox to confirm your email, then log in.')
+      }
+    } catch (e) {
+      setErr(e.message || String(e))
+    } finally {
+      setLoading(false)
     }
   }
 
