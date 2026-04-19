@@ -21,25 +21,33 @@ export default function PlanDetail() {
   const [attendance, setAttendance] = useState({})
 
   const load = useCallback(async () => {
-    const { data: p } = await db.from('plans').select('*').eq('id', id).maybeSingle()
-    if (!p) { setLoading(false); return }
-    setPlan(p)
-    const [{ data: org }, { data: parts }, { data: orgTrust }] = await Promise.all([
-      db.from('profiles').select('id, username, gender, birthdate').eq('id', p.user_id).maybeSingle(),
-      db.from('plan_participants').select('user_id, status, profiles(username, gender)').eq('plan_id', id).in('status', ['joined', 'pending']),
-      db.rpc('trust_score', { p_user_id: p.user_id }),
-    ])
-    setOrganizer(org ? { ...org, trust: orgTrust ?? -1 } : null)
-    const j = (parts || []).filter(x => x.status === 'joined')
-    setJoined(j)
-    setPending((parts || []).filter(x => x.status === 'pending'))
-    setMyStatus((parts || []).find(x => x.user_id === user?.id)?.status || null)
-    setAttendance(prev => {
-      const next = {}
-      j.forEach(x => { next[x.user_id] = prev[x.user_id] ?? true })
-      return next
-    })
-    setLoading(false)
+    try {
+      const { data: p, error: planErr } = await db.from('plans').select('*').eq('id', id).maybeSingle()
+      if (planErr) throw planErr
+      if (!p) return
+      setPlan(p)
+      const [{ data: org, error: orgErr }, { data: parts, error: partsErr }, { data: orgTrust }] = await Promise.all([
+        db.from('profiles').select('id, username, gender, birthdate').eq('id', p.user_id).maybeSingle(),
+        db.from('plan_participants').select('user_id, status, profiles(username, gender)').eq('plan_id', id).in('status', ['joined', 'pending']),
+        db.rpc('trust_score', { p_user_id: p.user_id }),
+      ])
+      if (orgErr) throw orgErr
+      if (partsErr) throw partsErr
+      setOrganizer(org ? { ...org, trust: orgTrust ?? -1 } : null)
+      const j = (parts || []).filter(x => x.status === 'joined')
+      setJoined(j)
+      setPending((parts || []).filter(x => x.status === 'pending'))
+      setMyStatus((parts || []).find(x => x.user_id === user?.id)?.status || null)
+      setAttendance(prev => {
+        const next = {}
+        j.forEach(x => { next[x.user_id] = prev[x.user_id] ?? true })
+        return next
+      })
+    } catch (e) {
+      setErr(e.message || String(e))
+    } finally {
+      setLoading(false)
+    }
   }, [id, user?.id])
 
   useEffect(() => { load() }, [load])
