@@ -56,5 +56,31 @@ export function useNotifications() {
     setUnread(0)
   }, [user?.id])
 
-  return { items, unread, error, markRead, markAllRead, refresh: load }
+  const deleteOne = useCallback(async (id) => {
+    const prev = items
+    setItems(p => p.filter(n => n.id !== id))
+    setUnread(p => {
+      const deleted = prev.find(n => n.id === id)
+      return deleted && !deleted.read ? Math.max(0, p - 1) : p
+    })
+    const { error: delErr } = await db.from('notifications').delete().eq('id', id)
+    if (delErr) {
+      setItems(prev)
+      setUnread((prev.filter(n => !n.read)).length)
+    }
+  }, [items])
+
+  const clearAll = useCallback(async () => {
+    if (!user) return
+    const prev = items
+    setItems([])
+    setUnread(0)
+    const { error: delErr } = await db.from('notifications').delete().eq('user_id', user.id)
+    if (delErr) {
+      setItems(prev)
+      setUnread((prev.filter(n => !n.read)).length)
+    }
+  }, [user?.id, items])
+
+  return { items, unread, error, markRead, markAllRead, deleteOne, clearAll, refresh: load }
 }
