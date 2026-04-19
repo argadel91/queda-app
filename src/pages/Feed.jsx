@@ -4,6 +4,7 @@ import { db } from '../lib/supabase.js'
 import { useAuth } from '../hooks/useAuth.js'
 import { CATEGORIES } from '../constants/categories.js'
 import { AVATAR_COLORS } from '../components/Icons.jsx'
+import FeedSkeleton from '../components/skeletons/FeedSkeleton.jsx'
 import { theme as t } from '../theme.js'
 
 export default function Feed() {
@@ -106,7 +107,7 @@ export default function Feed() {
         ))}
       </div>
 
-      {loading && <p style={{ color: t.textDim, fontSize: 13, padding: '20px 0' }}>Loading…</p>}
+      {loading && <FeedSkeleton />}
 
       {/* Empty state */}
       {!loading && plans.length === 0 && (

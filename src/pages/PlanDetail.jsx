@@ -6,6 +6,7 @@ import PlanHeader from '../components/plan/PlanHeader.jsx'
 import PlanActions from '../components/plan/PlanActions.jsx'
 import PlanAttendees from '../components/plan/PlanAttendees.jsx'
 import PlanComments from '../components/plan/PlanComments.jsx'
+import PlanDetailSkeleton from '../components/skeletons/PlanDetailSkeleton.jsx'
 import { theme as t } from '../theme.js'
 
 export default function PlanDetail() {
@@ -18,7 +19,7 @@ export default function PlanDetail() {
     actions,
   } = usePlanDetail(id)
 
-  if (loading) return <p style={{ color: t.textDim, padding: 24 }}>Loading…</p>
+  if (loading) return <PlanDetailSkeleton />
   if (!plan) return <p style={{ color: t.textDim, padding: 24 }}>Plan not found.</p>
 
   const isOrg = user?.id === plan.user_id

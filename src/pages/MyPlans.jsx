@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { db } from '../lib/supabase.js'
 import { useAuth } from '../hooks/useAuth.js'
 import PlanCard from '../components/PlanCard.jsx'
+import FeedSkeleton from '../components/skeletons/FeedSkeleton.jsx'
 import { theme as t } from '../theme.js'
 
 export default function MyPlans() {
@@ -58,7 +59,7 @@ export default function MyPlans() {
         ))}
       </div>
 
-      {loading && <p style={{ color: t.textDim, fontSize: 13, padding: '20px 0' }}>Loading…</p>}
+      {loading && <FeedSkeleton />}
 
       {!loading && list.length === 0 && (
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
