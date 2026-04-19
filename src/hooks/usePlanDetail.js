@@ -22,6 +22,13 @@ export function usePlanDetail(id) {
       if (planErr) throw planErr
       if (!p) return
       setPlan(p)
+      // Instrument view — fire-and-forget, errors must not break UX
+      if (user?.id) {
+        db.from('user_interactions').insert({
+          user_id: user.id, plan_id: id,
+          interaction_type: 'view', created_at: new Date().toISOString(),
+        }).then(() => {}).catch(() => {})
+      }
       const [{ data: org, error: orgErr }, { data: parts, error: partsErr }, { data: orgTrust }] = await Promise.all([
         db.from('profiles').select('id, username, gender, birthdate').eq('id', p.user_id).maybeSingle(),
         db.from('plan_participants').select('user_id, status, profiles(username, gender)').eq('plan_id', id).in('status', ['joined', 'pending']),
