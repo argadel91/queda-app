@@ -7,6 +7,9 @@ import FeedSkeleton from './components/skeletons/FeedSkeleton.jsx'
 import PlanDetailSkeleton from './components/skeletons/PlanDetailSkeleton.jsx'
 import ProfileSkeleton from './components/skeletons/ProfileSkeleton.jsx'
 import NotificationsSkeleton from './components/skeletons/NotificationsSkeleton.jsx'
+import OnboardingTour from './components/OnboardingTour.jsx'
+import InstallPrompt from './components/InstallPrompt.jsx'
+import { useAuth } from './hooks/useAuth.js'
 
 const Feed = lazy(() => import('./pages/Feed.jsx'))
 const Login = lazy(() => import('./pages/Login.jsx'))
@@ -20,14 +23,15 @@ const MyPlans = lazy(() => import('./pages/MyPlans.jsx'))
 const Notifications = lazy(() => import('./pages/Notifications.jsx'))
 const Welcome = lazy(() => import('./pages/Welcome.jsx'))
 
-// Blank placeholder for routes with no dedicated skeleton
 function BlankFallback() { return <div style={{ padding: 24 }} /> }
 
-// Layout-free routes (no bottom nav / header): auth flow + onboarding.
-// Everything else is wrapped in <Layout> and gated by <ProtectedRoute>.
-export default function App() {
+// Needs to be inside BrowserRouter to use useAuth (which calls db.auth.getSession inside effects)
+function AppInner() {
+  const { user } = useAuth()
   return (
-    <BrowserRouter>
+    <>
+      <OnboardingTour isAuthed={!!user} />
+      <InstallPrompt isAuthed={!!user} />
       <Routes>
         <Route path="/login" element={
           <ErrorBoundary><Suspense fallback={<BlankFallback />}><Login /></Suspense></ErrorBoundary>
@@ -52,7 +56,6 @@ export default function App() {
             </Suspense>
           </ErrorBoundary>
         } />
-
         <Route path="/" element={
           <ErrorBoundary>
             <Suspense fallback={<Layout><FeedSkeleton /></Layout>}>
@@ -96,6 +99,14 @@ export default function App() {
           </ErrorBoundary>
         } />
       </Routes>
+    </>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppInner />
     </BrowserRouter>
   )
 }
