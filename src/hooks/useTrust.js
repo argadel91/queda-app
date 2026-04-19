@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useAuth } from './useAuth.js'
 import { getTrustScore } from '../lib/trust.js'
+import { useAuth } from './useAuth.js'
 
 export function useTrust() {
   const { user } = useAuth()

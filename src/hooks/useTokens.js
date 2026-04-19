@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useAuth } from './useAuth.js'
 import { getTokenBalance, getTokenHistory, subscribeToBalance } from '../lib/tokens.js'
+import { useAuth } from './useAuth.js'
 
 export function useTokens() {
   const { user } = useAuth()
